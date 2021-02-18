@@ -6,10 +6,7 @@ import com.dettonville.api.pipeline.utils.logging.Logger
 import com.dettonville.api.pipeline.utils.DockerUtil
 
 
-// ref: https://blog.nimbleci.com/2016/08/31/how-to-build-docker-images-automatically-with-jenkins-pipeline/
-// ref: https://mike42.me/blog/2019-05-how-to-integrate-gitea-and-jenkins
-// ref: https://github.com/jenkinsci/pipeline-examples/pull/83/files
-// ref: https://www.jenkins.io/doc/book/pipeline/docker/
+// ref: https://gist.github.com/fortunecookiezen/b3bc3214a07a14529608857d078b32dd
 
 def call(Map params=[:]) {
 
@@ -21,15 +18,9 @@ def call(Map params=[:]) {
 
     Map config=loadPipelineConfig(log, params)
 
-//    TF_VARS_vsphere_password
-//    TF_VARS_vm_ssh_password
-//List secretVars = [
-//      string(credentialsId: 'vmware-vcenter-password', variable: 'TF_VARS_vsphere_password'),
-//      string(credentialsId: 'vmware-vcenter-password', variable: 'TF_VARS_vm_ssh_password'),
-//]
     List secretVars = [
-            string(credentialsId: 'vmware-vcenter-password', variable: 'VSPHERE_PASSWORD'),
-            string(credentialsId: 'vmware-vcenter-password', variable: 'VM_SSH_PASSWORD'),
+        string(credentialsId: 'vmware-vcenter-password', variable: 'VSPHERE_PASSWORD'),
+        string(credentialsId: 'vmware-vcenter-password', variable: 'VM_SSH_PASSWORD'),
     ]
 
     pipeline {
@@ -63,7 +54,7 @@ def call(Map params=[:]) {
                     withCredentials(secretVars) {
                         ansiColor('xterm') {
                             sh 'terraform init'
-                            //                        sh 'terraform init -backend-config="bucket=${ASI}-${ENVIRONMENT}-tfstate" -backend-config="key=${ASI}-${ENVIRONMENT}/terraform.tfstate" -backend-config="region=${AWS_REGION}"'
+                            // sh 'terraform init -backend-config="bucket=${ASI}-${ENVIRONMENT}-tfstate" -backend-config="key=${ASI}-${ENVIRONMENT}/terraform.tfstate" -backend-config="region=${AWS_REGION}"'
                         }
                     }
                 }
@@ -87,8 +78,8 @@ def call(Map params=[:]) {
                 steps {
                     withCredentials(secretVars) {
                         ansiColor('xterm') {
-                            //                        sh 'terraform plan -input=false -out=tfplan -var vsphere_password=${VSPHERE_PASSWORD} -var vm_ssh_password=${VM_SSH_PASSWORD}                 sh \'terraform destroy -force -var "vsphere_password=${VSPHERE_PASSWORD}" -var "vm_ssh_password=${VM_SSH_PASSWORD}" --var-file=environments/${ENVIRONMENT}.vars'
-                            sh 'terraform plan -input=false -out=tfplan -var vsphere_password=${VSPHERE_PASSWORD} -var vm_ssh_password=${VM_SSH_PASSWORD}                 sh \'terraform destroy -force -var "vsphere_password=${VSPHERE_PASSWORD}" -var "vm_ssh_password=${VM_SSH_PASSWORD}"'
+                            // sh 'terraform plan -input=false -out=tfplan -var vsphere_password=${VSPHERE_PASSWORD} -var vm_ssh_password=${VM_SSH_PASSWORD}'
+                            sh 'terraform plan -input=false -out=tfplan -var "vsphere_password=${VSPHERE_PASSWORD}" -var "vm_ssh_password=${VM_SSH_PASSWORD}"'
                         }
                     }
                 }
@@ -101,7 +92,7 @@ def call(Map params=[:]) {
                 steps {
                     sh 'terraform show -no-color tfplan > tfplan.txt'
                     script {
-                        //                    def userInput = input(id: 'confirm', message: 'Apply Terraform?', parameters: [[$class: 'BooleanParameterDefinition', defaultValue: false, description: 'Apply terraform', name: 'confirm']])
+                        // def userInput = input(id: 'confirm', message: 'Apply Terraform?', parameters: [[$class: 'BooleanParameterDefinition', defaultValue: false, description: 'Apply terraform', name: 'confirm']])
                         def plan = readFile 'tfplan.txt'
                         input message: "Apply the plan?",
                                 parameters: [text(name: 'Plan', description: 'Please review the plan', defaultValue: plan)]
@@ -136,9 +127,12 @@ def call(Map params=[:]) {
                     expression { config.ACTION_PREVIEW_DESTROY || config.ACTION_DESTROY }
                 }
                 steps {
-                    //                sh 'terraform plan -destroy -out=tfplan -var "aws_region=${AWS_REGION}" --var-file=environments/${ENVIRONMENT}.vars'
-                    sh 'terraform plan -destroy -out=tfplan -var "aws_region=${AWS_REGION}"'
-                    sh 'terraform show -no-color tfplan > tfplan.txt'
+                    withCredentials(secretVars) {
+                        ansiColor('xterm') {
+                            sh 'terraform plan -destroy -out=tfplan -var "vsphere_password=${VSPHERE_PASSWORD}" -var "vm_ssh_password=${VM_SSH_PASSWORD}"'
+                            sh 'terraform show -no-color tfplan > tfplan.txt'
+                        }
+                    }
                 }
             }
             stage('destroy') {
@@ -151,8 +145,12 @@ def call(Map params=[:]) {
                         input message: "Delete the stack?",
                                 parameters: [text(name: 'Plan', description: 'Please review the plan', defaultValue: plan)]
                     }
-                    //                sh 'terraform destroy -force -var "vsphere_password=${VSPHERE_PASSWORD}" -var "vm_ssh_password=${VM_SSH_PASSWORD}" --var-file=environments/${ENVIRONMENT}.vars'
-                    sh 'terraform destroy -force -var "vsphere_password=${VSPHERE_PASSWORD}" -var "vm_ssh_password=${VM_SSH_PASSWORD}"'
+                    withCredentials(secretVars) {
+                        ansiColor('xterm') {
+//                            sh 'terraform destroy -force -var "vsphere_password=${VSPHERE_PASSWORD}" -var "vm_ssh_password=${VM_SSH_PASSWORD}" --var-file=environments/${ENVIRONMENT}.vars'
+                            sh 'terraform destroy -force -var "vsphere_password=${VSPHERE_PASSWORD}" -var "vm_ssh_password=${VM_SSH_PASSWORD}"'
+                        }
+                    }
                 }
             }
 
