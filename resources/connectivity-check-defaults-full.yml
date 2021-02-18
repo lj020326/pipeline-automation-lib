@@ -35,7 +35,7 @@ pipeline:
         - prod
         - prod-admin
         - nyc-prod
-        - jpn-
+        - jpn-prod
         - int
         - itf
         - itf-admin
@@ -46,7 +46,7 @@ pipeline:
         - prod
         - prod-admin
         - nyc-prod
-        - jpn-
+        - jpn-prod
         - int
         - itf
         - itf-admin
@@ -121,7 +121,7 @@ pipeline:
         - endpoint: nyc.internal.cicd.sandbox.proxy.api.dettonville.int
         - endpoint: nyc.internal.cicd.developer.dettonville.int
 
-    jpn-:
+    jpn-prod:
       siteList:
         - endpoint: jpn.jenkins.sandbox.api.dettonville.int
         - endpoint: jpn.internal.cicd.sandbox.proxy.api.dettonville.int

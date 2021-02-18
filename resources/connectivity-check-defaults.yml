@@ -47,7 +47,7 @@ pipeline:
         - prod
         - prod-admin
         - nyc-prod
-        - jpn-
+        - jpn-prod
         - int
         - itf
         - itf-admin
@@ -126,7 +126,7 @@ pipeline:
 ## THE DOMAIN WAS NOT A PART OF THE INITIAL REQUEST, THEREFORE WAS NOT FACTORED IN WHEN REQUESTING CONNECTIVITY.
 #        - endpoint: nyc.jenkins.sandbox.api.dettonville.int
 
-    jpn-:
+    jpn-prod:
       siteList:
         - endpoint: jpn.jenkins.sandbox.api.dettonville.int
         - endpoint: jpn.internal.cicd.sandbox.proxy.api.dettonville.int

@@ -54,7 +54,7 @@ pipeline:
       truststoreFilename: "prod-cacerts.jks"
       truststorePassword: "changeit"
       pwdLabel: "X509-prd-ci-cd-sw"
-      jenkinsPcfCredId: dcapi-pcf-jpn--deploy
+      jenkinsPcfCredId: dcapi-pcf-jpn-deploy
 
     bel-prod:
       phase: production

@@ -32,7 +32,7 @@ pipeline:
       testNetworks:
         - prod-admin
         - nyc-prod-admin
-        - jpn--admin
+        - jpn-admin
         - other-admin
         - external
     - nodeLabel: jnk2stl1
@@ -40,7 +40,7 @@ pipeline:
       testNetworks:
         - prod-admin
         - nyc-prod-admin
-        - jpn--admin
+        - jpn-admin
         - other-admin
         - external
     - nodeLabel: jnk4stl1
@@ -90,7 +90,7 @@ pipeline:
         - endpoint: nyc.internal.cicd.sandbox.proxy.api.dettonville.int
         - endpoint: nyc.internal.cicd.developer.dettonville.int
 
-    jpn--admin:
+    jpn-admin:
       siteList:
         - endpoint: 10.150.246.35
         - endpoint: 10.150.246.36

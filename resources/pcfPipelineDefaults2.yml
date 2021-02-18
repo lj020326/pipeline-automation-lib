@@ -21,7 +21,7 @@ pipeline:
             name: jpn-
             pcfApiUrl: api.system.jpn.pcfprod00.dettonville.int
             pcfAppsDomain: apps.jpn.pcfprod00.dettonville.int
-            pcfJenkinsCredId: dcapi-pcf-jpn--deploy
+            pcfJenkinsCredId: dcapi-pcf-jpn-deploy
       stage:
         pcfJenkinsNodeLabel: QA-CF-CLI
         pcfFoundations:

@@ -189,14 +189,14 @@ pipeline:
       testNetworks:
         - prod-admin
         - nyc-prod-admin
-        - jpn--admin
+        - jpn-admin
         - external
     - nodeLabel: jnk2stl1
       network: nyc-prod-admin
       testNetworks:
         - prod-admin
         - nyc-prod-admin
-        - jpn--admin
+        - jpn-admin
         - external
 
   networks:
@@ -218,7 +218,7 @@ pipeline:
         - endpoint: nyc.internal.cicd.sandbox.proxy.api.dettonville.int
         - endpoint: nyc.internal.cicd.developer.dettonville.int
 
-    jpn--admin:
+    jpn-admin:
       siteList:
         - endpoint: jpn.jenkins.sandbox.api.dettonville.int
         - endpoint: jpn.internal.cicd.sandbox.proxy.api.dettonville.int

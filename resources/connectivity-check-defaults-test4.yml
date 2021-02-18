@@ -33,14 +33,14 @@ pipeline:
       testNetworks:
         - prod-admin
         - nyc-prod-admin
-        - jpn--admin
+        - jpn-admin
         - external
     - nodeLabel: jnk2stl1
       network: nyc-prod-admin
       testNetworks:
         - prod-admin
         - nyc-prod-admin
-        - jpn--admin
+        - jpn-admin
         - external
 #    - nodeLabel: jnk4stl1
 #      network: qa-admin
@@ -88,7 +88,7 @@ pipeline:
         - endpoint: nyc.internal.cicd.sandbox.proxy.api.dettonville.int:443
         - endpoint: nyc.internal.cicd.developer.dettonville.int:443
 
-    jpn--admin:
+    jpn-admin:
       siteList:
         - endpoint: 10.150.246.35:443
         - endpoint: 10.150.246.36:443
