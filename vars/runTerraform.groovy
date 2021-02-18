@@ -19,6 +19,8 @@ def call(Map params=[:]) {
 
     log.info("Loading Default Configs")
 
+    Map config=loadPipelineConfig(log, params)
+
 //    TF_VARS_vsphere_password
 //    TF_VARS_vm_ssh_password
 //List secretVars = [
@@ -37,17 +39,6 @@ def call(Map params=[:]) {
                 label "master"
             }
         }
-        parameters {
-            booleanParam(name: 'ACTION_PLAN', defaultValue: true, description: 'Run terraform plan action')
-            booleanParam(name: 'ACTION_APPLY', defaultValue: true, description: 'Run terraform apply action')
-            booleanParam(name: 'ACTION_SHOW', defaultValue: true, description: 'Run terraform show action')
-            booleanParam(name: 'ACTION_PREVIEW_DESTROY', defaultValue: false, description: 'Run terraform preview destroy action')
-            booleanParam(name: 'ACTION_DESTROY', defaultValue: false, description: 'Run terraform destroy action')
-            choice(
-                    choices: ['dev', 'test', 'prod'],
-                    description: 'deployment environment',
-                    name: 'ENVIRONMENT')
-        }
 
         stages {
             //      stage('fetch_latest_code') {
@@ -59,9 +50,6 @@ def call(Map params=[:]) {
 
             stage('Terraform Lint') {
                 steps {
-                    log.info("params=${JsonUtils.printToJsonString(params)}")
-                    log.info("config=${JsonUtils.printToJsonString(config)}")
-
                     // ref: https://github.com/pwelch/test-workspace/blob/master/.github/workflows/terraform.yml
                     ansiColor('xterm') {
                         sh 'terraform fmt'
@@ -94,7 +82,7 @@ def call(Map params=[:]) {
             // ref: https://medium.com/@suhasulun/deploying-to-aws-with-ansible-and-terraform-4c3be121ba51
             stage('Terraform Plan') {
                 when {
-                    expression { params.ACTION_PLAN || params.ACTION_APPLY }
+                    expression { config.ACTION_PLAN || config.ACTION_APPLY }
                 }
                 steps {
                     withCredentials(secretVars) {
@@ -108,7 +96,7 @@ def call(Map params=[:]) {
 
             stage('Approval') {
                 when {
-                    expression { params.ACTION_APPLY }
+                    expression { config.ACTION_APPLY }
                 }
                 steps {
                     sh 'terraform show -no-color tfplan > tfplan.txt'
@@ -123,7 +111,7 @@ def call(Map params=[:]) {
 
             stage('Terraform Apply') {
                 when {
-                    expression { params.ACTION_APPLY }
+                    expression { config.ACTION_APPLY }
                 }
                 steps {
                     withCredentials(secretVars) {
@@ -136,7 +124,7 @@ def call(Map params=[:]) {
             }
             stage('show') {
                 when {
-                    expression { params.ACTION_SHOW }
+                    expression { config.ACTION_SHOW }
                 }
                 steps {
                     sh 'terraform show'
@@ -145,7 +133,7 @@ def call(Map params=[:]) {
 
             stage('preview-destroy') {
                 when {
-                    expression { params.ACTION_PREVIEW_DESTROY || params.ACTION_DESTROY }
+                    expression { config.ACTION_PREVIEW_DESTROY || config.ACTION_DESTROY }
                 }
                 steps {
                     //                sh 'terraform plan -destroy -out=tfplan -var "aws_region=${AWS_REGION}" --var-file=environments/${ENVIRONMENT}.vars'
@@ -155,7 +143,7 @@ def call(Map params=[:]) {
             }
             stage('destroy') {
                 when {
-                    expression { params.ACTION_DESTROY }
+                    expression { config.ACTION_DESTROY }
                 }
                 steps {
                     script {
@@ -171,4 +159,30 @@ def call(Map params=[:]) {
 
         }
     }
+}
+
+//@NonCPS
+Map loadPipelineConfig(Logger log, Map params) {
+    String logPrefix="loadPipelineConfig():"
+    Map config = [:]
+
+    // copy immutable params maps to mutable config map
+    params.each { key, value ->
+        log.debug("${logPrefix} params[${key}]=${value}")
+//        key= Utilities.decapitalize(key)
+        if (value!="") {
+            config[key]=value
+        }
+    }
+
+    config.logLevel = config.get('logLevel', "INFO")
+
+    log.setLevel(config.logLevel)
+
+    log.info("${logPrefix} log.level=${log.level}")
+
+    log.info("${logPrefix} params=${JsonUtils.printToJsonString(params)}")
+    log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+
+    return config
 }
