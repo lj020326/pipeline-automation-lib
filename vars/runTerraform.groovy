@@ -91,7 +91,7 @@ def call(Map params=[:]) {
             // ref: https://medium.com/@suhasulun/deploying-to-aws-with-ansible-and-terraform-4c3be121ba51
             stage('Terraform Plan') {
                 when {
-                    expression { params.ACTION_PLAN == true || params.ACTION_APPLY == true }
+                    expression { params.ACTION_PLAN || params.ACTION_APPLY }
                 }
                 steps {
                     withCredentials(secretVars) {
@@ -105,7 +105,7 @@ def call(Map params=[:]) {
 
             stage('Approval') {
                 when {
-                    expression { params.ACTION_APPLY == true }
+                    expression { params.ACTION_APPLY }
                 }
                 steps {
                     sh 'terraform show -no-color tfplan > tfplan.txt'
@@ -120,7 +120,7 @@ def call(Map params=[:]) {
 
             stage('Terraform Apply') {
                 when {
-                    expression { params.ACTION_APPLY == true }
+                    expression { params.ACTION_APPLY }
                 }
                 steps {
                     withCredentials(secretVars) {
@@ -133,7 +133,7 @@ def call(Map params=[:]) {
             }
             stage('show') {
                 when {
-                    expression { params.ACTION_SHOW == true }
+                    expression { params.ACTION_SHOW }
                 }
                 steps {
                     sh 'terraform show'
@@ -142,7 +142,7 @@ def call(Map params=[:]) {
 
             stage('preview-destroy') {
                 when {
-                    expression { params.ACTION_PREVIEW_DESTROY == true || params.ACTION_DESTROY == true }
+                    expression { params.ACTION_PREVIEW_DESTROY || params.ACTION_DESTROY }
                 }
                 steps {
                     //                sh 'terraform plan -destroy -out=tfplan -var "aws_region=${AWS_REGION}" --var-file=environments/${ENVIRONMENT}.vars'
@@ -152,7 +152,7 @@ def call(Map params=[:]) {
             }
             stage('destroy') {
                 when {
-                    expression { params.ACTION_DESTROY == true }
+                    expression { params.ACTION_DESTROY }
                 }
                 steps {
                     script {
