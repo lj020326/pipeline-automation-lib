@@ -59,6 +59,9 @@ def call(Map params=[:]) {
 
             stage('Terraform Lint') {
                 steps {
+                    log.info("params=${JsonUtils.printToJsonString(params)}")
+                    log.info("config=${JsonUtils.printToJsonString(config)}")
+
                     // ref: https://github.com/pwelch/test-workspace/blob/master/.github/workflows/terraform.yml
                     ansiColor('xterm') {
                         sh 'terraform fmt'
