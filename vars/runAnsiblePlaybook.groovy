@@ -42,7 +42,7 @@ def call(Map config=[:]) {
                     // install galaxy roles
 //                        sh "ansible-galaxy install -vvv -r provision/requirements.yml -p provision/roles/"
                     sh "ansible-galaxy install -r roles/requirements.yml"
-                    sh "ansible-galaxy collection install -r roles/requirements.yml"
+                    sh "ansible-galaxy collection install --force -r roles/requirements.yml"
 
                 }
             }
