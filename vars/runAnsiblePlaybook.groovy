@@ -40,9 +40,9 @@ def call(Map config=[:]) {
             stage('Run Galaxy Install') {
                 steps {
                     // install galaxy roles
-//                        sh "ansible-galaxy install -vvv -r provision/requirements.yml -p provision/roles/"
                     sh "ansible-galaxy install -r roles/requirements.yml"
-                    sh "ansible-galaxy collection install --force -r roles/requirements.yml"
+//                    sh "ansible-galaxy collection install --force -r roles/requirements.yml"
+                    sh "ansible-galaxy collection install -r roles/requirements.yml"
 
                 }
             }
