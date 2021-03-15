@@ -20,10 +20,11 @@ def call(Map params=[:]) {
 
     pipeline {
 
-        agent any
-//        agent {
+//        agent any
+        agent {
 //            label "docker"
-//        }
+            label "packer"
+        }
 
         tools {
             "biz.neustar.jenkins.plugins.packer.PackerInstallation" "$packerTool"

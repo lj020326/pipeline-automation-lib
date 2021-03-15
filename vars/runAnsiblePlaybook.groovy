@@ -14,6 +14,9 @@ def call(Map config=[:]) {
 
     pipeline {
         agent any
+//        agent {
+//            label "ansible"
+//        }
         options {
             disableConcurrentBuilds()
             timestamps()
