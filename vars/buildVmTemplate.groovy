@@ -22,8 +22,8 @@ def call(Map params=[:]) {
 
 //        agent any
         agent {
-            label "docker"
-//            label "packer"
+//            label "docker"
+            label "packer"
         }
 
         tools {
