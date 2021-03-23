@@ -113,17 +113,9 @@ def call(Map params=[:]) {
                     script {
 //                        String govcCmd = "govc datastore.ls -ds=${config['vm-remote-cache-datastore']} ${config['vm-iso-file-dir']} | grep ${config['iso-file']}"
 //                        boolean imageExists = sh(script: govcCmd, returnStatus: true)==0
-                        boolean imageExists = sh(script: "ls -Fla /vmware/${config['vm-iso-file-dir']}/ | grep ${config['iso-file']} ", returnStatus: true)==0
+                        boolean imageExists = sh(script: "ls -Fla ${config['vm-data-dir']}/${config['vm-iso-file-dir']}/ | grep ${config['iso-file']} ", returnStatus: true)==0
 
                         if (!imageExists) {
-//                            sh """
-//                            ansible-playbook \
-//                              --inventory-file localhost, \
-//                              -e ansible_ssh_common_args='"-o StrictHostKeyChecking=no -o ServerAliveInterval=30"' \
-//                              -e fetch_images='"[${JsonOutput.toJson(config.imageInfo)}]"' \
-//                              fetch-osimages.yml
-//                            """
-
                             sh """
                             ansible-playbook \
                               --inventory-file localhost, \
@@ -155,7 +147,6 @@ def call(Map params=[:]) {
                             // ref: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html-single/installation_guide/index#s2-kickstart2-boot-media
                             // ref: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html-single/installation_guide/index#s2-kickstart2-networkbased
                             if (config["build-type"] == "vsphere-iso-nfs") {
-//                                sh "cp -p ks.cfg /data/osimages/kickstart/ks.cfg"
                                 sh "cp -p ${config['vm-init-file']} ${config['vm-init-dir']}/${config['vm-init-file']}"
                             }
 
