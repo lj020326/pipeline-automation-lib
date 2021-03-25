@@ -32,13 +32,12 @@ def call(Map params=[:]) {
 
         environment {
             GOVC_INSECURE = true
-//            GOVC_URL = "vcsa.dettonville.int"
         }
         options {
             buildDiscarder(logRotator(numToKeepStr: '10'))
             disableConcurrentBuilds()
-//            timestamps()
-            timeout(time: 3, unit: 'HOURS') //Should not take longer than 2 hours to run
+            timestamps()
+            timeout(time: 2, unit: 'HOURS')
         }
 
         stages {
