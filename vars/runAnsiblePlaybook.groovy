@@ -1,5 +1,6 @@
 #!/usr/bin/env groovy
 import com.dettonville.api.pipeline.utils.JsonUtils
+import com.dettonville.api.pipeline.utils.Utilities
 import com.dettonville.api.pipeline.utils.MapMerge
 import com.dettonville.api.pipeline.utils.logging.LogLevel
 import com.dettonville.api.pipeline.utils.logging.Logger
@@ -137,7 +138,7 @@ Map loadPipelineConfig(Logger log, Map params) {
     // copy immutable params maps to mutable config map
     params.each { key, value ->
         log.debug("${logPrefix} params[${key}]=${value}")
-        key=decapitalize(key)
+        key=Utilities.decapitalize(key)
         if (value!="") {
             config[key]=value
         }
