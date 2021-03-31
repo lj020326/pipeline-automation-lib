@@ -43,7 +43,8 @@ def call(Map config=[:]) {
         }
     }
 
-    log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+//    log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.info("config=${JsonUtils.printToJsonString(config)}")
 
     runAnsiblePlaybook(config)
 
