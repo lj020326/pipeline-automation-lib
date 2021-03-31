@@ -6,14 +6,20 @@ import com.dettonville.api.pipeline.utils.logging.Logger
 
 import static com.dettonville.api.pipeline.utils.ConfigConstants.*
 
-def call(Map config=[:]) {
+def call(Map params=[:]) {
 
     def email_from="runAnsiblePlaybook@dettonville.org"
     Logger.init(this, LogLevel.INFO)
     Logger log = new Logger(this)
 
+    Map config=loadPipelineConfig(log, params)
+    def agentLabel = getJenkinsAgentLabel(config.jenkinsNodeLabel)
+
     pipeline {
-        agent any
+        agent {
+            label agentLabel as String
+        }
+//        agent any
 //        agent {
 //            label "ansible"
 //        }
@@ -123,3 +129,40 @@ def call(Map config=[:]) {
 
 } // body
 
+//@NonCPS
+Map loadPipelineConfig(Logger log, Map params) {
+    String logPrefix="loadPipelineConfig():"
+    Map config = [:]
+
+    // copy immutable params maps to mutable config map
+    params.each { key, value ->
+        log.debug("${logPrefix} params[${key}]=${value}")
+        key=decapitalize(key)
+        if (value!="") {
+            config[key]=value
+        }
+    }
+
+    config.jenkinsNodeLabel = config.get('jenkinsNodeLabel',"ansible")
+    config.logLevel = config.get('logLevel', "INFO")
+    config.debugPipeline = config.get('debugPipeline', false)
+    config.continueIfFailed = config.get('continueIfFailed', false)
+    config.wait = config.get('wait', true)
+    config.failFast = config.get('failFast', false)
+
+    log.setLevel(config.logLevel)
+
+    if (config.debugPipeline) {
+        log.setLevel(LogLevel.DEBUG)
+    }
+
+    log.debug("${logPrefix} params=${params}")
+    log.debug("${logPrefix} config=${config}")
+
+    return config
+}
+
+String getJenkinsAgentLabel(String jenkinsLabel) {
+    // ref: https://stackoverflow.com/questions/46630168/in-a-declarative-jenkins-pipeline-can-i-set-the-agent-label-dynamically
+    return "${-> println 'Right Now the Jenkins Agent Label Name is ' + jenkinsLabel; return jenkinsLabel}"
+}
