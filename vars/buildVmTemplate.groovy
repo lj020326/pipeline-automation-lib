@@ -143,7 +143,7 @@ def call(Map params=[:]) {
 
                     script {
 
-                        dir("${config['build-dir']}") {
+                        dir("${config['build-dir']}/${env.JOB_BASE_NAME}") {
 //                        dir("${env.WORKSPACE}/${env.JOB_BASE_NAME}") {
 
                             // ref: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html-single/installation_guide/index#s2-kickstart2-boot-media
