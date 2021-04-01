@@ -45,52 +45,107 @@ def call(Map params=[:]) {
             stage("Initialize") {
                 steps {
                     script {
-                        setPackerEnv()
+//                        setPackerEnv()
+
+                        log.info("JOB_BASE=${env.JOB_NAME}")
+                        log.info("JOB_BASE_NAME=${env.JOB_BASE_NAME}")
+                        log.info("BUILD_TAG=${env.BUILD_TAG}")
+
+                        List jobParts = JOB_NAME.split("/")
+                        log.info("${logPrefix} jobParts=${jobParts}")
+                        config.jobBaseFolderLevel = config.jobBaseFolderLevel ?: 4
+                        config['build-dir']="build-config-new"
+
+                        int startIdx = config.jobBaseFolderLevel + 1
+//                            int endIdx = jobParts.size() - 1
+                        int endIdx = jobParts.size() - 2
+
+//                            config['build-distribution'] = jobParts[config.jobBaseFolderLevel]
+                        config['build-distribution'] = jobParts[-3]
+                        config['build-release'] = jobParts[-2]
+                        config['build-type'] = jobParts[-1]
+
+                        //    String[] buildTemplateParts = jobParts[startIdx..<jobParts.size()-1]
+                        List buildTemplateParts = []
+                        for (int i = startIdx; i < endIdx; i++) {
+                            buildTemplateParts.add(jobParts[i])
+                        }
+//                            buildTemplateParts.remove(0)
+
+                        log.info("buildTemplateParts=${buildTemplateParts}")
+
+                        config['build-distribution-config-dir'] = buildTemplateParts[0..-1].join("/")
+                        config['build-release-config-dir'] = buildTemplateParts.join("/")
+
+                        log.info("build-distribution-config-dir=${config['build-distribution-config-dir']}")
+                        log.info("build-release-config-dir=${config['build-release-config-dir']}")
+
+                        List buildTagList = env.BUILD_TAG.split("-")
+                        buildTagList[-1] = env.BUILD_NUMBER.toString().padLeft(4, '0')
+
+                        // ref: https://mrhaki.blogspot.com/2011/09/groovy-goodness-take-and-drop-items.html
+                        buildTagList = buildTagList.drop(3)
+                        templateBuildTag = buildTagList.join("-")
+
+                        //                        echo "templateBuildTag=${templateBuildTag}"
+                        env.TEMPLATE_BUILD_ID = templateBuildTag
 
                         log.info("env.TEMPLATE_BUILD_ID=${env.TEMPLATE_BUILD_ID}")
-//                        log.info("env.TEMPLATE_NAME=${env.TEMPLATE_NAME}")
-                        log.info("env.JOB_BASE_NAME=${env.JOB_BASE_NAME}")
+                        //                        log.info("env.TEMPLATE_NAME=${env.TEMPLATE_NAME}")
 
-//                        config['vm-template-name'] = "${env.TEMPLATE_NAME}"
+                        //                        config['vm_name'] = "${env.TEMPLATE_NAME}"
                         config.logLevel = "INFO"
 
-                        config['build-dir']="build-config"
+//                            -var-file=box_info.json -var-file=template.json ../../ubuntu-server-live-installer.json
 
-                        Map buildConfig = readJSON file: "./${config['build-dir']}/builder-config.json"
+                        Map buildConfig = readJSON file: "./${config['build-dir']}/build-config.json"
                         config = MapMerge.merge(config, buildConfig.variables)
 
-                        Map buildVars = readJSON file: "./${config['build-dir']}/${env.JOB_BASE_NAME}/build-vars.json"
-                        log.debug("buildVars=${JsonUtils.printToJsonString(buildVars)}")
+                        Map distBuildConfig = readJSON file: "./${config['build-dir']}/${config['build-distribution-config-dir']}/build-config.json"
+                        config = MapMerge.merge(config, distBuildConfig.variables)
+                        log.info("buildConfig=${JsonUtils.printToJsonString(buildConfig)}")
 
-                        config = MapMerge.merge(config, buildVars)
+                        Map boxInfoConfig = readJSON file: "./${config['build-dir']}/${config['build-release-config-dir']}/box_info.json"
+                        config = MapMerge.merge(config, boxInfoConfig)
+                        log.debug("boxInfoConfig=${JsonUtils.printToJsonString(boxInfoConfig)}")
+
+                        Map templateConfig = readJSON file: "./${config['build-dir']}/${config['build-release-config-dir']}/template.json"
+                        config = MapMerge.merge(config, templateConfig)
+                        log.debug("templateConfig=${JsonUtils.printToJsonString(templateConfig)}")
+
                         config = MapMerge.merge(config, params)
 
                         Map imageInfo = [:]
                         imageInfo['name'] = "${env.JOB_BASE_NAME}"
-                        imageInfo['iso-url'] = config['iso-url']
-                        imageInfo['iso-file'] = config['iso-file']
+                        //                        imageInfo['iso-url'] = config['iso-url']
+                        //                        imageInfo['iso-file'] = config['iso-file']
+
+                        String isoUrl = config['iso-url']
+                        // ref: https://stackoverflow.com/questions/605696/get-file-name-from-url
+                        String isoFile = isoUrl.substring(isoUrl.lastIndexOf('/') + 1, isoUrl.length());
+                        imageInfo['iso-url'] = isoUrl
+                        imageInfo['iso-file'] = isoFile
                         imageInfo['iso-checksum'] = config['iso-checksum']
-                        config.imageInfo = imageInfo
+                        config['image-info'] = imageInfo
 
                         log.setLevel(config.logLevel)
 
                         log.info("config=${JsonUtils.printToJsonString(config)}")
-
                     }
                 }
             }
 
             stage("Pre-check if template already exists") {
                 environment {
-                    GOVC_URL = "${config['vcenter-host']}"
+                    GOVC_URL = "${config['vcenter_host']}"
                 }
                 steps {
                     script {
                         log.info("checking if template already exists...")
                         withCredentials([usernamePassword(credentialsId: 'dcapi-govc-cred', passwordVariable: 'GOVC_PASSWORD', usernameVariable: 'GOVC_USERNAME')]) {
-                            sh "govc vm.info ${config['vm-template-name']}"
-//                            sh "govc -u=${config['vcenter-host']} vm.info ${config['vm-template-name']}"
-                            vmTemplateExists = sh(script: "govc vm.info ${config['vm-template-name']} | grep 'UUID:'", returnStatus: true) == 0
+                            sh "govc vm.info ${config['vm_name']}"
+//                            sh "govc -u=${config['vcenter-host']} vm.info ${config['vm_name']}"
+                            vmTemplateExists = sh(script: "govc vm.info ${config['vm_name']} | grep 'UUID:'", returnStatus: true) == 0
                         }
                         log.info("initial check if template already exists=>${vmTemplateExists}")
 
@@ -114,13 +169,13 @@ def call(Map params=[:]) {
                     script {
 //                        String govcCmd = "govc datastore.ls -ds=${config['vm-remote-cache-datastore']} ${config['vm-iso-file-dir']} | grep ${config['iso-file']}"
 //                        boolean imageExists = sh(script: govcCmd, returnStatus: true)==0
-                        boolean imageExists = sh(script: "ls -Fla ${config['vm-data-dir']}/${config['vm-iso-file-dir']}/ | grep ${config['iso-file']} ", returnStatus: true)==0
+                        boolean imageExists = sh(script: "ls -Fla ${config['vm_data_dir']}/${config['vm_iso_file_dir']}/ | grep ${config['iso-file']} ", returnStatus: true)==0
 
                         if (!imageExists) {
                             sh """
                             ansible-playbook \
                               --inventory-file localhost, \
-                              -e fetch_images='"[${JsonOutput.toJson(config.imageInfo)}]"' \
+                              -e fetch_images='"[${JsonOutput.toJson(config['image-info'])}]"' \
                               fetch-osimages.yml
                             """
 
@@ -143,8 +198,10 @@ def call(Map params=[:]) {
 
                     script {
 
+//                        dir("${env.WORKSPACE}/${config['build-dir']}/${env.JOB_BASE_NAME}") {
+//                        dir("${env.WORKSPACE}/${config['build-dir']}/${config['build-release-config-dir']}") {
+//                        dir("${env.WORKSPACE}/${config['build-dir']}") {
                         dir("${config['build-dir']}") {
-//                        dir("${env.WORKSPACE}/${env.JOB_BASE_NAME}") {
 
                             // ref: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html-single/installation_guide/index#s2-kickstart2-boot-media
                             // ref: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html-single/installation_guide/index#s2-kickstart2-networkbased
@@ -165,15 +222,19 @@ def call(Map params=[:]) {
 
                             withCredentials(secretVars) {
 
+                                // -var-file=box_info.json -var-file=template.json ../../build-config.json
+
                                 // ref: https://vsupalov.com/packer-ami/
                                 // ref: https://blog.deimos.fr/2015/01/16/packer-build-multiple-images-easily/
                                 // ref: https://github.com/hashicorp/packer/pull/7184
                                 sh """
                                 ${tool packerTool}/packer build -only ${config['build-type']} \
                                     -on-error=abort \
-                                    -var-file=build-vars.json \
+                                    -var-file=build-config.json \
+                                    -var-file=${config['build-release-config-dir']}/server/box_info.json \
+                                    -var-file=${config['build-release-config-dir']}/server/template.json \
                                     -debug \
-                                    ${env.WORKSPACE}/${config['build-dir']}/builder-config.json
+                                    ${env.WORKSPACE}/${config['build-dir']}/${config['build-distribution-config-dir']}/build-config.json
                                 """
                             }
 
@@ -196,19 +257,19 @@ def call(Map params=[:]) {
 
                         withCredentials([usernamePassword(credentialsId: 'dcapi-govc-cred', passwordVariable: 'GOVC_PASSWORD', usernameVariable: 'GOVC_USERNAME')]) {
 
-                            sh "govc vm.info ${config['vm-template-name']}"
-                            vmTemplateExists = sh(script: "govc vm.info ${config['vm-template-name']} | grep 'UUID:'", returnStatus: true) == 0
+                            sh "govc vm.info ${config['vm_name']}"
+                            vmTemplateExists = sh(script: "govc vm.info ${config['vm_name']} | grep 'UUID:'", returnStatus: true) == 0
                             log.info("vmTemplateExists=${vmTemplateExists}")
 
                             if (vmTemplateExists) {
-                                log.info("destroying existing template ${config['vm-template-name']}")
-                                sh "govc vm.destroy ${config['vm-template-name']}"
+                                log.info("destroying existing template ${config['vm_name']}")
+                                sh "govc vm.destroy ${config['vm_name']}"
                             }
 
-//                            sh "govc vm.clone -ds=${config['vm-template-datastore']} -vm=${env.TEMPLATE_BUILD_ID} -pool=/johnsondc/host/${config['vm-template-host']}/Resources -folder=${config['vm-template-folder']} -template ${config['vm-template-name']} >/dev/null"
-                            sh "govc vm.clone -ds=${config['vm-template-datastore']} -vm=${env.TEMPLATE_BUILD_ID} -host=${config['vm-template-host']} -folder=${config['vm-template-folder']} -template ${config['vm-template-name']} >/dev/null"
+//                            sh "govc vm.clone -ds=${config['vm-template-datastore']} -vm=${env.TEMPLATE_BUILD_ID} -pool=/johnsondc/host/${config['vm-template-host']}/Resources -folder=${config['vm-template-folder']} -template ${config['vm_name']} >/dev/null"
+                            sh "govc vm.clone -ds=${config['vm-template-datastore']} -vm=${env.TEMPLATE_BUILD_ID} -host=${config['vm-template-host']} -folder=${config['vm-template-folder']} -template ${config['vm_name']} >/dev/null"
 
-                            String getVmPathCmd = "govc vm.info -json ${config['vm-template-name']} | jq '.. |.Config?.VmPathName? | select(. != null)'"
+                            String getVmPathCmd = "govc vm.info -json ${config['vm_name']} | jq '.. |.Config?.VmPathName? | select(. != null)'"
                             sh "${getVmPathCmd}"
                             String vmPath = sh(script: "${getVmPathCmd}", returnStdout: true).replaceAll('"',"")
 //                            String vmDatastore = vmPath.split("/")[-1].replaceAll('([|])+','')
@@ -222,9 +283,9 @@ def call(Map params=[:]) {
 
                             if (vmPath != targetPath) {
                                 log.info("moving VM from '${vmPath}' to '${targetPath}'")
-                                sh "govc vm.unregister ${config['vm-template-name']}"
-                                sh "govc datastore.mv -ds=${config['vm-template-datastore']} ${config['vm-template-name']} ${config['vm-template-folder']}/${config['vm-template-name']}"
-                                sh "govc vm.register -template=true -ds=${config['vm-template-datastore']} -folder=${config['vm-template-folder']} -host=${config['vm-template-host']} ${config['vm-template-folder']}/${config['vm-template-name']}/${config['vm-template-name']}.vmtx"
+                                sh "govc vm.unregister ${config['vm_name']}"
+                                sh "govc datastore.mv -ds=${config['vm-template-datastore']} ${config['vm_name']} ${config['vm-template-folder']}/${config['vm_name']}"
+                                sh "govc vm.register -template=true -ds=${config['vm-template-datastore']} -folder=${config['vm-template-folder']} -host=${config['vm-template-host']} ${config['vm-template-folder']}/${config['vm_name']}/${config['vm_name']}.vmtx"
                             }
                             sh "govc datastore.ls -ds=${config['vm-template-datastore']} ${config['vm-template-folder']}"
                             log.info("removing temporary template build ${env.TEMPLATE_BUILD_ID}")
