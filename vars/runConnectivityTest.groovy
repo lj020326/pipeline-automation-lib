@@ -262,7 +262,7 @@ Map loadPipelineConfig(Logger log, Map params, String configFile=null) {
     config.sendInlineReport = config.sendInlineReport ?: true
     config.reportName = "ConnectivityReport"
 
-    log.info("loadPipelineConfig(): config=${printToJsonString(config)}")
+    log.info("${logPrefix} config=${printToJsonString(config)}")
 
     return config
 }

@@ -268,12 +268,27 @@ Map loadPipelineConfig(Logger log, Map params) {
 
     log.info("${logPrefix} TEMPLATE_BUILD_ID=${env.TEMPLATE_BUILD_ID}")
 
-    Map buildConfig = readJSON file: "./${config['build-dir']}/builder-config.json"
-    config = MapMerge.merge(config, buildConfig.variables)
+    buildConfigFile = "./${config['build-dir']}/builder-config.json"
+    if (fileExists(buildConfigFile)) {
+        Map buildConfig = readJSON file: buildConfigFile
+        config = MapMerge.merge(config, buildConfig.variables)
+    } else {
+        String message = "${logPrefix} buildConfigFile [${buildConfigFile}] not found"
+        log.error("${message}")
+        throw message
+    }
+    log.info("${logPrefix} HERE1")
 
-    Map buildVars = readJSON file: "./${config['build-dir']}/${env.JOB_BASE_NAME}/build-vars.json"
-    config = MapMerge.merge(config, buildVars)
-    log.info("${logPrefix} buildVars=${JsonUtils.printToJsonString(buildVars)}")
+    buildVarsFile = "./${config['build-dir']}/${env.JOB_BASE_NAME}/build-vars.json"
+    if (fileExists(buildVarsFile)) {
+        Map buildVars = readJSON file: buildVarsFile
+        config = MapMerge.merge(config, buildVars)
+        log.info("${logPrefix} buildVars=${JsonUtils.printToJsonString(buildVars)}")
+    } else {
+        String message = "${logPrefix} buildVarsFile [${buildVarsFile}] not found"
+        log.error("${message}")
+        throw message
+    }
 
     // copy immutable params maps to mutable config map
     // config = MapMerge.merge(config, params)
@@ -295,7 +310,7 @@ Map loadPipelineConfig(Logger log, Map params) {
         log.setLevel(LogLevel.DEBUG)
     }
 
-    log.info("${logPrefix} HERE1")
+    log.info("${logPrefix} HERE2")
 
 //    config['vm_name'] = "${env.TEMPLATE_NAME}"
 

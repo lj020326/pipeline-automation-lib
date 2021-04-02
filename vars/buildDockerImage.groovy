@@ -48,7 +48,7 @@ def call(Map params=[:]) {
 }
 
 //@NonCPS
-Map loadPipelineConfig(Logger log, Map params, String configFile=null) {
+Map loadPipelineConfig(Logger log, Map params) {
     String logPrefix = "loadPipelineConfig():"
     Map config = [:]
 
