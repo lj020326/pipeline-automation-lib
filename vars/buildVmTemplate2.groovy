@@ -49,30 +49,30 @@ def call(Map params=[:]) {
 
         stages {
 
-            stage("Initialize") {
-                steps {
-                    script {
-//                        setPackerEnv()
-
-                        log.info("JOB_BASE=${env.JOB_NAME}")
-                        log.info("JOB_BASE_NAME=${env.JOB_BASE_NAME}")
-                        log.info("BUILD_TAG=${env.BUILD_TAG}")
-
-                    }
-                }
-            }
+//            stage("Initialize") {
+//                steps {
+//                    script {
+////                        setPackerEnv()
+//
+//                        log.info("JOB_BASE=${env.JOB_NAME}")
+//                        log.info("JOB_BASE_NAME=${env.JOB_BASE_NAME}")
+//                        log.info("BUILD_TAG=${env.BUILD_TAG}")
+//
+//                    }
+//                }
+//            }
 
             stage("Pre-check if template already exists") {
                 environment {
-                    GOVC_URL = "${config['vcenter_host']}"
+                    GOVC_URL = "${config.vcenter_host}"
                 }
                 steps {
                     script {
                         log.info("checking if template already exists...")
                         withCredentials([usernamePassword(credentialsId: 'dcapi-govc-cred', passwordVariable: 'GOVC_PASSWORD', usernameVariable: 'GOVC_USERNAME')]) {
-                            sh "govc vm.info ${config['vm_name']}"
-//                            sh "govc -u=${config['vcenter-host']} vm.info ${config['vm_name']}"
-                            vmTemplateExists = sh(script: "govc vm.info ${config['vm_name']} | grep 'UUID:'", returnStatus: true) == 0
+                            sh "govc vm.info ${config.vm_name}"
+//                            sh "govc -u=${config['vcenter-host']} vm.info ${config.vm_name}"
+                            vmTemplateExists = sh(script: "govc vm.info ${config.vm_name} | grep 'UUID:'", returnStatus: true) == 0
                         }
                         log.info("initial check if template already exists=>${vmTemplateExists}")
 
@@ -94,9 +94,9 @@ def call(Map params=[:]) {
 
                 steps {
                     script {
-//                        String govcCmd = "govc datastore.ls -ds=${config['vm-remote-cache-datastore']} ${config['vm-iso-file-dir']} | grep ${config['iso-file']}"
+//                        String govcCmd = "govc datastore.ls -ds=${config.vm_remote_cache_datastore} ${config.vm_iso_file_dir} | grep ${config.iso_file}"
 //                        boolean imageExists = sh(script: govcCmd, returnStatus: true)==0
-                        boolean imageExists = sh(script: "ls -Fla ${config['vm_data_dir']}/${config['vm_iso_file_dir']}/ | grep ${config['iso-file']} ", returnStatus: true)==0
+                        boolean imageExists = sh(script: "ls -Fla ${config.vm_data_dir}/${config.vm_iso_file_dir}/ | grep ${config['iso-file']} ", returnStatus: true)==0
 
                         if (!imageExists) {
                             sh """
@@ -106,8 +106,8 @@ def call(Map params=[:]) {
                               fetch-osimages.yml
                             """
 
-//                            sh "govc datastore.upload -ds=${config['vm-remote-cache-datastore']} /data/osimages/${config['iso-file']} ${config['vm-iso-file-dir']}/${config['iso-file']}"
-//                            sh "cp -np /data/osimages/${config['iso-file']} /vmware/${config['vm-iso-file-dir']}/"
+//                            sh "govc datastore.upload -ds=${config.vm_remote_cache_datastore} /data/osimages/${config['iso-file']} ${config.vm_iso_file_dir}/${config['iso-file']}"
+//                            sh "cp -np /data/osimages/${config['iso-file']} /vmware/${config.vm_iso_file_dir}/"
                         }
                     }
                 }
@@ -126,14 +126,14 @@ def call(Map params=[:]) {
                     script {
 
 //                        dir("${env.WORKSPACE}/${config['build-dir']}/${env.JOB_BASE_NAME}") {
-//                        dir("${env.WORKSPACE}/${config['build-dir']}/${config['build-release-config-dir']}") {
+//                        dir("${env.WORKSPACE}/${config['build-dir']}/${config.build_release_config_dir}") {
 //                        dir("${env.WORKSPACE}/${config['build-dir']}") {
                         dir("${config['build-dir']}") {
 
                             // ref: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html-single/installation_guide/index#s2-kickstart2-boot-media
                             // ref: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html-single/installation_guide/index#s2-kickstart2-networkbased
                             if (config["build-type"] == "vsphere-iso-nfs") {
-                                sh "cp -p ${config['vm-init-file']} ${config['vm-init-dir']}/${config['vm-init-file']}"
+                                sh "cp -p ${config.vm_init_file} ${config.vm_init_dir}/${config.vm_init_file}"
                             }
 
                             // ref: https://docs.cloudbees.com/docs/cloudbees-ci/latest/cloud-secure-guide/injecting-secrets
@@ -161,10 +161,10 @@ def call(Map params=[:]) {
                                     -only ${config['build-type']} \
                                     -on-error=abort \
                                     -var-file=build-config.json \
-                                    -var-file=${config['build-release-config-dir']}/box_info.json \
-                                    -var-file=${config['build-release-config-dir']}/template.json \
+                                    -var-file=${config.build_release_config_dir}/box_info.json \
+                                    -var-file=${config.build_release_config_dir}/template.json \
                                     -debug \
-                                    ${env.WORKSPACE}/${config['build-dir']}/${config['build-distribution-config-dir']}/build-config.json
+                                    ${env.WORKSPACE}/${config['build-dir']}/${config.build_distribution_config_dir}/build-config.json
                                 """
                             }
 
@@ -173,7 +173,7 @@ def call(Map params=[:]) {
                 }
             }
 
-//            stage("Deploy Template to $config['vm-template-datastore'] $config['vm-template-folder']") {
+//            stage("Deploy Template to $config.vm_template_datastore $config.vm_template_folder") {
             stage("Deploy Template") {
                 when {
                     expression { !vmTemplateExists && !config["skip-packer-build"]?.toBoolean() }
@@ -187,19 +187,19 @@ def call(Map params=[:]) {
 
                         withCredentials([usernamePassword(credentialsId: 'dcapi-govc-cred', passwordVariable: 'GOVC_PASSWORD', usernameVariable: 'GOVC_USERNAME')]) {
 
-                            sh "govc vm.info ${config['vm_name']}"
-                            vmTemplateExists = sh(script: "govc vm.info ${config['vm_name']} | grep 'UUID:'", returnStatus: true) == 0
+                            sh "govc vm.info ${config.vm_name}"
+                            vmTemplateExists = sh(script: "govc vm.info ${config.vm_name} | grep 'UUID:'", returnStatus: true) == 0
                             log.info("vmTemplateExists=${vmTemplateExists}")
 
                             if (vmTemplateExists) {
-                                log.info("destroying existing template ${config['vm_name']}")
-                                sh "govc vm.destroy ${config['vm_name']}"
+                                log.info("destroying existing template ${config.vm_name}")
+                                sh "govc vm.destroy ${config.vm_name}"
                             }
 
-//                            sh "govc vm.clone -ds=${config['vm-template-datastore']} -vm=${env.TEMPLATE_BUILD_ID} -pool=/johnsondc/host/${config['vm-template-host']}/Resources -folder=${config['vm-template-folder']} -template ${config['vm_name']} >/dev/null"
-                            sh "govc vm.clone -ds=${config['vm-template-datastore']} -vm=${env.TEMPLATE_BUILD_ID} -host=${config['vm-template-host']} -folder=${config['vm-template-folder']} -template ${config['vm_name']} >/dev/null"
+//                            sh "govc vm.clone -ds=${config.vm_template_datastore} -vm=${env.TEMPLATE_BUILD_ID} -pool=/johnsondc/host/${config.vm_template_host}/Resources -folder=${config.vm_template_folder} -template ${config.vm_name} >/dev/null"
+                            sh "govc vm.clone -ds=${config.vm_template_datastore} -vm=${env.TEMPLATE_BUILD_ID} -host=${config.vm_template_host} -folder=${config.vm_template_folder} -template ${config.vm_name} >/dev/null"
 
-                            String getVmPathCmd = "govc vm.info -json ${config['vm_name']} | jq '.. |.Config?.VmPathName? | select(. != null)'"
+                            String getVmPathCmd = "govc vm.info -json ${config.vm_name} | jq '.. |.Config?.VmPathName? | select(. != null)'"
                             sh "${getVmPathCmd}"
                             String vmPath = sh(script: "${getVmPathCmd}", returnStdout: true).replaceAll('"',"")
 //                            String vmDatastore = vmPath.split("/")[-1].replaceAll('([|])+','')
@@ -208,16 +208,16 @@ def call(Map params=[:]) {
                             vmPath = vmPath.substring(0, vmPath.lastIndexOf("/"))
                             log.info("vmDatastore=${vmDatastore} vmPath='${vmPath}'")
 
-                            String targetPath = "[${config['vm-template-datastore']}] ${config['vm-template-folder']}"
+                            String targetPath = "[${config.vm_template_datastore}] ${config.vm_template_folder}"
                             log.info("targetPath='${targetPath}'")
 
                             if (vmPath != targetPath) {
                                 log.info("moving VM from '${vmPath}' to '${targetPath}'")
-                                sh "govc vm.unregister ${config['vm_name']}"
-                                sh "govc datastore.mv -ds=${config['vm-template-datastore']} ${config['vm_name']} ${config['vm-template-folder']}/${config['vm_name']}"
-                                sh "govc vm.register -template=true -ds=${config['vm-template-datastore']} -folder=${config['vm-template-folder']} -host=${config['vm-template-host']} ${config['vm-template-folder']}/${config['vm_name']}/${config['vm_name']}.vmtx"
+                                sh "govc vm.unregister ${config.vm_name}"
+                                sh "govc datastore.mv -ds=${config.vm_template_datastore} ${config.vm_name} ${config.vm_template_folder}/${config.vm_name}"
+                                sh "govc vm.register -template=true -ds=${config.vm_template_datastore} -folder=${config.vm_template_folder} -host=${config.vm_template_host} ${config.vm_template_folder}/${config.vm_name}/${config.vm_name}.vmtx"
                             }
-                            sh "govc datastore.ls -ds=${config['vm-template-datastore']} ${config['vm-template-folder']}"
+                            sh "govc datastore.ls -ds=${config.vm_template_datastore} ${config.vm_template_folder}"
                             log.info("removing temporary template build ${env.TEMPLATE_BUILD_ID}")
                             sh "govc vm.destroy ${env.TEMPLATE_BUILD_ID}"
                         }
@@ -238,16 +238,16 @@ Map loadPipelineConfig(Logger log, Map params) {
     List jobParts = JOB_NAME.split("/")
     log.info("${logPrefix} jobParts=${jobParts}")
     config.jobBaseFolderLevel = config.jobBaseFolderLevel ?: 4
-    config['build-dir']="packer_templates_bento"
+    config.build_dir="packer_templates_bento"
 
     int startIdx = config.jobBaseFolderLevel + 1
 //    int endIdx = jobParts.size() - 1
     int endIdx = jobParts.size() - 2
 
-//    config['build-distribution'] = jobParts[config.jobBaseFolderLevel]
-    config['build-distribution'] = jobParts[-3]
-    config['build-release'] = jobParts[-2]
-    config['build-type'] = jobParts[-1]
+//    config.build_distribution = jobParts[config.jobBaseFolderLevel]
+    config.build_distribution = jobParts[-3]
+    config.build_release = jobParts[-2]
+    config.build_type = jobParts[-1]
 
     //    String[] buildTemplateParts = jobParts[startIdx..<jobParts.size()-1]
     List buildTemplateParts = []
@@ -258,11 +258,11 @@ Map loadPipelineConfig(Logger log, Map params) {
 
     log.info("${logPrefix} buildTemplateParts=${buildTemplateParts}")
 
-    config['build-distribution-config-dir'] = buildTemplateParts[0..-1].join("/")
-    config['build-release-config-dir'] = buildTemplateParts.join("/") + "/server"
+    config.build_distribution_config_dir = buildTemplateParts[0..-1].join("/")
+    config.build_release_config_dir = buildTemplateParts.join("/") + "/server"
 
-    log.info("${logPrefix} build-distribution-config-dir=${config['build-distribution-config-dir']}")
-    log.info("${logPrefix} build-release-config-dir=${config['build-release-config-dir']}")
+    log.info("${logPrefix} build-distribution-config-dir=${config.build_distribution_config_dir}")
+    log.info("${logPrefix} build-release-config-dir=${config.build_release_config_dir}")
 
     List buildTagList = env.BUILD_TAG.split("-")
     buildTagList[-1] = env.BUILD_NUMBER.toString().padLeft(4, '0')
@@ -277,24 +277,24 @@ Map loadPipelineConfig(Logger log, Map params) {
     log.info("${logPrefix} TEMPLATE_BUILD_ID=${env.TEMPLATE_BUILD_ID}")
     log.info("${logPrefix} TEMPLATE_NAME=${env.TEMPLATE_NAME}")
 
-//    config['vm_name'] = "${env.TEMPLATE_NAME}"
+//    config.vm_name = "${env.TEMPLATE_NAME}"
 
     // from build.sh
     // packer build -only=vmware-iso -var-file=../../../private_vars.json \
     //  -var-file=box_info.json -var-file=template.json ../../build-config.json
 
-    Map buildConfig = readJSON file: "./${config['build-dir']}/build-config.json"
+    Map buildConfig = readJSON file: "./${config.build_dir}/build-config.json"
     config = MapMerge.merge(config, buildConfig.variables)
 
-    Map distBuildConfig = readJSON file: "./${config['build-dir']}/${config['build-distribution-config-dir']}/build-config.json"
+    Map distBuildConfig = readJSON file: "./${config.build_dir}/${config.build_distribution_config_dir}/build-config.json"
     config = MapMerge.merge(config, distBuildConfig.variables)
     log.info("${logPrefix} buildConfig=${JsonUtils.printToJsonString(buildConfig)}")
 
-    Map boxInfoConfig = readJSON file: "./${config['build-dir']}/${config['build-release-config-dir']}/box_info.json"
+    Map boxInfoConfig = readJSON file: "./${config.build_dir}/${config.build_release_config_dir}/box_info.json"
     config = MapMerge.merge(config, boxInfoConfig)
     log.debug("boxInfoConfig=${JsonUtils.printToJsonString(boxInfoConfig)}")
 
-    Map templateConfig = readJSON file: "./${config['build-dir']}/${config['build-release-config-dir']}/template.json"
+    Map templateConfig = readJSON file: "./${config.build_dir}/${config.build_release_config_dir}/template.json"
     config = MapMerge.merge(config, templateConfig)
     log.debug("templateConfig=${JsonUtils.printToJsonString(templateConfig)}")
 
@@ -320,16 +320,17 @@ Map loadPipelineConfig(Logger log, Map params) {
 
     Map imageInfo = [:]
     imageInfo['name'] = "${env.JOB_BASE_NAME}"
-    //                        imageInfo['iso-url'] = config['iso-url']
-    //                        imageInfo['iso-file'] = config['iso-file']
+    //                        imageInfo['iso-url'] = config.iso_url
+    //                        imageInfo['iso-file'] = config.iso_file
 
-    String isoUrl = config['iso-url']
+    String isoUrl = config.iso_url
     // ref: https://stackoverflow.com/questions/605696/get-file-name-from-url
     String isoFile = isoUrl.substring(isoUrl.lastIndexOf('/') + 1, isoUrl.length());
+//    imageInfo['iso-url'] = isoUrl
     imageInfo['iso-url'] = isoUrl
     imageInfo['iso-file'] = isoFile
-    imageInfo['iso-checksum'] = config['iso-checksum']
-    config['image-info'] = imageInfo
+    imageInfo['iso-checksum'] = config.iso_checksum
+    config.image_info = imageInfo
 
     log.debug("${logPrefix} params=${JsonUtils.printToJsonString(params)}")
     log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
