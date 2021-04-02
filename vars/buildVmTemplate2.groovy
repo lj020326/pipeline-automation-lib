@@ -235,16 +235,6 @@ Map loadPipelineConfig(Logger log, Map params) {
     String logPrefix="loadPipelineConfig():"
     Map config = [:]
 
-    config.jenkinsNodeLabel = config.get('jenkinsNodeLabel',"packer")
-    config.logLevel = config.get('logLevel', "INFO")
-    config.debugPipeline = config.get('debugPipeline', false)
-
-    log.setLevel(config.logLevel)
-
-    if (config.debugPipeline) {
-        log.setLevel(LogLevel.DEBUG)
-    }
-
     List jobParts = JOB_NAME.split("/")
     log.info("${logPrefix} jobParts=${jobParts}")
     config.jobBaseFolderLevel = config.jobBaseFolderLevel ?: 4
@@ -316,6 +306,16 @@ Map loadPipelineConfig(Logger log, Map params) {
         if (value!="") {
             config[key]=value
         }
+    }
+
+    config.jenkinsNodeLabel = config.get('jenkinsNodeLabel',"packer")
+    config.logLevel = config.get('logLevel', "INFO")
+    config.debugPipeline = config.get('debugPipeline', false)
+
+    log.setLevel(config.logLevel)
+
+    if (config.debugPipeline) {
+        log.setLevel(LogLevel.DEBUG)
     }
 
     Map imageInfo = [:]

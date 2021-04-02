@@ -241,21 +241,10 @@ def call(Map params=[:]) {
 
 }
 
-
 //@NonCPS
 Map loadPipelineConfig(Logger log, Map params) {
     String logPrefix="loadPipelineConfig():"
     Map config = [:]
-
-    config.jenkinsNodeLabel = config.get('jenkinsNodeLabel',"packer")
-    config.logLevel = config.get('logLevel', "INFO")
-    config.debugPipeline = config.get('debugPipeline', false)
-
-    log.setLevel(config.logLevel)
-
-    if (config.debugPipeline) {
-        log.setLevel(LogLevel.DEBUG)
-    }
 
     List jobParts = JOB_NAME.split("/")
     log.info("${logPrefix} jobParts=${jobParts}")
@@ -290,6 +279,16 @@ Map loadPipelineConfig(Logger log, Map params) {
         if (value!="") {
             config[key]=value
         }
+    }
+
+    config.jenkinsNodeLabel = config.get('jenkinsNodeLabel',"packer")
+    config.logLevel = config.get('logLevel', "INFO")
+    config.debugPipeline = config.get('debugPipeline', false)
+
+    log.setLevel(config.logLevel)
+
+    if (config.debugPipeline) {
+        log.setLevel(LogLevel.DEBUG)
     }
 
 //    config['vm_name'] = "${env.TEMPLATE_NAME}"
