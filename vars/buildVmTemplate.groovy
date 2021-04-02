@@ -18,19 +18,17 @@ def call(Map params=[:]) {
 
     boolean vmTemplateExists = false
 
-    Map config=loadPipelineConfig(log, params)
-    String agentLabel = getJenkinsAgentLabel(config.jenkinsNodeLabel)
+//    Map config=loadPipelineConfig(log, params)
+//    String agentLabel = getJenkinsAgentLabel(config.jenkinsNodeLabel)
 
     pipeline {
 
-        agent {
-            label agentLabel as String
-        }
-////        agent any
 //        agent {
-////            label "docker"
-//            label "packer"
+//            label agentLabel as String
 //        }
+        agent {
+            label "packer"
+        }
 
         tools {
             "biz.neustar.jenkins.plugins.packer.PackerInstallation" "$packerTool"
@@ -48,11 +46,12 @@ def call(Map params=[:]) {
 
         stages {
 
-//            stage("Initialize") {
-//                steps {
-//                    script {
+            stage("Initialize") {
+                steps {
+                    script {
+                        Map config=loadPipelineConfig(log, params)
+
 //                        setPackerEnv()
-//
 //                        log.info("env.TEMPLATE_BUILD_ID=${env.TEMPLATE_BUILD_ID}")
 ////                        log.info("env.TEMPLATE_NAME=${env.TEMPLATE_NAME}")
 //                        log.info("env.JOB_BASE_NAME=${env.JOB_BASE_NAME}")
@@ -79,12 +78,12 @@ def call(Map params=[:]) {
 //                        config.imageInfo = imageInfo
 //
 //                        log.setLevel(config.logLevel)
-//
-//                        log.info("config=${JsonUtils.printToJsonString(config)}")
-//
-//                    }
-//                }
-//            }
+
+                        log.info("config=${JsonUtils.printToJsonString(config)}")
+
+                    }
+                }
+            }
 
             stage("Pre-check if template already exists") {
                 environment {
