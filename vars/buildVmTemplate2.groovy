@@ -257,7 +257,7 @@ Map loadPipelineConfig(Logger log, Map params) {
     List jobParts = JOB_NAME.split("/")
     log.info("${logPrefix} jobParts=${jobParts}")
     config.jobBaseFolderLevel = config.jobBaseFolderLevel ?: 4
-    config['build-dir']="build-config-new"
+    config['build-dir']="packer_templates_bento"
 
     int startIdx = config.jobBaseFolderLevel + 1
 //    int endIdx = jobParts.size() - 1
