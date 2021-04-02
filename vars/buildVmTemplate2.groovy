@@ -222,13 +222,16 @@ def call(Map params=[:]) {
 
                             withCredentials(secretVars) {
 
-                                // -var-file=box_info.json -var-file=template.json ../../build-config.json
+                                // from build.sh
+                                // packer build -only=vmware-iso -var-file=../../../private_vars.json \
+                                //  -var-file=box_info.json -var-file=template.json ../../build-config.json
 
                                 // ref: https://vsupalov.com/packer-ami/
                                 // ref: https://blog.deimos.fr/2015/01/16/packer-build-multiple-images-easily/
                                 // ref: https://github.com/hashicorp/packer/pull/7184
                                 sh """
-                                ${tool packerTool}/packer build -only ${config['build-type']} \
+                                ${tool packerTool}/packer build \
+                                    -only ${config['build-type']} \
                                     -on-error=abort \
                                     -var-file=build-config.json \
                                     -var-file=${config['build-release-config-dir']}/server/box_info.json \
@@ -243,8 +246,8 @@ def call(Map params=[:]) {
                 }
             }
 
-//            stage("Move Template to $config['vm-template-datastore'] $config['vm-template-folder']") {
-            stage("Move Template") {
+//            stage("Deploy Template to $config['vm-template-datastore'] $config['vm-template-folder']") {
+            stage("Deploy Template") {
                 when {
                     expression { !vmTemplateExists && !config["skip-packer-build"]?.toBoolean() }
                 }

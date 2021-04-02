@@ -169,7 +169,8 @@ def call(Map params=[:]) {
                                 // ref: https://blog.deimos.fr/2015/01/16/packer-build-multiple-images-easily/
                                 // ref: https://github.com/hashicorp/packer/pull/7184
                                 sh """
-                                ${tool packerTool}/packer build -only ${config['build-type']} \
+                                ${tool packerTool}/packer build \
+                                    -only ${config['build-type']} \
                                     -on-error=abort \
                                     -var-file=build-vars.json \
                                     -debug \
@@ -182,8 +183,8 @@ def call(Map params=[:]) {
                 }
             }
 
-//            stage("Move Template to $config['vm-template-datastore'] $config['vm-template-folder']") {
-            stage("Move Template") {
+//            stage("Deploy Template to $config['vm-template-datastore'] $config['vm-template-folder']") {
+            stage("Deploy Template") {
                 when {
                     expression { !vmTemplateExists && !config["skip-packer-build"]?.toBoolean() }
                 }
