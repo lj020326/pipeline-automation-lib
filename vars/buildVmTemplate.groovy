@@ -54,7 +54,7 @@ def call(Map params=[:]) {
 //                        config['vm-template-name'] = "${env.TEMPLATE_NAME}"
                         config.logLevel = "INFO"
 
-                        config['build-dir']="build-config"
+                        config['build-dir']="packer_templates"
 
                         Map buildConfig = readJSON file: "./${config['build-dir']}/builder-config.json"
                         config = MapMerge.merge(config, buildConfig.variables)

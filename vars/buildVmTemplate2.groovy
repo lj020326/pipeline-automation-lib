@@ -58,86 +58,6 @@ def call(Map params=[:]) {
                         log.info("JOB_BASE_NAME=${env.JOB_BASE_NAME}")
                         log.info("BUILD_TAG=${env.BUILD_TAG}")
 
-                        List jobParts = JOB_NAME.split("/")
-                        log.info("${logPrefix} jobParts=${jobParts}")
-                        config.jobBaseFolderLevel = config.jobBaseFolderLevel ?: 4
-                        config['build-dir']="build-config-new"
-
-                        int startIdx = config.jobBaseFolderLevel + 1
-//                            int endIdx = jobParts.size() - 1
-                        int endIdx = jobParts.size() - 2
-
-//                            config['build-distribution'] = jobParts[config.jobBaseFolderLevel]
-                        config['build-distribution'] = jobParts[-3]
-                        config['build-release'] = jobParts[-2]
-                        config['build-type'] = jobParts[-1]
-
-                        //    String[] buildTemplateParts = jobParts[startIdx..<jobParts.size()-1]
-                        List buildTemplateParts = []
-                        for (int i = startIdx; i < endIdx; i++) {
-                            buildTemplateParts.add(jobParts[i])
-                        }
-//                            buildTemplateParts.remove(0)
-
-                        log.info("buildTemplateParts=${buildTemplateParts}")
-
-                        config['build-distribution-config-dir'] = buildTemplateParts[0..-1].join("/")
-                        config['build-release-config-dir'] = buildTemplateParts.join("/")
-
-                        log.info("build-distribution-config-dir=${config['build-distribution-config-dir']}")
-                        log.info("build-release-config-dir=${config['build-release-config-dir']}")
-
-                        List buildTagList = env.BUILD_TAG.split("-")
-                        buildTagList[-1] = env.BUILD_NUMBER.toString().padLeft(4, '0')
-
-                        // ref: https://mrhaki.blogspot.com/2011/09/groovy-goodness-take-and-drop-items.html
-                        buildTagList = buildTagList.drop(3)
-                        templateBuildTag = buildTagList.join("-")
-
-                        //                        echo "templateBuildTag=${templateBuildTag}"
-                        env.TEMPLATE_BUILD_ID = templateBuildTag
-
-                        log.info("env.TEMPLATE_BUILD_ID=${env.TEMPLATE_BUILD_ID}")
-                        //                        log.info("env.TEMPLATE_NAME=${env.TEMPLATE_NAME}")
-
-                        //                        config['vm_name'] = "${env.TEMPLATE_NAME}"
-                        config.logLevel = "INFO"
-
-//                            -var-file=box_info.json -var-file=template.json ../../ubuntu-server-live-installer.json
-
-                        Map buildConfig = readJSON file: "./${config['build-dir']}/build-config.json"
-                        config = MapMerge.merge(config, buildConfig.variables)
-
-                        Map distBuildConfig = readJSON file: "./${config['build-dir']}/${config['build-distribution-config-dir']}/build-config.json"
-                        config = MapMerge.merge(config, distBuildConfig.variables)
-                        log.info("buildConfig=${JsonUtils.printToJsonString(buildConfig)}")
-
-                        Map boxInfoConfig = readJSON file: "./${config['build-dir']}/${config['build-release-config-dir']}/box_info.json"
-                        config = MapMerge.merge(config, boxInfoConfig)
-                        log.debug("boxInfoConfig=${JsonUtils.printToJsonString(boxInfoConfig)}")
-
-                        Map templateConfig = readJSON file: "./${config['build-dir']}/${config['build-release-config-dir']}/template.json"
-                        config = MapMerge.merge(config, templateConfig)
-                        log.debug("templateConfig=${JsonUtils.printToJsonString(templateConfig)}")
-
-                        config = MapMerge.merge(config, params)
-
-                        Map imageInfo = [:]
-                        imageInfo['name'] = "${env.JOB_BASE_NAME}"
-                        //                        imageInfo['iso-url'] = config['iso-url']
-                        //                        imageInfo['iso-file'] = config['iso-file']
-
-                        String isoUrl = config['iso-url']
-                        // ref: https://stackoverflow.com/questions/605696/get-file-name-from-url
-                        String isoFile = isoUrl.substring(isoUrl.lastIndexOf('/') + 1, isoUrl.length());
-                        imageInfo['iso-url'] = isoUrl
-                        imageInfo['iso-file'] = isoFile
-                        imageInfo['iso-checksum'] = config['iso-checksum']
-                        config['image-info'] = imageInfo
-
-                        log.setLevel(config.logLevel)
-
-                        log.info("config=${JsonUtils.printToJsonString(config)}")
                     }
                 }
             }
@@ -334,8 +254,87 @@ Map loadPipelineConfig(Logger log, Map params) {
         log.setLevel(LogLevel.DEBUG)
     }
 
-    log.debug("${logPrefix} params=${params}")
-    log.debug("${logPrefix} config=${config}")
+    List jobParts = JOB_NAME.split("/")
+    log.info("${logPrefix} jobParts=${jobParts}")
+    config.jobBaseFolderLevel = config.jobBaseFolderLevel ?: 4
+    config['build-dir']="build-config-new"
+
+    int startIdx = config.jobBaseFolderLevel + 1
+//    int endIdx = jobParts.size() - 1
+    int endIdx = jobParts.size() - 2
+
+//    config['build-distribution'] = jobParts[config.jobBaseFolderLevel]
+    config['build-distribution'] = jobParts[-3]
+    config['build-release'] = jobParts[-2]
+    config['build-type'] = jobParts[-1]
+
+    //    String[] buildTemplateParts = jobParts[startIdx..<jobParts.size()-1]
+    List buildTemplateParts = []
+    for (int i = startIdx; i < endIdx; i++) {
+        buildTemplateParts.add(jobParts[i])
+    }
+//    buildTemplateParts.remove(0)
+
+    log.info("buildTemplateParts=${buildTemplateParts}")
+
+    config['build-distribution-config-dir'] = buildTemplateParts[0..-1].join("/")
+    config['build-release-config-dir'] = buildTemplateParts.join("/")
+
+    log.info("build-distribution-config-dir=${config['build-distribution-config-dir']}")
+    log.info("build-release-config-dir=${config['build-release-config-dir']}")
+
+    List buildTagList = env.BUILD_TAG.split("-")
+    buildTagList[-1] = env.BUILD_NUMBER.toString().padLeft(4, '0')
+
+    // ref: https://mrhaki.blogspot.com/2011/09/groovy-goodness-take-and-drop-items.html
+    buildTagList = buildTagList.drop(3)
+    templateBuildTag = buildTagList.join("-")
+
+    log.info("templateBuildTag=${templateBuildTag}")
+    env.TEMPLATE_BUILD_ID = templateBuildTag
+
+    log.info("env.TEMPLATE_BUILD_ID=${env.TEMPLATE_BUILD_ID}")
+    log.info("env.TEMPLATE_NAME=${env.TEMPLATE_NAME}")
+
+//    config['vm_name'] = "${env.TEMPLATE_NAME}"
+    config.logLevel = "INFO"
+
+    // from build.sh
+    // packer build -only=vmware-iso -var-file=../../../private_vars.json \
+    //  -var-file=box_info.json -var-file=template.json ../../build-config.json
+
+    Map buildConfig = readJSON file: "./${config['build-dir']}/build-config.json"
+    config = MapMerge.merge(config, buildConfig.variables)
+
+    Map distBuildConfig = readJSON file: "./${config['build-dir']}/${config['build-distribution-config-dir']}/build-config.json"
+    config = MapMerge.merge(config, distBuildConfig.variables)
+    log.info("buildConfig=${JsonUtils.printToJsonString(buildConfig)}")
+
+//    Map boxInfoConfig = readJSON file: "./${config['build-dir']}/${config['build-release-config-dir']}/box_info.json"
+//    config = MapMerge.merge(config, boxInfoConfig)
+//    log.debug("boxInfoConfig=${JsonUtils.printToJsonString(boxInfoConfig)}")
+//
+//    Map templateConfig = readJSON file: "./${config['build-dir']}/${config['build-release-config-dir']}/template.json"
+//    config = MapMerge.merge(config, templateConfig)
+//    log.debug("templateConfig=${JsonUtils.printToJsonString(templateConfig)}")
+
+    config = MapMerge.merge(config, params)
+
+    Map imageInfo = [:]
+    imageInfo['name'] = "${env.JOB_BASE_NAME}"
+    //                        imageInfo['iso-url'] = config['iso-url']
+    //                        imageInfo['iso-file'] = config['iso-file']
+
+    String isoUrl = config['iso-url']
+    // ref: https://stackoverflow.com/questions/605696/get-file-name-from-url
+    String isoFile = isoUrl.substring(isoUrl.lastIndexOf('/') + 1, isoUrl.length());
+    imageInfo['iso-url'] = isoUrl
+    imageInfo['iso-file'] = isoFile
+    imageInfo['iso-checksum'] = config['iso-checksum']
+    config['image-info'] = imageInfo
+
+    log.debug("${logPrefix} params=${JsonUtils.printToJsonString(params)}")
+    log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
 
     return config
 }
