@@ -235,15 +235,6 @@ Map loadPipelineConfig(Logger log, Map params) {
     String logPrefix="loadPipelineConfig():"
     Map config = [:]
 
-    // copy immutable params maps to mutable config map
-    params.each { key, value ->
-        log.debug("${logPrefix} params[${key}]=${value}")
-        key= Utilities.decapitalize(key)
-        if (value!="") {
-            config[key]=value
-        }
-    }
-
     config.jenkinsNodeLabel = config.get('jenkinsNodeLabel',"packer")
     config.logLevel = config.get('logLevel', "INFO")
     config.debugPipeline = config.get('debugPipeline', false)
@@ -275,29 +266,28 @@ Map loadPipelineConfig(Logger log, Map params) {
     }
 //    buildTemplateParts.remove(0)
 
-    log.info("buildTemplateParts=${buildTemplateParts}")
+    log.info("${logPrefix} buildTemplateParts=${buildTemplateParts}")
 
     config['build-distribution-config-dir'] = buildTemplateParts[0..-1].join("/")
     config['build-release-config-dir'] = buildTemplateParts.join("/")
 
-    log.info("build-distribution-config-dir=${config['build-distribution-config-dir']}")
-    log.info("build-release-config-dir=${config['build-release-config-dir']}")
+    log.info("${logPrefix} build-distribution-config-dir=${config['build-distribution-config-dir']}")
+    log.info("${logPrefix} build-release-config-dir=${config['build-release-config-dir']}")
 
     List buildTagList = env.BUILD_TAG.split("-")
     buildTagList[-1] = env.BUILD_NUMBER.toString().padLeft(4, '0')
 
     // ref: https://mrhaki.blogspot.com/2011/09/groovy-goodness-take-and-drop-items.html
-    buildTagList = buildTagList.drop(3)
+    buildTagList = buildTagList.drop(config.jobBaseFolderLevel)
     templateBuildTag = buildTagList.join("-")
 
-    log.info("templateBuildTag=${templateBuildTag}")
+    log.info("${logPrefix} templateBuildTag=${templateBuildTag}")
     env.TEMPLATE_BUILD_ID = templateBuildTag
 
-    log.info("env.TEMPLATE_BUILD_ID=${env.TEMPLATE_BUILD_ID}")
-    log.info("env.TEMPLATE_NAME=${env.TEMPLATE_NAME}")
+    log.info("${logPrefix} TEMPLATE_BUILD_ID=${env.TEMPLATE_BUILD_ID}")
+    log.info("${logPrefix} TEMPLATE_NAME=${env.TEMPLATE_NAME}")
 
 //    config['vm_name'] = "${env.TEMPLATE_NAME}"
-    config.logLevel = "INFO"
 
     // from build.sh
     // packer build -only=vmware-iso -var-file=../../../private_vars.json \
@@ -308,7 +298,7 @@ Map loadPipelineConfig(Logger log, Map params) {
 
     Map distBuildConfig = readJSON file: "./${config['build-dir']}/${config['build-distribution-config-dir']}/build-config.json"
     config = MapMerge.merge(config, distBuildConfig.variables)
-    log.info("buildConfig=${JsonUtils.printToJsonString(buildConfig)}")
+    log.info("${logPrefix} buildConfig=${JsonUtils.printToJsonString(buildConfig)}")
 
 //    Map boxInfoConfig = readJSON file: "./${config['build-dir']}/${config['build-release-config-dir']}/box_info.json"
 //    config = MapMerge.merge(config, boxInfoConfig)
@@ -318,7 +308,15 @@ Map loadPipelineConfig(Logger log, Map params) {
 //    config = MapMerge.merge(config, templateConfig)
 //    log.debug("templateConfig=${JsonUtils.printToJsonString(templateConfig)}")
 
-    config = MapMerge.merge(config, params)
+    // copy immutable params maps to mutable config map
+    // config = MapMerge.merge(config, params)
+    params.each { key, value ->
+        log.debug("${logPrefix} params[${key}]=${value}")
+        key= Utilities.decapitalize(key)
+        if (value!="") {
+            config[key]=value
+        }
+    }
 
     Map imageInfo = [:]
     imageInfo['name'] = "${env.JOB_BASE_NAME}"

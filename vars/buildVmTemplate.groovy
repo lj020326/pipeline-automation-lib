@@ -1,4 +1,5 @@
 #!/usr/bin/env groovy
+import com.dettonville.api.pipeline.utils.Utilities
 
 // ref: https://github.com/jenkinsci/packer-plugin/issues/20#issuecomment-469681596
 
@@ -238,4 +239,81 @@ def call(Map params=[:]) {
         }
     }
 
+}
+
+
+//@NonCPS
+Map loadPipelineConfig(Logger log, Map params) {
+    String logPrefix="loadPipelineConfig():"
+    Map config = [:]
+
+    config.jenkinsNodeLabel = config.get('jenkinsNodeLabel',"packer")
+    config.logLevel = config.get('logLevel', "INFO")
+    config.debugPipeline = config.get('debugPipeline', false)
+
+    log.setLevel(config.logLevel)
+
+    if (config.debugPipeline) {
+        log.setLevel(LogLevel.DEBUG)
+    }
+
+    List jobParts = JOB_NAME.split("/")
+    log.info("${logPrefix} jobParts=${jobParts}")
+    config.jobBaseFolderLevel = config.jobBaseFolderLevel ?: 4
+    config['build-dir']="packer_templates"
+
+    List buildTagList = env.BUILD_TAG.split("-")
+    buildTagList[-1] = env.BUILD_NUMBER.toString().padLeft(4, '0')
+
+    // ref: https://mrhaki.blogspot.com/2011/09/groovy-goodness-take-and-drop-items.html
+    buildTagList = buildTagList.drop(config.jobBaseFolderLevel)
+    templateBuildTag = buildTagList.join("-")
+
+    log.info("${logPrefix} templateBuildTag=${templateBuildTag}")
+    env.TEMPLATE_BUILD_ID = templateBuildTag
+
+    log.info("${logPrefix} TEMPLATE_BUILD_ID=${env.TEMPLATE_BUILD_ID}")
+    log.info("${logPrefix} TEMPLATE_NAME=${env.TEMPLATE_NAME}")
+
+    Map buildConfig = readJSON file: "./${config['build-dir']}/builder-config.json"
+    config = MapMerge.merge(config, buildConfig.variables)
+
+    Map buildVars = readJSON file: "./${config['build-dir']}/${env.JOB_BASE_NAME}/build-vars.json"
+    log.debug("buildVars=${JsonUtils.printToJsonString(buildVars)}")
+
+    config = MapMerge.merge(config, buildVars)
+    // copy immutable params maps to mutable config map
+    // config = MapMerge.merge(config, params)
+    params.each { key, value ->
+        log.debug("${logPrefix} params[${key}]=${value}")
+        key= Utilities.decapitalize(key)
+        if (value!="") {
+            config[key]=value
+        }
+    }
+
+//    config['vm_name'] = "${env.TEMPLATE_NAME}"
+
+    Map imageInfo = [:]
+    imageInfo['name'] = "${env.JOB_BASE_NAME}"
+//    imageInfo['iso-url'] = config['iso-url']
+//    imageInfo['iso-file'] = config['iso-file']
+
+    String isoUrl = config['iso-url']
+    // ref: https://stackoverflow.com/questions/605696/get-file-name-from-url
+    String isoFile = isoUrl.substring(isoUrl.lastIndexOf('/') + 1, isoUrl.length());
+    imageInfo['iso-url'] = isoUrl
+    imageInfo['iso-file'] = isoFile
+    imageInfo['iso-checksum'] = config['iso-checksum']
+    config['image-info'] = imageInfo
+
+    log.debug("${logPrefix} params=${JsonUtils.printToJsonString(params)}")
+    log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+
+    return config
+}
+
+String getJenkinsAgentLabel(String jenkinsLabel) {
+    // ref: https://stackoverflow.com/questions/46630168/in-a-declarative-jenkins-pipeline-can-i-set-the-agent-label-dynamically
+    return "${-> println 'Right Now the Jenkins Agent Label Name is ' + jenkinsLabel; return jenkinsLabel}"
 }
