@@ -161,8 +161,8 @@ def call(Map params=[:]) {
                                     -only ${config['build-type']} \
                                     -on-error=abort \
                                     -var-file=build-config.json \
-                                    -var-file=${config['build-release-config-dir']}/box_info.json \
-                                    -var-file=${config['build-release-config-dir']}/template.json \
+                                    -var-file=${config['build-release-config-dir']}/server/box_info.json \
+                                    -var-file=${config['build-release-config-dir']}/server/template.json \
                                     -debug \
                                     ${env.WORKSPACE}/${config['build-dir']}/${config['build-distribution-config-dir']}/build-config.json
                                 """
@@ -259,7 +259,7 @@ Map loadPipelineConfig(Logger log, Map params) {
     log.info("${logPrefix} buildTemplateParts=${buildTemplateParts}")
 
     config['build-distribution-config-dir'] = buildTemplateParts[0..-1].join("/")
-    config['build-release-config-dir'] = buildTemplateParts.join("/") + "/server"
+    config['build-release-config-dir'] = buildTemplateParts.join("/")
 
     log.info("${logPrefix} build-distribution-config-dir=${config['build-distribution-config-dir']}")
     log.info("${logPrefix} build-release-config-dir=${config['build-release-config-dir']}")
@@ -290,13 +290,13 @@ Map loadPipelineConfig(Logger log, Map params) {
     config = MapMerge.merge(config, distBuildConfig.variables)
     log.info("${logPrefix} buildConfig=${JsonUtils.printToJsonString(buildConfig)}")
 
-    Map boxInfoConfig = readJSON file: "./${config['build-dir']}/${config['build-release-config-dir']}/box_info.json"
-    config = MapMerge.merge(config, boxInfoConfig)
-    log.debug("boxInfoConfig=${JsonUtils.printToJsonString(boxInfoConfig)}")
-
-    Map templateConfig = readJSON file: "./${config['build-dir']}/${config['build-release-config-dir']}/template.json"
-    config = MapMerge.merge(config, templateConfig)
-    log.debug("templateConfig=${JsonUtils.printToJsonString(templateConfig)}")
+//    Map boxInfoConfig = readJSON file: "./${config['build-dir']}/${config['build-release-config-dir']}/box_info.json"
+//    config = MapMerge.merge(config, boxInfoConfig)
+//    log.debug("boxInfoConfig=${JsonUtils.printToJsonString(boxInfoConfig)}")
+//
+//    Map templateConfig = readJSON file: "./${config['build-dir']}/${config['build-release-config-dir']}/template.json"
+//    config = MapMerge.merge(config, templateConfig)
+//    log.debug("templateConfig=${JsonUtils.printToJsonString(templateConfig)}")
 
     // copy immutable params maps to mutable config map
     // config = MapMerge.merge(config, params)
