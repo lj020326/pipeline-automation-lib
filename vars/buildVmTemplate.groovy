@@ -16,6 +16,7 @@ def call(Map params=[:]) {
     Logger log = new Logger(this)
     String packerTool = "packer-1.6.2" // Name of Packer Installation
 
+    Map config=[:]
     boolean vmTemplateExists = false
 
 //    Map config=loadPipelineConfig(log, params)
@@ -49,38 +50,8 @@ def call(Map params=[:]) {
             stage("Initialize") {
                 steps {
                     script {
-                        Map config=loadPipelineConfig(log, params)
-
-//                        setPackerEnv()
-//                        log.info("env.TEMPLATE_BUILD_ID=${env.TEMPLATE_BUILD_ID}")
-////                        log.info("env.TEMPLATE_NAME=${env.TEMPLATE_NAME}")
-//                        log.info("env.JOB_BASE_NAME=${env.JOB_BASE_NAME}")
-//
-////                        config['vm-template-name'] = "${env.TEMPLATE_NAME}"
-//                        config.logLevel = "INFO"
-//
-//                        config['build-dir']="packer_templates"
-//
-//                        Map buildConfig = readJSON file: "./${config['build-dir']}/builder-config.json"
-//                        config = MapMerge.merge(config, buildConfig.variables)
-//
-//                        Map buildVars = readJSON file: "./${config['build-dir']}/${env.JOB_BASE_NAME}/build-vars.json"
-//                        log.debug("buildVars=${JsonUtils.printToJsonString(buildVars)}")
-//
-//                        config = MapMerge.merge(config, buildVars)
-//                        config = MapMerge.merge(config, params)
-//
-//                        Map imageInfo = [:]
-//                        imageInfo['name'] = "${env.JOB_BASE_NAME}"
-//                        imageInfo['iso-url'] = config['iso-url']
-//                        imageInfo['iso-file'] = config['iso-file']
-//                        imageInfo['iso-checksum'] = config['iso-checksum']
-//                        config.imageInfo = imageInfo
-//
-//                        log.setLevel(config.logLevel)
-
+                        config=loadPipelineConfig(log, params)
                         log.info("config=${JsonUtils.printToJsonString(config)}")
-
                     }
                 }
             }
@@ -276,13 +247,12 @@ Map loadPipelineConfig(Logger log, Map params) {
         log.error("${message}")
         throw message
     }
-    log.info("${logPrefix} HERE1")
 
     buildVarsFile = "./${config['build-dir']}/${env.JOB_BASE_NAME}/build-vars.json"
     if (fileExists(buildVarsFile)) {
         Map buildVars = readJSON file: buildVarsFile
         config = MapMerge.merge(config, buildVars)
-        log.info("${logPrefix} buildVars=${JsonUtils.printToJsonString(buildVars)}")
+        log.debug("${logPrefix} buildVars=${JsonUtils.printToJsonString(buildVars)}")
     } else {
         String message = "${logPrefix} buildVarsFile [${buildVarsFile}] not found"
         log.error("${message}")
@@ -309,8 +279,6 @@ Map loadPipelineConfig(Logger log, Map params) {
         log.setLevel(LogLevel.DEBUG)
     }
 
-    log.info("${logPrefix} HERE2")
-
 //    config['vm_name'] = "${env.TEMPLATE_NAME}"
 
     Map imageInfo = [:]
@@ -327,7 +295,7 @@ Map loadPipelineConfig(Logger log, Map params) {
     config['image-info'] = imageInfo
 
     log.debug("${logPrefix} params=${JsonUtils.printToJsonString(params)}")
-    log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.debug("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
 
     return config
 }
