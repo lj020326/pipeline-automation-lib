@@ -147,9 +147,6 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.jenkinsNodeLabel = config.get('jenkinsNodeLabel',"ansible")
     config.logLevel = config.get('logLevel', "INFO")
     config.debugPipeline = config.get('debugPipeline', false)
-    config.continueIfFailed = config.get('continueIfFailed', false)
-    config.wait = config.get('wait', true)
-    config.failFast = config.get('failFast', false)
 
     log.setLevel(config.logLevel)
 

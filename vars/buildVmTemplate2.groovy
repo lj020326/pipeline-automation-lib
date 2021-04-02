@@ -1,4 +1,5 @@
 #!/usr/bin/env groovy
+import com.dettonville.api.pipeline.utils.Utilities
 
 // ref: https://github.com/jenkinsci/packer-plugin/issues/20#issuecomment-469681596
 
@@ -18,13 +19,19 @@ def call(Map params=[:]) {
 
     boolean vmTemplateExists = false
 
+    Map config=loadPipelineConfig(log, params)
+    String agentLabel = getJenkinsAgentLabel(config.jenkinsNodeLabel)
+
     pipeline {
 
-//        agent any
         agent {
-//            label "docker"
-            label "packer"
+            label agentLabel as String
         }
+////        agent any
+//        agent {
+////            label "docker"
+//            label "packer"
+//        }
 
         tools {
             "biz.neustar.jenkins.plugins.packer.PackerInstallation" "$packerTool"
@@ -301,4 +308,39 @@ def call(Map params=[:]) {
         }
     }
 
+}
+
+//@NonCPS
+Map loadPipelineConfig(Logger log, Map params) {
+    String logPrefix="loadPipelineConfig():"
+    Map config = [:]
+
+    // copy immutable params maps to mutable config map
+    params.each { key, value ->
+        log.debug("${logPrefix} params[${key}]=${value}")
+        key= Utilities.decapitalize(key)
+        if (value!="") {
+            config[key]=value
+        }
+    }
+
+    config.jenkinsNodeLabel = config.get('jenkinsNodeLabel',"packer")
+    config.logLevel = config.get('logLevel', "INFO")
+    config.debugPipeline = config.get('debugPipeline', false)
+
+    log.setLevel(config.logLevel)
+
+    if (config.debugPipeline) {
+        log.setLevel(LogLevel.DEBUG)
+    }
+
+    log.debug("${logPrefix} params=${params}")
+    log.debug("${logPrefix} config=${config}")
+
+    return config
+}
+
+String getJenkinsAgentLabel(String jenkinsLabel) {
+    // ref: https://stackoverflow.com/questions/46630168/in-a-declarative-jenkins-pipeline-can-i-set-the-agent-label-dynamically
+    return "${-> println 'Right Now the Jenkins Agent Label Name is ' + jenkinsLabel; return jenkinsLabel}"
 }
