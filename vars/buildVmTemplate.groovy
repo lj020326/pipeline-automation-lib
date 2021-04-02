@@ -267,15 +267,14 @@ Map loadPipelineConfig(Logger log, Map params) {
     env.TEMPLATE_BUILD_ID = templateBuildTag
 
     log.info("${logPrefix} TEMPLATE_BUILD_ID=${env.TEMPLATE_BUILD_ID}")
-    log.info("${logPrefix} TEMPLATE_NAME=${env.TEMPLATE_NAME}")
 
     Map buildConfig = readJSON file: "./${config['build-dir']}/builder-config.json"
     config = MapMerge.merge(config, buildConfig.variables)
 
     Map buildVars = readJSON file: "./${config['build-dir']}/${env.JOB_BASE_NAME}/build-vars.json"
-    log.debug("buildVars=${JsonUtils.printToJsonString(buildVars)}")
-
     config = MapMerge.merge(config, buildVars)
+    log.info("${logPrefix} buildVars=${JsonUtils.printToJsonString(buildVars)}")
+
     // copy immutable params maps to mutable config map
     // config = MapMerge.merge(config, params)
     params.each { key, value ->
@@ -295,6 +294,8 @@ Map loadPipelineConfig(Logger log, Map params) {
     if (config.debugPipeline) {
         log.setLevel(LogLevel.DEBUG)
     }
+
+    log.info("${logPrefix} HERE1")
 
 //    config['vm_name'] = "${env.TEMPLATE_NAME}"
 
