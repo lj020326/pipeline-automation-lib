@@ -98,8 +98,8 @@ def call(Map params=[:]) {
                               fetch-osimages.yml
                             """
 
-//                            sh "govc datastore.upload -ds=${config.vm_remote_cache_datastore} /data/osimages/${config['iso-file']} ${config.vm_iso_file_dir}/${config['iso-file']}"
-//                            sh "cp -np /data/osimages/${config['iso-file']} /vmware/${config.vm_iso_file_dir}/"
+//                            sh "govc datastore.upload -ds=${config.vm_remote_cache_datastore} /data/osimages/${config.iso_file} ${config.vm_iso_file_dir}/${config.iso_file}"
+//                            sh "cp -np /data/osimages/${config.iso_file} /vmware/${config.vm_iso_file_dir}/"
                         }
                     }
                 }
@@ -107,7 +107,7 @@ def call(Map params=[:]) {
 
             stage("Run Packer to build template") {
                 when {
-                    expression { !vmTemplateExists && !config["skip-packer-build"]?.toBoolean() }
+                    expression { !vmTemplateExists && !config.skip_packer_build?.toBoolean() }
                 }
                 environment {
                     GOVC_URL = "${config.vcenter_host}"
@@ -124,7 +124,7 @@ def call(Map params=[:]) {
 
                             // ref: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html-single/installation_guide/index#s2-kickstart2-boot-media
                             // ref: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html-single/installation_guide/index#s2-kickstart2-networkbased
-                            if (config["build-type"] == "vsphere-iso-nfs") {
+                            if (config.build_type == "vsphere-iso-nfs") {
                                 sh "cp -p ${config.vm_init_file} ${config.vm_init_dir}/${config.vm_init_file}"
                             }
 
@@ -171,7 +171,7 @@ def call(Map params=[:]) {
 //            stage("Deploy Template to $config.vm_template_datastore $config.vm_template_folder") {
             stage("Deploy Template") {
                 when {
-                    expression { !vmTemplateExists && !config["skip-packer-build"]?.toBoolean() }
+                    expression { !vmTemplateExists && !config.skip_packer_build?.toBoolean() }
                 }
                 environment {
                     GOVC_URL = "${config.vcenter_host}"
