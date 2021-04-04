@@ -63,7 +63,7 @@ def call(Map params=[:]) {
                         log.info("checking if template already exists...")
                         withCredentials([usernamePassword(credentialsId: 'dcapi-govc-cred', passwordVariable: 'GOVC_PASSWORD', usernameVariable: 'GOVC_USERNAME')]) {
                             sh "govc vm.info ${config.vm_name}"
-//                            sh "govc -u=${config['vcenter-host']} vm.info ${config.vm_name}"
+//                            sh "govc -u=${config.vcenter_host} vm.info ${config.vm_name}"
                             vmTemplateExists = sh(script: "govc vm.info ${config.vm_name} | grep 'UUID:'", returnStatus: true) == 0
                         }
                         log.info("initial check if template already exists=>${vmTemplateExists}")
@@ -81,20 +81,20 @@ def call(Map params=[:]) {
                     expression { !vmTemplateExists }
                 }
                 environment {
-                    GOVC_URL = "${config['vcenter-host']}"
+                    GOVC_URL = "${config.vcenter_host}"
                 }
 
                 steps {
                     script {
 //                        String govcCmd = "govc datastore.ls -ds=${config.vm_remote_cache_datastore} ${config.vm_iso_file_dir} | grep ${config.iso_file}"
 //                        boolean imageExists = sh(script: govcCmd, returnStatus: true)==0
-                        boolean imageExists = sh(script: "ls -Fla ${config.vm_data_dir}/${config.vm_iso_file_dir}/ | grep ${config['iso_file']} ", returnStatus: true)==0
+                        boolean imageExists = sh(script: "ls -Fla ${config.vm_data_dir}/${config.vm_iso_file_dir}/ | grep ${config.iso_file} ", returnStatus: true)==0
 
                         if (!imageExists) {
                             sh """
                             ansible-playbook \
                               --inventory-file localhost, \
-                              -e fetch_images='"[${JsonOutput.toJson(config['image-info'])}]"' \
+                              -e fetch_images='"[${JsonOutput.toJson(config.image_info)}]"' \
                               fetch-osimages.yml
                             """
 
@@ -110,17 +110,17 @@ def call(Map params=[:]) {
                     expression { !vmTemplateExists && !config["skip-packer-build"]?.toBoolean() }
                 }
                 environment {
-                    GOVC_URL = "${config['vcenter-host']}"
+                    GOVC_URL = "${config.vcenter_host}"
                 }
 
                 steps {
 
                     script {
 
-//                        dir("${env.WORKSPACE}/${config['build-dir']}/${env.JOB_BASE_NAME}") {
-//                        dir("${env.WORKSPACE}/${config['build-dir']}/${config.build_release_config_dir}") {
-//                        dir("${env.WORKSPACE}/${config['build-dir']}") {
-                        dir("${config['build-dir']}") {
+//                        dir("${env.WORKSPACE}/${config.build_dir}/${env.JOB_BASE_NAME}") {
+//                        dir("${env.WORKSPACE}/${config.build_dir}/${config.build_release_config_dir}") {
+//                        dir("${env.WORKSPACE}/${config.build_dir}") {
+                        dir("${config.build_dir}") {
 
                             // ref: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html-single/installation_guide/index#s2-kickstart2-boot-media
                             // ref: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html-single/installation_guide/index#s2-kickstart2-networkbased
@@ -153,13 +153,13 @@ def call(Map params=[:]) {
                                 // ref: https://github.com/hashicorp/packer/pull/7184
                                 sh """
                                 ${tool packerTool}/packer build \
-                                    -only ${config['build-type']} \
+                                    -only ${config.build_type} \
                                     -on-error=abort \
                                     -var-file=common-vars.json \
                                     -var-file=${config.build_release_config_dir}/box_info.json \
                                     -var-file=${config.build_release_config_dir}/template.json \
                                     -debug \
-                                    ${env.WORKSPACE}/${config['build-dir']}/${config.build_distribution_config_dir}/build-config.json
+                                    ${env.WORKSPACE}/${config.build_dir}/${config.build_distribution_config_dir}/build-config.json
                                 """
                             }
 
@@ -174,7 +174,7 @@ def call(Map params=[:]) {
                     expression { !vmTemplateExists && !config["skip-packer-build"]?.toBoolean() }
                 }
                 environment {
-                    GOVC_URL = "${config['vcenter-host']}"
+                    GOVC_URL = "${config.vcenter_host}"
                 }
 
                 steps {
