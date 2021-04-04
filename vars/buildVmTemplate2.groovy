@@ -243,9 +243,9 @@ Map loadPipelineConfig(Logger log, Map params) {
 //    int endIdx = jobParts.size() - 2
 
 //    config.build_distribution = jobParts[config.jobBaseFolderLevel]
-    config.build_distribution = jobParts[-3]
-    config.build_release = jobParts[-2]
-//    config.build_type = jobParts[-1]
+    config.build_distribution = jobParts[0]
+    config.build_release = jobParts[1]
+//    config.build_type = jobParts[2]
     config.build_type = "vsphere-iso"
 
     log.info("${logPrefix} build_distribution=${config.build_distribution}")
