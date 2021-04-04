@@ -297,11 +297,11 @@ Map loadPipelineConfig(Logger log, Map params) {
 
     Map boxInfoVars = readJSON file: "./${config.build_dir}/${config.build_release_config_dir}/box_info.json"
     config = MapMerge.merge(config, boxInfoVars)
-    log.debug("boxInfoVars=${JsonUtils.printToJsonString(boxInfoVars)}")
+    log.info("boxInfoVars=${JsonUtils.printToJsonString(boxInfoVars)}")
 
     Map templateVars = readJSON file: "./${config.build_dir}/${config.build_release_config_dir}/template.json"
     config = MapMerge.merge(config, templateVars)
-    log.debug("templateConfig=${JsonUtils.printToJsonString(templateVars)}")
+    log.info("templateConfig=${JsonUtils.printToJsonString(templateVars)}")
 
     // copy immutable params maps to mutable config map
     // config = MapMerge.merge(config, params)
