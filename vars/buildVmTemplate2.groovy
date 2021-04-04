@@ -16,21 +16,18 @@ def call(Map params=[:]) {
     Logger log = new Logger(this)
     String packerTool = "packer-1.6.2" // Name of Packer Installation
 
+    Map config=[:]
     boolean vmTemplateExists = false
 
-    Map config=loadPipelineConfig(log, params)
-    String agentLabel = getJenkinsAgentLabel(config.jenkinsNodeLabel)
+//    Map config=loadPipelineConfig(log, params)
+//    String agentLabel = getJenkinsAgentLabel(config.jenkinsNodeLabel)
 
     pipeline {
 
         agent {
-            label agentLabel as String
+//            label agentLabel as String
+            label "packer"
         }
-////        agent any
-//        agent {
-////            label "docker"
-//            label "packer"
-//        }
 
         tools {
             "biz.neustar.jenkins.plugins.packer.PackerInstallation" "$packerTool"
@@ -48,18 +45,14 @@ def call(Map params=[:]) {
 
         stages {
 
-//            stage("Initialize") {
-//                steps {
-//                    script {
-////                        setPackerEnv()
-//
-//                        log.info("JOB_BASE=${env.JOB_NAME}")
-//                        log.info("JOB_BASE_NAME=${env.JOB_BASE_NAME}")
-//                        log.info("BUILD_TAG=${env.BUILD_TAG}")
-//
-//                    }
-//                }
-//            }
+            stage("Initialize") {
+                steps {
+                    script {
+                        config=loadPipelineConfig(log, params)
+                        log.info("config=${JsonUtils.printToJsonString(config)}")
+                    }
+                }
+            }
 
             stage("Pre-check if template already exists") {
                 environment {
@@ -149,8 +142,11 @@ def call(Map params=[:]) {
                             withCredentials(secretVars) {
 
                                 // from build.sh
-                                // packer build -only=vmware-iso -var-file=../../../private_vars.json \
-                                //  -var-file=box_info.json -var-file=template.json ../../build-config.json
+                                // packer build -only=vmware-iso \
+                                //   -var-file=../../../common-vars.json \
+                                //   -var-file=box_info.json \
+                                //   -var-file=template.json \
+                                //   ../../build-config.json
 
                                 // ref: https://vsupalov.com/packer-ami/
                                 // ref: https://blog.deimos.fr/2015/01/16/packer-build-multiple-images-easily/
@@ -159,7 +155,7 @@ def call(Map params=[:]) {
                                 ${tool packerTool}/packer build \
                                     -only ${config['build-type']} \
                                     -on-error=abort \
-                                    -var-file=build-config.json \
+                                    -var-file=common-vars.json \
                                     -var-file=${config.build_release_config_dir}/box_info.json \
                                     -var-file=${config.build_release_config_dir}/template.json \
                                     -debug \
@@ -237,7 +233,7 @@ Map loadPipelineConfig(Logger log, Map params) {
     List jobParts = JOB_NAME.split("/")
     log.info("${logPrefix} jobParts=${jobParts}")
     config.jobBaseFolderLevel = config.jobBaseFolderLevel ?: 4
-    config.build_dir="packer_templates_bento"
+    config.build_dir="packer_templates_new"
 
     int startIdx = config.jobBaseFolderLevel + 1
 //    int endIdx = jobParts.size() - 1
@@ -274,28 +270,39 @@ Map loadPipelineConfig(Logger log, Map params) {
     env.TEMPLATE_BUILD_ID = templateBuildTag
 
     log.info("${logPrefix} TEMPLATE_BUILD_ID=${env.TEMPLATE_BUILD_ID}")
-    log.info("${logPrefix} TEMPLATE_NAME=${env.TEMPLATE_NAME}")
 
-//    config.vm_name = "${env.TEMPLATE_NAME}"
+    log.info("${logPrefix} loading build config")
 
     // from build.sh
-    // packer build -only=vmware-iso -var-file=../../../private_vars.json \
-    //  -var-file=box_info.json -var-file=template.json ../../build-config.json
+    // packer build -only=vmware-iso \
+    //   -var-file=../../../common-vars.json \
+    //   -var-file=box_info.json \
+    //   -var-file=template.json \
+    //   ../../build-config.json
 
-    Map buildConfig = readJSON file: "./${config.build_dir}/build-config.json"
-    config = MapMerge.merge(config, buildConfig.variables)
+    String buildConfigFile = readJSON file: "./${config.build_dir}/${config.build_distribution_config_dir}/build-config.json"
+    if (fileExists(buildConfigFile)) {
+        Map buildConfig = readJSON file: buildConfigFile
+        config = MapMerge.merge(config, buildConfig.variables)
+    } else {
+        String message = "${logPrefix} buildConfigFile [${buildConfigFile}] not found"
+        log.error("${message}")
+        throw message
+    }
 
-    Map distBuildConfig = readJSON file: "./${config.build_dir}/${config.build_distribution_config_dir}/build-config.json"
-    config = MapMerge.merge(config, distBuildConfig.variables)
-    log.info("${logPrefix} buildConfig=${JsonUtils.printToJsonString(buildConfig)}")
+    log.info("${logPrefix} loading common and build vars")
 
-    Map boxInfoConfig = readJSON file: "./${config.build_dir}/${config.build_release_config_dir}/box_info.json"
-    config = MapMerge.merge(config, boxInfoConfig)
-    log.debug("boxInfoConfig=${JsonUtils.printToJsonString(boxInfoConfig)}")
+    Map commonVars = readJSON file: "./${config.build_dir}/common-vars.json"
+    config = MapMerge.merge(config, commonVars)
+    log.info("${logPrefix} commonVars=${JsonUtils.printToJsonString(commonVars)}")
 
-    Map templateConfig = readJSON file: "./${config.build_dir}/${config.build_release_config_dir}/template.json"
-    config = MapMerge.merge(config, templateConfig)
-    log.debug("templateConfig=${JsonUtils.printToJsonString(templateConfig)}")
+    Map boxInfoVars = readJSON file: "./${config.build_dir}/${config.build_release_config_dir}/box_info.json"
+    config = MapMerge.merge(config, boxInfoVars)
+    log.debug("boxInfoVars=${JsonUtils.printToJsonString(boxInfoVars)}")
+
+    Map templateVars = readJSON file: "./${config.build_dir}/${config.build_release_config_dir}/template.json"
+    config = MapMerge.merge(config, templateVars)
+    log.debug("templateConfig=${JsonUtils.printToJsonString(templateVars)}")
 
     // copy immutable params maps to mutable config map
     // config = MapMerge.merge(config, params)
@@ -319,8 +326,6 @@ Map loadPipelineConfig(Logger log, Map params) {
 
     Map imageInfo = [:]
     imageInfo['name'] = "${env.JOB_BASE_NAME}"
-    //                        imageInfo['iso-url'] = config.iso_url
-    //                        imageInfo['iso-file'] = config.iso_file
 
     String isoUrl = config.iso_url
     // ref: https://stackoverflow.com/questions/605696/get-file-name-from-url
@@ -332,7 +337,7 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.image_info = imageInfo
 
     log.debug("${logPrefix} params=${JsonUtils.printToJsonString(params)}")
-    log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.debug("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
 
     return config
 }

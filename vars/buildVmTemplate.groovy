@@ -24,10 +24,8 @@ def call(Map params=[:]) {
 
     pipeline {
 
-//        agent {
-//            label agentLabel as String
-//        }
         agent {
+//            label agentLabel as String
             label "packer"
         }
 
@@ -238,7 +236,7 @@ Map loadPipelineConfig(Logger log, Map params) {
 
     log.info("${logPrefix} TEMPLATE_BUILD_ID=${env.TEMPLATE_BUILD_ID}")
 
-    buildConfigFile = "./${config['build-dir']}/builder-config.json"
+    String buildConfigFile = "./${config['build-dir']}/builder-config.json"
     if (fileExists(buildConfigFile)) {
         Map buildConfig = readJSON file: buildConfigFile
         config = MapMerge.merge(config, buildConfig.variables)
@@ -248,7 +246,7 @@ Map loadPipelineConfig(Logger log, Map params) {
         throw message
     }
 
-    buildVarsFile = "./${config['build-dir']}/${env.JOB_BASE_NAME}/build-vars.json"
+    String buildVarsFile = "./${config['build-dir']}/${env.JOB_BASE_NAME}/build-vars.json"
     if (fileExists(buildVarsFile)) {
         Map buildVars = readJSON file: buildVarsFile
         config = MapMerge.merge(config, buildVars)
@@ -279,12 +277,8 @@ Map loadPipelineConfig(Logger log, Map params) {
         log.setLevel(LogLevel.DEBUG)
     }
 
-//    config['vm_name'] = "${env.TEMPLATE_NAME}"
-
     Map imageInfo = [:]
     imageInfo['name'] = "${env.JOB_BASE_NAME}"
-//    imageInfo['iso-url'] = config['iso-url']
-//    imageInfo['iso-file'] = config['iso-file']
 
     String isoUrl = config['iso-url']
     // ref: https://stackoverflow.com/questions/605696/get-file-name-from-url
