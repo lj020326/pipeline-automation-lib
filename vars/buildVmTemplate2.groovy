@@ -232,36 +232,30 @@ Map loadPipelineConfig(Logger log, Map params) {
 
     List jobParts = JOB_NAME.split("/")
     log.info("${logPrefix} jobParts=${jobParts}")
-    config.jobBaseFolderLevel = config.jobBaseFolderLevel ?: 2
+    config.jobBaseFolderLevel = config.jobBaseFolderLevel ?: 3
     config.build_dir="packer_templates_new"
 
     jobParts = jobParts.drop(config.jobBaseFolderLevel)
     log.info("${logPrefix} jobParts[after drop]=${jobParts}")
 
-    int startIdx = config.jobBaseFolderLevel + 1
-//    int endIdx = jobParts.size() - 1
-    int endIdx = jobParts.size() - 2
+//    int startIdx = config.jobBaseFolderLevel + 1
+////    int endIdx = jobParts.size() - 1
+//    int endIdx = jobParts.size() - 2
 
 //    config.build_distribution = jobParts[config.jobBaseFolderLevel]
     config.build_distribution = jobParts[-3]
     config.build_release = jobParts[-2]
-    config.build_type = jobParts[-1]
+//    config.build_type = jobParts[-1]
+    config.build_type = "vsphere-iso"
 
-    //    String[] buildTemplateParts = jobParts[startIdx..<jobParts.size()-1]
-    List buildTemplateParts = []
-    for (int i = startIdx; i < endIdx; i++) {
-        buildTemplateParts.add(jobParts[i])
-    }
-//    buildTemplateParts.remove(0)
+    log.info("${logPrefix} build_distribution=${config.build_distribution}")
+    log.info("${logPrefix} build_release=${config.build_release}")
 
-    log.info("${logPrefix} buildTemplateParts=${buildTemplateParts}")
+    config.build_distribution_config_dir = config.build_distribution
+    config.build_release_config_dir = jobParts.join("/") + "/server"
 
-//    config.build_distribution_config_dir = buildTemplateParts[0..-1].join("/")
-    config.build_distribution_config_dir = buildTemplateParts.join("/")
-    config.build_release_config_dir = buildTemplateParts.join("/") + "/server"
-
-    log.info("${logPrefix} build-distribution-config-dir=${config.build_distribution_config_dir}")
-    log.info("${logPrefix} build-release-config-dir=${config.build_release_config_dir}")
+    log.info("${logPrefix} build_distribution_config_dir=${config.build_distribution_config_dir}")
+    log.info("${logPrefix} build_release_config_dir=${config.build_release_config_dir}")
 
     log.info("${logPrefix} BUILD_TAG=${BUILD_TAG}")
     List buildTagList = env.BUILD_TAG.split("-")
