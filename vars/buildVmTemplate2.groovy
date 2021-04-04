@@ -232,8 +232,11 @@ Map loadPipelineConfig(Logger log, Map params) {
 
     List jobParts = JOB_NAME.split("/")
     log.info("${logPrefix} jobParts=${jobParts}")
-    config.jobBaseFolderLevel = config.jobBaseFolderLevel ?: 4
+    config.jobBaseFolderLevel = config.jobBaseFolderLevel ?: 2
     config.build_dir="packer_templates_new"
+
+    jobParts = jobParts.drop(config.jobBaseFolderLevel)
+    log.info("${logPrefix} jobParts[after drop]=${jobParts}")
 
     int startIdx = config.jobBaseFolderLevel + 1
 //    int endIdx = jobParts.size() - 1
@@ -253,12 +256,14 @@ Map loadPipelineConfig(Logger log, Map params) {
 
     log.info("${logPrefix} buildTemplateParts=${buildTemplateParts}")
 
-    config.build_distribution_config_dir = buildTemplateParts[0..-1].join("/")
+//    config.build_distribution_config_dir = buildTemplateParts[0..-1].join("/")
+    config.build_distribution_config_dir = buildTemplateParts.join("/")
     config.build_release_config_dir = buildTemplateParts.join("/") + "/server"
 
     log.info("${logPrefix} build-distribution-config-dir=${config.build_distribution_config_dir}")
     log.info("${logPrefix} build-release-config-dir=${config.build_release_config_dir}")
 
+    log.info("${logPrefix} BUILD_TAG=${BUILD_TAG}")
     List buildTagList = env.BUILD_TAG.split("-")
     buildTagList[-1] = env.BUILD_NUMBER.toString().padLeft(4, '0')
 

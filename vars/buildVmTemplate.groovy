@@ -224,6 +224,7 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.jobBaseFolderLevel = config.jobBaseFolderLevel ?: 4
     config['build-dir']="packer_templates"
 
+    log.info("${logPrefix} BUILD_TAG=${BUILD_TAG}")
     List buildTagList = env.BUILD_TAG.split("-")
     buildTagList[-1] = env.BUILD_NUMBER.toString().padLeft(4, '0')
 
