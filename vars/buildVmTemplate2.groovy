@@ -247,7 +247,8 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.build_distribution = jobParts[0]
     config.build_release = jobParts[1]
 //    config.build_type = jobParts[2]
-    config.build_type = "vsphere-iso"
+//    config.build_type = "vsphere-iso"
+    config.build_type = "vmware-iso-new"
 
     log.info("${logPrefix} build_distribution=${config.build_distribution}")
     log.info("${logPrefix} build_release=${config.build_release}")
