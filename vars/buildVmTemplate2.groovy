@@ -156,6 +156,7 @@ def call(Map params=[:]) {
                                     -only ${config.build_type} \
                                     -on-error=abort \
                                     -var-file=common-vars.json \
+                                    -var-file=${config.build_distribution_config_dir}/distribution-vars.json \
                                     -var-file=${config.build_release_config_dir}/box_info.json \
                                     -var-file=${config.build_release_config_dir}/template.json \
                                     -debug \
