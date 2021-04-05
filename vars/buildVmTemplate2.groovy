@@ -86,9 +86,9 @@ def call(Map params=[:]) {
 
                 steps {
                     script {
-//                        String govcCmd = "govc datastore.ls -ds=${config.vm_remote_cache_datastore} ${config.iso_file_dir} | grep ${config.iso_file}"
+//                        String govcCmd = "govc datastore.ls -ds=${config.vm_remote_cache_datastore} ${config.iso_base_dir}/${config.iso_dir} | grep ${config.iso_file}"
 //                        boolean imageExists = sh(script: govcCmd, returnStatus: true)==0
-                        boolean imageExists = sh(script: "ls -Fla ${config.vm_data_dir}/${config.iso_file_dir}/ | grep ${config.iso_file} ", returnStatus: true)==0
+                        boolean imageExists = sh(script: "ls -Fla ${config.vm_data_dir}/${config.iso_base_dir}/${config.iso_dir}/ | grep ${config.iso_file} ", returnStatus: true)==0
 
                         if (!imageExists) {
                             sh """
@@ -98,8 +98,8 @@ def call(Map params=[:]) {
                               fetch-osimages.yml
                             """
 
-//                            sh "govc datastore.upload -ds=${config.vm_remote_cache_datastore} /data/osimages/${config.iso_file} ${config.iso_file_dir}/${config.iso_file}"
-//                            sh "cp -np /data/osimages/${config.iso_file} /vmware/${config.iso_file_dir}/"
+//                            sh "govc datastore.upload -ds=${config.vm_remote_cache_datastore} /data/osimages/${config.iso_file} ${config.iso_base_dir}/${config.iso_dir}/${config.iso_file}"
+//                            sh "cp -np /data/osimages/${config.iso_file} /vmware/${config.iso_base_dir}/${config.iso_dir}/"
                         }
                     }
                 }

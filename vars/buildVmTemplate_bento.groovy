@@ -96,7 +96,7 @@ def call(Map params=[:]) {
                     script {
 //                        String govcCmd = "govc datastore.ls -ds=${config['vm-remote-cache-datastore']} ${config['vm-iso-file-dir']} | grep ${config['iso-file']}"
 //                        boolean imageExists = sh(script: govcCmd, returnStatus: true)==0
-                        boolean imageExists = sh(script: "ls -Fla ${config['vm_data_dir']}/${config['iso_file_dir']}/ | grep ${config['iso-file']} ", returnStatus: true)==0
+                        boolean imageExists = sh(script: "ls -Fla ${config['vm_data_dir']}/${config['iso_base_dir']}/ | grep ${config['iso-file']} ", returnStatus: true)==0
 
                         if (!imageExists) {
                             sh """
