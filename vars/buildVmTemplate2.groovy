@@ -62,9 +62,9 @@ def call(Map params=[:]) {
                     script {
                         log.info("checking if template already exists...")
                         withCredentials([usernamePassword(credentialsId: 'dcapi-govc-cred', passwordVariable: 'GOVC_PASSWORD', usernameVariable: 'GOVC_USERNAME')]) {
-                            sh "govc vm.info ${config.vm_template_name}"
-//                            sh "govc -u=${config.vcenter_host} vm.info ${config.vm_template_name}"
-                            vmTemplateExists = sh(script: "govc vm.info ${config.vm_template_name} | grep 'UUID:'", returnStatus: true) == 0
+                            sh "govc vm.info ${config.vm_name}"
+//                            sh "govc -u=${config.vcenter_host} vm.info ${config.vm_name}"
+                            vmTemplateExists = sh(script: "govc vm.info ${config.vm_name} | grep 'UUID:'", returnStatus: true) == 0
                         }
                         log.info("initial check if template already exists=>${vmTemplateExists}")
 
@@ -183,19 +183,19 @@ def call(Map params=[:]) {
 
                         withCredentials([usernamePassword(credentialsId: 'dcapi-govc-cred', passwordVariable: 'GOVC_PASSWORD', usernameVariable: 'GOVC_USERNAME')]) {
 
-                            sh "govc vm.info ${config.vm_template_name}"
-                            vmTemplateExists = sh(script: "govc vm.info ${config.vm_template_name} | grep 'UUID:'", returnStatus: true) == 0
+                            sh "govc vm.info ${config.vm_name}"
+                            vmTemplateExists = sh(script: "govc vm.info ${config.vm_name} | grep 'UUID:'", returnStatus: true) == 0
                             log.info("vmTemplateExists=${vmTemplateExists}")
 
                             if (vmTemplateExists) {
-                                log.info("destroying existing template ${config.vm_template_name}")
-                                sh "govc vm.destroy ${config.vm_template_name}"
+                                log.info("destroying existing template ${config.vm_name}")
+                                sh "govc vm.destroy ${config.vm_name}"
                             }
 
-//                            sh "govc vm.clone -ds=${config.vm_template-datastore']} -vm=${env.TEMPLATE_BUILD_ID} -pool=/johnsondc/host/${config.vm_template_host}/Resources -folder=${config.vm_template_folder} -template ${config.vm_template_name} >/dev/null"
-                            sh "govc vm.clone -ds=${config.vm_template_datastore} -vm=${env.TEMPLATE_BUILD_ID} -host=${config.vm_template_host} -folder=${config.vm_template_folder} -template ${config.vm_template_name} >/dev/null"
+//                            sh "govc vm.clone -ds=${config.vm_template-datastore']} -vm=${env.TEMPLATE_BUILD_ID} -pool=/johnsondc/host/${config.vm_template_host}/Resources -folder=${config.vm_template_folder} -template ${config.vm_name} >/dev/null"
+                            sh "govc vm.clone -ds=${config.vm_template_datastore} -vm=${env.TEMPLATE_BUILD_ID} -host=${config.vm_template_host} -folder=${config.vm_template_folder} -template ${config.vm_name} >/dev/null"
 
-                            String getVmPathCmd = "govc vm.info -json ${config.vm_template_name} | jq '.. |.Config?.VmPathName? | select(. != null)'"
+                            String getVmPathCmd = "govc vm.info -json ${config.vm_name} | jq '.. |.Config?.VmPathName? | select(. != null)'"
                             sh "${getVmPathCmd}"
                             String vmPath = sh(script: "${getVmPathCmd}", returnStdout: true).replaceAll('"',"")
 //                            String vmDatastore = vmPath.split("/")[-1].replaceAll('([|])+','')
@@ -209,9 +209,9 @@ def call(Map params=[:]) {
 
                             if (vmPath != targetPath) {
                                 log.info("moving VM from '${vmPath}' to '${targetPath}'")
-                                sh "govc vm.unregister ${config.vm_template_name}"
-                                sh "govc datastore.mv -ds=${config.vm_template_datastore} ${config.vm_template_name} ${config.vm_template_folder}/${config.vm_template_name}"
-                                sh "govc vm.register -template=true -ds=${config.vm_template_datastore} -folder=${config.vm_template_folder} -host=${config.vm_template_host} ${config.vm_template_folder}/${config.vm_template_name}/${config.vm_template_name}.vmtx"
+                                sh "govc vm.unregister ${config.vm_name}"
+                                sh "govc datastore.mv -ds=${config.vm_template_datastore} ${config.vm_name} ${config.vm_template_folder}/${config.vm_name}"
+                                sh "govc vm.register -template=true -ds=${config.vm_template_datastore} -folder=${config.vm_template_folder} -host=${config.vm_template_host} ${config.vm_template_folder}/${config.vm_name}/${config.vm_name}.vmtx"
                             }
                             sh "govc datastore.ls -ds=${config.vm_template_datastore} ${config.vm_template_folder}"
                             log.info("removing temporary template build ${env.TEMPLATE_BUILD_ID}")
