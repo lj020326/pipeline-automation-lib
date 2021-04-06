@@ -149,7 +149,7 @@ def call(Map params=[:]) {
                                     -var-file=common-vars.json \
                                     -var-file=build-vars.json \
                                     -debug \
-                                    ${env.WORKSPACE}/${config['build-dir']}/build-config.json
+                                    ${env.WORKSPACE}/${config.build_dir}/build-config.json
                                 """
                             }
 
@@ -164,7 +164,7 @@ def call(Map params=[:]) {
                     expression { !vmTemplateExists && !config.skip_packer_build?.toBoolean() }
                 }
                 environment {
-                    GOVC_URL = "${config['vcenter-host']}"
+                    GOVC_URL = "${config.vcenter_host}"
                 }
 
                 steps {
@@ -172,19 +172,19 @@ def call(Map params=[:]) {
 
                         withCredentials([usernamePassword(credentialsId: 'dcapi-govc-cred', passwordVariable: 'GOVC_PASSWORD', usernameVariable: 'GOVC_USERNAME')]) {
 
-                            sh "govc vm.info ${config['vm-template-name']}"
-                            vmTemplateExists = sh(script: "govc vm.info ${config['vm-template-name']} | grep 'UUID:'", returnStatus: true) == 0
+                            sh "govc vm.info ${config.vm_template_name}"
+                            vmTemplateExists = sh(script: "govc vm.info ${config.vm_template_name} | grep 'UUID:'", returnStatus: true) == 0
                             log.info("vmTemplateExists=${vmTemplateExists}")
 
                             if (vmTemplateExists) {
-                                log.info("destroying existing template ${config['vm-template-name']}")
-                                sh "govc vm.destroy ${config['vm-template-name']}"
+                                log.info("destroying existing template ${config.vm_template_name}")
+                                sh "govc vm.destroy ${config.vm_template_name}"
                             }
 
-//                            sh "govc vm.clone -ds=${config['vm-template-datastore']} -vm=${env.TEMPLATE_BUILD_ID} -pool=/johnsondc/host/${config['vm-template-host']}/Resources -folder=${config['vm-template-folder']} -template ${config['vm-template-name']} >/dev/null"
-                            sh "govc vm.clone -ds=${config['vm-template-datastore']} -vm=${env.TEMPLATE_BUILD_ID} -host=${config['vm-template-host']} -folder=${config['vm-template-folder']} -template ${config['vm-template-name']} >/dev/null"
+//                            sh "govc vm.clone -ds=${config.vm_template-datastore']} -vm=${env.TEMPLATE_BUILD_ID} -pool=/johnsondc/host/${config.vm_template_host}/Resources -folder=${config.vm_template_folder} -template ${config.vm_template_name} >/dev/null"
+                            sh "govc vm.clone -ds=${config.vm_template_datastore} -vm=${env.TEMPLATE_BUILD_ID} -host=${config.vm_template_host} -folder=${config.vm_template_folder} -template ${config.vm_template_name} >/dev/null"
 
-                            String getVmPathCmd = "govc vm.info -json ${config['vm-template-name']} | jq '.. |.Config?.VmPathName? | select(. != null)'"
+                            String getVmPathCmd = "govc vm.info -json ${config.vm_template_name} | jq '.. |.Config?.VmPathName? | select(. != null)'"
                             sh "${getVmPathCmd}"
                             String vmPath = sh(script: "${getVmPathCmd}", returnStdout: true).replaceAll('"',"")
 //                            String vmDatastore = vmPath.split("/")[-1].replaceAll('([|])+','')
@@ -193,16 +193,16 @@ def call(Map params=[:]) {
                             vmPath = vmPath.substring(0, vmPath.lastIndexOf("/"))
                             log.info("vmDatastore=${vmDatastore} vmPath='${vmPath}'")
 
-                            String targetPath = "[${config['vm-template-datastore']}] ${config['vm-template-folder']}"
+                            String targetPath = "[${config.vm_template_datastore}] ${config.vm_template_folder}"
                             log.info("targetPath='${targetPath}'")
 
                             if (vmPath != targetPath) {
                                 log.info("moving VM from '${vmPath}' to '${targetPath}'")
-                                sh "govc vm.unregister ${config['vm-template-name']}"
-                                sh "govc datastore.mv -ds=${config['vm-template-datastore']} ${config['vm-template-name']} ${config['vm-template-folder']}/${config['vm-template-name']}"
-                                sh "govc vm.register -template=true -ds=${config['vm-template-datastore']} -folder=${config['vm-template-folder']} -host=${config['vm-template-host']} ${config['vm-template-folder']}/${config['vm-template-name']}/${config['vm-template-name']}.vmtx"
+                                sh "govc vm.unregister ${config.vm_template_name}"
+                                sh "govc datastore.mv -ds=${config.vm_template_datastore} ${config.vm_template_name} ${config.vm_template_folder}/${config.vm_template_name}"
+                                sh "govc vm.register -template=true -ds=${config.vm_template_datastore} -folder=${config.vm_template_folder} -host=${config.vm_template_host} ${config.vm_template_folder}/${config.vm_template_name}/${config.vm_template_name}.vmtx"
                             }
-                            sh "govc datastore.ls -ds=${config['vm-template-datastore']} ${config['vm-template-folder']}"
+                            sh "govc datastore.ls -ds=${config.vm_template_datastore} ${config.vm_template_folder}"
                             log.info("removing temporary template build ${env.TEMPLATE_BUILD_ID}")
                             sh "govc vm.destroy ${env.TEMPLATE_BUILD_ID}"
                         }
@@ -223,7 +223,7 @@ Map loadPipelineConfig(Logger log, Map params) {
     List jobParts = JOB_NAME.split("/")
     log.info("${logPrefix} jobParts=${jobParts}")
     config.jobBaseFolderLevel = config.jobBaseFolderLevel ?: 4
-    config['build-dir']="packer_templates"
+    config.build_dir="packer_templates"
 
     log.info("${logPrefix} BUILD_TAG=${BUILD_TAG}")
     List buildTagList = env.BUILD_TAG.split("-")
@@ -238,7 +238,7 @@ Map loadPipelineConfig(Logger log, Map params) {
 
     log.info("${logPrefix} TEMPLATE_BUILD_ID=${env.TEMPLATE_BUILD_ID}")
 
-    String buildConfigFile = "./${config['build-dir']}/build-config.json"
+    String buildConfigFile = "./${config.build_dir}/build-config.json"
     if (fileExists(buildConfigFile)) {
         Map buildConfig = readJSON file: buildConfigFile
         config = MapMerge.merge(config, buildConfig.variables)
@@ -248,7 +248,12 @@ Map loadPipelineConfig(Logger log, Map params) {
         throw message
     }
 
-    String buildVarsFile = "./${config['build-dir']}/${env.JOB_BASE_NAME}/build-vars.json"
+    log.info("${logPrefix} loading common and build vars")
+    Map commonVars = readJSON file: "./${config.build_dir}/common-vars.json"
+    config = MapMerge.merge(config, commonVars)
+    log.info("${logPrefix} commonVars=${JsonUtils.printToJsonString(commonVars)}")
+
+    String buildVarsFile = "./${config.build_dir}/${env.JOB_BASE_NAME}/build-vars.json"
     if (fileExists(buildVarsFile)) {
         Map buildVars = readJSON file: buildVarsFile
         config = MapMerge.merge(config, buildVars)
@@ -280,15 +285,23 @@ Map loadPipelineConfig(Logger log, Map params) {
     }
 
     Map imageInfo = [:]
-    imageInfo['name'] = "${env.JOB_BASE_NAME}"
+    imageInfo.name = "${env.JOB_BASE_NAME}"
 
-    String isoUrl = config['iso-url']
-    // ref: https://stackoverflow.com/questions/605696/get-file-name-from-url
-    String isoFile = isoUrl.substring(isoUrl.lastIndexOf('/') + 1, isoUrl.length());
-    imageInfo['iso-url'] = isoUrl
-    imageInfo['iso-file'] = isoFile
-    imageInfo['iso-checksum'] = config['iso-checksum']
-    config['image-info'] = imageInfo
+//    imageInfo['name'] = "${env.JOB_BASE_NAME}"
+//    imageInfo['name'] = "${config.build_iso_dir}"
+//    imageInfo['name'] = "${config.iso_dir}"
+//
+//    String isoUrl = config.iso_url
+//    // ref: https://stackoverflow.com/questions/605696/get-file-name-from-url
+//    String isoFile = isoUrl.substring(isoUrl.lastIndexOf('/') + 1, isoUrl.length());
+//    imageInfo['iso-url'] = isoUrl
+//    imageInfo['iso-file'] = isoFile
+
+    imageInfo['name'] = config.iso_dir
+    imageInfo['iso-url'] = config.iso_url
+    imageInfo['iso-file'] = config.iso_file
+    imageInfo['iso-checksum'] = config.iso_checksum
+    config.image_info = imageInfo
 
     log.debug("${logPrefix} params=${JsonUtils.printToJsonString(params)}")
     log.debug("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
