@@ -56,15 +56,15 @@ def call(Map params=[:]) {
 
             stage("Pre-check if template already exists") {
                 environment {
-                    GOVC_URL = "${config['vcenter-host']}"
+                    GOVC_URL = "${config.vcenter_host}"
                 }
                 steps {
                     script {
                         log.info("checking if template already exists...")
                         withCredentials([usernamePassword(credentialsId: 'dcapi-govc-cred', passwordVariable: 'GOVC_PASSWORD', usernameVariable: 'GOVC_USERNAME')]) {
-                            sh "govc vm.info ${config['vm-template-name']}"
-//                            sh "govc -u=${config['vcenter-host']} vm.info ${config['vm-template-name']}"
-                            vmTemplateExists = sh(script: "govc vm.info ${config['vm-template-name']} | grep 'UUID:'", returnStatus: true) == 0
+                            sh "govc vm.info ${config.vm_template_name}"
+//                            sh "govc -u=${config.vcenter_host} vm.info ${config.vm_template_name}"
+                            vmTemplateExists = sh(script: "govc vm.info ${config.vm_template_name} | grep 'UUID:'", returnStatus: true) == 0
                         }
                         log.info("initial check if template already exists=>${vmTemplateExists}")
 
@@ -81,25 +81,25 @@ def call(Map params=[:]) {
                     expression { !vmTemplateExists }
                 }
                 environment {
-                    GOVC_URL = "${config['vcenter-host']}"
+                    GOVC_URL = "${config.vcenter_host}"
                 }
 
                 steps {
                     script {
-//                        String govcCmd = "govc datastore.ls -ds=${config['vm-remote-cache-datastore']} ${config['vm-iso-file-dir']} | grep ${config['iso-file']}"
+//                        String govcCmd = "govc datastore.ls -ds=${config.vm_remote_cache_datastore} ${config.iso_base_dir}/${config.iso_dir} | grep ${config.iso_file}"
 //                        boolean imageExists = sh(script: govcCmd, returnStatus: true)==0
-                        boolean imageExists = sh(script: "ls -Fla ${config['vm-data-dir']}/${config['vm-iso-file-dir']}/ | grep ${config['iso-file']} ", returnStatus: true)==0
+                        boolean imageExists = sh(script: "ls -Fla ${config.vm_data_dir}/${config.iso_base_dir}/${config.iso_dir}/ | grep ${config.iso_file} ", returnStatus: true)==0
 
                         if (!imageExists) {
                             sh """
                             ansible-playbook \
                               --inventory-file localhost, \
-                              -e fetch_images='"[${JsonOutput.toJson(config.imageInfo)}]"' \
+                              -e fetch_images='"[${JsonOutput.toJson(config.image_info)}]"' \
                               fetch-osimages.yml
                             """
 
-//                            sh "govc datastore.upload -ds=${config['vm-remote-cache-datastore']} /data/osimages/${config['iso-file']} ${config['vm-iso-file-dir']}/${config['iso-file']}"
-//                            sh "cp -np /data/osimages/${config['iso-file']} /vmware/${config['vm-iso-file-dir']}/"
+//                            sh "govc datastore.upload -ds=${config.vm_remote_cache_datastore} /data/osimages/${config.iso_file} ${config.iso_base_dir}/${config.iso_dir}/${config.iso_file}"
+//                            sh "cp -np /data/osimages/${config.iso_file} /vmware/${config.iso_base_dir}/${config.iso_dir}/"
                         }
                     }
                 }
@@ -107,23 +107,23 @@ def call(Map params=[:]) {
 
             stage("Run Packer to build template") {
                 when {
-                    expression { !vmTemplateExists && !config["skip-packer-build"]?.toBoolean() }
+                    expression { !vmTemplateExists && !config.skip_packer_build?.toBoolean() }
                 }
                 environment {
-                    GOVC_URL = "${config['vcenter-host']}"
+                    GOVC_URL = "${config.vcenter_host}"
                 }
 
                 steps {
 
                     script {
 
-                        dir("${config['build-dir']}/${env.JOB_BASE_NAME}") {
 //                        dir("${env.WORKSPACE}/${env.JOB_BASE_NAME}") {
+                        dir("${config.build_dir}/${env.JOB_BASE_NAME}") {
 
                             // ref: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html-single/installation_guide/index#s2-kickstart2-boot-media
                             // ref: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html-single/installation_guide/index#s2-kickstart2-networkbased
-                            if (config["build-type"] == "vsphere-iso-nfs") {
-                                sh "cp -p ${config['vm-init-file']} ${config['vm-init-dir']}/${config['vm-init-file']}"
+                            if (config.build_type == "vsphere-iso-nfs") {
+                                sh "cp -p ${config.vm_init_file} ${config.vm_init_dir}/${config.vm_init_file}"
                             }
 
                             // ref: https://docs.cloudbees.com/docs/cloudbees-ci/latest/cloud-secure-guide/injecting-secrets
@@ -144,11 +144,12 @@ def call(Map params=[:]) {
                                 // ref: https://github.com/hashicorp/packer/pull/7184
                                 sh """
                                 ${tool packerTool}/packer build \
-                                    -only ${config['build-type']} \
+                                    -only ${config.build_type} \
                                     -on-error=abort \
+                                    -var-file=common-vars.json \
                                     -var-file=build-vars.json \
                                     -debug \
-                                    ${env.WORKSPACE}/${config['build-dir']}/builder-config.json
+                                    ${env.WORKSPACE}/${config['build-dir']}/build-config.json
                                 """
                             }
 
@@ -157,10 +158,10 @@ def call(Map params=[:]) {
                 }
             }
 
-//            stage("Deploy Template to $config['vm-template-datastore'] $config['vm-template-folder']") {
+//            stage("Deploy Template to $config.vm_template_datastore $config.vm_template_folder") {
             stage("Deploy Template") {
                 when {
-                    expression { !vmTemplateExists && !config["skip-packer-build"]?.toBoolean() }
+                    expression { !vmTemplateExists && !config.skip_packer_build?.toBoolean() }
                 }
                 environment {
                     GOVC_URL = "${config['vcenter-host']}"
