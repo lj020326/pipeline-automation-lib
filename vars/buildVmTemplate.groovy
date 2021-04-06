@@ -237,7 +237,7 @@ Map loadPipelineConfig(Logger log, Map params) {
 
     log.info("${logPrefix} TEMPLATE_BUILD_ID=${env.TEMPLATE_BUILD_ID}")
 
-    String buildConfigFile = "./${config['build-dir']}/builder-config.json"
+    String buildConfigFile = "./${config['build-dir']}/build-config.json"
     if (fileExists(buildConfigFile)) {
         Map buildConfig = readJSON file: buildConfigFile
         config = MapMerge.merge(config, buildConfig.variables)
