@@ -146,7 +146,7 @@ def call(Map params=[:]) {
                                 ${tool packerTool}/packer build \
                                     -only ${config.build_type} \
                                     -on-error=abort \
-                                    -var-file=common-vars.json \
+                                    -var-file=../common-vars.json \
                                     -var-file=build-vars.json \
                                     -debug \
                                     ${env.WORKSPACE}/${config.build_dir}/build-config.json
