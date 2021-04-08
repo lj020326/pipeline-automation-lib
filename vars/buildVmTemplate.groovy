@@ -156,6 +156,19 @@ def call(Map params=[:]) {
                         }
                     }
                 }
+//                // ref: https://hourperday.wordpress.com/2017/05/17/how-to-cicd-with-chef-cookbooks-and-jenkins-part-three/
+//                post {
+//                    always {
+//                        // use checkstyle plugin to expose rubycop lint checks
+//                        checkstyle canComputeNew: false, canRunOnFailed: true, defaultEncoding: '', healthy: '', pattern: 'int-lint-results.xml', unHealthy: ''
+//                        // use warnings plugin with our custom foodcritic parser to expose chef lint checks
+//                        warnings canComputeNew: false, canResolveRelativePaths: false, canRunOnFailed: true, consoleParsers: [[parserName: 'Foodcritic']], defaultEncoding: '', excludePattern: '', healthy: '', includePattern: '', messagesPattern: '', unHealthy: ''
+//                        // expose chefspec unit tests
+//                        junit 'junit.xml'
+////                        // publish chefspec coverage results
+////                        publishHTML([allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true, reportDir: '', reportFiles: 'index.html', reportName: 'ChefSpec Report', reportTitles: ''])
+//                    }
+//                }
             }
 
 //            stage("Deploy Template to $config.vm_template_datastore $config.vm_template_folder") {
