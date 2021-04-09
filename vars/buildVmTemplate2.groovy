@@ -150,6 +150,8 @@ def call(Map params=[:]) {
                                     -var-file=${config.build_release_config_dir}/box_info.json \
                                     -var-file=${config.build_release_config_dir}/template.json \
                                     -var vm_build_id=${config.vm_build_id} \
+                                    -var iso_dir=${config.iso_dir} \
+                                    -var iso_file=${config.iso_file} \
                                     -debug \
                                     ${env.WORKSPACE}/${config.build_dir}/${config.build_distribution_config_dir}/build-config.json
                                 """
@@ -240,27 +242,6 @@ Map loadPipelineConfig(Logger log, Map params) {
 //    config.build_type = "vmware-iso-new"
     config.build_type = "vsphere-iso"
 
-    log.info("${logPrefix} build_distribution=${config.build_distribution}")
-    log.info("${logPrefix} build_release=${config.build_release}")
-
-    config.build_distribution_config_dir = config.build_distribution
-    config.build_release_config_dir = jobParts.join("/") + "/server"
-
-    log.info("${logPrefix} build_distribution_config_dir=${config.build_distribution_config_dir}")
-    log.info("${logPrefix} build_release_config_dir=${config.build_release_config_dir}")
-
-    log.info("${logPrefix} BUILD_TAG=${BUILD_TAG}")
-    List buildTagList = env.BUILD_TAG.split("-")
-    buildTagList[-1] = env.BUILD_NUMBER.toString().padLeft(4, '0')
-
-    // ref: https://mrhaki.blogspot.com/2011/09/groovy-goodness-take-and-drop-items.html
-    buildTagList = buildTagList.drop(config.jobBaseFolderLevel)
-    templateBuildTag = buildTagList.join("-").toLowerCase()
-
-    log.info("${logPrefix} templateBuildTag=${templateBuildTag}")
-    config.vm_build_id = templateBuildTag
-//    env.TEMPLATE_BUILD_ID = templateBuildTag
-
     log.info("${logPrefix} loading build config")
 
     String buildConfigFile = "./${config.build_dir}/${config.build_distribution_config_dir}/build-config.json"
@@ -285,6 +266,33 @@ Map loadPipelineConfig(Logger log, Map params) {
     Map templateVars = readJSON file: "./${config.build_dir}/${config.build_release_config_dir}/template.json"
     config = MapMerge.merge(config, templateVars)
     log.info("templateConfig=${JsonUtils.printToJsonString(templateVars)}")
+
+
+    log.info("${logPrefix} build_distribution=${config.build_distribution}")
+    log.info("${logPrefix} build_release=${config.build_release}")
+
+    config.build_distribution_config_dir = config.build_distribution
+    config.build_release_config_dir = jobParts.join("/") + "/server"
+    config.iso_dir = "${config.build_distribution}/${config.build_release}"
+    // ref: https://stackoverflow.com/questions/605696/get-file-name-from-url
+    config.iso_file = config.iso_url.substring(config.iso_url.lastIndexOf('/') + 1, config.iso_url.length())
+
+    log.info("${logPrefix} build_distribution_config_dir=${config.build_distribution_config_dir}")
+    log.info("${logPrefix} build_release_config_dir=${config.build_release_config_dir}")
+
+    log.info("${logPrefix} BUILD_TAG=${BUILD_TAG}")
+    List buildTagList = env.BUILD_TAG.split("-")
+    buildTagList[-1] = env.BUILD_NUMBER.toString().padLeft(4, '0')
+
+    // ref: https://mrhaki.blogspot.com/2011/09/groovy-goodness-take-and-drop-items.html
+    buildTagList = buildTagList.drop(config.jobBaseFolderLevel)
+    templateBuildTag = buildTagList.join("-").toLowerCase()
+
+    log.info("${logPrefix} templateBuildTag=${templateBuildTag}")
+    config.vm_build_id = templateBuildTag
+//    env.TEMPLATE_BUILD_ID = templateBuildTag
+
+
 
     // copy immutable params maps to mutable config map
     // config = MapMerge.merge(config, params)
