@@ -242,6 +242,12 @@ Map loadPipelineConfig(Logger log, Map params) {
 //    config.build_type = "vmware-iso-new"
     config.build_type = "vsphere-iso"
 
+    log.info("${logPrefix} build_distribution=${config.build_distribution}")
+    log.info("${logPrefix} build_release=${config.build_release}")
+
+    config.build_distribution_config_dir = config.build_distribution
+    config.build_release_config_dir = jobParts.join("/") + "/server"
+
     log.info("${logPrefix} loading build config")
 
     String buildConfigFile = "./${config.build_dir}/${config.build_distribution_config_dir}/build-config.json"
@@ -267,12 +273,6 @@ Map loadPipelineConfig(Logger log, Map params) {
     config = MapMerge.merge(config, templateVars)
     log.info("templateConfig=${JsonUtils.printToJsonString(templateVars)}")
 
-
-    log.info("${logPrefix} build_distribution=${config.build_distribution}")
-    log.info("${logPrefix} build_release=${config.build_release}")
-
-    config.build_distribution_config_dir = config.build_distribution
-    config.build_release_config_dir = jobParts.join("/") + "/server"
     config.iso_dir = "${config.build_distribution}/${config.build_release}"
     // ref: https://stackoverflow.com/questions/605696/get-file-name-from-url
     config.iso_file = config.iso_url.substring(config.iso_url.lastIndexOf('/') + 1, config.iso_url.length())
