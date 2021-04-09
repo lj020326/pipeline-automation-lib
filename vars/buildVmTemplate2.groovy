@@ -149,7 +149,7 @@ def call(Map params=[:]) {
                                     -var-file=${config.build_distribution_config_dir}/distribution-vars.json \
                                     -var-file=${config.build_release_config_dir}/box_info.json \
                                     -var-file=${config.build_release_config_dir}/template.json \
-                                    -var vm_build_id=${config.vm_build_id}
+                                    -var vm_build_id=${config.vm_build_id} \
                                     -debug \
                                     ${env.WORKSPACE}/${config.build_dir}/${config.build_distribution_config_dir}/build-config.json
                                 """
