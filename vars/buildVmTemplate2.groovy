@@ -117,9 +117,6 @@ def call(Map params=[:]) {
 
                     script {
 
-//                        dir("${env.WORKSPACE}/${config.build_dir}/${env.JOB_BASE_NAME}") {
-//                        dir("${env.WORKSPACE}/${config.build_dir}/${config.build_release_config_dir}") {
-//                        dir("${env.WORKSPACE}/${config.build_dir}") {
                         dir("${config.build_dir}") {
 
                             // ref: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html-single/installation_guide/index#s2-kickstart2-boot-media
@@ -140,13 +137,6 @@ def call(Map params=[:]) {
                             ]
 
                             withCredentials(secretVars) {
-
-                                // from build.sh
-                                // packer build -only=vmware-iso \
-                                //   -var-file=../../../common-vars.json \
-                                //   -var-file=box_info.json \
-                                //   -var-file=template.json \
-                                //   ../../build-config.json
 
                                 // ref: https://vsupalov.com/packer-ami/
                                 // ref: https://blog.deimos.fr/2015/01/16/packer-build-multiple-images-easily/
@@ -192,8 +182,8 @@ def call(Map params=[:]) {
                                 sh "govc vm.destroy ${config.vm_name}"
                             }
 
-//                            sh "govc vm.clone -ds=${config.vm_template-datastore']} -vm=${env.TEMPLATE_BUILD_ID} -pool=/johnsondc/host/${config.vm_template_host}/Resources -folder=${config.vm_template_folder} -template ${config.vm_name} >/dev/null"
-                            sh "govc vm.clone -ds=${config.vm_template_datastore} -vm=${env.TEMPLATE_BUILD_ID} -host=${config.vm_template_host} -folder=${config.vm_template_folder} -template ${config.vm_name} >/dev/null"
+//                            sh "govc vm.clone -ds=${config.vm_template-datastore']} -vm=${config.template_build_id} -pool=/johnsondc/host/${config.vm_template_host}/Resources -folder=${config.vm_template_folder} -template ${config.vm_name} >/dev/null"
+                            sh "govc vm.clone -ds=${config.vm_template_datastore} -vm=${config.template_build_id} -host=${config.vm_template_host} -folder=${config.vm_template_folder} -template ${config.vm_name} >/dev/null"
 
                             String getVmPathCmd = "govc vm.info -json ${config.vm_name} | jq '.. |.Config?.VmPathName? | select(. != null)'"
                             sh "${getVmPathCmd}"
@@ -214,8 +204,8 @@ def call(Map params=[:]) {
                                 sh "govc vm.register -template=true -ds=${config.vm_template_datastore} -folder=${config.vm_template_folder} -host=${config.vm_template_host} ${config.vm_template_folder}/${config.vm_name}/${config.vm_name}.vmtx"
                             }
                             sh "govc datastore.ls -ds=${config.vm_template_datastore} ${config.vm_template_folder}"
-                            log.info("removing temporary template build ${env.TEMPLATE_BUILD_ID}")
-                            sh "govc vm.destroy ${env.TEMPLATE_BUILD_ID}"
+                            log.info("removing temporary template build ${config.template_build_id}")
+                            sh "govc vm.destroy ${config.template_build_id}"
                         }
                     }
                 }
@@ -265,12 +255,10 @@ Map loadPipelineConfig(Logger log, Map params) {
 
     // ref: https://mrhaki.blogspot.com/2011/09/groovy-goodness-take-and-drop-items.html
     buildTagList = buildTagList.drop(config.jobBaseFolderLevel)
-    templateBuildTag = buildTagList.join("-")
+    templateBuildTag = buildTagList.join("-").toLowerCase()
 
     log.info("${logPrefix} templateBuildTag=${templateBuildTag}")
-    env.TEMPLATE_BUILD_ID = templateBuildTag
-
-    log.info("${logPrefix} TEMPLATE_BUILD_ID=${env.TEMPLATE_BUILD_ID}")
+    config.template_build_id = templateBuildTag
 
     log.info("${logPrefix} loading build config")
 
