@@ -149,6 +149,7 @@ def call(Map params=[:]) {
                                     -var-file=${config.build_distribution_config_dir}/distribution-vars.json \
                                     -var-file=${config.build_release_config_dir}/box_info.json \
                                     -var-file=${config.build_release_config_dir}/template.json \
+                                    -var vm_build_id=${config.vm_build_id}
                                     -debug \
                                     ${env.WORKSPACE}/${config.build_dir}/${config.build_distribution_config_dir}/build-config.json
                                 """
@@ -159,7 +160,6 @@ def call(Map params=[:]) {
                 }
             }
 
-//            stage("Deploy Template to $config.vm_template_datastore $config.vm_template_folder") {
             stage("Deploy Template") {
                 when {
                     expression { !vmTemplateExists && !config.skip_packer_build?.toBoolean() }
@@ -259,15 +259,9 @@ Map loadPipelineConfig(Logger log, Map params) {
 
     log.info("${logPrefix} templateBuildTag=${templateBuildTag}")
     config.template_build_id = templateBuildTag
+//    env.TEMPLATE_BUILD_ID = templateBuildTag
 
     log.info("${logPrefix} loading build config")
-
-    // from build.sh
-    // packer build -only=vmware-iso \
-    //   -var-file=../../../common-vars.json \
-    //   -var-file=box_info.json \
-    //   -var-file=template.json \
-    //   ../../build-config.json
 
     String buildConfigFile = "./${config.build_dir}/${config.build_distribution_config_dir}/build-config.json"
     if (fileExists(buildConfigFile)) {
