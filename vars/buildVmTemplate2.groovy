@@ -182,8 +182,8 @@ def call(Map params=[:]) {
                                 sh "govc vm.destroy ${config.vm_name}"
                             }
 
-//                            sh "govc vm.clone -ds=${config.vm_template-datastore']} -vm=${config.template_build_id} -pool=/johnsondc/host/${config.vm_template_host}/Resources -folder=${config.vm_template_folder} -template ${config.vm_name} >/dev/null"
-                            sh "govc vm.clone -ds=${config.vm_template_datastore} -vm=${config.template_build_id} -host=${config.vm_template_host} -folder=${config.vm_template_folder} -template ${config.vm_name} >/dev/null"
+//                            sh "govc vm.clone -ds=${config.vm_template-datastore']} -vm=${config.vm_build_id} -pool=/johnsondc/host/${config.vm_template_host}/Resources -folder=${config.vm_template_folder} -template ${config.vm_name} >/dev/null"
+                            sh "govc vm.clone -ds=${config.vm_template_datastore} -vm=${config.vm_build_id} -host=${config.vm_template_host} -folder=${config.vm_template_folder} -template ${config.vm_name} >/dev/null"
 
                             String getVmPathCmd = "govc vm.info -json ${config.vm_name} | jq '.. |.Config?.VmPathName? | select(. != null)'"
                             sh "${getVmPathCmd}"
@@ -204,8 +204,8 @@ def call(Map params=[:]) {
                                 sh "govc vm.register -template=true -ds=${config.vm_template_datastore} -folder=${config.vm_template_folder} -host=${config.vm_template_host} ${config.vm_template_folder}/${config.vm_name}/${config.vm_name}.vmtx"
                             }
                             sh "govc datastore.ls -ds=${config.vm_template_datastore} ${config.vm_template_folder}"
-                            log.info("removing temporary template build ${config.template_build_id}")
-                            sh "govc vm.destroy ${config.template_build_id}"
+                            log.info("removing temporary template build ${config.vm_build_id}")
+                            sh "govc vm.destroy ${config.vm_build_id}"
                         }
                     }
                 }
@@ -258,7 +258,7 @@ Map loadPipelineConfig(Logger log, Map params) {
     templateBuildTag = buildTagList.join("-").toLowerCase()
 
     log.info("${logPrefix} templateBuildTag=${templateBuildTag}")
-    config.template_build_id = templateBuildTag
+    config.vm_build_id = templateBuildTag
 //    env.TEMPLATE_BUILD_ID = templateBuildTag
 
     log.info("${logPrefix} loading build config")
