@@ -315,20 +315,9 @@ Map loadPipelineConfig(Logger log, Map params) {
     Map imageInfo = [:]
     imageInfo.name = "${env.JOB_BASE_NAME}"
 
-//    imageInfo.name = "${env.JOB_BASE_NAME}"
-//    imageInfo.name = "${config.build_iso_dir}"
-//    imageInfo.name = "${config.iso_dir}"
-//
-//    String isoUrl = config.iso_url
-//    // ref: https://stackoverflow.com/questions/605696/get-file-name-from-url
-//    String isoFile = isoUrl.substring(isoUrl.lastIndexOf('/') + 1, isoUrl.length());
-//    imageInfo.iso_url = isoUrl
-//    imageInfo.iso_file = isoFile
-
     imageInfo.name = config.iso_dir
     imageInfo.iso_url = config.iso_url
     imageInfo.iso_file = config.iso_file
-//    imageInfo.iso_checksum = config.iso_checksum
     imageInfo.iso_checksum = "${config.iso_checksum_type}:${config.iso_checksum}"
     config.image_info = imageInfo
 
