@@ -328,7 +328,8 @@ Map loadPipelineConfig(Logger log, Map params) {
     imageInfo.name = config.iso_dir
     imageInfo.iso_url = config.iso_url
     imageInfo.iso_file = config.iso_file
-    imageInfo.iso_checksum = config.iso_checksum
+//    imageInfo.iso_checksum = config.iso_checksum
+    imageInfo.iso_checksum = "${config.iso_checksum_type}:${config.iso_checksum}"
     config.image_info = imageInfo
 
     log.debug("${logPrefix} params=${JsonUtils.printToJsonString(params)}")
