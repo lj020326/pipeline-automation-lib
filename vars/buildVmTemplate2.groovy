@@ -95,7 +95,7 @@ def call(Map params=[:]) {
                             ansible-playbook \
                               --inventory-file localhost, \
                               -e fetch_images='"[${JsonOutput.toJson(config.image_info)}]"' \
-                              fetch-osimages.yml
+                              ansible/fetch_os_images.yml
                             """
 
 //                            sh "govc datastore.upload -ds=${config.vm_remote_cache_datastore} /data/osimages/${config.iso_file} ${config.iso_base_dir}/${config.iso_dir}/${config.iso_file}"
