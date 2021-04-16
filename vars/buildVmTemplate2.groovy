@@ -292,8 +292,6 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.vm_build_id = templateBuildTag
 //    env.TEMPLATE_BUILD_ID = templateBuildTag
 
-
-
     // copy immutable params maps to mutable config map
     // config = MapMerge.merge(config, params)
     params.each { key, value ->
@@ -317,20 +315,20 @@ Map loadPipelineConfig(Logger log, Map params) {
     Map imageInfo = [:]
     imageInfo.name = "${env.JOB_BASE_NAME}"
 
-//    imageInfo['name'] = "${env.JOB_BASE_NAME}"
-//    imageInfo['name'] = "${config.build_iso_dir}"
-//    imageInfo['name'] = "${config.iso_dir}"
+//    imageInfo.name = "${env.JOB_BASE_NAME}"
+//    imageInfo.name = "${config.build_iso_dir}"
+//    imageInfo.name = "${config.iso_dir}"
 //
 //    String isoUrl = config.iso_url
 //    // ref: https://stackoverflow.com/questions/605696/get-file-name-from-url
 //    String isoFile = isoUrl.substring(isoUrl.lastIndexOf('/') + 1, isoUrl.length());
-//    imageInfo['iso-url'] = isoUrl
-//    imageInfo['iso-file'] = isoFile
+//    imageInfo.iso_url = isoUrl
+//    imageInfo.iso_file = isoFile
 
-    imageInfo['name'] = config.iso_dir
-    imageInfo['iso-url'] = config.iso_url
-    imageInfo['iso-file'] = config.iso_file
-    imageInfo['iso-checksum'] = config.iso_checksum
+    imageInfo.name = config.iso_dir
+    imageInfo.iso_url = config.iso_url
+    imageInfo.iso_file = config.iso_file
+    imageInfo.iso_checksum = config.iso_checksum
     config.image_info = imageInfo
 
     log.debug("${logPrefix} params=${JsonUtils.printToJsonString(params)}")
