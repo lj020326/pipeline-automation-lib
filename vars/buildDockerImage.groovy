@@ -36,8 +36,10 @@ def call(Map params=[:]) {
 //                            config.buildDirList.eachWithIndex { String buildDir, i ->
                             config.buildImageList.each { String buildInfo ->
 //                                config.get("buildInfo", buildInfo)
-                                config = MapMerge.merge(config, buildInfo)
-                                buildAndPublishImage(log, config)
+//                                config = MapMerge.merge(config, buildInfo)
+//                                buildAndPublishImage(log, config)
+                                Map buildConfig = MapMerge.merge(config.findAll { !["buildImageList"].contains(it.key) }, buildInfo)
+                                buildAndPublishImage(log, buildConfig)
                             }
                     }
                 }
@@ -83,7 +85,7 @@ Map loadPipelineConfig(Logger log, Map params) {
 }
 
 void buildAndPublishImage(Logger log, Map config) {
-    String logPrefix="runJobList():"
+    String logPrefix="buildAndPublishImage():"
     log.info("${logPrefix} started")
 
     log.debug("${logPrefix} config=${JsonUtils.printToJsonString(config)}")

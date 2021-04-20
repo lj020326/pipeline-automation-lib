@@ -806,7 +806,7 @@ class AcceptanceTestHarness implements Serializable {
 
         if (envConfigs?.extendEnvironment) {
             Map envParentConfigs = loadJavaEnvConfigs(envConfigs.extendEnvironment)
-            envConfigs = com.dettonville.api.pipeline.utils.MapMerge.merge(envParentConfigs, envConfigs.findAll { !["extendEnvironment"].contains(it.key) })
+            envConfigs = MapMerge.merge(envParentConfigs, envConfigs.findAll { !["extendEnvironment"].contains(it.key) })
         }
 
         log.debug("${logPrefix} envConfigs=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(envConfigs)}")
