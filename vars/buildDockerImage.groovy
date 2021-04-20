@@ -97,7 +97,7 @@ void buildAndPublishImage(Logger log, Map config) {
 
 //    DockerUtil dockerUtil = new DockerUtil(this)
 
-    dir (config.buildDir) {
+    dir (config.buildImageDir) {
 
         def app
         stage("build ${config.buildImageLabel} ${config.buildPath}") {
