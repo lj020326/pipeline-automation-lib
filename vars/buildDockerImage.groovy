@@ -95,13 +95,15 @@ void buildAndPublishImage(Logger log, Map config) {
 
     log.info("${logPrefix} commit_id=${commit_id}")
 
-    DockerUtil dockerUtil = new DockerUtil(this)
+//    DockerUtil dockerUtil = new DockerUtil(this)
 
     dir (config.buildDir) {
 
         def app
         stage("build ${config.buildImageLabel} ${config.buildPath}") {
-            app = docker.build "${config.buildImageLabel}" "${config.buildPath}"
+            // ref: https://www.jenkins.io/doc/book/pipeline/docker/
+//            app = docker.build "${config.buildImageLabel}"
+            app = docker.build(config.buildImageLabel, config.buildPath)
         }
 
         stage("publish ${config.buildImageLabel}") {
