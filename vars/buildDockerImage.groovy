@@ -107,7 +107,7 @@ void buildAndPublishImage(Logger log, Map config) {
                 app = docker.build(config.buildImageLabel, "-f ${config.dockerFile} ${config.buildPath}")
             }
             else if (config?.dockerFile) {
-                app = docker.build(config.buildImageLabel, "-f ${config.dockerFile}")
+                app = docker.build(config.buildImageLabel, "-f ${config.dockerFile} .")
             }
             else if (config?.buildPath) {
                 app = docker.build(config.buildImageLabel, config.buildPath)
