@@ -61,6 +61,7 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.get("registryCredId", "docker-registry-admin")
     config.get("buildImageLabel", "${env.JOB_NAME.split('/')[-2]}")
     config.get("buildImageDir", ".")
+    config.get("buildPath", ".")
 //    config.get("buildImageList", [[ buildDir: ".", buildImageLabel: "${env.JOB_BASE_NAME}"]])
     config.get("buildImageList", [[ buildDir: config.buildImageDir, buildImageLabel: config.buildImageLabel]])
 
@@ -97,8 +98,8 @@ void buildAndPublishImage(Logger log, Map config) {
     dir (config.buildDir) {
 
         def app
-        stage("build ${config.buildImageLabel}") {
-            app = docker.build "${config.buildImageLabel}"
+        stage("build ${config.buildImageLabel} ${config.buildPath}") {
+            app = docker.build "${config.buildImageLabel}" "${config.buildPath}"
         }
 
         stage("publish ${config.buildImageLabel}") {
