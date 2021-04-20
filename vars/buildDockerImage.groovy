@@ -112,7 +112,7 @@ void buildAndPublishImage(Logger log, Map config) {
             else if (config?.buildPath) {
                 app = docker.build(config.buildImageLabel, config.buildPath)
             }
-            else
+            else {
                 app = docker.build(${config.buildImageLabel})
             }
         }
