@@ -62,11 +62,11 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.get("registryUrl","https://media.johnson.int:5000")
     config.get("registryCredId", "docker-registry-admin")
     config.get("buildImageLabel", "${env.JOB_NAME.split('/')[-2]}")
-    config.get("buildImageDir", ".")
+    config.get("buildDir", ".")
 //    config.get("buildPath", "")
 //    config.get("dockerFile", "")
 //    config.get("buildImageList", [[ buildDir: ".", buildImageLabel: "${env.JOB_BASE_NAME}"]])
-    config.get("buildImageList", [[ buildDir: config.buildImageDir, buildImageLabel: config.buildImageLabel]])
+    config.get("buildImageList", [[ buildDir: config.buildDir, buildImageLabel: config.buildImageLabel]])
 
 //    config.logLevel = config.get('logLevel', "INFO")
     config.logLevel = config.get('logLevel', "DEBUG")
@@ -98,7 +98,7 @@ void buildAndPublishImage(Logger log, Map config) {
 
 //    DockerUtil dockerUtil = new DockerUtil(this)
 
-    dir (config.buildImageDir) {
+    dir (config.buildDir) {
 
         def app
         stage("build ${config.buildImageLabel} ${config.buildPath}") {
