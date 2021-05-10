@@ -105,6 +105,62 @@ def call(Map params=[:]) {
                 }
             }
 
+            stage("Run Packer to validate json settings") {
+                when {
+                    expression { !vmTemplateExists && !config.skip_packer_build?.toBoolean() }
+                }
+                environment {
+                    GOVC_URL = "${config.vcenter_host}"
+                }
+
+                steps {
+
+                    script {
+
+                        dir("${config.build_dir}") {
+
+                            // ref: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html-single/installation_guide/index#s2-kickstart2-boot-media
+                            // ref: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html-single/installation_guide/index#s2-kickstart2-networkbased
+                            if (config.build_type == "vsphere-iso-nfs") {
+                                sh "cp -p ${config.vm_init_file} ${config.vm_init_dir}/${config.vm_init_file}"
+                            }
+
+                            // ref: https://docs.cloudbees.com/docs/cloudbees-ci/latest/cloud-secure-guide/injecting-secrets
+                            // require SSH credentials for some ansible jobs (e.g., deploy-cacerts)
+                            // ref: https://emilwypych.com/2019/06/15/how-to-pass-credentials-to-jenkins-pipeline/
+                            List secretVars=[
+                                    string(credentialsId: 'vmware-vcenter-password', variable: 'VMWARE_VCENTER_PASSWORD'),
+                                    string(credentialsId: 'vmware-esxi-password', variable: 'VMWARE_ESXI_PASSWORD'),
+                                    string(credentialsId: 'packer-ssh-password', variable: 'PACKER_SSH_PASSWORD'),
+                                    string(credentialsId: 'vm-root-password', variable: 'VM_ROOT_PASSWORD'),
+                                    string(credentialsId: 'ansible-vault-password', variable: 'ANSIBLE_VAULT_PASSWORD'),
+                            ]
+
+                            withCredentials(secretVars) {
+
+                                // ref: https://vsupalov.com/packer-ami/
+                                // ref: https://blog.deimos.fr/2015/01/16/packer-build-multiple-images-easily/
+                                // ref: https://github.com/hashicorp/packer/pull/7184
+                                sh """
+                                ${tool packerTool}/packer validate \
+                                    -only ${config.build_type} \
+                                    -on-error=abort \
+                                    -var-file=common-vars.json \
+                                    -var-file=${config.build_distribution_config_dir}/distribution-vars.json \
+                                    -var-file=${config.build_release_config_dir}/box_info.json \
+                                    -var-file=${config.build_release_config_dir}/template.json \
+                                    -var vm_build_id=${config.vm_build_id} \
+                                    -var iso_dir=${config.iso_dir} \
+                                    -var iso_file=${config.iso_file} \
+                                    ${env.WORKSPACE}/${config.build_dir}/${config.build_distribution_config_dir}/build-config.json
+                                """
+                            }
+
+                        }
+                    }
+                }
+            }
+
             stage("Run Packer to build template") {
                 when {
                     expression { !vmTemplateExists && !config.skip_packer_build?.toBoolean() }
