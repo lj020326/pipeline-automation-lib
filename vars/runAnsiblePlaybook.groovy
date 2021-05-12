@@ -29,7 +29,8 @@ def call(Map params=[:]) {
             timestamps()
             buildDiscarder(logRotator(numToKeepStr: '10'))
             skipDefaultCheckout()
-            timeout(time: 1, unit: 'HOURS')
+//            timeout(time: 2, unit: 'HOURS')
+            timeout(time: config.timeout, unit: config.timeoutUnit)
         }
         stages {
             stage('Checkout') {
@@ -147,6 +148,8 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.jenkinsNodeLabel = config.get('jenkinsNodeLabel',"ansible")
     config.logLevel = config.get('logLevel', "INFO")
     config.debugPipeline = config.get('debugPipeline', false)
+    config.timeout = config.get('timeout', 2)
+    config.timeoutUnit = config.get('timeoutUnit', 'HOURS')
 
     log.setLevel(config.logLevel)
 
