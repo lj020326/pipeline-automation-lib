@@ -41,20 +41,19 @@ def call(Map params=[:]) {
             buildDiscarder(logRotator(numToKeepStr: '10'))
             disableConcurrentBuilds()
             timestamps()
-//            timeout(time: 2, unit: 'HOURS')
-            timeout(time: config.timeout, unit: config.timeoutUnit)
+            timeout(time: 3, unit: 'HOURS')
         }
 
         stages {
 
-//            stage("Initialize") {
-//                steps {
-//                    script {
-//                        config=loadPipelineConfig(log, params)
-//                        log.info("config=${JsonUtils.printToJsonString(config)}")
-//                    }
-//                }
-//            }
+            stage("Initialize") {
+                steps {
+                    script {
+                        config=loadPipelineConfig(log, params)
+                        log.info("config=${JsonUtils.printToJsonString(config)}")
+                    }
+                }
+            }
 
             stage("Pre-check if template already exists") {
                 environment {
