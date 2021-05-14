@@ -16,7 +16,8 @@ def call(Map params=[:]) {
     Logger log = new Logger(this)
     String packerTool = "packer-1.6.2" // Name of Packer Installation
 
-    Map config=[:]
+    Map config=loadPipelineConfig(log, params)
+//    Map config=[:]
     boolean vmTemplateExists = false
 
 //    Map config=loadPipelineConfig(log, params)
@@ -40,19 +41,20 @@ def call(Map params=[:]) {
             buildDiscarder(logRotator(numToKeepStr: '10'))
             disableConcurrentBuilds()
             timestamps()
-            timeout(time: 2, unit: 'HOURS')
+//            timeout(time: 2, unit: 'HOURS')
+            timeout(time: config.timeout, unit: config.timeoutUnit)
         }
 
         stages {
 
-            stage("Initialize") {
-                steps {
-                    script {
-                        config=loadPipelineConfig(log, params)
-                        log.info("config=${JsonUtils.printToJsonString(config)}")
-                    }
-                }
-            }
+//            stage("Initialize") {
+//                steps {
+//                    script {
+//                        config=loadPipelineConfig(log, params)
+//                        log.info("config=${JsonUtils.printToJsonString(config)}")
+//                    }
+//                }
+//            }
 
             stage("Pre-check if template already exists") {
                 environment {
