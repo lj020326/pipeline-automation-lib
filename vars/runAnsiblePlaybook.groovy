@@ -148,7 +148,7 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.jenkinsNodeLabel = config.get('jenkinsNodeLabel',"ansible")
     config.logLevel = config.get('logLevel', "INFO")
     config.debugPipeline = config.get('debugPipeline', false)
-    config.timeout = config.get('timeout', 2)
+    config.timeout = config.get('timeout', 3)
     config.timeoutUnit = config.get('timeoutUnit', 'HOURS')
 
     log.setLevel(config.logLevel)
