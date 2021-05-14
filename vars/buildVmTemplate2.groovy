@@ -16,8 +16,7 @@ def call(Map params=[:]) {
     Logger log = new Logger(this)
     String packerTool = "packer-1.6.2" // Name of Packer Installation
 
-    Map config=loadPipelineConfig(log, params)
-//    Map config=[:]
+    Map config=[:]
     boolean vmTemplateExists = false
 
 //    Map config=loadPipelineConfig(log, params)
