@@ -53,8 +53,8 @@ def call(Map params=[:]) {
                     // install galaxy roles
 //                    sh "ansible-galaxy install -r roles/requirements.yml"
 //                    sh "ansible-galaxy collection install -r roles/requirements.yml"
-                    sh "ansible-galaxy install --force -r roles/requirements.yml"
-                    sh "ansible-galaxy collection install --force -r roles/requirements.yml"
+                    sh "ansible-galaxy install ${config.ansibleGalaxyForceOpt} -r roles/requirements.yml"
+                    sh "ansible-galaxy collection install ${config.ansibleGalaxyForceOpt} -r roles/requirements.yml"
 
                 }
             }
@@ -151,6 +151,7 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.debugPipeline = config.get('debugPipeline', false)
     config.timeout = config.get('timeout', 2)
     config.timeoutUnit = config.get('timeoutUnit', 'HOURS')
+    config.ansibleGalaxyForceOpt = config.get('ansibleGalaxyForceOpt', '--force')
 
     log.setLevel(config.logLevel)
 
