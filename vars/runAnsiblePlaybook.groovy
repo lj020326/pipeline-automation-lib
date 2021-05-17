@@ -151,7 +151,8 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.debugPipeline = config.get('debugPipeline', false)
     config.timeout = config.get('timeout', 2)
     config.timeoutUnit = config.get('timeoutUnit', 'HOURS')
-    config.ansibleGalaxyForceOpt = config.get('ansibleGalaxyForceOpt', '--force')
+//    config.ansibleGalaxyForceOpt = config.get('ansibleGalaxyForceOpt', '--force')
+    config.ansibleGalaxyForceOpt = config.get('ansibleGalaxyForceOpt', '')
 
     log.setLevel(config.logLevel)
 
