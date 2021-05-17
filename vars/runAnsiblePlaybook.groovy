@@ -51,9 +51,10 @@ def call(Map params=[:]) {
             stage('Run Galaxy Install') {
                 steps {
                     // install galaxy roles
-                    sh "ansible-galaxy install -r roles/requirements.yml"
-//                    sh "ansible-galaxy collection install --force -r roles/requirements.yml"
-                    sh "ansible-galaxy collection install -r roles/requirements.yml"
+//                    sh "ansible-galaxy install -r roles/requirements.yml"
+//                    sh "ansible-galaxy collection install -r roles/requirements.yml"
+                    sh "ansible-galaxy install --force -r roles/requirements.yml"
+                    sh "ansible-galaxy collection install --force -r roles/requirements.yml"
 
                 }
             }
