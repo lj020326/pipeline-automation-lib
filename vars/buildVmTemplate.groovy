@@ -332,8 +332,7 @@ Map loadPipelineConfig(Logger log, Map params) {
 
     config.iso_dir = "${config.build_distribution}/${config.build_release}"
     // ref: https://stackoverflow.com/questions/605696/get-file-name-from-url
-    config.iso_file = config.iso_url.substring(config.iso_url.lastIndexOf('/') + 1, config.iso_url.length())
-    config.iso_file = config.iso_file.replace(".jigdo", ".iso")
+    config.iso_file = config.iso_url.substring(config.iso_url.lastIndexOf('/') + 1, config.iso_url.length()).replace(".jigdo", ".iso")
 
     log.info("${logPrefix} build_distribution_config_dir=${config.build_distribution_config_dir}")
     log.info("${logPrefix} build_release_config_dir=${config.build_release_config_dir}")
