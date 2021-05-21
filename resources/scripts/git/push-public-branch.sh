@@ -23,8 +23,10 @@ echo "Rename the temporary branch to public:"
 git branch -m public
 
 echo "Finally, force update to our repository:"
-#git push -f origin public
-git push -f --set-upstream origin public
+git push -f origin public
+#git push -f --set-upstream origin public
 
 echo "Finally, force update to github repository:"
 git push -f github public
+
+git checkout master
