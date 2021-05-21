@@ -281,7 +281,7 @@ Map loadPipelineConfig(Logger log, Map params) {
     List jobParts = JOB_NAME.split("/")
     log.info("${logPrefix} jobParts=${jobParts}")
     config.jobBaseFolderLevel = config.jobBaseFolderLevel ?: 3
-    config.build_dir="packer_templates_new"
+    config.build_dir="packer_templates"
     config.timeout = config.get('timeout', 3)
     config.timeoutUnit = config.get('timeoutUnit', 'HOURS')
 
