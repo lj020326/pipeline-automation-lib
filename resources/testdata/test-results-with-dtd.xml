@@ -1,0 +1,721 @@
+<!DOCTYPE ac:structured-macro [
+        <!ENTITY % HTMLlat1 PUBLIC
+                "-//W3C//ENTITIES Latin 1 for XHTML//EN"
+                "xhtml-lat1.ent">
+        %HTMLlat1;
+
+        <!ENTITY % HTMLsymbol PUBLIC
+                "-//W3C//ENTITIES Symbols for XHTML//EN"
+                "xhtml-symbol.ent">
+        %HTMLsymbol;
+
+        <!ENTITY % HTMLspecial PUBLIC
+                "-//W3C//ENTITIES Special for XHTML//EN"
+                "xhtml-special.ent">
+        %HTMLspecial;
+
+        <!-- Imported names -->
+
+        <!-- A single character, as per section 2.2 of [XML] -->
+        <!ENTITY % Character "CDATA">
+
+        <!-- One or more digits -->
+        <!ENTITY % Number "CDATA">
+
+        <!-- A Uniform Resource Identifier, see [RFC2396] -->
+        <!ENTITY % URI "CDATA">
+
+        <!-- Style sheet data -->
+        <!ENTITY % StyleSheet "CDATA">
+
+        <!-- Used for titles etc. -->
+        <!ENTITY % Text "CDATA">
+
+        <!-- Generic attributes -->
+
+        <!ENTITY % classattr
+        "class       CDATA          #IMPLIED"
+        >
+
+        <!ENTITY % styleattr
+        "style       %StyleSheet;   #IMPLIED"
+        >
+
+        <!-- Atlassian Confluence elements -->
+
+        <!ENTITY % confluence.ac.block
+        "ac:macro">
+        <!ENTITY % confluence.ac.inline
+        "ac:macro | ac:link | ac:emoticon | ac:image">
+        <!ENTITY % confluence.ri
+        "ri:page | ri:blog-post | ri:attachment | ri:url | ri:shortcut | ri:user | ri:space | ri:content-entity">
+
+        <!-- Text elements -->
+
+        <!ENTITY % special.pre
+        "br | span">
+
+
+        <!ENTITY % special
+        "%special.pre;">
+
+        <!ENTITY % fontstyle "i | b | big | small | u | s">
+
+        <!ENTITY % phrase "em | strong | code | sub | sup | cite">
+
+        <!ENTITY % inline "a | %special; | %fontstyle; | %phrase;">
+
+        <!-- %Inline; covers inline or "text-level" elements -->
+        <!ENTITY % Inline "(#PCDATA | %inline; | del | %confluence.ac.inline;)*">
+
+        <!-- Block-level elements -->
+
+        <!ENTITY % heading "h1|h2|h3|h4|h5|h6">
+        <!ENTITY % lists "ul | ol">
+        <!ENTITY % blocktext "pre | hr | blockquote">
+
+        <!ENTITY % block
+        "p | %heading; | div | %lists; | %blocktext; | table">
+
+        <!ENTITY % Block "(%block; | del | %confluence.ac.block;)*">
+
+        <!-- %Flow; mixes block and inline and is used for list items etc. -->
+        <!ENTITY % Flow "(#PCDATA | %block; | %inline; | del | %confluence.ac.inline;)*">
+
+        <!-- Content models for exclusions -->
+
+        <!-- a elements use %Inline; excluding a -->
+        <!ENTITY % a.content
+        "(#PCDATA | %special; | %fontstyle; | %phrase; | %confluence.ac.inline;)*">
+
+        <!-- pre uses %Inline excluding big, small, sup or sup -->
+        <!ENTITY % pre.content
+        "(#PCDATA | a | %fontstyle; | %phrase; | %special.pre;)*">
+
+        <!-- Document structure -->
+
+        <!-- Entities for namespace prefixes -->
+        <!ENTITY % xmlns.xsi.prefix "xsi">
+        <!ENTITY % xmlns.xsi.attrs
+        "xmlns:%xmlns.xsi.prefix; %URI; #FIXED 'http://www.w3.org/2001/XMLSchema-instance'
+        %xmlns.xsi.prefix;:schemaLocation CDATA #IMPLIED">
+
+        <!-- Document root element -->
+        <!ELEMENT ac:confluence %Block;>
+        <!ATTLIST ac:confluence
+        xmlns           %URI;      #FIXED 'http://www.atlassian.com/schema/confluence/4/'
+        xmlns:ac        %URI;      #FIXED 'http://www.atlassian.com/schema/confluence/4/ac/'
+        xmlns:ri        %URI;      #FIXED 'http://www.atlassian.com/schema/confluence/4/ri/'
+        %xmlns.xsi.attrs;
+        >
+
+        <!-- Generic language/style container -->
+        <!ELEMENT div %Flow;>
+        <!ATTLIST div
+        %styleattr;
+        data-atlassian-layout CDATA #IMPLIED
+        >
+
+        <!-- Paragraph -->
+        <!ELEMENT p %Inline;>
+        <!ATTLIST p
+        %styleattr;
+        >
+
+        <!--
+  Heading. There are six levels of headings from h1 (the most important)
+  to h6 (the least important).
+-->
+        <!ELEMENT h1 %Inline;>
+        <!ATTLIST h1
+        %styleattr;
+        >
+        <!ELEMENT h2 %Inline;>
+        <!ATTLIST h2
+        %styleattr;
+        >
+        <!ELEMENT h3 %Inline;>
+        <!ATTLIST h3
+        %styleattr;
+        >
+        <!ELEMENT h4 %Inline;>
+        <!ATTLIST h4
+        %styleattr;
+        >
+        <!ELEMENT h5 %Inline;>
+        <!ATTLIST h5
+        %styleattr;
+        >
+        <!ELEMENT h6 %Inline;>
+        <!ATTLIST h6
+        %styleattr;
+        >
+
+        <!-- Unordered list -->
+        <!ELEMENT ul (li)+>
+        <!ATTLIST ul
+        %classattr;
+        %styleattr;
+        >
+
+        <!-- Ordered (numbered) list -->
+        <!ELEMENT ol (li)+>
+        <!ATTLIST ol
+        %styleattr;
+        >
+
+        <!-- List item -->
+        <!ELEMENT li %Flow;>
+        <!ATTLIST li
+        %styleattr;
+        >
+
+        <!-- Horizontal rule -->
+        <!ELEMENT hr EMPTY>
+
+        <!--
+  Preformatted text.
+  Content is %Inline; excluding "img|object|big|small|sub|sup".
+-->
+        <!ELEMENT pre %pre.content;>
+
+        <!-- Block-like quotes -->
+        <!ELEMENT blockquote %Block;>
+
+        <!-- Deleted text -->
+        <!ELEMENT del %Flow;>
+
+        <!--
+  Anchor.
+  Content is %Inline; except that anchors shouldn't be nested.
+-->
+        <!ELEMENT a %a.content;>
+        <!ATTLIST a
+        %classattr;
+        follow      CDATA          #IMPLIED
+        href        %URI;          #IMPLIED
+        rel         CDATA          #IMPLIED
+        title       CDATA          #IMPLIED
+        >
+
+        <!-- Generic language/style container -->
+        <!ELEMENT span %Inline;>
+        <!ATTLIST span
+        %styleattr;
+        >
+
+        <!-- Forced line break -->
+        <!ELEMENT br EMPTY>
+        <!ATTLIST br
+        %classattr;
+        >
+
+        <!-- Emphasis -->
+        <!ELEMENT em     %Inline;>
+        <!-- Strong emphasis -->
+        <!ELEMENT strong %Inline;>
+        <!-- Program code -->
+        <!ELEMENT code   %Inline;>
+        <!-- Citation -->
+        <!ELEMENT cite   %Inline;>
+        <!-- Subscript -->
+        <!ELEMENT sub    %Inline;>
+        <!-- Superscript -->
+        <!ELEMENT sup    %Inline;>
+        <!-- Italic font -->
+        <!ELEMENT i      %Inline;>
+        <!-- Bold font -->
+        <!ELEMENT b      %Inline;>
+        <!-- Bigger font -->
+        <!ELEMENT big    %Inline;>
+        <!-- Smaller font -->
+        <!ELEMENT small  %Inline;>
+        <!-- Underline -->
+        <!ELEMENT u      %Inline;>
+        <!-- Strikethrough -->
+        <!ELEMENT s      %Inline;>
+
+        <!-- Table -->
+        <!ELEMENT table    (tbody)>
+        <!-- Table body -->
+        <!ELEMENT tbody    (tr)+>
+        <!-- Table row -->
+        <!ELEMENT tr       (th|td)+>
+        <!-- Table header cell -->
+        <!ELEMENT th       %Flow;>
+        <!ATTLIST th
+        %classattr;
+        rowspan     %Number;       "1"
+        colspan     %Number;       "1"
+        >
+        <!-- Table data cell -->
+        <!ELEMENT td       %Flow;>
+        <!ATTLIST td
+        %classattr;
+        rowspan     %Number;       "1"
+        colspan     %Number;       "1"
+        >
+
+        <!-- Confluence macro -->
+        <!ELEMENT ac:macro (ac:parameter*,ac:default-parameter?,(ac:rich-text-body|ac:plain-text-body)?)>
+        <!ATTLIST ac:macro
+        ac:name     CDATA          #REQUIRED
+        >
+        <!-- Rich text body of Confluence macro -->
+        <!ELEMENT ac:rich-text-body %Flow;>
+        <!-- Plain text body of Confluence macro -->
+        <!ELEMENT ac:plain-text-body (#PCDATA)>
+        <!-- Default (unnamed) parameter of Confluence macro (a macro can have only one default parameter) -->
+        <!ELEMENT ac:default-parameter (#PCDATA)>
+        <!-- Named parameter of Confluence macro (a macro can have many named parameters) -->
+        <!ELEMENT ac:parameter (#PCDATA)>
+        <!ATTLIST ac:parameter
+        ac:name     CDATA          #REQUIRED
+        >
+        <!-- Confluence image -->
+        <!ELEMENT ac:image (ri:url|ri:attachment)>
+        <!ATTLIST ac:image
+        ac:align    CDATA          #IMPLIED
+        ac:border   (true)         #IMPLIED
+        ac:class    CDATA          #IMPLIED
+        ac:title    CDATA          #IMPLIED
+        ac:style    %StyleSheet;   #IMPLIED
+        ac:thumbnail (true)        #IMPLIED
+        ac:alt      CDATA          #IMPLIED
+        ac:height   CDATA          #IMPLIED
+        ac:width    CDATA          #IMPLIED
+        ac:vspace   CDATA          #IMPLIED
+        ac:hspace   CDATA          #IMPLIED
+        ac:queryparams CDATA       #IMPLIED
+        >
+        <!-- Confluence link -->
+        <!ELEMENT ac:link ((%confluence.ri;)?,(ac:link-body|ac:plain-text-link-body)?,(%confluence.ri;)?)>
+        <!ATTLIST ac:link
+        ac:anchor        CDATA     #IMPLIED
+        ac:tooltip       CDATA     #IMPLIED
+        >
+        <!-- Body of Confluence link -->
+        <!ELEMENT ac:link-body %Flow;>
+        <!-- Plain text body of Confluence link -->
+        <!ELEMENT ac:plain-text-link-body (#PCDATA)>
+        <!-- Emoticon -->
+        <!ELEMENT ac:emoticon EMPTY>
+        <!ATTLIST ac:emoticon
+        ac:name (smile|sad|cheeky|laugh|wink|thumbs-up|thumbs-down|information|tick|cross|warning|plus|minus|question|light-on|light-off|yellow-star|red-star|green-star|blue-star) #REQUIRED
+        >
+        <!-- Confluence page resource identifier -->
+        <!ELEMENT ri:page EMPTY>
+        <!ATTLIST ri:page
+        ri:space-key     CDATA     #IMPLIED
+        ri:content-title CDATA     #REQUIRED
+        >
+        <!-- Confluence blog post resource identifier -->
+        <!ELEMENT ri:blog-post EMPTY>
+        <!ATTLIST ri:blog-post
+        ri:space-key     CDATA     #IMPLIED
+        ri:content-title CDATA     #IMPLIED
+        ri:posting-day   CDATA     #REQUIRED
+        >
+        <!-- Confluence attachment resource identifier -->
+        <!ELEMENT ri:attachment (ri:page?)>
+        <!ATTLIST ri:attachment
+        ri:filename CDATA          #REQUIRED
+        >
+        <!-- Confluence URL resource identifier -->
+        <!ELEMENT ri:url EMPTY>
+        <!ATTLIST ri:url
+        ri:value    CDATA          #REQUIRED
+        >
+        <!-- Confluence shortcut resource identifier -->
+        <!ELEMENT ri:shortcut EMPTY>
+        <!ATTLIST ri:shortcut
+        ri:key      CDATA          #REQUIRED
+        ri:parameter CDATA         #REQUIRED
+        >
+        <!-- Confluence user resource identifier -->
+        <!ELEMENT ri:user EMPTY>
+        <!ATTLIST ri:user
+        ri:username CDATA          #REQUIRED
+        >
+        <!-- Confluence space resource identifier -->
+        <!ELEMENT ri:space EMPTY>
+        <!ATTLIST ri:space
+        ri:space-key CDATA         #REQUIRED
+        >
+        <!-- Confluence content entity resource identifier -->
+        <!ELEMENT ri:content-entity EMPTY>
+        <!ATTLIST ri:content-entity
+        ri:content-id CDATA        #REQUIRED
+        >
+        ]>
+<ac:structured-macro ac:name="expand">
+    <ac:parameter ac:name="title">Notes on creating results</ac:parameter>
+    <ac:rich-text-body>
+        <p>Note - Test Results are extracted from Jenkins Logs.</p>
+        <p>Total tests passing, failing and pending come from the Serenity Results page, e.g.&nbsp;<a
+                href="https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/master/272/Serenity_Reports/">
+            https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/master/272/Serenity_Reports/
+        </a>
+        </p>
+        <p>The difference e.g. (+19) comes from the test report, e.g.&nbsp;&nbsp;<a
+                href="https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/master/272/testReport/">
+            https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/master/272/testReport/
+        </a>
+        </p>
+        <p>Newly Failing, comes from the Blue Ocean results, e.g.&nbsp;<a
+                href="https://cd.dettonville.int/jenkins/blue/organizations/jenkins/DCAPI%2Fdcapi-test/detail/master/272/tests">
+            https://cd.dettonville.int/jenkins/blue/organizations/jenkins/DCAPI%2Fdcapi-test/detail/master/272/tests</a>&nbsp;or
+            by counting the 1's ffor newly failed in the rest report.
+        </p>
+        <p>Newly Passing, is calculated as newly failing + the difference, e.g. run 270 had 25 newly failing, but
+            overall only 19 extra failures, so 6 tests that previously failed should now be passing.
+        </p>
+        <p>Local Tests data only to be included if local tests ran on laptop for tests unable to run on Jenkins</p>
+        <p>New Results are entered by adding a row at the top of the table, so results appear in reverse chronological
+            order.
+        </p>
+        <p>New App defects is the number of newly failing tests for which we believe the test is correct and the
+            application needs to be fixed.
+        </p>
+        <p>&nbsp;</p>
+        <p>STAGE JOB: <a
+                href="https://cd.dettonville.int/jenkins/job/DCAPI/job/Jobs/job/job_dcapi_prodvalidation_stage_chrome/">
+            https://cd.dettonville.int/jenkins/job/DCAPI/job/Jobs/job/job_dcapi_prodvalidation_stage_chrome/
+        </a> (moving forward)
+        </p>
+        <p>&nbsp;</p>
+        <p>PROD JOB : <a
+                href="https://cd.dettonville.int/jenkins/job/DCAPI/job/Jobs/job/job_dcapi_prodvalidation_prod_chrome/">
+            https://cd.dettonville.int/jenkins/job/DCAPI/job/Jobs/job/job_dcapi_prodvalidation_prod_chrome/
+        </a> (moving forward)
+        </p>
+    </ac:rich-text-body>
+</ac:structured-macro><h2>Test Execution Cycle</h2><table>
+<tbody>
+    <tr>
+        <td>
+            <h3>Stage</h3>
+            <ul>
+                <li>Daily Test Execution of 90 available on Jenkins by&nbsp;<ac:link>
+                    <ri:user ri:userkey="8a1a66cf50e631d20151911c615f02db"/>
+                </ac:link>
+                </li>
+                <li>Daily Test Execution of 20 local by&nbsp;<ac:link>
+                    <ri:user ri:userkey="8a1a66cf542290d601543ca49b0f00da"/>
+                </ac:link>
+                </li>
+            </ul>
+        </td>
+        <td>
+            <h3>Production</h3>
+            <h4>Before Deployment</h4>
+            <ul>
+                <li>Full Jenkins Execution by&nbsp;<ac:link>
+                    <ri:user ri:userkey="8a1a96eb4dcd1551014e4cdfaac9034f"/>
+                </ac:link>
+                </li>
+                <li>Local Test Execition by&nbsp;<ac:link>
+                    <ri:user ri:userkey="8a1a66cf542290d601543ca49b0f00da"/>
+                </ac:link>
+                </li>
+            </ul>
+        </td>
+        <td colspan="1">
+            <h3>Production</h3>
+            <h4>After Deployment (During Deployment Window)</h4>
+            <ul>
+                <li>Full Jenkins Execution by&nbsp;<ac:link>
+                    <ri:user ri:userkey="8a1a96eb4dcd1551014e4cdfaac9034f"/>
+                </ac:link>&nbsp;
+                </li>
+                <li>Local Test Execition by&nbsp;<ac:link>
+                    <ri:user ri:userkey="8a1a66cf542290d601543ca49b0f00da"/>
+                </ac:link>
+                </li>
+            </ul>
+        </td>
+        <td colspan="1">
+            <h3>Production</h3>
+            <h4>Weekly trial on weeks without a deployment</h4>
+            <ul>
+                <li>Full Jenkins Execution by&nbsp;<ac:link>
+                    <ri:user ri:userkey="8a1a96eb4dcd1551014e4cdfaac9034f"/>
+                </ac:link>
+                </li>
+                <li>Local Test Execition by&nbsp;<ac:link>
+                    <ri:user ri:userkey="8a1a66cf542290d601543ca49b0f00da"/>
+                </ac:link>
+                </li>
+            </ul>
+        </td>
+    </tr>
+</tbody>
+</table><h2><br/>Stage Test Results
+</h2><table>
+<tbody>
+    <tr>
+        <th colspan="1">&nbsp;</th>
+        <th colspan="1">&nbsp;</th>
+        <th colspan="4">Local Testing (Kedar)</th>
+        <th colspan="8" style="text-align: center;">Jenkins Testing (Akash)</th>
+    </tr>
+    <tr>
+        <th>Date</th>
+        <th>Jenkins Link</th>
+        <th colspan="1">
+            <p>
+                <span>Tests</span>
+            </p>
+        </th>
+        <th colspan="1">
+            <p>Pass</p>
+        </th>
+        <th colspan="1">
+            <p>Fail</p>
+        </th>
+        <th colspan="1">
+            <p>Pending</p>
+        </th>
+        <th>Jenkins Tests</th>
+        <th colspan="1">Passed</th>
+        <th colspan="1">Pending</th>
+        <th colspan="1">Total Failed</th>
+        <th colspan="1">
+            <p>
+                <span style="color: rgb(0,128,0);">Newly Passing Tests</span>
+            </p>
+            <p>
+                <span style="color: rgb(0,128,0);">(Progress)</span>
+            </p>
+        </th>
+        <th colspan="1">
+            <p>
+                <span style="color: rgb(255,0,0);">Newly Failing Tests</span>
+            </p>
+            <p>
+                <span style="color: rgb(255,0,0);">(Regressions)</span>
+            </p>
+        </th>
+        <th colspan="1">New App Defects</th>
+        <th colspan="1">
+            <p>
+                <span style="color: rgb(255,153,0);">New Pending Tests</span>
+            </p>
+            <p>
+                <span style="color: rgb(255,153,0);">(Increased Scope)</span>
+            </p>
+        </th>
+    </tr>
+    <tr>
+        <td colspan="1">31 Aug 2018</td>
+        <td colspan="1">
+            <a href="https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/master/272/"
+               style="text-decoration: none;text-align: left;">
+                https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/master/276/
+            </a>
+        </td>
+        <td colspan="1">&nbsp;</td>
+        <td colspan="1">&nbsp;</td>
+        <td colspan="1">&nbsp;</td>
+        <td colspan="1">&nbsp;</td>
+        <td colspan="1">91</td>
+        <td colspan="1">67</td>
+        <td colspan="1">0</td>
+        <td colspan="1">24</td>
+        <td colspan="1">4</td>
+        <td colspan="1">4</td>
+        <td colspan="1">
+            <a href="https://rally1.rallydev.com/#/90187121996d/detail/defect/250187344384?fdp=true"
+               style="text-decoration: none;text-align: left;">DE107588
+            </a>
+            <a href="https://rally1.rallydev.com/#/90187121996d/detail/defect/250187344384?fdp=true"
+               style="text-decoration: none;text-align: left;"></a>
+        </td>
+        <td colspan="1">0</td>
+    </tr>
+    <tr>
+        <td colspan="1">
+            <span>&nbsp;</span>
+            <time datetime="2018-08-30"/>
+            <span>&nbsp;</span>
+        </td>
+        <td colspan="1">
+            <a href="https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/master/272/"
+               style="text-decoration: none;text-align: left;">
+                https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/master/275/
+            </a>
+        </td>
+        <td colspan="1">20</td>
+        <td colspan="1">11</td>
+        <td colspan="1">7</td>
+        <td colspan="1">2</td>
+        <td colspan="1">91(+1)</td>
+        <td colspan="1">67(+3)</td>
+        <td colspan="1">0</td>
+        <td colspan="1">24(-2)</td>
+        <td colspan="1">12</td>
+        <td colspan="1">9</td>
+        <td colspan="1">
+            <p>
+                <a href="https://rally1.rallydev.com/#/90187121996d/detail/defect/250187344384?fdp=true">DE107588</a>
+                <a href="https://rally1.rallydev.com/#/90187121996d/detail/defect/250187344384?fdp=true"></a>
+            </p>
+        </td>
+        <td colspan="1">0</td>
+    </tr>
+    <tr>
+        <td colspan="1"><time datetime="2018-08-29"/>&nbsp;
+        </td>
+        <td colspan="1">
+            <a href="https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/master/272/"
+               style="text-decoration: none;text-align: left;">
+                https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/master/274/
+            </a>
+        </td>
+        <td colspan="1">&nbsp;</td>
+        <td colspan="1">&nbsp;</td>
+        <td colspan="1">&nbsp;</td>
+        <td colspan="1">&nbsp;</td>
+        <td colspan="1">90</td>
+        <td colspan="1">64(+4)</td>
+        <td colspan="1">0</td>
+        <td colspan="1">26(-4)</td>
+        <td colspan="1">13</td>
+        <td colspan="1">9</td>
+        <td colspan="1">&nbsp;</td>
+        <td colspan="1">0</td>
+    </tr>
+    <tr>
+        <td colspan="1"><time datetime="2018-08-29"/>&nbsp;
+        </td>
+        <td colspan="1">
+            <a href="https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/master/272/"
+               style="text-decoration: none;text-align: left;">
+                https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/master/273/
+            </a>
+        </td>
+        <td colspan="1">&nbsp;</td>
+        <td colspan="1">&nbsp;</td>
+        <td colspan="1">&nbsp;</td>
+        <td colspan="1">&nbsp;</td>
+        <td colspan="1">90</td>
+        <td colspan="1">60(-2)</td>
+        <td colspan="1">0</td>
+        <td colspan="1">30(+2)</td>
+        <td colspan="1">11</td>
+        <td colspan="1">13</td>
+        <td colspan="1">&nbsp;</td>
+        <td colspan="1">0</td>
+    </tr>
+    <tr>
+        <td colspan="1"><time datetime="2018-08-28"/>&nbsp;
+        </td>
+        <td colspan="1">
+            <a href="https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/master/272/">
+                https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/master/272/
+            </a>
+        </td>
+        <td colspan="1">&nbsp;</td>
+        <td colspan="1">&nbsp;</td>
+        <td colspan="1">&nbsp;</td>
+        <td colspan="1">&nbsp;</td>
+        <td colspan="1">90</td>
+        <td colspan="1">62 (-19)</td>
+        <td colspan="1">0</td>
+        <td colspan="1">28 (+19)</td>
+        <td colspan="1">
+            <p>6</p>
+        </td>
+        <td colspan="1">25
+            <p>&nbsp;</p>
+        </td>
+        <td colspan="1">&nbsp;</td>
+        <td colspan="1">0</td>
+    </tr>
+    <tr>
+        <td><time datetime="2018-08-27"/>&nbsp;
+        </td>
+        <td>
+            <a href="https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/master/271/">
+                https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/master/271/
+            </a>
+        </td>
+        <td colspan="1">&nbsp;</td>
+        <td colspan="1">&nbsp;</td>
+        <td colspan="1">&nbsp;</td>
+        <td colspan="1">&nbsp;</td>
+        <td>90</td>
+        <td colspan="1">81</td>
+        <td colspan="1">0</td>
+        <td colspan="1">9</td>
+        <td colspan="1">&nbsp;</td>
+        <td colspan="1">&nbsp;</td>
+        <td colspan="1">&nbsp;</td>
+        <td colspan="1">&nbsp;</td>
+    </tr>
+</tbody>
+</table><h2>Production Test Results</h2><p>&nbsp;</p><table>
+<tbody>
+    <tr>
+        <th colspan="1">&nbsp;</th>
+        <th colspan="1">&nbsp;</th>
+        <th colspan="4">Local Testing (Kedar)</th>
+        <th colspan="8">Jenkins Testing (Akash)</th>
+    </tr>
+    <tr>
+        <th>Date</th>
+        <th>Jenkins Link</th>
+        <th>Tests</th>
+        <th colspan="1">Pass</th>
+        <th colspan="1">Fail</th>
+        <th colspan="1">Pending</th>
+        <th colspan="1">Tests</th>
+        <th colspan="1">Passed</th>
+        <th colspan="1">Pending</th>
+        <th colspan="1">Total Failed</th>
+        <th colspan="1">
+            <p>
+                <span style="color: rgb(0,128,0);">Newly Passing Tests</span>
+            </p>
+            <p>
+                <span style="color: rgb(0,128,0);">(Progress)</span>
+            </p>
+        </th>
+        <th colspan="1">
+            <p>
+                <span style="color: rgb(255,0,0);">Newly Failing Tests</span>
+            </p>
+            <p>
+                <span style="color: rgb(255,0,0);">(Regressions)</span>
+            </p>
+        </th>
+        <th colspan="1">New App Defects</th>
+        <th colspan="1">
+            <p>
+                <span style="color: rgb(255,153,0);">New Pending Tests</span>
+            </p>
+            <p>
+                <span style="color: rgb(255,153,0);">(Increased Scope)</span>
+            </p>
+        </th>
+    </tr>
+    <tr>
+        <td colspan="1">&nbsp;</td>
+        <td colspan="1">
+            <span style="color: rgb(11,5,18);">&nbsp;</span>
+        </td>
+        <td colspan="1">&nbsp;</td>
+        <td colspan="1">&nbsp;</td>
+        <td colspan="1">&nbsp;</td>
+        <td colspan="1">&nbsp;</td>
+        <td colspan="1">&nbsp;</td>
+        <td colspan="1">&nbsp;</td>
+        <td colspan="1">&nbsp;</td>
+        <td colspan="1">&nbsp;</td>
+        <td colspan="1">&nbsp;</td>
+        <td colspan="1">&nbsp;</td>
+        <td colspan="1">&nbsp;</td>
+        <td colspan="1">&nbsp;</td>
+    </tr>
+</tbody>
+</table>

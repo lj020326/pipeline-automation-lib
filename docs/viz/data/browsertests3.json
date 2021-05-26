@@ -1,0 +1,146 @@
+{
+  "name": "ATH Pipeline",
+  "children": [
+    {
+      "name": "Test Group [0]: Windows-Chrome",
+      "children": [
+        {
+          "name": "Test Case [0]: browserstackChromeVersion: 68",
+          "children": [
+            {
+              "name": "run: 1"
+            },
+            {
+              "name": "run: 2"
+            },
+            {
+              "name": "run: 3"
+            }
+          ]
+        },
+        {
+          "name": "Test Case [1]: browserstackChromeVersion: 67",
+          "children": [
+            {
+              "name": "run: 1"
+            },
+            {
+              "name": "run: 2"
+            },
+            {
+              "name": "run: 3"
+            }
+          ]
+        },
+        {
+          "name": "Test Case [2]: browserstackChromeVersion: 65",
+          "children": [
+            {
+              "name": "run: 1"
+            },
+            {
+              "name": "run: 2"
+            },
+            {
+              "name": "run: 3"
+            }
+          ]
+        },
+        {
+          "name": "Test Case [3]: browserstackChromeVersion: 64",
+          "children": [
+            {
+              "name": "run: 1"
+            },
+            {
+              "name": "run: 2"
+            },
+            {
+              "name": "run: 3"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Test Group [1]: Windows-Firefox",
+      "children": [
+        {
+          "name": "Test Case [0]: browserstackFirefoxVersion: 61",
+          "children": [
+            {
+              "name": "run: 1"
+            },
+            {
+              "name": "run: 2"
+            },
+            {
+              "name": "run: 3"
+            }
+          ]
+        },
+        {
+          "name": "Test Case [1]: browserstackFirefoxVersion: 60",
+          "children": [
+            {
+              "name": "run: 1"
+            },
+            {
+              "name": "run: 2"
+            },
+            {
+              "name": "run: 3"
+            }
+          ]
+        },
+        {
+          "name": "Test Case [2]: browserstackFirefoxVersion: 59",
+          "children": [
+            {
+              "name": "run: 1"
+            },
+            {
+              "name": "run: 2"
+            },
+            {
+              "name": "run: 3"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Test Group [2]: MacOS",
+      "children": [
+        {
+          "name": "Test Case [0]: browserstackSafariVersion: 11.1",
+          "children": [
+            {
+              "name": "run: 1"
+            },
+            {
+              "name": "run: 2"
+            },
+            {
+              "name": "run: 3"
+            }
+          ]
+        },
+        {
+          "name": "Test Case [1]: browserstackSafariVersion: 11.0",
+          "children": [
+            {
+              "name": "run: 1"
+            },
+            {
+              "name": "run: 2"
+            },
+            {
+              "name": "run: 3"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

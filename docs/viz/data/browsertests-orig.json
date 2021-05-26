@@ -1,0 +1,60 @@
+{
+  "name": "ATH Pipeline",
+  "parent": "null",
+  "children": [
+    {
+      "name": "Windows-Chrome",
+      "parent": "ATH Pipeline",
+      "children": [
+        {
+          "name": "browserstackChromeVersion: 68",
+          "parent": "Windows-Chrome"
+        },
+        {
+          "name": "browserstackChromeVersion: 67",
+          "parent": "Windows-Chrome"
+        },
+        {
+          "name": "browserstackChromeVersion: 65",
+          "parent": "Windows-Chrome"
+        },
+        {
+          "name": "browserstackChromeVersion: 64",
+          "parent": "Windows-Chrome"
+        }
+      ]
+    },
+    {
+      "name": "Windows-Firefox",
+      "parent": "ATH Pipeline",
+      "children": [
+        {
+          "name": "browserstackFirefoxVersion: 61",
+          "parent": "Windows-Firefox"
+        },
+        {
+          "name": "browserstackFirefoxVersion: 60",
+          "parent": "Windows-Firefox"
+        },
+        {
+          "name": "browserstackFirefoxVersion: 59",
+          "parent": "Windows-Firefox"
+        }
+      ]
+    },
+    {
+      "name": "MacOS",
+      "parent": "ATH Pipeline",
+      "children": [
+        {
+          "name": "browserstackSafariVersion: 11.1",
+          "parent": "MacOS"
+        },
+        {
+          "name": "browserstackSafariVersion: 11.0",
+          "parent": "MacOS"
+        }
+      ]
+    }
+  ]
+}

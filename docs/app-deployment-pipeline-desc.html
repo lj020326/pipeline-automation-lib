@@ -1,0 +1,8 @@
+<p><span style="font-family: Arial, sans-serif; font-size: 16px;">Information for the Deployment Jobs pipeline framework is located at <span style="background-color: #00ff00;"><a href="https://fusion.dettonville.int/confluence/display/MAPI/How+to+use+the+App+Deployment+Pipeline">How to use the App Deployment Pipeline</a>.</span></span></p>
+<p><span style="font-family: Arial, sans-serif; font-size: 16px;">The current deployment environment configuration is <span style="background-color: #00ff00;">defined in the yaml section <a style="background-color: #00ff00;" href="https://fusion.dettonville.int/stash/projects/API/repos/dcapi-automation-pipeline/browse/vars/runAppDeployEnv.groovy">here</a> and information on how to <span style="background-color: #00ff00;">deploy app components using the framework is <a style="background-color: #00ff00;" href="https://fusion.dettonville.int/confluence/display/MAPI/How+to+deploy+App+Component%28s%29+in+Deployment+Jobs">here</a>.</span></span></p>
+<p><span style="font-family: Arial, sans-serif; font-size: 16px;">
+    It is assumed that the yaml definition will be updated as versions are promoted through each environment.
+    Therefore, it is best to leave the first parameter "ArtifactVersion" blank unless necessary to override the environment defaults.
+    This also works to make the pipeline more efficient since input overrides should not be necessary unless an exception or edge case is desired for deployment.
+</span></p>
+

@@ -1,0 +1,43 @@
+{
+  "_class": "hudson.tasks.junit.TestResult",
+  "testActions": [],
+  "duration": 114.63,
+  "empty": false,
+  "failCount": 0,
+  "passCount": 1,
+  "skipCount": 0,
+  "suites": [
+    {
+      "cases": [
+        {
+          "testActions": [],
+          "age": 0,
+          "className": "Logins",
+          "duration": 0,
+          "errorDetails": null,
+          "errorStackTrace": null,
+          "failedSince": 0,
+          "name": "Authorized user can login to Mastercard Developers",
+          "skipped": false,
+          "skippedMessage": null,
+          "status": "PASSED",
+          "stderr": null,
+          "stdout": null
+        }
+      ],
+      "duration": 114.63,
+      "enclosingBlockNames": [
+        "Aggregate Results"
+      ],
+      "enclosingBlocks": [
+        "186"
+      ],
+      "id": null,
+      "name": "Logins",
+      "nodeId": "208",
+      "stderr": null,
+      "stdout": null,
+      "timestamp": "2019-04-04 09:04:05"
+    }
+  ]
+}

@@ -1,0 +1,81 @@
+responseString: {
+  "request_id":"1b2a9a87-0f16-7e25-0590-e3db1d099ef4",
+  "lease_id":"",
+  "renewable":false,
+  "lease_duration":0,
+  "data":null,
+  "wrap_info":null,
+  "warnings":null,
+  "auth": {
+    "client_token":"fcdf059c-3ec5-f590-28b7-9938b4d58e86",
+    "accessor":"416746f5-a87c-925a-3ef5-44195075df87",
+    "policies":["csc_lifecycle-rw","default"],
+    "metadata": {
+      "role_name":"csc_lifecycle"
+    },
+    "lease_duration":2764800,
+    "renewable":true,
+    "entity_id":"b7aea77b-9caa-de33-3fa7-ca7ed35642b8"
+  }
+}
+
+{
+  "request_id":"3a6a7fda-9e9a-9300-76b1-be943cf83515",
+  "lease_id":"",
+  "renewable":false,
+  "lease_duration":2764800,
+  "data": {
+    "mypassword":"somepassword"
+  },
+  "wrap_info":null,
+  "warnings":null,
+  "auth":null
+}
+
+ymlTemplate {
+    yml="""
+    release:
+        vault:
+          environments:
+            nyc_dev:
+              vault_credentials: 'lifecycle_nyc_dev_vault'
+              directory: 'csc_lifecycle/secrets'
+              verbose: 'false'
+              jenkins_credentials:
+                - credentials_id: 'test-insert-vault-creds1'
+                - credentials_id: 'test-insert-vault-creds2'
+              insert:
+                - key: 'key1'
+                  value: 'value1'
+                - key: 'key2'
+                  value: 'value2'
+            nyc_stage:
+              vault_credentials: 'lifecycle_nyc_stage_vault'
+              verbose: 'false'
+              directory: 'csc_lifecycle/secrets'
+              insert:
+                - key: 'key1'
+                  value: 'value1'
+                - key: 'key2'
+                  value: 'value2'
+              nyc_prod:
+                vault_credentials: 'lifecycle_nyc_prod_vault'
+                directory: 'csc_lifecycle/secrets'
+                jenkins_credentials:
+                  - credentials_id: 'test-insert-vault-creds1'
+                  - credentials_id: 'test-insert-vault-creds2'
+"""
+}
+
+ymlTemplate {
+    yml="""
+    release:
+        vault:
+          environments:
+            nyc_dev:
+              vault_credentials: 'lifecycle_nyc_prod_vault'
+              directory: 'csc_lifecycle/secrets'
+              jenkins_credentials:
+                - credentials_id: 'test-insert-vault-creds1'
+"""
+}
