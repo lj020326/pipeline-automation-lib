@@ -67,7 +67,7 @@ def call(Map params=[:]) {
                             (ANSIBLE) : [
                                 (ANSIBLE_INSTALLATION)    : "ansible-local",
                                 (ANSIBLE_PLAYBOOK)        : 'site.yml',
-                                (ANSIBLE_INVENTORY)       : 'inventory',
+                                (ANSIBLE_INVENTORY)       : 'inventory/hosts.ini',
                                 (ANSIBLE_TAGS)            : "${env.JOB_BASE_NAME}",
                                 (ANSIBLE_CREDENTIALS_ID)  : "jenkins-ansible-ssh",
                                 (ANSIBLE_VAULT_CREDENTIALS_ID)  : "ansible-vault-pwd-file",
