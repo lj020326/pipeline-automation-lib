@@ -67,7 +67,8 @@ def call(Map params=[:]) {
                             (ANSIBLE) : [
                                 (ANSIBLE_INSTALLATION)    : "ansible-local",
                                 (ANSIBLE_PLAYBOOK)        : 'site.yml',
-                                (ANSIBLE_INVENTORY)       : 'inventory/hosts.ini',
+//                                (ANSIBLE_INVENTORY)       : 'inventory/hosts.ini',
+                                (ANSIBLE_INVENTORY)       : "${config.ansibleInventory}",
                                 (ANSIBLE_TAGS)            : "${env.JOB_BASE_NAME}",
                                 (ANSIBLE_CREDENTIALS_ID)  : "jenkins-ansible-ssh",
                                 (ANSIBLE_VAULT_CREDENTIALS_ID)  : "ansible-vault-pwd-file",
@@ -153,6 +154,8 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.timeoutUnit = config.get('timeoutUnit', 'HOURS')
 //    config.ansibleGalaxyForceOpt = config.get('ansibleGalaxyForceOpt', '--force')
     config.ansibleGalaxyForceOpt = config.get('ansibleGalaxyForceOpt', '')
+//    config.ansibleInventory = config.get('ansibleInventory', 'inventory')
+    config.ansibleInventory = config.get('ansibleInventory', 'inventory/hosts.ini')
 
     log.setLevel(config.logLevel)
 
