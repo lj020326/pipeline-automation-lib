@@ -101,8 +101,8 @@ void buildAndPublishImage(Logger log, Map config) {
     dir (config.buildDir) {
 
         def app
-        String stageName = "build ${config.buildImageLabel} ${config.buildPath}"
-        if (config.buildPath!=null) stageName += " ${config.buildPath}"
+        String stageName = "build ${config.buildImageLabel}"
+        if (config.buildPath) stageName += " ${config.buildPath}"
 
         stage("${stageName}") {
             // ref: https://www.jenkins.io/doc/book/pipeline/docker/
