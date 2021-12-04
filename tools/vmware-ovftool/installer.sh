@@ -2,7 +2,7 @@
 
 bundle_file=VMware-ovftool-4.3.0-7948156-lin.x86_64.bundle
 bundle_file_archive="${bundle_file}.tgz"
-bundle_url="http://pxeboot.johnson.local:9080/vmware/${bundle_file_archive}"
+bundle_url="http://pxeboot.johnson.int:9080/vmware/${bundle_file_archive}"
 bin=./ovftool/bin/ovftool
 
 echo "PWD=${PWD}"

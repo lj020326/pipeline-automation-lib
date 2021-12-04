@@ -57,8 +57,8 @@ Map loadPipelineConfig(Logger log, Map params) {
     log.info("${logPrefix} copy immutable params map to mutable config map")
     config = MapMerge.merge(config, params)
 
-//    config.get("registryUrl","https://registry.media.johnson.local:5000")
-    config.get("registryUrl","https://media.johnson.local:5000")
+//    config.get("registryUrl","https://registry.media.johnson.int:5000")
+    config.get("registryUrl","https://media.johnson.int:5000")
 //    config.get("registryUrl","https://media.dettonville.int:5000")
     config.get("registryCredId", "docker-registry-admin")
     config.get("buildImageLabel", "${env.JOB_NAME.split('/')[-2]}")
