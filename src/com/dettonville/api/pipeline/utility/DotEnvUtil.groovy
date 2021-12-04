@@ -27,7 +27,7 @@ class DotEnvUtil implements Serializable {
 
     def envContent = """
     SRCI_HOST=${cerseiHost}
-    MASTERCARD_SRC_HOST=${varysHost}
+    DETTONVILLE_SRC_HOST=${varysHost}
     """
 
     steps.writeFile file: ".env", text: envContent
