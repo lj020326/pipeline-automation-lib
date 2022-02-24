@@ -1,0 +1,69 @@
+---
+pipeline:
+  artifactoryBaseUrl: "https://artifacts.dettonville.int"
+  jenkinsArtifactoryCredId: "dcapi_ci_vcs_user"
+  jenkinsBitbucketCredId: "dcapi_ci_vcs_user"
+
+  publishToArtifactoryFromBranch: "develop"
+  createSnapshotFromBranch: "develop"
+
+  pcfEnvironments:
+    nyc-dev:
+      phase: develop
+      jenkinsM3NodeLabel: QA-M3
+      jenkinsCaaSNodeLabel: QA-CAAS-CLIENT
+      jenkinsDeployNodeLabel: QA-CF-CLI
+      pcfApiUrl: api.system.nyc.pcfdev00.dettonville.int
+      pcfAppDomain: apps.nyc.pcfdev00.dettonville.int
+      truststoreFilename: "devpaas-truststore.jks"
+      truststorePassword: "password"
+      pwdLabel: "X509-Default-non-PRD"
+      jenkinsPcfCredId: dcapi-pcf-nyc-dev-deploy
+
+    nyc-stage:
+      phase: stage
+      jenkinsM3NodeLabel: QA-M3
+      jenkinsCaaSNodeLabel: QA-CAAS-CLIENT
+      jenkinsDeployNodeLabel: QA-CF-CLI
+      pcfApiUrl: api.system.nyc.pcfstage00.dettonville.int
+      pcfAppDomain: apps.nyc.pcfstage00.dettonville.int
+      truststoreFilename: "stage-cacerts.jks"
+      truststorePassword: "password"
+      pwdLabel: "X509-Default-non-PRD"
+      jenkinsPcfCredId: dcapi-pcf-nyc-stage-deploy
+
+    nyc-prod:
+      phase: production
+      jenkinsM3NodeLabel: M3
+      jenkinsCaaSNodeLabel: CAAS-CLIENT
+      jenkinsDeployNodeLabel: CF-CLI
+      pcfApiUrl: api.system.nyc.pcfprod00.dettonville.int
+      pcfAppDomain: apps.nyc.pcfprod00.dettonville.int
+      truststoreFilename: "prod-cacerts.jks"
+      truststorePassword: "changeit"
+      pwdLabel: "X509-prd-ci-cd-sw"
+      jenkinsPcfCredId: dcapi-pcf-nyc-prod-deploy
+
+    jpn-:
+      phase: production
+      jenkinsM3NodeLabel: M3
+      jenkinsCaaSNodeLabel: CAAS-CLIENT
+      jenkinsDeployNodeLabel: CF-CLI
+      pcfApiUrl: api.system.jpn.pcfprod00.dettonville.int
+      pcfAppDomain: apps.jpn.pcfprod00.dettonville.int
+      truststoreFilename: "prod-cacerts.jks"
+      truststorePassword: "changeit"
+      pwdLabel: "X509-prd-ci-cd-sw"
+      jenkinsPcfCredId: dcapi-pcf-jpn-deploy
+
+    bel-prod:
+      phase: production
+      jenkinsM3NodeLabel: M3
+      jenkinsCaaSNodeLabel: CAAS-CLIENT
+      jenkinsDeployNodeLabel: CF-CLI
+      pcfApiUrl: api.system.bel.pcfprod00.dettonville.int
+      pcfAppDomain: apps.bel.pcfprod00.dettonville.int
+      truststoreFilename: "prod-cacerts.jks"
+      truststorePassword: "changeit"
+      pwdLabel: "X509-prd-ci-cd-sw"
+      jenkinsPcfCredId: dcapi-pcf-bel-prod-deploy

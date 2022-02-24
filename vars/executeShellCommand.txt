@@ -1,0 +1,23 @@
+<h1>Execute Shell Command</h1>
+
+<p>
+    Lets you run a shell command without having to worry about the platform.
+</p>
+
+<h2>How to use</h2>
+
+<p>
+    Below is an example how you can use the change dsl method from a Jenkins pipeline.
+</p>
+
+<p>
+    <pre>
+    @Library(['stpl-pipeline-core']) _
+
+    node {
+        def someName = 'ABC'
+        def command = "echo $ABC" // platform independent command
+        executeShellCommand(command) // will work on Linux and Windows alike
+    }
+    <pre>
+</p>

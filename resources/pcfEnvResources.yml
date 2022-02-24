@@ -1,0 +1,31 @@
+---
+pcfEnvironments:
+    develop:
+      pcfJenkinsNodeLabel: QA-LINUX
+      pcfFoundations:
+        -
+          name: nyc-dev
+          pcfApiUrl: api.system.nyc.pcfdev00.dettonville.int
+          pcfAppsDomain: apps.nyc.pcfdev00.dettonville.int
+          pcfJenkinsCredId: dcapi-pcf-nyc-dev-deploy
+    master:
+      pcfJenkinsNodeLabel: PROD-LINUX
+      pcfFoundations:
+        -
+          name: nyc-prod
+          pcfApiUrl: api.system.nyc.pcfprod00.dettonville.int
+          pcfAppsDomain: apps.nyc.pcfprod00.dettonville.int
+          pcfJenkinsCredId: dcapi-pcf-nyc-prod-deploy
+        -
+          name: jpn-
+          pcfApiUrl: api.system.jpn.pcfprod00.dettonville.int
+          pcfAppsDomain: apps.jpn.pcfprod00.dettonville.int
+          pcfJenkinsCredId: dcapi-pcf-jpn-deploy
+    stage:
+      pcfJenkinsNodeLabel: QA-LINUX
+      pcfFoundations:
+        -
+          name: nyc-stage
+          pcfApiUrl: api.system.nyc.pcfstage00.dettonville.int
+          pcfAppsDomain: apps.nyc.pcfstage00.dettonville.int
+          pcfJenkinsCredId: dcapi-pcf-nyc-stage-deploy
