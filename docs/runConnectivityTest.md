@@ -1,5 +1,5 @@
 
-Runs the [Connectivity Test](https://repo.dettonville.int/stash/projects/API/repos/dcapi-automation-pipeline/browse/vars/runConnectivityTest.groovy) in a configurable way
+Runs the [Connectivity Test](../vars/runConnectivityTest.groovy) in a configurable way
 
 The configuration is divided into two parts, one related to the step itself and another related to how the Connectivity Test is run.
 
