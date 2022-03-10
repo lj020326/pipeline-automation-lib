@@ -24,7 +24,7 @@ def call(Map params=[:]) {
             disableConcurrentBuilds()
             timestamps()
             buildDiscarder(logRotator(numToKeepStr: '10'))
-            // skipDefaultCheckout()
+            skipDefaultCheckout(config.skipDefaultCheckout)
             timeout(time: config.timeout, unit: config.timeoutUnit)
         }
         stages {
@@ -144,6 +144,7 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.debugPipeline = config.get('debugPipeline', false)
     config.timeout = config.get('timeout', 3)
     config.timeoutUnit = config.get('timeoutUnit', 'HOURS')
+    config.skipDefaultCheckout = config.get('skipDefaultCheckout', true)
 
     config.gitBranch = config.get('gitBranch', '')
     config.gitRepoUrl = config.get('gitRepoUrl', '')

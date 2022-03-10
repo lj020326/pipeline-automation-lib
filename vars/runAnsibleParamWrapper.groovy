@@ -43,6 +43,8 @@ def call(Map config=[:]) {
         }
     }
 
+    config.skipDefaultCheckout = false
+
     config.gitBranch = 'master'
     config.gitRepoUrl = 'git@bitbucket.org:lj020326/ansible-datacenter.git'
     config.gitCredId = 'bitbucket-ssh-lj020326'
