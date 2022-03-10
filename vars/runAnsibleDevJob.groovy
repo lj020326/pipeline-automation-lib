@@ -13,8 +13,6 @@ def call(Map config=[:]) {
 
     String logPrefix="runAnsibleDevJob():"
 
-    config.gitRepoUrl = config.get('gitRepoUrl', "https://github.com/lj020326/ansible-configvars-examples.git")
-
     List paramList = []
 
     Map paramMap = [
