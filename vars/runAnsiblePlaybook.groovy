@@ -85,9 +85,6 @@ def call(Map params=[:]) {
                         config = MapMerge.merge(ansibleCfg, config)
                         log.info("config=${JsonUtils.printToJsonString(config)}")
 
-//                        ansible.execPlaybook(config)
-
-//                        List secretVars=[usernamePassword(credentialsId: 'dcapi-ansible-ssh-password', passwordVariable: 'ANSIBLE_SSH_PASSWORD', usernameVariable: 'ANSIBLE_SSH_USERNAME')]
                         // require SSH credentials for some ansible jobs (e.g., deploy-cacerts)
                         // ref: https://emilwypych.com/2019/06/15/how-to-pass-credentials-to-jenkins-pipeline/
                         List secretVars=[
