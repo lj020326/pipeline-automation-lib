@@ -44,6 +44,8 @@ def call(Map config=[:]) {
     }
 
     config.ansibleTags = config.get('ansibleTags', "${env.JOB_BASE_NAME}")
+    // config.ansibleInventory = config.get('ansibleInventory', './inventory')
+    config.ansibleInventory = config.get('ansibleInventory', './inventory/hosts.ini')
 
     log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
 
