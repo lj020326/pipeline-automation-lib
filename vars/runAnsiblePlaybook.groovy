@@ -66,12 +66,11 @@ def call(Map params=[:]) {
                         Map ansibleCfg = [
                             (ANSIBLE) : [
                                 (ANSIBLE_INSTALLATION)    : "ansible-local",
-                                (ANSIBLE_PLAYBOOK)        : 'site.yml',
-//                                (ANSIBLE_INVENTORY)       : 'inventory/hosts.ini',
+                                (ANSIBLE_PLAYBOOK)        : "${config.ansiblePlaybook}",
                                 (ANSIBLE_INVENTORY)       : "${config.ansibleInventory}",
                                 (ANSIBLE_TAGS)            : "${env.JOB_BASE_NAME}",
-                                (ANSIBLE_CREDENTIALS_ID)  : "jenkins-ansible-ssh",
-                                (ANSIBLE_VAULT_CREDENTIALS_ID)  : "ansible-vault-pwd-file",
+                                (ANSIBLE_CREDENTIALS_ID)  : "${config.ansibleSshCredId}",
+                                (ANSIBLE_VAULT_CREDENTIALS_ID)  : "${config.ansibleVaultCredId}",
                                 (ANSIBLE_COLORIZED)       : true,
                                 (ANSIBLE_DISABLE_HOST_KEY_CHECK): true,
                                 (ANSIBLE_EXTRA_PARAMETERS): [],
@@ -156,6 +155,15 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.ansibleGalaxyForceOpt = config.get('ansibleGalaxyForceOpt', '')
 //    config.ansibleInventory = config.get('ansibleInventory', 'inventory')
     config.ansibleInventory = config.get('ansibleInventory', 'inventory/hosts.ini')
+
+    config.ansibleSshCredId = config.get('ansibleSshCredId', 'jenkins-ansible-ssh')
+    config.ansibleVaultCredId = config.get('ansibleVaultCredId', 'ansible-vault-pwd-file')
+    config.ansiblePlaybook = config.get('ansiblePlaybook', 'site.yml')
+    config.ansibleTags = config.get('ansibleTags', "${env.JOB_BASE_NAME}")
+
+    config.gitBranch = config.get('gitBranch', 'master')
+    config.gitRepoUrl = config.get('gitRepoUrl', 'git@bitbucket.org:lj020326/ansible-datacenter.git')
+    config.gitCredId = config.get('gitCredId', 'bitbucket-ssh-lj020326')
 
     log.setLevel(config.logLevel)
 

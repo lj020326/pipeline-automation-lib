@@ -11,25 +11,24 @@ def call(Map config=[:]) {
     Logger.init(this, LogLevel.INFO)
     Logger log = new Logger(this)
 
-    String logPrefix="runAnsibleParamWrapper():"
+    String logPrefix="runAnsibleDevJob():"
+
+    config.athGitRepo = config.get('gitRepo', "https://github.com/lj020326/ansible-configvars-examples.git")
 
     List paramList = []
-
-//    List inventoryList = ["admin01",
-//                       "media01",
-//                       "nas02"]
 
     Map paramMap = [
         ansibleLimitHosts  : string(defaultValue: "", description: "Limit playbook to specified inventory hosts\nE.g., 'host01', 'host01,host02'", name: 'AnsibleLimitHosts'),
         ansibleDebugFlag   : choice(choices: "\n-v\n-vv\n-vvv\n-vvvv", description: "Choose Ansible Debug Level", name: 'AnsibleDebugFlag'),
-//        ansibleLimitHosts      : choice(choices: inventoryList.join('\n'), description: "Choose Inventory Host", name: 'AnsibleLimitHosts'),
-//        debugPipeline      : booleanParam(defaultValue: false, description: "Debug Pipeline?", name: 'DebugPipeline'),
-//        logLevel           : choice(choices: "INFO\nDEBUG\nWARN\nERROR", description: "Choose Log Level", name: 'LogLevel')
     ]
 
     paramMap.each { String key, def param ->
         paramList.addAll([param])
     }
+
+    String defaultBranch = "master"
+    List branchList = Utilities.getRepoBranchList(this, config.gitRepoUrl, defaultBranch)
+    paramList.addAll([choice(choices: branchList.join('\n'), description: "Choose Branch", name: 'GitBranch')])
 
     properties([
         parameters(paramList),
