@@ -95,6 +95,7 @@ def call(Map params=[:]) {
 //                                sshUserPrivateKey(credentialsId: 'jenkins-ansible-ssh', keyFileVariable: 'ssh-key', usernameVariable: 'ssh-user')
                         ]
 
+                        sh "ls -Fla"
                         withCredentials(secretVars) {
                             ansible.execPlaybook(config)
                         }
