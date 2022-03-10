@@ -68,7 +68,7 @@ def call(Map params=[:]) {
                                 (ANSIBLE_INSTALLATION)    : "ansible-local",
                                 (ANSIBLE_PLAYBOOK)        : "${config.ansiblePlaybook}",
                                 (ANSIBLE_INVENTORY)       : "${config.ansibleInventory}",
-                                (ANSIBLE_TAGS)            : "${env.JOB_BASE_NAME}",
+                                (ANSIBLE_TAGS)            : "${config.ansibleTags}",
                                 (ANSIBLE_CREDENTIALS_ID)  : "${config.ansibleSshCredId}",
                                 (ANSIBLE_VAULT_CREDENTIALS_ID)  : "${config.ansibleVaultCredId}",
                                 (ANSIBLE_COLORIZED)       : true,
@@ -159,7 +159,7 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.ansibleSshCredId = config.get('ansibleSshCredId', 'jenkins-ansible-ssh')
     config.ansibleVaultCredId = config.get('ansibleVaultCredId', 'ansible-vault-pwd-file')
     config.ansiblePlaybook = config.get('ansiblePlaybook', 'site.yml')
-    config.ansibleTags = config.get('ansibleTags', "${env.JOB_BASE_NAME}")
+    config.ansibleTags = config.get('ansibleTags', '')
 
     config.gitBranch = config.get('gitBranch', 'master')
     config.gitRepoUrl = config.get('gitRepoUrl', 'git@bitbucket.org:lj020326/ansible-datacenter.git')

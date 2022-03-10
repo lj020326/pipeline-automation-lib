@@ -13,11 +13,12 @@ def call(Map config=[:]) {
 
     String logPrefix="runAnsibleDevJob():"
 
-    config.athGitRepo = config.get('gitRepo', "https://github.com/lj020326/ansible-configvars-examples.git")
+    config.gitRepoUrl = config.get('gitRepoUrl', "https://github.com/lj020326/ansible-configvars-examples.git")
 
     List paramList = []
 
     Map paramMap = [
+        ansibleLimitHosts  : string(defaultValue: "", description: "Limit playbook to specified inventory hosts\nE.g., 'host01', 'host01,host02'", name: 'AnsibleLimitHosts'),
         ansibleLimitHosts  : string(defaultValue: "", description: "Limit playbook to specified inventory hosts\nE.g., 'host01', 'host01,host02'", name: 'AnsibleLimitHosts'),
         ansibleDebugFlag   : choice(choices: "\n-v\n-vv\n-vvv\n-vvvv", description: "Choose Ansible Debug Level", name: 'AnsibleDebugFlag'),
     ]
@@ -25,10 +26,6 @@ def call(Map config=[:]) {
     paramMap.each { String key, def param ->
         paramList.addAll([param])
     }
-
-    String defaultBranch = "master"
-    List branchList = Utilities.getRepoBranchList(this, config.gitRepoUrl, defaultBranch)
-    paramList.addAll([choice(choices: branchList.join('\n'), description: "Choose Branch", name: 'GitBranch')])
 
     properties([
         parameters(paramList),
