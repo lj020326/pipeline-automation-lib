@@ -39,6 +39,10 @@ def call(Map config=[:]) {
         }
     }
 
+    // config.ansibleInventory = config.get('ansibleInventory', './inventory')
+    config.ansibleInventory = 'hosts'
+    config.ansiblePlaybook = 'site.yml'
+
     log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
 
     runAnsiblePlaybook(config)
