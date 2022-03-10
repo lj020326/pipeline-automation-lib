@@ -145,7 +145,7 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.debugPipeline = config.get('debugPipeline', false)
     config.timeout = config.get('timeout', 3)
     config.timeoutUnit = config.get('timeoutUnit', 'HOURS')
-    config.skipDefaultCheckout = config.get('skipDefaultCheckout', true)
+    config.skipDefaultCheckout = config.get('skipDefaultCheckout', false)
 
     config.gitBranch = config.get('gitBranch', '')
     config.gitRepoUrl = config.get('gitRepoUrl', '')
