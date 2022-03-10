@@ -24,7 +24,7 @@ def call(Map params=[:]) {
             disableConcurrentBuilds()
             timestamps()
             buildDiscarder(logRotator(numToKeepStr: '10'))
-            skipDefaultCheckout()
+            // skipDefaultCheckout()
             timeout(time: config.timeout, unit: config.timeoutUnit)
         }
         stages {
