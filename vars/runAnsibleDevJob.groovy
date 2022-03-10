@@ -19,7 +19,7 @@ def call(Map config=[:]) {
 
     Map paramMap = [
         ansibleLimitHosts  : string(defaultValue: "", description: "Limit playbook to specified inventory hosts\nE.g., 'host01', 'host01,host02'", name: 'AnsibleLimitHosts'),
-        ansibleLimitHosts  : string(defaultValue: "", description: "Limit playbook to specified inventory hosts\nE.g., 'host01', 'host01,host02'", name: 'AnsibleLimitHosts'),
+        ansibleTags  : string(defaultValue: "", description: "Run playbook with tags\nE.g., 'bootstrap-linux', etc", name: 'AnsibleTags'),
         ansibleDebugFlag   : choice(choices: "\n-v\n-vv\n-vvv\n-vvvv", description: "Choose Ansible Debug Level", name: 'AnsibleDebugFlag'),
     ]
 

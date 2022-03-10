@@ -106,7 +106,7 @@ class AcceptanceTestHarness implements Serializable {
 
             if (!pipelineConfig.runSingleMvnCmdMode) {
                 runMvnClean()
-            }-
+            }
 
             if (pipelineConfig.useLocalMvnRepo && !pipelineConfig.runSingleMvnCmdMode) {
                 dsl.stash name: pipelineConfig.STASH_NAME, includes: "**, ${pipelineConfig.mvnLocalRepoDir}/", excludes: "deploy_configs/"

@@ -42,12 +42,12 @@ def call(Map config=[:]) {
             config[key] = value
         }
     }
-    
+
     config.ansibleTags = config.get('ansibleTags', "${env.JOB_BASE_NAME}")
 
     log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
 
-    runAnsiblePlaybook(config)
+    runAnsiblePlaybookSCM(config)
 
 }
 

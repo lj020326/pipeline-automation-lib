@@ -20,42 +20,36 @@ def call(Map params=[:]) {
         agent {
             label agentLabel as String
         }
-//        agent any
-//        agent {
-//            label "ansible"
-//        }
         options {
             disableConcurrentBuilds()
             timestamps()
             buildDiscarder(logRotator(numToKeepStr: '10'))
             skipDefaultCheckout()
-//            timeout(time: 2, unit: 'HOURS')
             timeout(time: config.timeout, unit: config.timeoutUnit)
         }
         stages {
-            stage('Checkout') {
-                steps {
-                    script {
-//                        deleteDir()
-//                        git credentialsId: 'bitbucket-ssh-lj020326', url: 'git@bitbucket.org:lj020326/ansible-datacenter.git'
-                        checkout scm: [
-                            $class: 'GitSCM',
-                            branches: [[name: "master"]],
-                            userRemoteConfigs: [[credentialsId: 'bitbucket-ssh-lj020326',
-                                                 url: 'git@bitbucket.org:lj020326/ansible-datacenter.git']]
-                        ]
+            // stage('Checkout') {
+            //     steps {
+            //         script {
+            //             // git credentialsId: 'bitbucket-ssh-lj020326', url: 'git@bitbucket.org:lj020326/ansible-datacenter.git'
+            //             checkout scm: [
+            //                 $class: 'GitSCM',
+            //                 branches: [[name: "master"]],
+            //                 userRemoteConfigs: [[credentialsId: 'bitbucket-ssh-lj020326',
+            //                                      url: 'git@bitbucket.org:lj020326/ansible-datacenter.git']]
+            //             ]
 
-                    }
-                }
-            }
+            //         }
+            //     }
+            // }
             stage('Run Galaxy Install') {
                 steps {
                     // install galaxy roles
-//                    sh "ansible-galaxy install -r roles/requirements.yml"
-//                    sh "ansible-galaxy collection install -r roles/requirements.yml"
-                    sh "ansible-galaxy install ${config.ansibleGalaxyForceOpt} -r roles/requirements.yml"
-                    sh "ansible-galaxy collection install ${config.ansibleGalaxyForceOpt} -r roles/requirements.yml"
-
+                    // sh "ansible-galaxy install -r roles/requirements.yml"
+                    // sh "ansible-galaxy collection install -r roles/requirements.yml"
+                    // sh "ansible-galaxy install ${config.ansibleGalaxyForceOpt} -r roles/requirements.yml"
+                    // sh "ansible-galaxy collection install ${config.ansibleGalaxyForceOpt} -r roles/requirements.yml"
+                    sh "ansible-galaxy collection install ${config.ansibleGalaxyForceOpt} -r collections/requirements.yml"
                 }
             }
 
