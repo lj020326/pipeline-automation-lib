@@ -89,6 +89,16 @@ void call(String emailFrom, String emailDist, def currentBuild, String fileName,
     emailBody += """
             <p>Please follow the reports</p> <div><span style=color:${styleColor};font-weight:bold;font-size:24pt>${buildStatus}</span></div> \
             """
+    if (config?.testSuiteName) {
+        emailBody += """
+            <div><span style=color:${styleColor};font-weight:bold;font-size:16pt>Test Suite: ${config.testSuiteName}</span></div> \
+            """
+    }
+    if (config?.browserPlatform) {
+        emailBody += """
+            <div><span style=color:${styleColor};font-weight:bold;font-size:16pt>Browser: ${config.browserPlatform}</span></div> \
+            """
+    }
 
     emailBody += """\
         ${emailBodyReportLinks}
