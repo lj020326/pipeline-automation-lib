@@ -43,6 +43,9 @@ def call(Map params=[:]) {
             //     }
             // }
             stage('Run Galaxy Install') {
+                when {
+                    expression { config.ansibleCollectionsRequirements }
+                }
                 steps {
                     // install galaxy roles
                     // sh "ansible-galaxy install -r roles/requirements.yml"
@@ -145,6 +148,9 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.debugPipeline = config.get('debugPipeline', false)
     config.timeout = config.get('timeout', 3)
     config.timeoutUnit = config.get('timeoutUnit', 'HOURS')
+    
+    // config.ansibleCollectionsRequirements = config.get('ansibleCollectionsRequirements', 'collections/requirements.yml')
+    config.ansibleCollectionsRequirements = config.get('ansibleCollectionsRequirements', '')
 //    config.ansibleGalaxyForceOpt = config.get('ansibleGalaxyForceOpt', '--force')
     config.ansibleGalaxyForceOpt = config.get('ansibleGalaxyForceOpt', '')
 //    config.ansibleInventory = config.get('ansibleInventory', 'inventory')
