@@ -28,20 +28,23 @@ def call(Map params=[:]) {
             timeout(time: config.timeout, unit: config.timeoutUnit)
         }
         stages {
-            // stage('Checkout') {
-            //     steps {
-            //         script {
-            //             // git credentialsId: 'bitbucket-ssh-lj020326', url: 'git@bitbucket.org:lj020326/ansible-datacenter.git'
-            //             checkout scm: [
-            //                 $class: 'GitSCM',
-            //                 branches: [[name: "master"]],
-            //                 userRemoteConfigs: [[credentialsId: 'bitbucket-ssh-lj020326',
-            //                                      url: 'git@bitbucket.org:lj020326/ansible-datacenter.git']]
-            //             ]
+            stage('Checkout') {
+                when {
+                    expression { config.performGitCheckout }
+                }
+                steps {
+                    script {
+                        // git credentialsId: 'bitbucket-ssh-lj020326', url: 'git@bitbucket.org:lj020326/ansible-datacenter.git'
+                        checkout scm: [
+                            $class: 'GitSCM',
+                            branches: [[name: "master"]],
+                            userRemoteConfigs: [[credentialsId: 'bitbucket-ssh-lj020326',
+                                                 url: 'git@bitbucket.org:lj020326/ansible-datacenter.git']]
+                        ]
 
-            //         }
-            //     }
-            // }
+                    }
+                }
+            }
             stage('Run Galaxy Install') {
                 when {
                     expression { config.ansibleCollectionsRequirements }
@@ -142,6 +145,11 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.timeout = config.get('timeout', 3)
     config.timeoutUnit = config.get('timeoutUnit', 'HOURS')
 
+    config.gitBranch = config.get('gitBranch', '')
+    config.gitRepoUrl = config.get('gitRepoUrl', '')
+    config.gitCredId = config.get('gitCredId', '')
+    config.gitPullRepo = config.get('gitPullRepo', false)
+
     // config.ansibleCollectionsRequirements = config.get('ansibleCollectionsRequirements', 'collections/requirements.yml')
     config.ansibleCollectionsRequirements = config.get('ansibleCollectionsRequirements', '')
 //    config.ansibleGalaxyForceOpt = config.get('ansibleGalaxyForceOpt', '--force')
@@ -153,10 +161,6 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.ansibleVaultCredId = config.get('ansibleVaultCredId', 'ansible-vault-pwd-file')
     config.ansiblePlaybook = config.get('ansiblePlaybook', 'site.yml')
     config.ansibleTags = config.get('ansibleTags', '')
-
-    config.gitBranch = config.get('gitBranch', 'master')
-    config.gitRepoUrl = config.get('gitRepoUrl', 'git@bitbucket.org:lj020326/ansible-datacenter.git')
-    config.gitCredId = config.get('gitCredId', 'bitbucket-ssh-lj020326')
 
     log.setLevel(config.logLevel)
 
