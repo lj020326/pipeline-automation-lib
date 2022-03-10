@@ -107,14 +107,17 @@ def call(Map params=[:]) {
         post {
             always {
                 script {
-                    ansibleLogSummary = sh(returnStdout: true, script: "tail -n 50 ansible.log").trim()
-//                    def build_status = "${currentBuild.result ? currentBuild.result : 'SUCCESS'}"
-//                    emailext (
-//                        to: "${appConfigs.pipeline.alwaysEmailList}",
-//                        from: "${email_from}",
-//                        subject: "BUILD ${build_status}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-//                        body: "${env.EMAIL_BODY} \n\nBuild Log:\n${ansibleLogSummary}",
-//                    )
+                    if (fileExists("ansible.log")) {
+                        ansibleLogSummary = sh(returnStdout: true, script: "tail -n 50 ansible.log").trim()
+                        sendEmailReport(config.emailFrom, config.emailDist, currentBuild, 'ansible.log')
+                        // def build_status = "${currentBuild.result ? currentBuild.result : 'SUCCESS'}"
+                        // emailext (
+                        //     to: "${appConfigs.pipeline.alwaysEmailList}",
+                        //     from: "${email_from}",
+                        //     subject: "BUILD ${build_status}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                        //     body: "${env.EMAIL_BODY} \n\nBuild Log:\n${ansibleLogSummary}",
+                        // )
+                    }
                     sendEmail(currentBuild, env)
                 }
 
@@ -146,6 +149,11 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.timeout = config.get('timeout', 3)
     config.timeoutUnit = config.get('timeoutUnit', 'HOURS')
     config.skipDefaultCheckout = config.get('skipDefaultCheckout', false)
+
+//    config.emailDist = config.emailDist ?: "ljohnson@dettonville.org"
+    config.emailDist = config.get('emailDist',"ljohnson@dettonville.org")
+    // config.alwaysEmailDist = config.alwaysEmailDist ?: "ljohnson@dettonville.org"
+    config.emailFrom = config.emailFrom ?: "admin+ansible@dettonville.com"
 
     config.gitBranch = config.get('gitBranch', '')
     config.gitRepoUrl = config.get('gitRepoUrl', '')
