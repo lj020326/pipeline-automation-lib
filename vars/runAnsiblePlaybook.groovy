@@ -45,13 +45,16 @@ def call(Map params=[:]) {
                     }
                 }
             }
-            stage('Run Galaxy Install') {
+            stage('Run collections and roles Install') {
                 when {
                     expression { config.ansibleCollectionsRequirements }
                 }
                 steps {
                     // install galaxy roles
                     sh "ansible-galaxy collection install ${config.ansibleGalaxyForceOpt} -r ${config.ansibleCollectionsRequirements}"
+                    if (fileExists("./roles/requirements.yml")) {
+                        sh "ansible-galaxy install ${config.ansibleGalaxyForceOpt} -r ./roles/requirements.yml"
+                    }
                 }
             }
 
