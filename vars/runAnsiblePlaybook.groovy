@@ -50,10 +50,12 @@ def call(Map params=[:]) {
                     expression { config.ansibleCollectionsRequirements }
                 }
                 steps {
-                    // install galaxy roles
-                    sh "ansible-galaxy collection install ${config.ansibleGalaxyForceOpt} -r ${config.ansibleCollectionsRequirements}"
-                    if (fileExists("./roles/requirements.yml")) {
-                        sh "ansible-galaxy install ${config.ansibleGalaxyForceOpt} -r ./roles/requirements.yml"
+                    script {
+                        // install galaxy roles
+                        sh "ansible-galaxy collection install ${config.ansibleGalaxyForceOpt} -r ${config.ansibleCollectionsRequirements}"
+                        if (fileExists("./roles/requirements.yml")) {
+                            sh "ansible-galaxy install ${config.ansibleGalaxyForceOpt} -r ./roles/requirements.yml"
+                        }
                     }
                 }
             }
