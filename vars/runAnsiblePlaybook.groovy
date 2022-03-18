@@ -30,7 +30,7 @@ def call(Map params=[:]) {
         stages {
             stage('Checkout') {
                 when {
-                    expression { config.performGitCheckout }
+                    expression { config.gitPerformCheckout }
                 }
                 steps {
                     script {
@@ -148,13 +148,14 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.debugPipeline = config.get('debugPipeline', false)
     config.timeout = config.get('timeout', 3)
     config.timeoutUnit = config.get('timeoutUnit', 'HOURS')
-    config.skipDefaultCheckout = config.get('skipDefaultCheckout', false)
 
 //    config.emailDist = config.emailDist ?: "ljohnson@dettonville.org"
     config.emailDist = config.get('emailDist',"ljohnson@dettonville.org")
     // config.alwaysEmailDist = config.alwaysEmailDist ?: "ljohnson@dettonville.org"
     config.emailFrom = config.emailFrom ?: "admin+ansible@dettonville.com"
 
+    config.skipDefaultCheckout = config.get('skipDefaultCheckout', false)
+    config.gitPerformCheckout = config.get('gitPerformCheckout', !config.get('skipDefaultCheckout',false))
     config.gitBranch = config.get('gitBranch', '')
     config.gitRepoUrl = config.get('gitRepoUrl', '')
     config.gitCredId = config.get('gitCredId', '')
