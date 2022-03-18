@@ -37,9 +37,9 @@ def call(Map params=[:]) {
                         // git credentialsId: 'bitbucket-ssh-lj020326', url: 'git@bitbucket.org:lj020326/ansible-datacenter.git'
                         checkout scm: [
                             $class: 'GitSCM',
-                            branches: [[name: "master"]],
-                            userRemoteConfigs: [[credentialsId: 'bitbucket-ssh-lj020326',
-                                                 url: 'git@bitbucket.org:lj020326/ansible-datacenter.git']]
+                            branches: [[name: "${config.gitBranch}"]],
+                            userRemoteConfigs: [[credentialsId: "${config.gitCredId}",
+                                                 url: "${config.gitRepoUrl}"]]
                         ]
 
                     }
@@ -158,7 +158,6 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.gitBranch = config.get('gitBranch', '')
     config.gitRepoUrl = config.get('gitRepoUrl', '')
     config.gitCredId = config.get('gitCredId', '')
-    config.gitPullRepo = config.get('gitPullRepo', false)
 
     // config.ansibleCollectionsRequirements = config.get('ansibleCollectionsRequirements', 'collections/requirements.yml')
     config.ansibleCollectionsRequirements = config.get('ansibleCollectionsRequirements', '')

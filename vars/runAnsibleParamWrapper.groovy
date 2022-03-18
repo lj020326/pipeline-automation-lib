@@ -44,11 +44,9 @@ def call(Map config=[:]) {
     }
 
 //     config.skipDefaultCheckout = true
-
     config.gitBranch = 'master'
     config.gitRepoUrl = 'git@bitbucket.org:lj020326/ansible-datacenter.git'
     config.gitCredId = 'bitbucket-ssh-lj020326'
-    config.gitPullRepo = true
 
     config.ansibleCollectionsRequirements = 'collections/requirements.yml'
     config.ansibleTags = "${env.JOB_BASE_NAME}"
