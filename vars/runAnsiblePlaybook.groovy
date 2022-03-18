@@ -47,12 +47,14 @@ def call(Map params=[:]) {
             }
             stage('Run collections and roles Install') {
                 when {
-                    expression { config.ansibleCollectionsRequirements }
+                    expression { config.ansibleCollectionsRequirements || config.ansibleRolesRequirements }
                 }
                 steps {
                     script {
                         // install galaxy roles
-                        sh "ansible-galaxy collection install ${config.ansibleGalaxyForceOpt} -r ${config.ansibleCollectionsRequirements}"
+                        if (fileExists(config.ansibleCollectionsRequirements)) {
+                            sh "ansible-galaxy collection install ${config.ansibleGalaxyForceOpt} -r ${config.ansibleCollectionsRequirements}"
+                        }
                         if (fileExists(config.ansibleRolesRequirements)) {
                             sh "ansible-galaxy install ${config.ansibleGalaxyForceOpt} -r ${config.ansibleRolesRequirements}"
                         }
