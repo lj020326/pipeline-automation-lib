@@ -53,8 +53,8 @@ def call(Map params=[:]) {
                     script {
                         // install galaxy roles
                         sh "ansible-galaxy collection install ${config.ansibleGalaxyForceOpt} -r ${config.ansibleCollectionsRequirements}"
-                        if (fileExists("./roles/requirements.yml")) {
-                            sh "ansible-galaxy install ${config.ansibleGalaxyForceOpt} -r ./roles/requirements.yml"
+                        if (fileExists(config.ansibleRolesRequirements)) {
+                            sh "ansible-galaxy install ${config.ansibleGalaxyForceOpt} -r ${config.ansibleRolesRequirements}"
                         }
                     }
                 }
@@ -165,8 +165,9 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.gitRepoUrl = config.get('gitRepoUrl', '')
     config.gitCredId = config.get('gitCredId', '')
 
-    // config.ansibleCollectionsRequirements = config.get('ansibleCollectionsRequirements', 'collections/requirements.yml')
+    // config.ansibleCollectionsRequirements = config.get('ansibleCollectionsRequirements', './collections/requirements.yml')
     config.ansibleCollectionsRequirements = config.get('ansibleCollectionsRequirements', '')
+    config.ansibleRolesRequirements = config.get('ansibleRolesRequirements', './roles/requirements.yml')
 //    config.ansibleGalaxyForceOpt = config.get('ansibleGalaxyForceOpt', '--force')
     config.ansibleGalaxyForceOpt = config.get('ansibleGalaxyForceOpt', '')
 //    config.ansibleInventory = config.get('ansibleInventory', 'inventory')
