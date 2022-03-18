@@ -53,7 +53,8 @@ def call(Map config=[:]) {
     config.ansibleCollectionsRequirements = 'collections/requirements.yml'
     config.ansibleTags = "${env.JOB_BASE_NAME}"
     // config.ansibleInventory = './inventory'
-    config.ansibleInventory = './inventory/hosts.ini'
+//     config.ansibleInventory = './inventory/hosts.ini'
+    config.ansibleInventory = './inventory/dev/hosts.ini'
 
     log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
 
