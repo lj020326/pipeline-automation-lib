@@ -103,6 +103,8 @@ def call(Map params=[:]) {
                         ]
 
 //                         sh "ls -Fla"
+//                         sh "ls -Fla inventory/dev/group_vars"
+                        sh "tree inventory/dev/group_vars"
                         withCredentials(secretVars) {
                             ansible.execPlaybook(config)
                         }
