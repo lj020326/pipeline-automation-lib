@@ -49,10 +49,13 @@ def call(Map config=[:]) {
     config.gitCredId = 'bitbucket-ssh-lj020326'
 
     config.ansibleCollectionsRequirements = 'collections/requirements.yml'
+    config.ansibleRolesRequirements = './roles/requirements.yml'
     config.ansibleTags = "${env.JOB_BASE_NAME}"
-    // config.ansibleInventory = './inventory'
+    config.environment = "${env.JOB_NAME.split('/')[-2]}"
+
+//     config.ansibleInventory = './inventory'
 //     config.ansibleInventory = './inventory/hosts.ini'
-    config.ansibleInventory = './inventory/dev/hosts.ini'
+    config.ansibleInventory = "./inventory/${config.environment}/hosts.ini"
 
     log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
 
