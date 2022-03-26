@@ -53,11 +53,18 @@ def call(Map config=[:]) {
     config.ansibleTags = "${env.JOB_BASE_NAME}"
     config.environment = "${env.JOB_NAME.split('/')[-2]}"
 
+    config.towerHost = "https://awx.admin.johnson.int"
+
+    List ansibleEnvVarsList=[
+        "TOWER_HOST=${config.towerHost}"
+    ]
+    config.ansibleEnvVarsList = ansibleEnvVarsList
+
     List ansibleSecretVarsList=[
         usernamePassword(credentialsId: 'dcapi-ansible-ssh-password', passwordVariable: 'ANSIBLE_SSH_PASSWORD', usernameVariable: 'ANSIBLE_SSH_USERNAME'),
-//         sshUserPrivateKey(credentialsId: 'jenkins-ansible-ssh', keyFileVariable: 'ssh-key', usernameVariable: 'ssh-user')
+        string(credentialsId: 'awx-oauth-token', variable: 'TOWER_OAUTH_TOKEN')
     ]
-    config.ansibleSecretVarsList = "./inventory/${config.environment}/hosts.ini"
+    config.ansibleSecretVarsList = ansibleSecretVarsList
 
 //     config.ansibleInventory = './inventory'
 //     config.ansibleInventory = './inventory/hosts.ini'
