@@ -188,9 +188,10 @@ Map loadPipelineConfig(Logger log, Map params) {
     List secretVarsListDefault=[
         usernamePassword(credentialsId: 'dcapi-ansible-ssh-password', passwordVariable: 'ANSIBLE_SSH_PASSWORD', usernameVariable: 'ANSIBLE_SSH_USERNAME')
     ]
+    log.info("${logPrefix} secretVarsListDefault=${secretVarsListDefault}")
 
     config.ansibleSecretVarsList = config.get('ansibleSecretVarsList', secretVarsListDefault)
-    log.info("config.ansibleSecretVarsList=${config.ansibleSecretVarsList}")
+    log.info("${logPrefix} config.ansibleSecretVarsList=${config.ansibleSecretVarsList}")
 
     log.debug("${logPrefix} params=${params}")
     log.debug("${logPrefix} config=${config}")
