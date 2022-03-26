@@ -97,8 +97,10 @@ def call(Map params=[:]) {
 
                         sh "tree ${config.ansibleInventoryDir}/group_vars"
 
-                        withCredentials(config.ansibleSecretVarsList) {
-                            ansible.execPlaybook(config)
+                        withEnv(config.ansibleEnvVarsList) {
+                            withCredentials(config.ansibleSecretVarsList) {
+                                ansible.execPlaybook(config)
+                            }
                         }
 
                     }
