@@ -95,17 +95,9 @@ def call(Map params=[:]) {
                         config = MapMerge.merge(ansibleCfg, config)
                         log.info("config=${JsonUtils.printToJsonString(config)}")
 
-                        // require SSH credentials for some ansible jobs (e.g., deploy-cacerts)
-                        // ref: https://emilwypych.com/2019/06/15/how-to-pass-credentials-to-jenkins-pipeline/
-                        List secretVars=[
-                                usernamePassword(credentialsId: 'dcapi-ansible-ssh-password', passwordVariable: 'ANSIBLE_SSH_PASSWORD', usernameVariable: 'ANSIBLE_SSH_USERNAME'),
-//                                sshUserPrivateKey(credentialsId: 'jenkins-ansible-ssh', keyFileVariable: 'ssh-key', usernameVariable: 'ssh-user')
-                        ]
+                        sh "tree ${config.ansibleInventoryDir}/group_vars"
 
-//                         sh "ls -Fla"
-//                         sh "ls -Fla inventory/dev/group_vars"
-                        sh "tree inventory/dev/group_vars"
-                        withCredentials(secretVars) {
+                        withCredentials(config.ansibleSecretVarsList) {
                             ansible.execPlaybook(config)
                         }
 
@@ -130,8 +122,8 @@ def call(Map params=[:]) {
                     sendEmail(currentBuild, env)
                 }
 
-                echo "Empty current workspace dir"
-//                deleteDir()
+//                 echo "Empty current workspace dir"
+//                 deleteDir()
             }
         }
     }
@@ -176,11 +168,24 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.ansibleGalaxyForceOpt = config.get('ansibleGalaxyForceOpt', '')
 //    config.ansibleInventory = config.get('ansibleInventory', 'inventory')
     config.ansibleInventory = config.get('ansibleInventory', 'hosts')
+    config.ansibleInventoryDir = config.ansibleInventory.take(config.ansibleInventory.lastIndexOf('/'))
 
     config.ansibleSshCredId = config.get('ansibleSshCredId', 'jenkins-ansible-ssh')
     config.ansibleVaultCredId = config.get('ansibleVaultCredId', 'ansible-vault-pwd-file')
     config.ansiblePlaybook = config.get('ansiblePlaybook', 'site.yml')
     config.ansibleTags = config.get('ansibleTags', '')
+
+
+    config.ansibleEnvVarsList = config.get('ansibleEnvVarsList', [])
+
+    // require SSH credentials for some ansible jobs (e.g., deploy-cacerts)
+    // ref: https://emilwypych.com/2019/06/15/how-to-pass-credentials-to-jenkins-pipeline/
+    List secretVarsListDefault=[
+        usernamePassword(credentialsId: 'dcapi-ansible-ssh-password', passwordVariable: 'ANSIBLE_SSH_PASSWORD', usernameVariable: 'ANSIBLE_SSH_USERNAME'),
+//         sshUserPrivateKey(credentialsId: 'jenkins-ansible-ssh', keyFileVariable: 'ssh-key', usernameVariable: 'ssh-user')
+    ]
+
+    config.ansibleSecretVarsList = config.get('ansibleSecretVarsList', secretVarsListDefault)
 
     log.setLevel(config.logLevel)
 

@@ -53,6 +53,12 @@ def call(Map config=[:]) {
     config.ansibleTags = "${env.JOB_BASE_NAME}"
     config.environment = "${env.JOB_NAME.split('/')[-2]}"
 
+    List ansibleSecretVarsList=[
+        usernamePassword(credentialsId: 'dcapi-ansible-ssh-password', passwordVariable: 'ANSIBLE_SSH_PASSWORD', usernameVariable: 'ANSIBLE_SSH_USERNAME'),
+//         sshUserPrivateKey(credentialsId: 'jenkins-ansible-ssh', keyFileVariable: 'ssh-key', usernameVariable: 'ssh-user')
+    ]
+    config.ansibleSecretVarsList = "./inventory/${config.environment}/hosts.ini"
+
 //     config.ansibleInventory = './inventory'
 //     config.ansibleInventory = './inventory/hosts.ini'
     config.ansibleInventory = "./inventory/${config.environment}/hosts.ini"
