@@ -144,6 +144,12 @@ Map loadPipelineConfig(Logger log, Map params) {
         }
     }
 
+    log.setLevel(config.logLevel)
+
+    if (config.debugPipeline) {
+        log.setLevel(LogLevel.DEBUG)
+    }
+
     config.jenkinsNodeLabel = config.get('jenkinsNodeLabel',"ansible")
     config.logLevel = config.get('logLevel', "INFO")
     config.debugPipeline = config.get('debugPipeline', false)
@@ -184,12 +190,7 @@ Map loadPipelineConfig(Logger log, Map params) {
     ]
 
     config.ansibleSecretVarsList = config.get('ansibleSecretVarsList', secretVarsListDefault)
-
-    log.setLevel(config.logLevel)
-
-    if (config.debugPipeline) {
-        log.setLevel(LogLevel.DEBUG)
-    }
+    log.info("config.ansibleSecretVarsList=${config.ansibleSecretVarsList}")
 
     log.debug("${logPrefix} params=${params}")
     log.debug("${logPrefix} config=${config}")
