@@ -122,8 +122,8 @@ def call(Map params=[:]) {
                     sendEmail(currentBuild, env)
                 }
 
-//                 echo "Empty current workspace dir"
-//                 deleteDir()
+                echo "Empty current workspace dir"
+                deleteDir()
             }
         }
     }
