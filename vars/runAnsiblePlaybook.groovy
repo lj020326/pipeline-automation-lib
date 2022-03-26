@@ -190,6 +190,7 @@ Map loadPipelineConfig(Logger log, Map params) {
     ]
     log.info("${logPrefix} secretVarsListDefault=${secretVarsListDefault}")
 
+    log.info("${logPrefix} config.ansibleSecretVarsList[0]=${config.ansibleSecretVarsList}")
     config.ansibleSecretVarsList = config.get('ansibleSecretVarsList', secretVarsListDefault)
     log.info("${logPrefix} config.ansibleSecretVarsList=${config.ansibleSecretVarsList}")
 
