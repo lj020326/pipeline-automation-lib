@@ -56,7 +56,8 @@ def call(Map config=[:]) {
     config.towerHost = "https://awx.admin.dettonville.int"
 
     List ansibleEnvVarsList=[
-        "TOWER_HOST=${config.towerHost}"
+        "TOWER_HOST=${config.towerHost}",
+        "CONTROLLER_VERIFY_SSL=no"
     ]
     config.ansibleEnvVarsList = ansibleEnvVarsList
 
