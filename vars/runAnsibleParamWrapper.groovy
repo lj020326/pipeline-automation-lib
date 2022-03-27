@@ -53,7 +53,7 @@ def call(Map config=[:]) {
     config.ansibleTags = "${env.JOB_BASE_NAME}"
     config.environment = "${env.JOB_NAME.split('/')[-2]}"
 
-    config.towerHost = "https://awx.admin.johnson.int"
+    config.towerHost = "https://awx.admin.dettonville.int"
 
     List ansibleEnvVarsList=[
         "TOWER_HOST=${config.towerHost}"
