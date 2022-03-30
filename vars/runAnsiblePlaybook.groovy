@@ -169,8 +169,7 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.gitRepoUrl = config.get('gitRepoUrl', '')
     config.gitCredId = config.get('gitCredId', '')
 
-    // config.ansibleCollectionsRequirements = config.get('ansibleCollectionsRequirements', './collections/requirements.yml')
-    config.ansibleCollectionsRequirements = config.get('ansibleCollectionsRequirements', '')
+    config.ansibleCollectionsRequirements = config.get('ansibleCollectionsRequirements', './collections/requirements.yml')
     config.ansibleRolesRequirements = config.get('ansibleRolesRequirements', './roles/requirements.yml')
 //    config.ansibleGalaxyForceOpt = config.get('ansibleGalaxyForceOpt', '--force')
     config.ansibleGalaxyForceOpt = config.get('ansibleGalaxyForceOpt', '')
