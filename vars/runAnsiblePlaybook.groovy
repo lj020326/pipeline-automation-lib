@@ -175,7 +175,7 @@ Map loadPipelineConfig(Logger log, Map params) {
 //    config.ansibleGalaxyForceOpt = config.get('ansibleGalaxyForceOpt', '--force')
     config.ansibleGalaxyForceOpt = config.get('ansibleGalaxyForceOpt', '')
 //    config.ansibleInventory = config.get('ansibleInventory', 'inventory')
-    config.ansibleInventory = config.get('ansibleInventory', 'hosts')
+    config.ansibleInventory = config.get('ansibleInventory', 'hosts.ini')
     config.ansibleInventoryDir = config.ansibleInventory.take(config.ansibleInventory.lastIndexOf('/'))
 
     config.ansibleSshCredId = config.get('ansibleSshCredId', 'jenkins-ansible-ssh')
