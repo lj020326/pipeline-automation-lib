@@ -43,6 +43,8 @@ def call(Map config=[:]) {
     config.ansiblePlaybook = 'site.yml'
     config.gitPerformCheckout = false
 
+    log.info("${logPrefix} env.BRANCH_NAME=${$env.BRANCH_NAME}")
+
     log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
 
     runAnsiblePlaybook(config)
