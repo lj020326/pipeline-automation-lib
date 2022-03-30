@@ -33,14 +33,13 @@ def call(Map params=[:]) {
             stage("Build and Publish Docker Image") {
                 steps {
                     script {
-//                            config.buildDirList.eachWithIndex { String buildDir, i ->
-                            config.buildImageList.each { String buildInfo ->
-//                                config.get("buildInfo", buildInfo)
-//                                config = MapMerge.merge(config, buildInfo)
-//                                buildAndPublishImage(log, config)
-                                Map buildConfig = MapMerge.merge(config.findAll { !["buildImageList"].contains(it.key) }, buildInfo)
-                                buildAndPublishImage(log, buildConfig)
-                            }
+                        config.buildImageList.each { String buildInfo ->
+//                             config.get("buildInfo", buildInfo)
+//                             config = MapMerge.merge(config, buildInfo)
+//                             buildAndPublishImage(log, config)
+                            Map buildConfig = MapMerge.merge(config.findAll { !["buildImageList"].contains(it.key) }, buildInfo)
+                            buildAndPublishImage(log, buildConfig)
+                        }
                     }
                 }
             }
