@@ -41,6 +41,7 @@ def call(Map config=[:]) {
 //     config.ansibleInventory = 'hosts'
     config.ansibleInventory = 'hosts.ini'
     config.ansiblePlaybook = 'site.yml'
+    config.gitPerformCheckout = false
 
     log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
 
