@@ -89,7 +89,7 @@ void execPlaybook(Map config) {
         error("provided ansible configuration is null, make sure to configure properly.")
     }
 
-    if (ansibleCfg.containsKey(ANSIBLE_LOG_LEVEL) {
+    if (ansibleCfg.containsKey(ANSIBLE_LOG_LEVEL)) {
         log.setLevel(ansibleCfg[ANSIBLE_LOG_LEVEL])
     }
 
