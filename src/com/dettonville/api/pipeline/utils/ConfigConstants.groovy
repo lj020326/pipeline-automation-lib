@@ -31,6 +31,7 @@ class ConfigConstants {
   public static final ANSI_COLOR_CSS = "css"
 
   public static final String ANSIBLE = "ansible"
+  public static final String ANSIBLE_LOG_LEVEL = "ansibleLogLevel"
   public static final String ANSIBLE_COLORIZED = "colorized"
   public static final String ANSIBLE_CREDENTIALS_ID = "credentialsId"
   public static final String ANSIBLE_VAULT_CREDENTIALS_ID = "vaultCredentialsId"
