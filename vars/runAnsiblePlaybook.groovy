@@ -87,7 +87,6 @@ def call(Map params=[:]) {
 
                         if (config.containsKey('ansiblePythonInterpreter')) {
                             ansibleCfg[ANSIBLE][ANSIBLE_EXTRA_VARS]=["ansible_python_interpreter" : config.ansiblePythonInterpreter]
-                            ansibleCfg[ANSIBLE][ANSIBLE_INJECT_PARAMS]=true
                         }
                         if (config.containsKey('ansibleDebugFlag')) {
                             ansibleCfg[ANSIBLE][ANSIBLE_EXTRA_PARAMETERS]+=[config.ansibleDebugFlag]
