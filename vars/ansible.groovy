@@ -81,6 +81,9 @@ void checkoutRequirements(String requirementsYmlPath) {
  */
 void execPlaybook(Map config) {
     Logger log = new Logger("ansible:execPlaybook -> ")
+    if (config.logLevel) {
+        log.setLevel(config.logLevel)
+    }
 
     Map ansibleCfg = config[ANSIBLE] ?: null
 
