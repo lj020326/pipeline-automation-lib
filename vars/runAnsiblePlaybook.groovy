@@ -94,6 +94,9 @@ def call(Map params=[:]) {
                         if (config.containsKey('ansibleLimitHosts')) {
                             ansibleCfg[ANSIBLE][ANSIBLE_LIMIT]=config.ansibleLimitHosts
                         }
+                        if (config?.ansibleLogLevel) {
+                            ansibleCfg[ANSIBLE][ANSIBLE_LOG_LEVEL]=config.ansibleLogLevel
+                        }
 
                         config = MapMerge.merge(ansibleCfg, config)
                         log.info("config=${JsonUtils.printToJsonString(config)}")

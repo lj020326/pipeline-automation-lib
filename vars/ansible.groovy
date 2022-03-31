@@ -81,15 +81,16 @@ void checkoutRequirements(String requirementsYmlPath) {
  */
 void execPlaybook(Map config) {
     Logger log = new Logger("ansible:execPlaybook -> ")
-    if (config.logLevel) {
-        log.setLevel(config.logLevel)
-    }
 
     Map ansibleCfg = config[ANSIBLE] ?: null
 
     if (ansibleCfg == null) {
         log.fatal("provided ansible configuration is null, make sure to configure properly.")
         error("provided ansible configuration is null, make sure to configure properly.")
+    }
+
+    if (ansibleCfg?.ANSIBLE_LOG_LEVEL) {
+        log.setLevel(ansibleCfg.ANSIBLE_LOG_LEVEL)
     }
 
     Boolean colorized = ansibleCfg[ANSIBLE_COLORIZED] != null ? ansibleCfg[ANSIBLE_COLORIZED] : true

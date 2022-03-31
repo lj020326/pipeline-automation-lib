@@ -41,6 +41,7 @@ def call(Map config=[:]) {
     config.ansibleInventory = config.get('ansibleInventory','hosts.ini')
     config.ansiblePlaybook = config.get('ansiblePlaybook','site.yml')
     config.gitPerformCheckout = false
+    config.ansibleLogLevel = 'trace'
 
     log.info("${logPrefix} env.BRANCH_NAME=${env.BRANCH_NAME}")
 
