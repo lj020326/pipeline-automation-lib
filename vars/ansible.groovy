@@ -90,7 +90,7 @@ void execPlaybook(Map config) {
     }
 
     if (ansibleCfg?.ANSIBLE_LOG_LEVEL) {
-        log.setLevel(ansibleCfg.ANSIBLE_LOG_LEVEL)
+        log.setLevel(ansibleCfg[ANSIBLE_LOG_LEVEL])
     }
 
     Boolean colorized = ansibleCfg[ANSIBLE_COLORIZED] != null ? ansibleCfg[ANSIBLE_COLORIZED] : true
