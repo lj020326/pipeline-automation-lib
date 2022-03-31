@@ -85,6 +85,9 @@ def call(Map params=[:]) {
                             ]
                         ]
 
+                        if (config.containsKey('ansiblePythonInterpreter')) {
+                            ansibleCfg[ANSIBLE][ANSIBLE_EXTRA_PARAMETERS]+=["ansible_python_interpreter" : config.ansiblePythonInterpreter]
+                        }
                         if (config.containsKey('ansibleDebugFlag')) {
                             ansibleCfg[ANSIBLE][ANSIBLE_EXTRA_PARAMETERS]+=[config.ansibleDebugFlag]
                         }
