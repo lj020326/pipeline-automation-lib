@@ -50,7 +50,9 @@ def call(Map config=[:]) {
 
     config.ansibleCollectionsRequirements = 'collections/requirements.yml'
     config.ansibleRolesRequirements = './roles/requirements.yml'
-    config.ansibleTags = "${env.JOB_BASE_NAME}"
+//     config.ansibleTags = "${env.JOB_BASE_NAME}"
+    // ref: https://stackoverflow.com/questions/62213910/run-only-tasks-with-a-certain-tag-or-untagged
+    config.ansibleTags = "untagged,${env.JOB_BASE_NAME}"
     config.environment = "${env.JOB_NAME.split('/')[-2]}"
 
     config.towerHost = "https://awx.admin.dettonville.int"
