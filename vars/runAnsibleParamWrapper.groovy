@@ -57,7 +57,8 @@ def call(Map config=[:]) {
 
     List ansibleEnvVarsList=[
         "TOWER_HOST=${config.towerHost}",
-        "CONTROLLER_VERIFY_SSL=no"
+        "CONTROLLER_VERIFY_SSL=no",
+        "LANG"="en_US.UTF-8"
     ]
     config.ansibleEnvVarsList = ansibleEnvVarsList
 
