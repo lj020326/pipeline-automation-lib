@@ -97,8 +97,6 @@ void execPlaybook(Map config) {
 
     String installation = ansibleCfg[ANSIBLE_INSTALLATION] ?: null
     Integer forks = ansibleCfg[ANSIBLE_FORKS] ?: 5
-    Boolean checkMode = ansibleCfg[ANSIBLE_CHECK_MODE] != null ? ansibleCfg[ANSIBLE_CHECK_MODE] : false
-    Boolean diffMode = ansibleCfg[ANSIBLE_DIFF_MODE] != null ? ansibleCfg[ANSIBLE_DIFF_MODE] : false
     String limit = ansibleCfg[ANSIBLE_LIMIT] ?: null
     String playbook = ansibleCfg[ANSIBLE_PLAYBOOK] ?: null
     String credentialsId = ansibleCfg[ANSIBLE_CREDENTIALS_ID] ?: null

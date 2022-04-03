@@ -306,29 +306,6 @@ Map config = [
 
 Controls how many forks will be used during Ansible Playbook execution.
 
-#### `checkMode` (optional)
-
-|||
-|---|---|
-|Constant|[`ConfigConstants.ANSIBLE_SUDO`](../src/com.dettonville.api.pipeline/utils/ConfigConstants.groovy)|
-|Type|`Boolean`|
-|Default|`false`|
-
-When enabled [check mode](https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html#using-check-mode) will be used.
-
-#### `diffMode` (optional)
-
-|||
-|---|---|
-|Constant|[`ConfigConstants.ANSIBLE_SUDO`](../src/com.dettonville.api.pipeline/utils/ConfigConstants.groovy)|
-|Type|`Boolean`|
-|Default|`false`|
-
-When enabled [diff mode](https://docs.ansible.com/ansible/latest/user_guide/playbooks_checkmode.html#using-diff-mode) will be used. The diff mode option for ansible-playbook can be used alone or with [`checkMode`](#checkMode-optional) setting. When you run in diff mode, any module that supports diff mode reports the changes made or, if used with check mode, the changes that would have been made. Diff mode is most common in modules that manipulate files (for example, the template module) but other modules might also show ‘before and after’ information (for example, the user module).
-When enabled sudo (become) will be used. Combined with [`sudoUser`](#sudouser-optional) setting.
-
-Diff mode produces a large amount of output, so it is best used when checking a single host at a time.
-
 #### `injectParams` (optional)
 
 |||

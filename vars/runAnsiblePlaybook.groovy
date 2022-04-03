@@ -99,6 +99,12 @@ def call(Map params=[:]) {
                         if (config.containsKey('ansibleDebugFlag')) {
                             ansibleCfg[ANSIBLE][ANSIBLE_EXTRA_PARAMETERS]+=[config.ansibleDebugFlag]
                         }
+                        if (config.containsKey('ansibleCheckMode')) {
+                            ansibleCfg[ANSIBLE][ANSIBLE_EXTRA_PARAMETERS]+=['--check']
+                        }
+                        if (config.containsKey('ansibleDiffMode')) {
+                            ansibleCfg[ANSIBLE][ANSIBLE_EXTRA_PARAMETERS]+=['--diff']
+                        }
                         if (config.containsKey('ansibleLimitHosts')) {
                             ansibleCfg[ANSIBLE][ANSIBLE_LIMIT]=config.ansibleLimitHosts
                         }
