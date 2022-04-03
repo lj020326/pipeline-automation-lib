@@ -85,6 +85,12 @@ def call(Map params=[:]) {
                             ]
                         ]
 
+                        if (config.containsKey('ansibleCheckMode')) {
+                            ansibleCfg[ANSIBLE][ANSIBLE_CHECK_MODE]=config.ansibleCheckMode
+                        }
+                        if (config.containsKey('ansibleDiffMode')) {
+                            ansibleCfg[ANSIBLE][ANSIBLE_DIFF_MODE]=config.ansibleDiffMode
+                        }
                         if (config.containsKey('ansiblePythonInterpreter')) {
                             ansibleCfg[ANSIBLE][ANSIBLE_EXTRA_VARS]=["ansible_python_interpreter" : config.ansiblePythonInterpreter]
                         }

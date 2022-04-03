@@ -22,9 +22,8 @@ def call(Map config=[:]) {
     Map paramMap = [
         ansibleLimitHosts  : string(defaultValue: "", description: "Limit playbook to specified inventory hosts\nE.g., 'host01', 'host01,host02'", name: 'AnsibleLimitHosts'),
         ansibleDebugFlag   : choice(choices: "\n-v\n-vv\n-vvv\n-vvvv", description: "Choose Ansible Debug Level", name: 'AnsibleDebugFlag'),
-//        ansibleLimitHosts      : choice(choices: inventoryList.join('\n'), description: "Choose Inventory Host", name: 'AnsibleLimitHosts'),
-//        debugPipeline      : booleanParam(defaultValue: false, description: "Debug Pipeline?", name: 'DebugPipeline'),
-//        logLevel           : choice(choices: "INFO\nDEBUG\nWARN\nERROR", description: "Choose Log Level", name: 'LogLevel')
+        useCheckMode       : booleanParam(defaultValue: false, description: "Dry Run?", name: 'UseCheckMode'),
+        useDiffMode        : booleanParam(defaultValue: false, description: "Dry Run?", name: 'UseDiffMode')
     ]
 
     paramMap.each { String key, def param ->

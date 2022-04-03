@@ -38,6 +38,8 @@ class ConfigConstants {
   public static final String ANSIBLE_EXTRA_PARAMETERS = "extraParameters"
   public static final String ANSIBLE_EXTRA_VARS = "extraVars"
   public static final String ANSIBLE_FORKS = "forks"
+  public static final String ANSIBLE_CHECK_MODE = "checkMode"
+  public static final String ANSIBLE_DIFF_MODE = "diffMode"
   public static final String ANSIBLE_INJECT_PARAMS = "injectParams"
   public static final String ANSIBLE_INSTALLATION = "installation"
   public static final String ANSIBLE_INVENTORY = "inventory"
