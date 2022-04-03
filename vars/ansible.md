@@ -190,8 +190,6 @@ ansible.execPlaybook(
             (ANSIBLE_EXTRA_PARAMETERS): ["-list","-of","-params"],
             (ANSIBLE_EXTRA_VARS)      : [ "<name1>" : "<value1>", "<name2>" : "<value2>" ],
             (ANSIBLE_FORKS)           : 5,
-            (ANSIBLE_CHECK_MODE)      : false,
-            (ANSIBLE_DIFF_MODE)       : false,
             (ANSIBLE_SUDO)            : false,
             (ANSIBLE_INSTALLATION)    : "<ansible-installation>",
             (ANSIBLE_INVENTORY)       : "<path/to/inventory>",
