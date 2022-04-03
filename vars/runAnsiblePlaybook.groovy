@@ -73,7 +73,6 @@ def call(Map params=[:]) {
                                 (ANSIBLE_INVENTORY)       : "${config.ansibleInventory}",
                                 (ANSIBLE_TAGS)            : "${config.ansibleTags}",
                                 (ANSIBLE_CREDENTIALS_ID)  : "${config.ansibleSshCredId}",
-                                (ANSIBLE_VAULT_CREDENTIALS_ID)  : "${config.ansibleVaultCredId}",
                                 (ANSIBLE_COLORIZED)       : true,
                                 (ANSIBLE_DISABLE_HOST_KEY_CHECK): true,
                                 (ANSIBLE_EXTRA_PARAMETERS): [],
@@ -85,6 +84,9 @@ def call(Map params=[:]) {
                             ]
                         ]
 
+                        if (config.containsKey('ansibleVaultCredId')) {
+                            ansibleCfg[ANSIBLE][ANSIBLE_VAULT_CREDENTIALS_ID]=config.ansibleVaultCredId
+                        }
                         if (config.containsKey('ansibleCheckMode')) {
                             ansibleCfg[ANSIBLE][ANSIBLE_CHECK_MODE]=config.ansibleCheckMode
                         }
