@@ -15,10 +15,6 @@ def call(Map config=[:]) {
 
     List paramList = []
 
-//    List inventoryList = ["admin01",
-//                       "media01",
-//                       "nas02"]
-
     Map paramMap = [
         ansibleLimitHosts  : string(defaultValue: "", description: "Limit playbook to specified inventory hosts\nE.g., 'host01', 'host01,host02'", name: 'AnsibleLimitHosts'),
         ansibleDebugFlag   : choice(choices: "\n-v\n-vv\n-vvv\n-vvvv", description: "Choose Ansible Debug Level", name: 'AnsibleDebugFlag'),
