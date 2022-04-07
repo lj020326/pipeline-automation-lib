@@ -1,0 +1,155 @@
+---
+## for info on how to configure pipeline - see here:
+## ref: https://repo.dettonville.int/stash/projects/API/repos/dcapi-automation-pipeline/browse/vars/runATH.md
+pipeline:
+  gitRepoUrl: "https://repo.dettonville.int/stash/scm/api/testsslserver.git"
+
+  logLevel: "INFO"
+#  logLevel: "DEBUG"
+#  useSimulationMode: true
+
+#  emailDist: "ljohnson@dettonville.org"
+#  alwaysEmailDist: "ljohnson@dettonville.org"
+#  emailFrom: "DCAPI.TestAutomation@dettonville.org"
+
+  timeout: 10
+  runcount: 2
+
+  testList:
+    - command: nslookup
+#    - command: dig
+#    - command: mtr
+#    - command: traceroute
+#    - command: bash
+#    - command: ping
+    - command: curl
+    - command: telnet
+#    - command: sslpoke
+    - command: sslhandshake
+
+  nodeList:
+    - nodeLabel: jnk2stl0
+      network: nyc-prod-admin
+      testNetworks:
+        - prod-admin
+        - nyc-prod-admin
+        - jpn-admin
+        - external
+    - nodeLabel: jnk2stl1
+      network: nyc-prod-admin
+      testNetworks:
+        - prod-admin
+        - nyc-prod-admin
+        - jpn-admin
+        - external
+#    - nodeLabel: jnk4stl1
+#      network: qa-admin
+#      testNetworks:
+#        - qa-admin
+#        - external
+#    - nodeLabel: jnk4stl2
+#      network: qa-admin
+#      testNetworks:
+#        - qa-admin
+#        - external
+#    - nodeLabel: jnk4stl3
+#      network: qa-admin
+#      testNetworks:
+#        - qa-admin
+#        - external
+#    - nodeLabel: jnk4stl4
+#      network: qa-admin
+#      testNetworks:
+#        - qa-admin
+#        - external
+
+  networks:
+    prod-admin:
+      siteList:
+        - endpoint: developer.dettonville.org:443
+        - endpoint: api.dettonville.org:443
+        - endpoint: sandbox.api.dettonville.org:443
+        - endpoint: sandbox.proxy.api.dettonville.org:443
+        - endpoint: dcapiadmin.dettonville.org:443
+        - endpoint: iapp.dettonville.int:443
+        - endpoint: jenkins.sandbox.api.dettonville.int:443
+          ip:
+            - 10.154.221.29:443
+            - 10.150.221.29:443
+
+    nyc-prod-admin:
+      siteList:
+        - endpoint: 10.154.246.101:443
+        - endpoint: 10.154.246.136:443
+        - endpoint: 10.154.246.248:443
+        - endpoint: 10.154.232.160:443
+        - endpoint: nyc.jenkins.sandbox.api.dettonville.int:443
+        - endpoint: 10.154.221.29:443
+        - endpoint: nyc.internal.cicd.sandbox.proxy.api.dettonville.int:443
+        - endpoint: nyc.internal.cicd.developer.dettonville.int:443
+
+    jpn-admin:
+      siteList:
+        - endpoint: 10.150.246.35:443
+        - endpoint: 10.150.246.36:443
+        - endpoint: 10.150.246.248:443
+        - endpoint: 10.150.232.160:443
+        - endpoint: jpn.jenkins.sandbox.api.dettonville.int:443
+        - endpoint: 10.150.221.29:443
+        - endpoint: jpn.internal.cicd.sandbox.proxy.api.dettonville.int
+        - endpoint: jpn.internal.cicd.developer.dettonville.int
+
+    qa-admin:
+      siteList:
+        - endpoint: stage.dcapiadmin.dettonville.org:443
+        - endpoint: stage2.dcapiadmin.dettonville.org:443
+          ip:
+            - 209.64.211.214
+        - endpoint: 209.64.211.214:443
+          dns:
+            - stage2.dcapiadmin.dettonville.org
+        - endpoint: stage.api.dettonville.org:443
+          ip:
+            - 10.157.246.63
+        - endpoint: 10.157.246.63:443
+          dns:
+            - stage.api.dettonville.org
+        - endpoint: stage.proxy.api.dettonville.org:443
+        - endpoint: sbx.stage.api.dettonville.org:443
+        - endpoint: stage.iapp.dettonville.int:443
+        - endpoint: stage.developer.dettonville.org:443
+          ip:
+            - 209.64.211.109
+        - endpoint: 209.64.211.109:443
+          dns:
+            - stage.developer.dettonville.org
+        - endpoint: stage.sso.api.dettonville.int:443
+        - endpoint: 10.158.232.160:443
+          dns:
+            - stage.sso.api.dettonville.int
+        - endpoint: dev.developer.dettonville.org:443
+          ip:
+            - 10.157.170.231
+        - endpoint: 10.157.170.231:443
+          dns: dev.developer.dettonville.org
+        - endpoint: dev.api.dettonville.org:443
+          ip:
+            - 10.157.170.232:443
+        - endpoint: 10.157.170.232:443
+          dns:
+            - dev.api.dettonville.org
+        - endpoint: dev.eportal.dettonville.org:443
+        - endpoint: dev.sso.eportal.dettonville.org:443
+          ip:
+            - 10.157.170.159:443
+        - endpoint: 10.157.170.159:443
+          dns:
+            - dev.sso.eportal.dettonville.org
+        - endpoint: dev.dcapiadmin.dettonville.org:443
+          ip:
+            - 10.157.170.234:443
+        - endpoint: internal.cicd.stage.developer.dettonville.int:443
+
+    external:
+      siteList:
+        - endpoint: rally1.rallydev.com:443

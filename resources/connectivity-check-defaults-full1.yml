@@ -1,0 +1,177 @@
+---
+## for info on how to configure pipeline - see here:
+## ref: https://repo.dettonville.int/stash/projects/API/repos/dcapi-automation-pipeline/browse/vars/runATH.md
+pipeline:
+  gitRepoUrl: "https://repo.dettonville.int/stash/scm/api/testsslserver.git"
+
+  logLevel: "INFO"
+#  logLevel: "DEBUG"
+#  useSimulationMode: true
+
+  alwaysEmailDist: "SIT-engineer@dettonville.org, ljohnson@dettonville.org"
+
+  timeout: 4
+  runcount: 5
+
+  testList:
+    - command: nslookup
+#    - command: dig
+#    - command: mtr
+#    - command: traceroute
+#    - command: bash
+#    - command: ping
+    - command: telnet
+#    - command: sslpoke
+    - command: curl
+    - command: httpclienttest
+    - command: sslhandshake
+
+  nodeList:
+    - nodeLabel: jnk2stl0
+      network: nyc-prod-admin
+      testNetworks:
+        - prod-admin
+        - nyc-prod-admin
+        - jpn-admin
+        - other-admin
+        - external
+    - nodeLabel: jnk2stl1
+      network: nyc-prod-admin
+      testNetworks:
+        - prod-admin
+        - nyc-prod-admin
+        - jpn-admin
+        - other-admin
+        - external
+    - nodeLabel: jnk4stl1
+      network: qa-admin
+      testNetworks:
+        - qa-admin
+        - dev-admin
+        - other-admin
+        - external
+    - nodeLabel: jnk4stl2
+      network: qa-admin
+      testNetworks:
+        - qa-admin
+        - dev-admin
+        - other-admin
+        - external
+    - nodeLabel: jnk4stl3
+      network: qa-admin
+      testNetworks:
+        - qa-admin
+        - dev-admin
+        - other-admin
+        - external
+
+  networks:
+    prod-admin:
+      siteList:
+        - endpoint: developer.dettonville.org
+        - endpoint: api.dettonville.org
+        - endpoint: sandbox.api.dettonville.org
+        - endpoint: sandbox.proxy.api.dettonville.org
+        - endpoint: dcapiadmin.dettonville.org
+        - endpoint: iapp.dettonville.int
+        - endpoint: jenkins.sandbox.api.dettonville.int
+          ip:
+            - 10.154.221.29
+            - 10.150.221.29
+
+    nyc-prod-admin:
+      siteList:
+        - endpoint: 10.154.246.101
+        - endpoint: 10.154.246.136
+        - endpoint: 10.154.246.248
+        - endpoint: 10.154.232.160
+        - endpoint: nyc.jenkins.sandbox.api.dettonville.int
+        - endpoint: 10.154.221.29
+        - endpoint: nyc.internal.cicd.sandbox.proxy.api.dettonville.int
+        - endpoint: nyc.internal.cicd.developer.dettonville.int
+
+    jpn-admin:
+      siteList:
+        - endpoint: 10.150.246.35
+        - endpoint: 10.150.246.36
+        - endpoint: 10.150.246.248
+        - endpoint: 10.150.232.160
+        - endpoint: jpn.jenkins.sandbox.api.dettonville.int
+        - endpoint: 10.150.221.29
+        - endpoint: jpn.internal.cicd.sandbox.proxy.api.dettonville.int
+        - endpoint: jpn.internal.cicd.developer.dettonville.int
+
+    qa-admin:
+      siteList:
+        - endpoint: stage.dcapiadmin.dettonville.org
+        - endpoint: stage2.dcapiadmin.dettonville.org
+          ip:
+            - 209.64.211.214
+        - endpoint: 209.64.211.214
+          dns:
+            - stage2.dcapiadmin.dettonville.org
+        - endpoint: stage.api.dettonville.org
+          ip:
+            - 10.157.246.63
+        - endpoint: 10.157.246.63
+          dns:
+            - stage.api.dettonville.org
+        - endpoint: stage.proxy.api.dettonville.org
+        - endpoint: sbx.stage.api.dettonville.org
+        - endpoint: stage.iapp.dettonville.int
+        - endpoint: stage.developer.dettonville.org
+          ip:
+            - 209.64.211.109
+        - endpoint: 209.64.211.109
+          dns:
+            - stage.developer.dettonville.org
+        - endpoint: stage.sso.api.dettonville.int
+        - endpoint: 10.158.232.160
+          dns:
+            - stage.sso.api.dettonville.int
+        - endpoint: dev.developer.dettonville.org
+          ip:
+            - 10.157.170.231
+        - endpoint: 10.157.170.231
+          dns: dev.developer.dettonville.org
+        - endpoint: dev.api.dettonville.org
+          ip:
+            - 10.157.170.232
+        - endpoint: 10.157.170.232
+          dns:
+            - dev.api.dettonville.org
+        - endpoint: dev.eportal.dettonville.org
+        - endpoint: dev.sso.eportal.dettonville.org
+          ip:
+            - 10.157.170.159
+        - endpoint: 10.157.170.159
+          dns:
+            - dev.sso.eportal.dettonville.org
+        - endpoint: dev.dcapiadmin.dettonville.org
+          ip:
+            - 10.157.170.234
+        - endpoint: internal.cicd.stage.developer.dettonville.int
+        - endpoint: stage1.developer2.dettonville.org
+        - endpoint: stage2.developer2.dettonville.org
+        - endpoint: stage3.developer2.dettonville.org
+        - endpoint: stage.developer2.dettonville.org
+        - endpoint: stage.developer.dettonville.org
+
+    dev-admin:
+      siteList:
+        - endpoint: dev.developer.dettonville.org
+        - endpoint: dev.eportal.dettonville.org
+        - endpoint: dev.dcapiadmin.dettonville.org
+        - endpoint: dev.api.dettonville.org
+
+    other-admin:
+      siteList:
+        - endpoint: int.developer2.dettonville.org
+        - endpoint: itf.developer2.dettonville.org
+
+    external:
+      httpProxyHost: outboundproxy.dettonville.int
+      httpProxyPort: 15768
+      siteList:
+        - endpoint: rally1.rallydev.com
+        - endpoint: api.mailinator.com

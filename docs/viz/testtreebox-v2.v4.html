@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <!-- load the d3.js library -->
+    <script type="text/javascript" src="d3.v4.min.js"></script>
+    <script type="text/javascript" src="treebox.v4.js"></script>
+    <!--<script type="text/javascript" src="treebox-v1.v4.js"></script>-->
+    <style>
+
+.node circle {
+  fill: #fff;
+  stroke: steelblue;
+  stroke-width: 3px;
+}
+
+.node text { font: 12px sans-serif; }
+
+.node--internal text {
+  text-shadow: 0 1px 0 #fff, 0 -1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff;
+}
+
+.link {
+  fill: none;
+  stroke: #ccc;
+  stroke-width: 2px;
+}
+
+    </style>
+
+</head>
+
+<body>
+
+    <div id="svgHere1" class="hierarchy-container"></div>
+
+    <script>
+
+
+var treeData =
+  {
+    "name": "Top Level",
+    "children": [
+      {
+		"name": "Level 2: A",
+        "children": [
+          { "name": "Son of A" },
+          { "name": "Daughter of A" }
+        ]
+      },
+      { "name": "Level 2: B" }
+    ]
+  };
+
+    <!--var dataFile = "browsertests.json"-->
+    <!--d3.json(dataFile, function(error, data) { createTreeBox(data, "#svgHere1") });-->
+    createTreeBox(treeData, "#svgHere1");
+    </script>
+
+</body>
+
+</html>
