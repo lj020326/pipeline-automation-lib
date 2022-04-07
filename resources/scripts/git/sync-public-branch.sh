@@ -31,6 +31,10 @@ PRIVATE_CONTENT_ARRAY+=('.vault_pass')
 PRIVATE_CONTENT_ARRAY+=('***/*vault*')
 PRIVATE_CONTENT_ARRAY+=('*.log')
 
+printf -v EXCLUDE_AND_REMOVE '%s,' "${PRIVATE_CONTENT_ARRAY[@]}"
+EXCLUDE_AND_REMOVE="${EXCLUDE_AND_REMOVE%,}"
+echo "EXCLUDE_AND_REMOVE=${EXCLUDE_AND_REMOVE}"
+
 ## ref: https://stackoverflow.com/questions/53839253/how-can-i-convert-an-array-into-a-comma-separated-string
 declare -a EXCLUDES_ARRAY
 EXCLUDES_ARRAY=('.git')
@@ -42,10 +46,6 @@ EXCLUDES_ARRAY+=('venv')
 printf -v EXCLUDES '%s,' "${EXCLUDES_ARRAY[@]}"
 EXCLUDES="${EXCLUDES%,}"
 echo "EXCLUDES=${EXCLUDES}"
-
-printf -v EXCLUDE_AND_REMOVE '%s,' "${PRIVATE_CONTENT_ARRAY[@]}"
-EXCLUDE_AND_REMOVE="${EXCLUDE_AND_REMOVE%,}"
-echo "EXCLUDE_AND_REMOVE=${EXCLUDE_AND_REMOVE}"
 
 echo "SCRIPT_DIR=[${SCRIPT_DIR}]"
 echo "PROJECT_DIR=${PROJECT_DIR}"
@@ -101,9 +101,14 @@ eval $rsync_cmd
 #rm -fr vars/secrets.yml
 #rm -fr .vault_pass
 
-echo "rm -fr ${EXCLUDE_AND_REMOVE}"
+printf -v TO_REMOVE '%s ' "${PRIVATE_CONTENT_ARRAY[@]}"
+TO_REMOVE="${TO_REMOVE% }"
+echo "TO_REMOVE=${TO_REMOVE}"
+cleanupPvt="rm -fr ${TO_REMOVE}"
+echo "${cleanupPvt}"
+eval $cleanupPvt
 
-exit 0
+#exit 0
 
 echo "Update public files:"
 cp -p files/git/pub.gitignore .gitignore
