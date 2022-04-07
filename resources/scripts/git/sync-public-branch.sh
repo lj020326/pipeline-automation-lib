@@ -21,6 +21,8 @@ SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
 #PROJECT_DIR=$(git rev-parse --show-toplevel)
 PROJECT_DIR="$( cd "$SCRIPT_DIR/" && git rev-parse --show-toplevel )"
 
+PUBLIC_GITIGNORE=files/git/pub.gitignore
+
 ## ref: https://stackoverflow.com/questions/53839253/how-can-i-convert-an-array-into-a-comma-separated-string
 declare -a PRIVATE_CONTENT_ARRAY
 PRIVATE_CONTENT_ARRAY+=('**/private/***')
@@ -38,10 +40,12 @@ echo "EXCLUDE_AND_REMOVE=${EXCLUDE_AND_REMOVE}"
 ## ref: https://stackoverflow.com/questions/53839253/how-can-i-convert-an-array-into-a-comma-separated-string
 declare -a EXCLUDES_ARRAY
 EXCLUDES_ARRAY=('.git')
+EXCLUDES_ARRAY=('.gitmodule')
 EXCLUDES_ARRAY+=('.idea')
 EXCLUDES_ARRAY+=('.vscode')
 EXCLUDES_ARRAY+=('**/.DS_Store')
 EXCLUDES_ARRAY+=('venv')
+EXCLUDES_ARRAY+=('*.log')
 
 printf -v EXCLUDES '%s,' "${EXCLUDES_ARRAY[@]}"
 EXCLUDES="${EXCLUDES%,}"
@@ -110,9 +114,9 @@ eval $cleanupPvt
 
 #exit 0
 
-if [ -e files/git/pub.gitignore ]; then
+if [ -e $PUBLIC_GITIGNORE ]; then
   echo "Update public files:"
-  cp -p files/git/pub.gitignore .gitignore
+  cp -p $PUBLIC_GITIGNORE .gitignore
 fi
 
 echo "Show changes before push:"
