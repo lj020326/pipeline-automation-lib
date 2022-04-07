@@ -1,4 +1,0 @@
-export USER=<YOUR USER HERE>
-export PASS=<YOUR PASSWORD HERE>
-export CRUMB=`curl -u "${USER}:${PASS}" -k https://stage.cd.dettonville.int/jenkins/crumbIssuer/api/xml?xpath=concat\(//crumbRequestField,%22:%22,//crumb\)`
-curl -H $CRUMB -X POST -u "${USER}:${PASS}" -k https://stage.cd.dettonville.int/jenkins/job/Janus/job/pipelines-01/view/DEV-Branch-Pipeline-Dev2Stage/job/dev-Branch-Routing-services-Pipeline/149/kill

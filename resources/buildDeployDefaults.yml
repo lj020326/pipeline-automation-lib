@@ -1,5 +1,0 @@
----
-pipeline:
-  releaseDevCloud: false
-  releaseDev: false
-  releaseStage: false

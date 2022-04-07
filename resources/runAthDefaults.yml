@@ -1,7 +1,0 @@
----
-## for info on how to configure pipeline - see here:
-## ref: https://repo.dettonville.int/stash/projects/API/repos/dcapi-automation-pipeline/browse/vars/runATH.md
-pipeline:
-  athGitRepo: "https://repo.dettonville.int/stash/scm/api/dcapi-test.git"
-  browserstackChromeVersion: "70"
-  browserstackFirefoxVersion: "63"
