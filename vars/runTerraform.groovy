@@ -27,7 +27,7 @@ def call(Map params=[:]) {
 
         agent {
             node {
-                label "master"
+                label "built-in"
             }
         }
 
