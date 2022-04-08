@@ -4,7 +4,7 @@
 pipeline {
     agent {
         docker {
-            label "built-in"
+            label "controller"
 //            image 'yourdockerhub/agent-image:latest'
         }
     }
