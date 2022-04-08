@@ -26,7 +26,8 @@ def call(Map params=[:]) {
     pipeline {
 
         agent {
-            label "docker-in-docker"
+//             label "docker-in-docker"
+            label "docker"
         }
 
         stages {

@@ -27,7 +27,8 @@ def call(Map params=[:]) {
 
         agent {
             node {
-                label "master"
+                // https://stackoverflow.com/questions/68830925/jenkins-missing-node-label-master-after-v-2-307-upgrade
+                label "built-in"
             }
         }
 
