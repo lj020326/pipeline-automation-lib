@@ -5,7 +5,7 @@ pipeline {
     agent {
         docker {
             // ref: https://stackoverflow.com/questions/68830925/jenkins-missing-node-label-master-after-v-2-307-upgrade
-            label "controller"
+            label "built-in"
 //            image 'yourdockerhub/agent-image:latest'
         }
     }
