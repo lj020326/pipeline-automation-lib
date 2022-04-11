@@ -84,11 +84,20 @@ def call(Map params=[:]) {
                             ]
                         ]
 
-                        if (config.containsKey('ansibleVaultCredId')) {
-                            ansibleCfg[ANSIBLE][ANSIBLE_VAULT_CREDENTIALS_ID]=config.ansibleVaultCredId
+                        Map extraVars = [:]
+                        if (config.containsKey('ansibleExtraVars')) {
+                            extraVars+=config.ansibleExtraVars
                         }
                         if (config.containsKey('ansiblePythonInterpreter')) {
-                            ansibleCfg[ANSIBLE][ANSIBLE_EXTRA_VARS]=["ansible_python_interpreter" : config.ansiblePythonInterpreter]
+                            extraVars+=["ansible_python_interpreter" : config.ansiblePythonInterpreter]
+                        }
+                        if (extraVars.size()>0) {
+                            log.info("extraVars=${JsonUtils.printToJsonString(extraVars)}")
+                            ansibleCfg[ANSIBLE][ANSIBLE_EXTRA_VARS]=extraVars
+                        }
+
+                        if (config.containsKey('ansibleVaultCredId')) {
+                            ansibleCfg[ANSIBLE][ANSIBLE_VAULT_CREDENTIALS_ID]=config.ansibleVaultCredId
                         }
                         if (config.containsKey('ansibleDebugFlag')) {
                             ansibleCfg[ANSIBLE][ANSIBLE_EXTRA_PARAMETERS]+=[config.ansibleDebugFlag]
