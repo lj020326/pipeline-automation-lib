@@ -70,19 +70,29 @@ def call(Map params=[:]) {
                             (ANSIBLE) : [
                                 (ANSIBLE_INSTALLATION)    : "ansible-local",
                                 (ANSIBLE_PLAYBOOK)        : "${config.ansiblePlaybook}",
-                                (ANSIBLE_INVENTORY)       : "${config.ansibleInventory}",
-                                (ANSIBLE_TAGS)            : "${config.ansibleTags}",
-                                (ANSIBLE_CREDENTIALS_ID)  : "${config.ansibleSshCredId}",
                                 (ANSIBLE_COLORIZED)       : true,
                                 (ANSIBLE_DISABLE_HOST_KEY_CHECK): true,
                                 (ANSIBLE_EXTRA_PARAMETERS): [],
-//                                (ANSIBLE_EXTRA_PARAMETERS): ["-vvvv"],
-//                                (ANSIBLE_SUDO_USER)       : "root",
-//                                (ANSIBLE_EXTRA_VARS)      : [
+//                                 (ANSIBLE_INVENTORY)       : "${config.ansibleInventory}",
+//                                 (ANSIBLE_TAGS)            : "${config.ansibleTags}",
+//                                 (ANSIBLE_CREDENTIALS_ID)  : "${config.ansibleSshCredId}",
+//                                 (ANSIBLE_EXTRA_PARAMETERS): ["-vvvv"],
+//                                 (ANSIBLE_SUDO_USER)       : "root",
+//                                 (ANSIBLE_EXTRA_VARS)      : [
 //                                    "ansible_python_interpreter" : "/usr/bin/python3"
-//                                ]
+//                                 ]
                             ]
                         ]
+
+                        if (config.containsKey('ansibleInventory')) {
+                            ansibleCfg[ANSIBLE][ANSIBLE_INVENTORY]=config.ansibleInventory
+                        }
+                        if (config.containsKey('ansibleTags')) {
+                            ansibleCfg[ANSIBLE][ANSIBLE_TAGS]=config.ansibleTags
+                        }
+                        if (config.containsKey('ansibleSshCredId')) {
+                            ansibleCfg[ANSIBLE][ANSIBLE_CREDENTIALS_ID]=config.ansibleSshCredId
+                        }
 
                         Map extraVars = [:]
                         if (config.containsKey('ansibleExtraVars')) {
