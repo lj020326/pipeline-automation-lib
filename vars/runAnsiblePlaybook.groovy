@@ -118,7 +118,9 @@ def call(Map params=[:]) {
                         config = MapMerge.merge(ansibleCfg, config)
                         log.info("config=${JsonUtils.printToJsonString(config)}")
 
-                        sh "tree ${config.ansibleInventoryDir}/group_vars"
+                        if ( fileExists("${config.ansibleInventoryDir}/group_vars") ) {
+                            sh "tree ${config.ansibleInventoryDir}/group_vars"
+                        }
 
                         withEnv(config.ansibleEnvVarsList) {
                             withCredentials(config.ansibleSecretVarsList) {
