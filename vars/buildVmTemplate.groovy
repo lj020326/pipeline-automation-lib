@@ -323,6 +323,10 @@ Map loadPipelineConfig(Logger log, Map params) {
     config = MapMerge.merge(config, commonVars)
     log.info("${logPrefix} commonVars=${JsonUtils.printToJsonString(commonVars)}")
 
+    Map distributionVars = readJSON file: "./${config.build_dir}/${config.build_distribution_config_dir}/distribution-vars.json"
+    config = MapMerge.merge(config, distributionVars)
+    log.info("distributionVars=${JsonUtils.printToJsonString(distributionVars)}")
+
     Map boxInfoVars = readJSON file: "./${config.build_dir}/${config.build_release_config_dir}/box_info.json"
     config = MapMerge.merge(config, boxInfoVars)
     log.info("boxInfoVars=${JsonUtils.printToJsonString(boxInfoVars)}")
