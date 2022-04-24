@@ -336,6 +336,9 @@ Map loadPipelineConfig(Logger log, Map params) {
     log.info("templateConfig=${JsonUtils.printToJsonString(templateVars)}")
 
     config.iso_dir = "${config.build_distribution}/${config.build_release}"
+    if (config.build_distribution=="Windows") {
+        config.iso_dir = config.iso_dir.toLowerCase()
+    }
     // ref: https://stackoverflow.com/questions/605696/get-file-name-from-url
     config.iso_file = config.iso_url.substring(config.iso_url.lastIndexOf('/') + 1, config.iso_url.length()).replace(".jigdo", ".iso")
 
