@@ -337,7 +337,7 @@ Map loadPipelineConfig(Logger log, Map params) {
 
     if (config.build_distribution=="Windows") {
         config.iso_dir = "${config.build_distribution.toLowerCase()}/${config.build_release}"
-    else {
+    } else {
         config.iso_dir = "${config.build_distribution}/${config.build_release}"
     }
     // ref: https://stackoverflow.com/questions/605696/get-file-name-from-url
