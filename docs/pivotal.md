@@ -1,35 +1,4 @@
 
-# Jenkins Pipeline Automation
-
-## Key Concepts
-
-The pipeline library was developed with a focus to ease build processes which have a more or less similiar project structure e.g.
-* VMware Vsphere
-* Ansible Automation
-* Openshift
-* Kubernetes
-* Pivotal PCF
-* Maven/Java
-* local Artifact Server (e.g., Sonatype Nexus or Artifactory)
-* GIT (e.g., gitlab, gitea)
-
-The assumption is that in these environments
-
-* Jenkins has a dedicated user account to checkout code (or one per project)
-* the artifact server caches public artifacts and acts as a internal artifact server
-
-So why configure maven repositories and scm credentials in every pipeline?
-
-So the key concepts of the pipeline enable you to
-* Auto provide credentials (no worries, only Jenkins credential ids, not the credential itself) (see [Credentials](docs/credentials.md))
-* Auto provide maven settings (see [ManagedFiles](docs/managed-files.md))
-* configure each job the same way (see [ConfigStructure](docs/config-structure.md))
-* log and see the things you are interested in (see [Logging](docs/logging.md)) to builds.
-
-Running this pipeline library will result in more structured and easier to maintain pipeline scripts.
-
-Looking for an example on how a pipeline script looks like when using Pipeline? Have a look at [Usage examples](docs/pcfBuildDeployMvn.md)
-
 ## Build and Deploy Spring Boot apps to PCF
 
 ### Requirements
