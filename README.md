@@ -74,7 +74,7 @@ Some of the most often used pipelines in this library include:
   * [runATH](./vars/runATH.groovy) - pipeline used by CICD build process at the test phases (e.g., Integration/Automation/QA testing using selenium/etc).<br>
     See more detailed information [here](./docs/runATH.md) for how to use.
 * Run App Deployment Pipeline
-  * [runAppDeployEnvJob](./vars/runAppDeployEnvJob.groovy) - used to deploy maven java application
+  * [runAppDeployEnvJob](./vars/runAppDeployEnvJob.groovy) - used to deploy maven java application.
   * [pcfBuildDeployMvn](./vars/pcfBuildDeployMvn.groovy) - used to build and deploy maven java application.<br>
     See more detailed information [here](./docs/pcfBuildDeployMvn.md) for how to use.
   * [pcfBuildDeployGradle](./vars/pcfBuildDeployGradle.groovy) - used to build and deploy maven java application.<br>
