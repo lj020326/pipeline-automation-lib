@@ -323,6 +323,10 @@ Map loadPipelineConfig(Logger log, Map params) {
     config = MapMerge.merge(config, commonVars)
     log.info("${logPrefix} commonVars=${JsonUtils.printToJsonString(commonVars)}")
 
+    Map distributionVars = readJSON file: "./${config.build_dir}/${config.build_distribution_config_dir}/distribution-vars.json"
+    config = MapMerge.merge(config, distributionVars)
+    log.info("distributionVars=${JsonUtils.printToJsonString(distributionVars)}")
+
     Map boxInfoVars = readJSON file: "./${config.build_dir}/${config.build_release_config_dir}/box_info.json"
     config = MapMerge.merge(config, boxInfoVars)
     log.info("boxInfoVars=${JsonUtils.printToJsonString(boxInfoVars)}")
@@ -331,7 +335,11 @@ Map loadPipelineConfig(Logger log, Map params) {
     config = MapMerge.merge(config, templateVars)
     log.info("templateConfig=${JsonUtils.printToJsonString(templateVars)}")
 
-    config.iso_dir = "${config.build_distribution}/${config.build_release}"
+    if (config.build_distribution=="Windows") {
+        config.iso_dir = "${config.build_distribution.toLowerCase()}/${config.build_release}"
+    } else {
+        config.iso_dir = "${config.build_distribution}/${config.build_release}"
+    }
     // ref: https://stackoverflow.com/questions/605696/get-file-name-from-url
     config.iso_file = config.iso_url.substring(config.iso_url.lastIndexOf('/') + 1, config.iso_url.length()).replace(".jigdo", ".iso")
 

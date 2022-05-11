@@ -70,25 +70,44 @@ def call(Map params=[:]) {
                             (ANSIBLE) : [
                                 (ANSIBLE_INSTALLATION)    : "ansible-local",
                                 (ANSIBLE_PLAYBOOK)        : "${config.ansiblePlaybook}",
-                                (ANSIBLE_INVENTORY)       : "${config.ansibleInventory}",
-                                (ANSIBLE_TAGS)            : "${config.ansibleTags}",
-                                (ANSIBLE_CREDENTIALS_ID)  : "${config.ansibleSshCredId}",
                                 (ANSIBLE_COLORIZED)       : true,
                                 (ANSIBLE_DISABLE_HOST_KEY_CHECK): true,
                                 (ANSIBLE_EXTRA_PARAMETERS): [],
-//                                (ANSIBLE_EXTRA_PARAMETERS): ["-vvvv"],
-//                                (ANSIBLE_SUDO_USER)       : "root",
-//                                (ANSIBLE_EXTRA_VARS)      : [
+//                                 (ANSIBLE_INVENTORY)       : "${config.ansibleInventory}",
+//                                 (ANSIBLE_TAGS)            : "${config.ansibleTags}",
+//                                 (ANSIBLE_CREDENTIALS_ID)  : "${config.ansibleSshCredId}",
+//                                 (ANSIBLE_EXTRA_PARAMETERS): ["-vvvv"],
+//                                 (ANSIBLE_SUDO_USER)       : "root",
+//                                 (ANSIBLE_EXTRA_VARS)      : [
 //                                    "ansible_python_interpreter" : "/usr/bin/python3"
-//                                ]
+//                                 ]
                             ]
                         ]
 
-                        if (config.containsKey('ansibleVaultCredId')) {
-                            ansibleCfg[ANSIBLE][ANSIBLE_VAULT_CREDENTIALS_ID]=config.ansibleVaultCredId
+                        if (config.containsKey('ansibleInventory')) {
+                            ansibleCfg[ANSIBLE][ANSIBLE_INVENTORY]=config.ansibleInventory
+                        }
+                        if (config.containsKey('ansibleTags')) {
+                            ansibleCfg[ANSIBLE][ANSIBLE_TAGS]=config.ansibleTags
+                        }
+                        if (config.containsKey('ansibleSshCredId')) {
+                            ansibleCfg[ANSIBLE][ANSIBLE_CREDENTIALS_ID]=config.ansibleSshCredId
+                        }
+
+                        Map extraVars = [:]
+                        if (config.containsKey('ansibleExtraVars')) {
+                            extraVars+=config.ansibleExtraVars
                         }
                         if (config.containsKey('ansiblePythonInterpreter')) {
-                            ansibleCfg[ANSIBLE][ANSIBLE_EXTRA_VARS]=["ansible_python_interpreter" : config.ansiblePythonInterpreter]
+                            extraVars+=["ansible_python_interpreter" : config.ansiblePythonInterpreter]
+                        }
+                        if (extraVars.size()>0) {
+                            log.info("extraVars=${JsonUtils.printToJsonString(extraVars)}")
+                            ansibleCfg[ANSIBLE][ANSIBLE_EXTRA_VARS]=extraVars
+                        }
+
+                        if (config.containsKey('ansibleVaultCredId')) {
+                            ansibleCfg[ANSIBLE][ANSIBLE_VAULT_CREDENTIALS_ID]=config.ansibleVaultCredId
                         }
                         if (config.containsKey('ansibleDebugFlag')) {
                             ansibleCfg[ANSIBLE][ANSIBLE_EXTRA_PARAMETERS]+=[config.ansibleDebugFlag]
@@ -109,7 +128,9 @@ def call(Map params=[:]) {
                         config = MapMerge.merge(ansibleCfg, config)
                         log.info("config=${JsonUtils.printToJsonString(config)}")
 
-                        sh "tree ${config.ansibleInventoryDir}/group_vars"
+                        if ( fileExists("${config.ansibleInventoryDir}/group_vars") ) {
+                            sh "tree ${config.ansibleInventoryDir}/group_vars"
+                        }
 
                         withEnv(config.ansibleEnvVarsList) {
                             withCredentials(config.ansibleSecretVarsList) {
