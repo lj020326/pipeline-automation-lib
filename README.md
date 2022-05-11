@@ -60,10 +60,12 @@ The example above loads the library, and calls the shared `buildVmTemplate` pipe
 Some of the most often used pipelines in this library include:
 
 * Run Ansible Playbook
-  * [runAnsibleParamWrapper](./vars/runAnsibleParamWrapper.groovy) - used by pipelines within a defined node hierarchy (e.g., environment and tag) to collect information to specify parameters to start the common [ansible playbook job](./vars/runAnsiblePlaybook.groovy) 
-  * [runAnsibleDevJob](./vars/runAnsibleDevJob.groovy) - used to develop ansible playbooks against a branch of the ansible source repo
+  * [runAnsibleParamWrapper](./vars/runAnsibleParamWrapper.groovy) - used by pipelines within a defined node hierarchy (e.g., environment and tag) to collect information to specify parameters to start the common [ansible playbook job](./vars/runAnsiblePlaybook.groovy).
+    See [here](https://github.com/lj020326/ansible-datacenter/blob/main/README.md) for document explaining example setup and usage of this pipeline.
+  * [runAnsibleDevJob](./vars/runAnsibleDevJob.groovy) - used to develop ansible playbooks against a branch of the ansible source repo.
 * Build Vm Template
   * [buildVmTemplate](./vars/buildVmTemplate.groovy) - pipeline used to build vm templates for vmware vsphere, kvm, virtualbox, hyperv, and other possible hypervisor environments
+    See [here](https://github.com/lj020326/packer-templates/blob/main/README.md) for document explaining example setup and usage of this pipeline.
 * Run Connectivity Test 
   * [runConnectivityTest](./vars/runConnectivityTest.groovy) - pipeline used run connectivity tests from the specified jenkins nodes.
     This is mainly used by jenkins admin to verify connectivity from any/all specified jenkins nodes to the specified endpoints.
@@ -78,3 +80,4 @@ Some of the most often used pipelines in this library include:
   * [pcfBuildDeployGradle](./vars/pcfBuildDeployGradle.groovy) - used to build and deploy maven java application
     See more detailed information [here](./docs/pcfBuildDeployGradle.md) for how to use.
   * [runPcfDeploy](./vars/runPcfDeploy.groovy) - used to deploy maven application to PCF 
+
