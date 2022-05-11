@@ -30,10 +30,6 @@ Running this pipeline library will result in more structured and easier to maint
 
 Looking for an example on how a pipeline script looks like when using Pipeline? Have a look at [Usage examples](docs/pcfBuildDeployMvn.md)
 
-## Build and Deploy Spring Boot apps to PCF
-
-See the [pivotal pcf section](./docs/pivotal-pcf.md) for details.
-
 ### Library Setup
 
 Have a look at the [pipeline setup tutorial](./docs/tutorial-setup-library.md) to configure and start using the shared pipeline library.
@@ -80,4 +76,8 @@ Some of the most often used pipelines in this library include:
   * [pcfBuildDeployGradle](./vars/pcfBuildDeployGradle.groovy) - used to build and deploy maven java application.<br>
     See more detailed information [here](./docs/pcfBuildDeployGradle.md) for how to use.
   * [runPcfDeploy](./vars/runPcfDeploy.groovy) - used to deploy maven application to PCF 
+
+## Build and Deploy Spring Boot apps to PCF
+
+See the [pivotal pcf section](./docs/pivotal-pcf.md) for details.
 
