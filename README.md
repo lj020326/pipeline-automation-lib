@@ -62,6 +62,8 @@ Some of the most often used pipelines in this library include:
 * Run Ansible Playbook
   * [runAnsibleParamWrapper](./vars/runAnsibleParamWrapper.groovy) - used by pipelines within a defined node hierarchy (e.g., environment and tag) to collect information to specify parameters to start the common [ansible playbook job](./vars/runAnsiblePlaybook.groovy) 
   * [runAnsibleDevJob](./vars/runAnsibleDevJob.groovy) - used to develop ansible playbooks against a branch of the ansible source repo
+* Build Vm Template
+  * [buildVmTemplate](./vars/buildVmTemplate.groovy) - pipeline used to build vm templates for vmware vsphere, kvm, virtualbox, hyperv, and other possible hypervisor environments
 * Run Connectivity Test 
   * [runConnectivityTest](./vars/runConnectivityTest.groovy) - pipeline used run connectivity tests from the specified jenkins nodes.
     This is mainly used by jenkins admin to verify connectivity from any/all specified jenkins nodes to the specified endpoints.
@@ -69,8 +71,6 @@ Some of the most often used pipelines in this library include:
 * Run Application Test Harness 
   * [runATH](./vars/runATH.groovy) - pipeline used by CICD build process at the test phases (e.g., Integration/Automation/QA testing using selenium/etc).
     See more detailed information [here](./docs/runATH.md) for how to use.
-* Build Vm Template
-  * [buildVmTemplate](./vars/buildVmTemplate.groovy) - pipeline used to build vm templates for vmware vsphere, kvm, virtualbox, hyperv, and other possible hypervisor environments
 * Run App Deployment Pipeline
   * [runAppDeployEnvJob](./vars/runAppDeployEnvJob.groovy) - used to deploy maven java application
   * [pcfBuildDeployMvn](./vars/pcfBuildDeployMvn.groovy) - used to build and deploy maven java application
