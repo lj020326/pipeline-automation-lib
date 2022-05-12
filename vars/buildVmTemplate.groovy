@@ -285,6 +285,7 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.build_dir="templates"
     config.timeout = config.get('timeout', 3)
     config.timeoutUnit = config.get('timeoutUnit', 'HOURS')
+    config.alwaysEmailList = config.get('alwaysEmailList', "ljohnson@dettonville.org")
 
     jobParts = jobParts.drop(config.jobBaseFolderLevel)
     log.info("${logPrefix} jobParts[after drop]=${jobParts}")
