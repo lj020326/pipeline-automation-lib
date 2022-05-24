@@ -51,6 +51,46 @@ buildVmTemplate(config)
 
 The example above loads the library, and calls the shared `buildVmTemplate` pipeline used to build vm templates for vmware vsphere, kvm, virtualbox, hyperv, and other possible hypervisor environments.
 
+
+## Jenkins Pipeline Usage
+
+### Setup pipeline automation library used by all jenkins jobs
+Configure the library in jenkins as seen below.
+![Jenkins - Configure shared Pipeline Automation Library](./docs/screenshots/00-pipeline-library.png)
+
+### Pipeline Screen snaps
+![00-pipeline-library](./docs/screenshots/00-pipeline-library.png)
+![ansible-datacenter-0-toplevel](./docs/screenshots/ansible-datacenter-0-toplevel.png)
+![ansible-datacenter-00-pipeline-library](./docs/screenshots/ansible-datacenter-00-pipeline-library.png)
+![ansible-datacenter-0b-secret-file-credential](./docs/screenshots/ansible-datacenter-0b-secret-file-credential.png)
+![ansible-datacenter-10-CICD-dev-pipelines](./docs/screenshots/ansible-datacenter-10-CICD-dev-pipelines.png)
+![ansible-datacenter-10-CICD-dev-pipelines2](./docs/screenshots/ansible-datacenter-10-CICD-dev-pipelines2.png)
+![ansible-datacenter-10-CICD-dev-pipelines3](./docs/screenshots/ansible-datacenter-10-CICD-dev-pipelines3.png)
+![ansible-datacenter-11-CICD-branches](./docs/screenshots/ansible-datacenter-11-CICD-branches.png)
+![ansible-datacenter-12-CICD-branches-params](./docs/screenshots/ansible-datacenter-12-CICD-branches-params.png)
+![ansible-datacenter-13-CICD-branches-console](./docs/screenshots/ansible-datacenter-13-CICD-branches-console.png)
+![ansible-datacenter-1a-env-dev](./docs/screenshots/ansible-datacenter-1a-env-dev.png)
+![ansible-datacenter-1aa-tags](./docs/screenshots/ansible-datacenter-1aa-tags.png)
+![ansible-datacenter-1b-jenkins-pipeline-definition-ansible-tags](./docs/screenshots/ansible-datacenter-1b-jenkins-pipeline-definition-ansible-tags.png)
+![ansible-datacenter-2a-deploy-vm](./docs/screenshots/ansible-datacenter-2a-deploy-vm.png)
+![ansible-datacenter-2b-deploy-vm-params](./docs/screenshots/ansible-datacenter-2b-deploy-vm-params.png)
+![ansible-datacenter-3a-bootstrap-linux](./docs/screenshots/ansible-datacenter-3a-bootstrap-linux.png)
+![ansible-datacenter-3b-bootstrap-linux-params](./docs/screenshots/ansible-datacenter-3b-bootstrap-linux-params.png)
+![ansible-datacenter-3c-bootstrap-linux-console](./docs/screenshots/ansible-datacenter-3c-bootstrap-linux-console.png)
+[ansible-datacenter-3d-bootstrap-linux-console](./docs/screenshots/ansible-datacenter-3d-bootstrap-linux-console.md)
+![ansible-datacenter-4-deploy-cacerts](./docs/screenshots/ansible-datacenter-4-deploy-cacerts.png)
+![ansible-datacenter-5-bootstrap-dockerstack](./docs/screenshots/ansible-datacenter-5-bootstrap-dockerstack.png)
+![packer-templates-0-toplevel](./docs/screenshots/packer-templates-0-toplevel.png)
+![packer-templates-00-pipeline-library](./docs/screenshots/packer-templates-00-pipeline-library.png)
+![packer-templates-1a-os-version-builds](./docs/screenshots/packer-templates-1a-os-version-builds.png)
+![packer-templates-1a-os-versions](./docs/screenshots/packer-templates-1a-os-versions.png)
+![packer-templates-1a-os](./docs/screenshots/packer-templates-1a-os.png)
+![packer-templates-1a-template-build-output](./docs/screenshots/packer-templates-1a-template-build-output.png)
+![packer-templates-1a-template-build-wrapper](./docs/screenshots/packer-templates-1a-template-build-wrapper.png)
+![packer-templates-2a-run-all-builds-config](./docs/screenshots/packer-templates-2a-run-all-builds-config.png)
+![packer-templates-2b-run-all-builds-output](./docs/screenshots/packer-templates-2b-run-all-builds-output.png)
+
+
 ## Pipelines Available
 
 Some of the most often used pipelines in this library include:
