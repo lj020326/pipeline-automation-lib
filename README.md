@@ -51,6 +51,14 @@ buildVmTemplate(config)
 
 The example above loads the library, and calls the shared `buildVmTemplate` pipeline used to build vm templates for vmware vsphere, kvm, virtualbox, hyperv, and other possible hypervisor environments.
 
+
+## Jenkins Pipeline Usage
+
+### Setup pipeline automation library used by all jenkins jobs
+Configure the library in jenkins as seen below.
+![Jenkins - Configure shared Pipeline Automation Library](./docs/screenshots/00-pipeline-library.png)
+
+
 ## Pipelines Available
 
 Some of the most often used pipelines in this library include:
