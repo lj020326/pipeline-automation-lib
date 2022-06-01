@@ -125,3 +125,8 @@ What are your thoughts? Have you used Jenkins and Docker in your work? Leave you
 
 > [_Lee Johnson_](https://www.linkedin.com/in/leejjohnson/) _is a technology consultant specialising in platform automation, and data-driven products._ [_@leejjohnson_](https://www.linkedin.com/in/leejjohnson/)
 > [_Lee Johnson_](https://twitter.com/lj020326) _technology consultant_ [_@lj020326_](https://twitter.com/lj020326)
+
+## Reference
+
+* https://medium.com/swlh/quickstart-ci-with-jenkins-and-docker-in-docker-c3f7174ee9ff
+* 
