@@ -1,14 +1,10 @@
 ## Can you run Docker inside a Docker container?
 
-This short article is based on a blog post by Jérôme Petazzoni: [**Using Docker-in-Docker for your CI or testing environment? Think twice**](https://jpetazzo.github.io/2015/09/03/do-not-use-docker-in-docker-for-ci/)**.**
-
 ![](https://miro.medium.com/max/1400/1*TLfGMbPi7lXyhBJTfCKo2Q.jpeg)
-
-Shipping containers on a cargo ship. Photo by [Axel Ahoi](https://unsplash.com/photos/hjEesK4KSDs?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText) on [Unsplash](https://unsplash.com/search/photos/container-ship?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText).
 
 The question that this article looks at is the following: if you run a Docker container that has itself Docker installed, can you then run Docker inside that Docker container (for example, to pull and build images, or to run other containers) with the two Docker instances being completely independent from each other?
 
-The answer is yes, but it is not recommended because it causes many low-level technical problems, which have to do with the way Docker is implemented on the operating system, and which are explained in detail in [Jérôme Petazzoni’s post](https://jpetazzo.github.io/2015/09/03/do-not-use-docker-in-docker-for-ci/).
+The answer is yes, but it is not recommended because it causes many low-level technical problems, which have to do with the way Docker is implemented on the operating system, and which are explained in detail in [this post](./docker-in-docker-the-good-the-bad-and-the-fix.md).
 
 The good news is that there is another, recommended, way to use Docker inside a Docker container, with which the two Docker instances are not independent from each other, but which bypasses these problems.
 
