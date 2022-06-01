@@ -69,6 +69,9 @@ Some of the most often used pipelines in this library include:
 * Build Vm Template
   * [buildVmTemplate](./vars/buildVmTemplate.groovy) - pipeline used to build vm templates for vmware vsphere, kvm, virtualbox, hyperv, and other possible hypervisor environments.<br>
     See [here](https://github.com/lj020326/packer-templates/blob/main/README.md) for document explaining example setup and usage of this pipeline.
+* Build Docker Image
+  * [buildDockerImage](./vars/buildDockerImage.groovy) - pipeline used to build docker images<br>
+    See [Jenkinsfile here for advanced multi-image example](https://github.com/lj020326/jenkins-docker-agent/blob/master/Jenkinsfile).
 * Run Connectivity Test 
   * [runConnectivityTest](./vars/runConnectivityTest.groovy) - pipeline used run connectivity tests from the specified jenkins nodes.<br>
     This is mainly used by jenkins admin to verify connectivity from any/all specified jenkins nodes to the specified endpoints.<br>
