@@ -100,8 +100,7 @@ Now this container will have access to the Docker socket, and will therefore be 
 Try it out, using the `docker` official image (which contains the Docker binary):
 
 ```
-docker run -v /var/run/docker.sock:/var/run/docker.sock \
-           -ti docker
+docker run -v /var/run/docker.sock:/var/run/docker.sock -ti docker
 ```
 
 This looks like Docker-in-Docker, feels like Docker-in-Docker, but it’s not Docker-in-Docker: when this container will create more containers, those containers will be created in the top-level Docker. You will not experience nesting side effects, and the build cache will be shared across multiple invocations.
