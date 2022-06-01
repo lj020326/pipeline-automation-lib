@@ -123,5 +123,5 @@ That brings us to the end of this tutorial. Hopefully this shows how you can ver
 
 What are your thoughts? Have you used Jenkins and Docker in your work? Leave your comments below!
 
-> [_Lee Johnson_](https://www.linkedin.com/in/leejjohnson/) _is a technology consultant specialising in machine learning, machine vision, and data-driven products._ [_@leejjohnson_](https://www.linkedin.com/in/leejjohnson/)
+> [_Lee Johnson_](https://www.linkedin.com/in/leejjohnson/) _is a technology consultant specialising in platform automation, and data-driven products._ [_@leejjohnson_](https://www.linkedin.com/in/leejjohnson/)
 > [_Lee Johnson_](https://twitter.com/lj020326) _technology consultant_ [_@lj020326_](https://twitter.com/lj020326)
