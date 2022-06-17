@@ -53,10 +53,10 @@ def call(Map params=[:]) {
                     script {
                         // install galaxy roles
                         if (fileExists(config.ansibleCollectionsRequirements)) {
-                            sh "ansible-galaxy collection install --force ${config.ansibleGalaxyForceOpt} -r ${config.ansibleCollectionsRequirements}"
+                            sh "ansible-galaxy collection install ${config.ansibleGalaxyForceOpt} -r ${config.ansibleCollectionsRequirements}"
                         }
                         if (fileExists(config.ansibleRolesRequirements)) {
-                            sh "ansible-galaxy install --force ${config.ansibleGalaxyForceOpt} -r ${config.ansibleRolesRequirements}"
+                            sh "ansible-galaxy install ${config.ansibleGalaxyForceOpt} -r ${config.ansibleRolesRequirements}"
                         }
                     }
                 }
