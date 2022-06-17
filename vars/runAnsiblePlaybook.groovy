@@ -53,10 +53,10 @@ def call(Map params=[:]) {
                     script {
                         // install galaxy roles
                         if (fileExists(config.ansibleCollectionsRequirements)) {
-                            sh "ansible-galaxy collection install ${config.ansibleGalaxyForceOpt} -r ${config.ansibleCollectionsRequirements}"
+                            sh "ansible-galaxy collection install ${config.ansibleGalaxyForceOptString} -r ${config.ansibleCollectionsRequirements}"
                         }
                         if (fileExists(config.ansibleRolesRequirements)) {
-                            sh "ansible-galaxy install ${config.ansibleGalaxyForceOpt} -r ${config.ansibleRolesRequirements}"
+                            sh "ansible-galaxy install ${config.ansibleGalaxyForceOptString} -r ${config.ansibleRolesRequirements}"
                         }
                     }
                 }
@@ -206,11 +206,15 @@ Map loadPipelineConfig(Logger log, Map params) {
 
     config.ansibleCollectionsRequirements = config.get('ansibleCollectionsRequirements', './collections/requirements.yml')
     config.ansibleRolesRequirements = config.get('ansibleRolesRequirements', './roles/requirements.yml')
-//    config.ansibleGalaxyForceOpt = config.get('ansibleGalaxyForceOpt', '--force')
-    config.ansibleGalaxyForceOpt = config.get('ansibleGalaxyForceOpt', '')
 //    config.ansibleInventory = config.get('ansibleInventory', 'inventory')
     config.ansibleInventory = config.get('ansibleInventory', 'hosts.ini')
     config.ansibleInventoryDir = config.ansibleInventory.take(config.ansibleInventory.lastIndexOf('/'))
+
+    config.ansibleGalaxyForceOpt = config.get('ansibleGalaxyForceOpt', false)
+    config.ansibleGalaxyForceOptString=""
+    if (config.ansibleGalaxyForceOpt) {
+        config.ansibleGalaxyForceOptString="--force"
+    }
 
     config.ansibleSshCredId = config.get('ansibleSshCredId', 'jenkins-ansible-ssh')
     config.ansibleVaultCredId = config.get('ansibleVaultCredId', 'ansible-vault-pwd-file')
