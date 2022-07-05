@@ -146,15 +146,15 @@ def call(Map params=[:]) {
             always {
                 script {
                     if (fileExists("ansible.log")) {
+//                         sendEmailReport(config.emailFrom, config.emailDist, currentBuild, 'ansible.log')
                         ansibleLogSummary = sh(returnStdout: true, script: "tail -n 50 ansible.log").trim()
-                        sendEmailReport(config.emailFrom, config.emailDist, currentBuild, 'ansible.log')
-                        // def build_status = "${currentBuild.result ? currentBuild.result : 'SUCCESS'}"
-                        // emailext (
-                        //     to: "${appConfigs.pipeline.alwaysEmailList}",
-                        //     from: "${email_from}",
-                        //     subject: "BUILD ${build_status}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-                        //     body: "${env.EMAIL_BODY} \n\nBuild Log:\n${ansibleLogSummary}",
-                        // )
+                        def build_status = "${currentBuild.result ? currentBuild.result : 'SUCCESS'}"
+                        emailext (
+                            to: "${appConfigs.pipeline.alwaysEmailList}",
+                            from: "${email_from}",
+                            subject: "BUILD ${build_status}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                            body: "${env.EMAIL_BODY} \n\nBuild Log:\n${ansibleLogSummary}",
+                        )
                     }
                     sendEmail(currentBuild, env)
                 }

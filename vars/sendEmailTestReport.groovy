@@ -88,22 +88,6 @@ void call(Map config, String emailDist, def currentBuild, String fileName=null, 
         <p>Greetings,</p> <div>The ${JOB_NAME.replaceAll('%2F', '/')} Test Automation execution has been completed.</div> \
         """
 
-    if (isStageJenkins) {
-        emailBody += """
-              <p>To access the report you need to login into the Test Firewall and create your MC Test Password if not already done:\
-              <p> <div><a href=https://wngdtlidmz.dettonville.int/connect>Test Firewall</a><div> <div><a href=https://mctestpassword.corp.dettonville.org/>MC Test Password</a><div> \
-            """
-    } else {
-//        emailBody += """
-//              <p>To access the report you need to login into the STL OCC Prod Firewall:\
-//              <p> <div><a href=https://10.154.18.50/connect/PortalMain>STL OCC Firewall</a><div> \
-//            """
-        emailBody += """
-              <p>To access the report you need to login into the STL NZ Prod Firewall:\
-              <p> <div><a href=http://10.154.18.132/connect>STL NZ Firewall</a><div> \
-            """
-    }
-
     emailBody += """
             <p>Please follow the reports</p> <div><span style=color:${styleColor};font-weight:bold;font-size:24pt>${buildStatus}</span></div> \
             """
