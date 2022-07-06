@@ -150,8 +150,8 @@ def call(Map params=[:]) {
                         ansibleLogSummary = sh(returnStdout: true, script: "tail -n 50 ansible.log").trim()
                         def build_status = "${currentBuild.result ? currentBuild.result : 'SUCCESS'}"
                         emailext (
-                            to: "${appConfigs.pipeline.alwaysEmailList}",
-                            from: "${email_from}",
+                            to: "${config.emailDist}",
+                            from: "${config.emailFrom}",
                             subject: "BUILD ${build_status}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
                             body: "${env.EMAIL_BODY} \n\nBuild Log:\n${ansibleLogSummary}",
                         )
