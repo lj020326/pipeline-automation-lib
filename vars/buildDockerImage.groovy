@@ -44,7 +44,13 @@ def call(Map params=[:]) {
                     }
                 }
             }
-
+        }
+        post {
+            always {
+                script {
+                    sendEmail(currentBuild, env)
+                }
+            }
         }
     }
 }
