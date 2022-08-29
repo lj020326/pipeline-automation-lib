@@ -43,24 +43,9 @@ class AnsibleTestCommandBuilderImpl implements CommandBuilder,
   public static final String EXECUTABLE = "ansible-test"
 
   /**
-   * The host to connect to
-   */
-  String host = null
-
-  /**
-   * The user to use
-   */
-  String user = null
-
-  /**
    * The ansible-test destination path
    */
-  String destinationPath = null
-
-  /**
-   * The source path on the local machine
-   */
-  String sourcePath = null
+  String destination = null
 
   /**
    * Logger instance
