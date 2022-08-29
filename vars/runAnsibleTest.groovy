@@ -67,7 +67,7 @@ def call(Map params=[:]) {
 
                         String collectionDir="ansible_collections/dettonville/inventory"
                         dir(collectionDir) {
-                            ansibleTestUtil.withTestConfigVault(config.ansibleCredId) {
+                            ansibleTestUtil.withTestConfigVault(config.ansibleVaultCredId) {
                                 ansibleTestUtil.runAnsibleTest(
                                     command="integration",
                                     color = "auto",
@@ -156,7 +156,7 @@ Map loadPipelineConfig(Logger log, Map params) {
         config.ansibleGalaxyForceOptString="--force"
     }
 
-    config.ansibleSshCredId = config.get('ansibleSshCredId', 'jenkins-ansible-ssh')
+//    config.ansibleSshCredId = config.get('ansibleSshCredId', 'jenkins-ansible-ssh')
     config.ansibleVaultCredId = config.get('ansibleVaultCredId', 'ansible-vault-password')
     config.ansibleTags = config.get('ansibleTags', '')
 
