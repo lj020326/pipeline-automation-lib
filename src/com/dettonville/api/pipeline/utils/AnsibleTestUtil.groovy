@@ -29,9 +29,9 @@ class AnsibleTestUtil implements Serializable {
         this.dsl = dsl
     }
 
-    def runIntTestVaultConfig(String ansibleVaultCredId="ansible-vault-password", def actions) {
+    def withTestConfigVault(String ansibleVaultCredId="ansible-vault-password", def actions) {
 
-        String logPrefix = "runIntTestVaultConfig():"
+        String logPrefix = "withTestVaultConfig():"
 
         dsl.withCredentials([string(credentialsId: ansibleVaultCredId, variable: 'VAULT_PASSWORD')]) {
 
@@ -67,7 +67,7 @@ class AnsibleTestUtil implements Serializable {
             ansibleTestCmd += " --debug"
         }
         if (verbosity) {
-            ansibleTestCmd += " -${verbosity}"
+            ansibleTestCmd += " ${verbosity}"
         }
         ansibleTestCmd += " --python ${pythonVersion}"
 
