@@ -91,6 +91,11 @@ class Logger implements Serializable {
     this.dateFormat = dateFormat
   }
 
+  Logger(DSL dsl, LogLevel logLvl) {
+    this(dsl)
+    this.init(DSL dsl, LogLevel logLvl = LogLevel.INFO)
+  }
+
   /**
    * Initializes the logger with DSL/steps object and LogLevel
    *
