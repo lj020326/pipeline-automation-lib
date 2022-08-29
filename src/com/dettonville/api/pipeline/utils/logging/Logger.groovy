@@ -92,8 +92,8 @@ class Logger implements Serializable {
   }
 
   Logger(DSL dsl, LogLevel logLvl) {
-    this(dsl)
-    this.init(DSL dsl, LogLevel logLvl = LogLevel.INFO)
+    this(dsl as Object)
+    this.init(dsl, logLvl)
   }
 
   /**
@@ -101,7 +101,6 @@ class Logger implements Serializable {
    *
    * @param dsl The DSL object of the current pipeline script (available via this.steps in pipeline scripts)
    * @param logLvl The log level to use during execution of the pipeline script
-   * @deprecated
    */
   @NonCPS
   static void init(DSL dsl, LogLevel logLvl = LogLevel.INFO) {
