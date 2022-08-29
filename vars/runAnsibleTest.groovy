@@ -157,8 +157,7 @@ Map loadPipelineConfig(Logger log, Map params) {
     }
 
     config.ansibleSshCredId = config.get('ansibleSshCredId', 'jenkins-ansible-ssh')
-    config.ansibleVaultCredId = config.get('ansibleVaultCredId', 'ansible-vault-pwd-file')
-    config.ansiblePlaybook = config.get('ansiblePlaybook', 'site.yml')
+    config.ansibleVaultCredId = config.get('ansibleVaultCredId', 'ansible-vault-password')
     config.ansibleTags = config.get('ansibleTags', '')
 
     config.ansibleEnvVarsList = config.get('ansibleEnvVarsList', [])

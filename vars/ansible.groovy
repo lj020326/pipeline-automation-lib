@@ -262,7 +262,6 @@ void execAnsibleTest(Map config) {
         ${env.WORKSPACE}/${config.build_dir}/${config.build_distribution_config_dir}/build-config.json
     """
 
-
     ansiblePlaybook(
             colorized: colorized,
             extras: extras,
