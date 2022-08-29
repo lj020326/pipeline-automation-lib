@@ -69,11 +69,11 @@ def call(Map params=[:]) {
                         dir(collectionDir) {
                             ansibleTestUtil.withTestConfigVault(config.registryUrl, config.registryCredId) {
                                 ansibleTestUtil.runAnsibleTest(
-                                        command="integration",
-                                        color = "auto",
-                                        verbosity="-v",
-                                        pythonVersion="3.6",
-                                        target = "update_hosts"
+                                    command="integration",
+                                    color = "auto",
+                                    verbosity="-v",
+                                    pythonVersion="3.6",
+                                    target = "update_hosts"
                                 )
                             }
 
