@@ -76,7 +76,6 @@ def call(Map params=[:]) {
                                     target = "update_hosts"
                                 )
                             }
-
                         }
 
                     }
