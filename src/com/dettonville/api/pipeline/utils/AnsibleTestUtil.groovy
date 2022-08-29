@@ -8,8 +8,9 @@ class AnsibleTestUtil implements Serializable {
     Logger log = new Logger(this)
     def dsl
 
-    String integrationTestConfigVault = "integration_config.vault.yml"
-    String integrationTestConfig = "integration_config.yml"
+    String testIntegrationDir = "tests/integration"
+    String integrationTestConfigVault = "${testIntegrationDir}/integration_config.vault.yml"
+    String integrationTestConfig = "${testIntegrationDir}/integration_config.yml"
 
     /**
      * The ansible-test test command (env, sanity, coverage, units, integration, network-integration)
@@ -52,14 +53,13 @@ class AnsibleTestUtil implements Serializable {
             String command="integration",
             String color = null,
             Boolean debug = false,
-            String include = null,
-            String exclude = null,
             String verbosity=null,
             String pythonVersion="3.6",
             String target = null
     ) {
 
         String ansibleTestCmd = "ansible-test"
+        ansibleTestCmd += " ${command}"
         if (color) {
             ansibleTestCmd += " --color ${color}"
         }
