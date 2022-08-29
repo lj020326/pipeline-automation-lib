@@ -10,8 +10,6 @@ import static com.dettonville.api.pipeline.utils.ConfigConstants.*
 def call(Map params=[:]) {
 
     Logger log = new Logger(this, LogLevel.INFO)
-//    Logger log = new Logger(this)
-//    Logger.init(this, LogLevel.INFO)
 
     Map config=loadPipelineConfig(log, params)
     def agentLabel = getJenkinsAgentLabel(config.jenkinsNodeLabel)
@@ -72,15 +70,7 @@ def call(Map params=[:]) {
                                 (ANSIBLE_PLAYBOOK)        : "${config.ansiblePlaybook}",
                                 (ANSIBLE_COLORIZED)       : true,
                                 (ANSIBLE_DISABLE_HOST_KEY_CHECK): true,
-                                (ANSIBLE_EXTRA_PARAMETERS): [],
-//                                 (ANSIBLE_INVENTORY)       : "${config.ansibleInventory}",
-//                                 (ANSIBLE_TAGS)            : "${config.ansibleTags}",
-//                                 (ANSIBLE_CREDENTIALS_ID)  : "${config.ansibleSshCredId}",
-//                                 (ANSIBLE_EXTRA_PARAMETERS): ["-vvvv"],
-//                                 (ANSIBLE_SUDO_USER)       : "root",
-//                                 (ANSIBLE_EXTRA_VARS)      : [
-//                                    "ansible_python_interpreter" : "/usr/bin/python3"
-//                                 ]
+                                (ANSIBLE_EXTRA_PARAMETERS): []
                             ]
                         ]
 

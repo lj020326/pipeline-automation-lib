@@ -96,7 +96,7 @@ class Logger implements Serializable {
     this(logScope)
     this.init(logScope, logLvl)
   }
-  
+
   /**
    * Initializes the logger with DSL/steps object and LogLevel
    *
