@@ -65,8 +65,7 @@ def call(Map params=[:]) {
                 steps {
                     script {
 
-                        String collectionDir="ansible_collections/dettonville/inventory"
-                        dir(collectionDir) {
+                        dir(config.collectionDir) {
                             ansibleTestUtil.withTestConfigVault(config.ansibleVaultCredId) {
                                 ansibleTestUtil.runAnsibleTest(
                                     command="integration",
@@ -169,6 +168,8 @@ Map loadPipelineConfig(Logger log, Map params) {
     ]
 
     config.ansibleSecretVarsList = config.get('ansibleSecretVarsList', secretVarsListDefault)
+    
+    config.collectionDir=config.get('collectionDir', 'ansible_collections/dettonville/inventory')
 
     log.debug("${logPrefix} params=${params}")
     log.debug("${logPrefix} config=${config}")
