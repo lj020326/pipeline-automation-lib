@@ -93,7 +93,7 @@ class Logger implements Serializable {
 
   Logger(Object logScope, LogLevel logLvl) {
     this(logScope)
-    this.init(logScope as DSL, logLvl)
+    this.init(logScope, logLvl)
   }
 
   /**
