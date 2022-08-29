@@ -91,9 +91,9 @@ class Logger implements Serializable {
     this.dateFormat = dateFormat
   }
 
-  Logger(DSL dsl, LogLevel logLvl) {
-    this(dsl as Object)
-    this.init(dsl, logLvl)
+  Logger(Object logScope, LogLevel logLvl) {
+    this(logScope)
+    this.init(logScope as DSL, logLvl)
   }
 
   /**
