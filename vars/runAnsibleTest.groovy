@@ -67,7 +67,7 @@ def call(Map params=[:]) {
 
                         String collectionDir="ansible_collections/dettonville/inventory"
                         dir(collectionDir) {
-                            ansibleTestUtil.withTestConfigVault(config.registryUrl, config.registryCredId) {
+                            ansibleTestUtil.withTestConfigVault(config.ansibleCredId) {
                                 ansibleTestUtil.runAnsibleTest(
                                     command="integration",
                                     color = "auto",
