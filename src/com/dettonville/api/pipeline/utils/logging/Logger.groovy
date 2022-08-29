@@ -81,6 +81,7 @@ class Logger implements Serializable {
         this.name = "$logScope"
       }
     }
+    this.init(logScope)
   }
 
   /**
@@ -95,7 +96,7 @@ class Logger implements Serializable {
     this(logScope)
     this.init(logScope, logLvl)
   }
-
+  
   /**
    * Initializes the logger with DSL/steps object and LogLevel
    *
