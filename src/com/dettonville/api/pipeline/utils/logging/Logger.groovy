@@ -81,7 +81,6 @@ class Logger implements Serializable {
         this.name = "$logScope"
       }
     }
-    this.init(logScope)
   }
 
   /**
