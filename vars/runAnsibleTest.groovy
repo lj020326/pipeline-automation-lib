@@ -146,7 +146,8 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.ansibleCollectionsRequirements = config.get('ansibleCollectionsRequirements', './collections/requirements.yml')
     config.ansibleRolesRequirements = config.get('ansibleRolesRequirements', './roles/requirements.yml')
 //    config.ansibleInventory = config.get('ansibleInventory', 'inventory')
-    config.ansibleInventory = config.get('ansibleInventory', 'hosts.ini')
+//    config.ansibleInventory = config.get('ansibleInventory', 'hosts.ini')
+    config.ansibleInventory = config.get('ansibleInventory', 'hosts.yml')
     config.ansibleInventoryDir = config.ansibleInventory.take(config.ansibleInventory.lastIndexOf('/'))
 
     config.ansibleGalaxyForceOpt = config.get('ansibleGalaxyForceOpt', false)
