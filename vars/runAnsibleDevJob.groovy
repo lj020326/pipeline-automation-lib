@@ -38,7 +38,8 @@ def call(Map config=[:]) {
     }
 
     // config.ansibleInventory = config.get('ansibleInventory', './inventory')
-    config.ansibleInventory = config.get('ansibleInventory','hosts.ini')
+//    config.ansibleInventory = config.get('ansibleInventory','hosts.ini')
+    config.ansibleInventory = config.get('ansibleInventory','hosts.yml')
     config.ansiblePlaybook = config.get('ansiblePlaybook','site.yml')
     config.gitPerformCheckout = false
 
