@@ -51,6 +51,17 @@ class ConfigConstants {
   // ref: https://www.jenkins.io/doc/pipeline/steps/ansible/
   public static final String ANSIBLE_DISABLE_HOST_KEY_CHECK = "disableHostKeyChecking"
 
+//  public static final String ANSIBLE_TEST = "ansible-test"
+//  public static final String ANSIBLE_TEST_ARGUMENTS = "arguments"
+//  public static final String ANSIBLE_TEST_COMMAND = "command"
+//  public static final String ANSIBLE_TEST_DESTINATION = "destination"
+//  public static final String ANSIBLE_TEST_EXECUTABLE = "executable"
+//  public static final String ANSIBLE_TEST_LIMIT = "limit"
+//  public static final String ANSIBLE_TEST_SKIPPED_TAGS = "skippedTags"
+//  public static final String ANSIBLE_TEST_START_AT_TASK = "startAtTask"
+//  public static final String ANSIBLE_TEST_TAGS = "tags"
+//  public static final String ANSIBLE_TEST_PYTHON_VERSION = "python"
+
   public static final String MAVEN = "maven"
   public static final String MAVEN_ARGUMENTS = "arguments"
   public static final String MAVEN_DEFINES = "defines"

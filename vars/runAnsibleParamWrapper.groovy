@@ -72,7 +72,8 @@ def call(Map config=[:]) {
 
 //     config.ansibleInventory = './inventory'
 //     config.ansibleInventory = './inventory/hosts.ini'
-    config.ansibleInventory = "./inventory/${config.environment}/hosts.ini"
+//    config.ansibleInventory = "./inventory/${config.environment}/hosts.ini"
+    config.ansibleInventory = "./inventory/${config.environment}/hosts.yml"
 
     log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
 

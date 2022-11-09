@@ -91,12 +91,16 @@ class Logger implements Serializable {
     this.dateFormat = dateFormat
   }
 
+  Logger(Object logScope, LogLevel logLvl) {
+    this(logScope)
+    this.init(logScope, logLvl)
+  }
+
   /**
    * Initializes the logger with DSL/steps object and LogLevel
    *
    * @param dsl The DSL object of the current pipeline script (available via this.steps in pipeline scripts)
    * @param logLvl The log level to use during execution of the pipeline script
-   * @deprecated
    */
   @NonCPS
   static void init(DSL dsl, LogLevel logLvl = LogLevel.INFO) {

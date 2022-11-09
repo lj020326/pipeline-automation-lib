@@ -10,11 +10,10 @@ import static com.dettonville.api.pipeline.utils.ConfigConstants.*
 def call(Map params=[:]) {
 
     Logger log = new Logger(this, LogLevel.INFO)
-//    Logger log = new Logger(this)
-//    Logger.init(this, LogLevel.INFO)
 
     Map config=loadPipelineConfig(log, params)
     def agentLabel = getJenkinsAgentLabel(config.jenkinsNodeLabel)
+    AnsibleTestUtil ansibleTestUtil = new AnsibleTestUtil(this)
 
     pipeline {
         agent {
@@ -66,75 +65,15 @@ def call(Map params=[:]) {
                 steps {
                     script {
 
-                        Map ansibleCfg = [
-                            (ANSIBLE) : [
-                                (ANSIBLE_INSTALLATION)    : "ansible-local",
-                                (ANSIBLE_PLAYBOOK)        : "${config.ansiblePlaybook}",
-                                (ANSIBLE_COLORIZED)       : true,
-                                (ANSIBLE_DISABLE_HOST_KEY_CHECK): true,
-                                (ANSIBLE_EXTRA_PARAMETERS): [],
-//                                 (ANSIBLE_INVENTORY)       : "${config.ansibleInventory}",
-//                                 (ANSIBLE_TAGS)            : "${config.ansibleTags}",
-//                                 (ANSIBLE_CREDENTIALS_ID)  : "${config.ansibleSshCredId}",
-//                                 (ANSIBLE_EXTRA_PARAMETERS): ["-vvvv"],
-//                                 (ANSIBLE_SUDO_USER)       : "root",
-//                                 (ANSIBLE_EXTRA_VARS)      : [
-//                                    "ansible_python_interpreter" : "/usr/bin/python3"
-//                                 ]
-                            ]
-                        ]
-
-                        if (config.containsKey('ansibleInventory')) {
-                            ansibleCfg[ANSIBLE][ANSIBLE_INVENTORY]=config.ansibleInventory
-                        }
-                        if (config.containsKey('ansibleTags')) {
-                            ansibleCfg[ANSIBLE][ANSIBLE_TAGS]=config.ansibleTags
-                        }
-                        if (config.containsKey('ansibleSshCredId')) {
-                            ansibleCfg[ANSIBLE][ANSIBLE_CREDENTIALS_ID]=config.ansibleSshCredId
-                        }
-
-                        Map extraVars = [:]
-                        if (config.containsKey('ansibleExtraVars')) {
-                            extraVars+=config.ansibleExtraVars
-                        }
-                        if (config.containsKey('ansiblePythonInterpreter')) {
-                            extraVars+=["ansible_python_interpreter" : config.ansiblePythonInterpreter]
-                        }
-                        if (extraVars.size()>0) {
-                            log.info("extraVars=${JsonUtils.printToJsonString(extraVars)}")
-                            ansibleCfg[ANSIBLE][ANSIBLE_EXTRA_VARS]=extraVars
-                        }
-
-                        if (config.containsKey('ansibleVaultCredId')) {
-                            ansibleCfg[ANSIBLE][ANSIBLE_VAULT_CREDENTIALS_ID]=config.ansibleVaultCredId
-                        }
-                        if (config.containsKey('ansibleDebugFlag')) {
-                            ansibleCfg[ANSIBLE][ANSIBLE_EXTRA_PARAMETERS]+=[config.ansibleDebugFlag]
-                        }
-                        if (config.containsKey('ansibleCheckMode')) {
-                            ansibleCfg[ANSIBLE][ANSIBLE_EXTRA_PARAMETERS]+=['--check']
-                        }
-                        if (config.containsKey('ansibleDiffMode')) {
-                            ansibleCfg[ANSIBLE][ANSIBLE_EXTRA_PARAMETERS]+=['--diff']
-                        }
-                        if (config.containsKey('ansibleLimitHosts')) {
-                            ansibleCfg[ANSIBLE][ANSIBLE_LIMIT]=config.ansibleLimitHosts
-                        }
-                        if (config?.ansibleLogLevel) {
-                            ansibleCfg[ANSIBLE][ANSIBLE_LOG_LEVEL]=config.ansibleLogLevel
-                        }
-
-                        config = MapMerge.merge(ansibleCfg, config)
-                        log.info("config=${JsonUtils.printToJsonString(config)}")
-
-                        if ( fileExists("${config.ansibleInventoryDir}/group_vars") ) {
-                            sh "tree ${config.ansibleInventoryDir}/group_vars"
-                        }
-
-                        withEnv(config.ansibleEnvVarsList) {
-                            withCredentials(config.ansibleSecretVarsList) {
-                                ansible.execPlaybook(config)
+                        dir(config.collectionDir) {
+                            ansibleTestUtil.withTestConfigVault(config.ansibleVaultCredId) {
+                                ansibleTestUtil.runAnsibleTest(
+                                    command="integration",
+                                    color = "auto",
+                                    verbosity="-v",
+                                    pythonVersion="3.6",
+                                    target = "update_hosts"
+                                )
                             }
                         }
 
@@ -217,9 +156,8 @@ Map loadPipelineConfig(Logger log, Map params) {
         config.ansibleGalaxyForceOptString="--force"
     }
 
-    config.ansibleSshCredId = config.get('ansibleSshCredId', 'jenkins-ansible-ssh')
-    config.ansibleVaultCredId = config.get('ansibleVaultCredId', 'ansible-vault-pwd-file')
-    config.ansiblePlaybook = config.get('ansiblePlaybook', 'site.yml')
+//    config.ansibleSshCredId = config.get('ansibleSshCredId', 'jenkins-ansible-ssh')
+    config.ansibleVaultCredId = config.get('ansibleVaultCredId', 'ansible-vault-password')
     config.ansibleTags = config.get('ansibleTags', '')
 
     config.ansibleEnvVarsList = config.get('ansibleEnvVarsList', [])
@@ -231,6 +169,8 @@ Map loadPipelineConfig(Logger log, Map params) {
     ]
 
     config.ansibleSecretVarsList = config.get('ansibleSecretVarsList', secretVarsListDefault)
+    
+    config.collectionDir=config.get('collectionDir', 'ansible_collections/dettonville/inventory')
 
     log.debug("${logPrefix} params=${params}")
     log.debug("${logPrefix} config=${config}")
