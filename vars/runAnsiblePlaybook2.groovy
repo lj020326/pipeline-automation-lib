@@ -15,35 +15,35 @@ def call(Map params=[:]) {
 
     def agentLabel = getJenkinsAgentLabel(config.jenkinsNodeLabel)
 
-//     pipeline {
-//         agent {
-//             label agentLabel as String
-//         }
-//         options {
-//             disableConcurrentBuilds()
-//             timestamps()
-//             buildDiscarder(logRotator(numToKeepStr: '10'))
-//             skipDefaultCheckout(config.skipDefaultCheckout)
-//             timeout(time: config.timeout, unit: config.timeoutUnit)
-//         }
-//         stages {
-//             stage('Checkout') {
-//                 when {
-//                     expression { config.gitPerformCheckout }
-//                 }
-//                 steps {
-//                     script {
-//                         // git credentialsId: 'bitbucket-ssh-lj020326', url: 'git@bitbucket.org:lj020326/ansible-datacenter.git'
-//                         checkout scm: [
-//                             $class: 'GitSCM',
-//                             branches: [[name: "${config.gitBranch}"]],
-//                             userRemoteConfigs: [[credentialsId: "${config.gitCredId}",
-//                                                  url: "${config.gitRepoUrl}"]]
-//                         ]
-//
-//                     }
-//                 }
-//             }
+    pipeline {
+        agent {
+            label agentLabel as String
+        }
+        options {
+            disableConcurrentBuilds()
+            timestamps()
+            buildDiscarder(logRotator(numToKeepStr: '10'))
+            skipDefaultCheckout(config.skipDefaultCheckout)
+            timeout(time: config.timeout, unit: config.timeoutUnit)
+        }
+        stages {
+            stage('Checkout') {
+                when {
+                    expression { config.gitPerformCheckout }
+                }
+                steps {
+                    script {
+                        // git credentialsId: 'bitbucket-ssh-lj020326', url: 'git@bitbucket.org:lj020326/ansible-datacenter.git'
+                        checkout scm: [
+                            $class: 'GitSCM',
+                            branches: [[name: "${config.gitBranch}"]],
+                            userRemoteConfigs: [[credentialsId: "${config.gitCredId}",
+                                                 url: "${config.gitRepoUrl}"]]
+                        ]
+
+                    }
+                }
+            }
 //             stage('Run collections and roles Install') {
 //                 when {
 //                     expression { config.ansibleCollectionsRequirements || config.ansibleRolesRequirements }
@@ -140,29 +140,29 @@ def call(Map params=[:]) {
 //                     }
 //                 }
 //             }
-//         }
-//         post {
-//             always {
-//                 script {
-//                     if (fileExists("ansible.log")) {
-// //                         sendEmailReport(config.emailFrom, config.emailDist, currentBuild, 'ansible.log')
-//                         ansibleLogSummary = sh(returnStdout: true, script: "tail -n 50 ansible.log").trim()
-//                         def build_status = "${currentBuild.result ? currentBuild.result : 'SUCCESS'}"
-//                         emailext (
-//                             to: "${config.emailDist}",
-//                             from: "${config.emailFrom}",
-//                             subject: "BUILD ${build_status}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-//                             body: "${env.EMAIL_BODY} \n\nBuild Log:\n${ansibleLogSummary}",
-//                         )
-//                     }
-//                     sendEmail(currentBuild, env)
-//                 }
-//
-// //                 echo "Empty current workspace dir"
-// //                 deleteDir()
-//             }
-//         }
-//     }
+        }
+        post {
+            always {
+                script {
+                    if (fileExists("ansible.log")) {
+//                         sendEmailReport(config.emailFrom, config.emailDist, currentBuild, 'ansible.log')
+                        ansibleLogSummary = sh(returnStdout: true, script: "tail -n 50 ansible.log").trim()
+                        def build_status = "${currentBuild.result ? currentBuild.result : 'SUCCESS'}"
+                        emailext (
+                            to: "${config.emailDist}",
+                            from: "${config.emailFrom}",
+                            subject: "BUILD ${build_status}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                            body: "${env.EMAIL_BODY} \n\nBuild Log:\n${ansibleLogSummary}",
+                        )
+                    }
+                    sendEmail(currentBuild, env)
+                }
+
+//                 echo "Empty current workspace dir"
+//                 deleteDir()
+            }
+        }
+    }
 
 } // body
 
