@@ -10,13 +10,11 @@ import static com.dettonville.api.pipeline.utils.ConfigConstants.*
 def call(Map params=[:]) {
 
     Logger log = new Logger(this, LogLevel.INFO)
-//    Logger log = new Logger(this)
-//    Logger.init(this, LogLevel.INFO)
 
     Map config=loadPipelineConfig(log, params)
 
-//     def agentLabel = getJenkinsAgentLabel(config.jenkinsNodeLabel)
-//
+    def agentLabel = getJenkinsAgentLabel(config.jenkinsNodeLabel)
+
 //     pipeline {
 //         agent {
 //             label agentLabel as String
