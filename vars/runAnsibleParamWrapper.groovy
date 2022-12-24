@@ -77,8 +77,7 @@ def call(Map config=[:]) {
 
     log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
 
-//     testHello("foobar")
-    runAnsiblePlaybook2(config)
+    runAnsiblePlaybook(config)
 
     log.info("${logPrefix} finished")
 
