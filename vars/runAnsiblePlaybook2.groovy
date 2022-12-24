@@ -33,6 +33,9 @@ def call(Map params=[:]) {
                 }
                 steps {
                     script {
+                        log.info("checkout config.gitRepoUrl=${config.gitRepoUrl}")
+                        log.info("checkout config.gitBranch=${config.gitBranch}")
+                        log.info("checkout config.gitCredId=${config.gitCredId}")
                         // git credentialsId: 'bitbucket-ssh-lj020326', url: 'git@bitbucket.org:lj020326/ansible-datacenter.git'
                         checkout scm: [
                             $class: 'GitSCM',
