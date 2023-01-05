@@ -1,6 +1,6 @@
 [![License](https://img.shields.io/badge/license-GPLv3-brightgreen.svg?style=flat)](LICENSE)
 
-# Jenkins Pipeline Automation
+# Jenkins Pipeline Automation Library
 
 The jenkins enabled docker image used in examples here can be found on [dockerhub](https://hub.docker.com/repository/docker/lj020326/docker-jenkins).  
 
