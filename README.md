@@ -3,6 +3,8 @@
 
 # Jenkins Pipeline Automation
 
+The jenkins enabled docker image used defined here can be found on [dockerhub](https://hub.docker.com/repository/docker/lj020326/docker-jenkins).  
+
 ## Key Concepts
 
 The pipeline library was developed with a focus to ease build processes which have a more or less similiar project structure e.g.

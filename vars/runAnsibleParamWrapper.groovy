@@ -79,5 +79,7 @@ def call(Map config=[:]) {
 
     runAnsiblePlaybook(config)
 
+    log.info("${logPrefix} finished")
+
 }
 
