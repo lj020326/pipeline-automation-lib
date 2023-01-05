@@ -9,7 +9,7 @@ The jenkins-agent enabled docker images used in examples here can be found on [d
 
 ## Key Concepts
 
-The pipeline library was developed with a focus to ease build processes which have a more or less similiar project structure e.g.
+The pipeline library was developed with a focus to ease build processes which have a more or less similar project structure e.g.
 * VMware Vsphere
 * Ansible Automation
 * Openshift
