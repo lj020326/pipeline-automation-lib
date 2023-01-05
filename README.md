@@ -1,7 +1,6 @@
 [![License](https://img.shields.io/badge/license-GPLv3-brightgreen.svg?style=flat)](LICENSE)
-[![Linkedin](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/leejjohnson/)
 
-# Jenkins Pipeline Automation
+# Jenkins Pipeline Automation Library
 
 The jenkins enabled docker image used in examples here can be found on [dockerhub](https://hub.docker.com/repository/docker/lj020326/docker-jenkins).  
 
@@ -130,3 +129,6 @@ See the [pivotal pcf section](./docs/pivotal-pcf.md) for details.
 ![packer-templates-2a-run-all-builds-config](./docs/screenshots/packer-templates-2a-run-all-builds-config.png)
 ![packer-templates-2b-run-all-builds-output](./docs/screenshots/packer-templates-2b-run-all-builds-output.png)
 
+## Contact
+
+[![Linkedin](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/leejjohnson/)
