@@ -256,8 +256,10 @@ def call(Map params=[:]) {
 
                             if (vmPath != targetPath) {
                                 log.info("moving VM from '${vmPath}' to '${targetPath}'")
+                                // ref: https://github.com/vmware/govmomi/blob/main/govc/USAGE.md
                                 sh "govc vm.unregister ${config.vm_name}"
                                 sh "govc datastore.mkdir -p -ds=${config.vm_template_datastore} ${config.vm_template_folder}"
+                                sh "govc datastore.rm -f -ds=${config.vm_template_datastore} ${config.vm_template_folder}/${config.vm_name}"
                                 sh "govc datastore.mv -ds=${config.vm_template_datastore} ${config.vm_name} ${config.vm_template_folder}/${config.vm_name}"
                                 sh "govc vm.register -template=true -ds=${config.vm_template_datastore} -folder=${config.vm_template_folder} -host=${config.vm_template_host} ${config.vm_template_folder}/${config.vm_name}/${config.vm_name}.vmtx"
                             }
