@@ -103,10 +103,11 @@ void buildAndPublishImage(Logger log, Map config) {
 //    DockerUtil dockerUtil = new DockerUtil(this)
     List buildArgs = []
     if (config.buildArgs) {
-        buildArgs.each { key, value ->
+        config.buildArgs.each { key, value ->
             buildArgs.push("--build-arg ${key}=${value}")
         }
     }
+    log.info("${logPrefix} buildArgs=${JsonUtils.printToJsonString(buildArgs)}")
 
     dir (config.buildDir) {
 
@@ -125,7 +126,7 @@ void buildAndPublishImage(Logger log, Map config) {
 //             if (buildArgs.size()>0) {
             if (buildArgs) {
                 String buildArgsString = buildArgs.join(" ")
-                log.info("buildArgsString=${buildArgsString}")
+                log.info("${logPrefix} buildArgsString=${buildArgsString}")
                 app = docker.build(config.buildImageLabel, buildArgsString)
             } else {
                 app = docker.build(config.buildImageLabel)
