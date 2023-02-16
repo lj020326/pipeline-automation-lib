@@ -108,23 +108,23 @@ void buildAndPublishImage(Logger log, Map config) {
         String stageName = "build ${config.buildImageLabel}"
         if (config.buildPath) stageName += " ${config.buildPath}"
 
-        String buildArgs
+        List buildArgs = []
         if (config.buildArgs) {
             buildArgs.each { key, value ->
-                buildArgs += " --build-arg ${key}=${value}"
+                buildArgs.push("--build-arg ${key}=${value}")
             }
         }
 
         stage("${stageName}") {
             // ref: https://www.jenkins.io/doc/book/pipeline/docker/
             if (config?.buildPath && config?.dockerFile) {
-                buildArgs += "-f ${config.dockerFile} ${config.buildPath}"
+                buildArgs.push("-f ${config.dockerFile} ${config.buildPath}")
             }
             else if (config?.dockerFile) {
-                buildArgs += "-f ${config.dockerFile} ."
+                buildArgs.push("-f ${config.dockerFile} .")
             }
             if (buildArgs) {
-                app = docker.build(config.buildImageLabel, buildArgs)
+                app = docker.build(config.buildImageLabel, buildArgs.join(" "))
             } else {
                 app = docker.build(config.buildImageLabel)
             }
