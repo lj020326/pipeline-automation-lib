@@ -101,19 +101,18 @@ void buildAndPublishImage(Logger log, Map config) {
     log.info("${logPrefix} commit_id=${commit_id}")
 
 //    DockerUtil dockerUtil = new DockerUtil(this)
+    List buildArgs = []
+    if (config.buildArgs) {
+        buildArgs.each { key, value ->
+            buildArgs.push("--build-arg ${key}=${value}")
+        }
+    }
 
     dir (config.buildDir) {
 
         def app
         String stageName = "build ${config.buildImageLabel}"
         if (config.buildPath) stageName += " ${config.buildPath}"
-
-        List buildArgs = []
-        if (config.buildArgs) {
-            buildArgs.each { key, value ->
-                buildArgs.push("--build-arg ${key}=${value}")
-            }
-        }
 
         stage("${stageName}") {
             // ref: https://www.jenkins.io/doc/book/pipeline/docker/
@@ -125,7 +124,9 @@ void buildAndPublishImage(Logger log, Map config) {
             }
 //             if (buildArgs.size()>0) {
             if (buildArgs) {
-                app = docker.build(config.buildImageLabel, buildArgs.join(" "))
+                String buildArgsString = buildArgs.join(" ")
+                log.info("buildArgsString=${buildArgsString}")
+                app = docker.build(config.buildImageLabel, buildArgsString)
             } else {
                 app = docker.build(config.buildImageLabel)
             }
