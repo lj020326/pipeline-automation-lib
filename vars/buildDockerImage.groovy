@@ -123,6 +123,7 @@ void buildAndPublishImage(Logger log, Map config) {
             else if (config?.dockerFile) {
                 buildArgs.push("-f ${config.dockerFile} .")
             }
+//             if (buildArgs.size()>0) {
             if (buildArgs) {
                 app = docker.build(config.buildImageLabel, buildArgs.join(" "))
             } else {
