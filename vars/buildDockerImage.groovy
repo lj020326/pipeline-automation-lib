@@ -101,6 +101,13 @@ void buildAndPublishImage(Logger log, Map config) {
     log.info("${logPrefix} commit_id=${commit_id}")
 
 //    DockerUtil dockerUtil = new DockerUtil(this)
+    List buildArgs = []
+    if (config.buildArgs) {
+        config.buildArgs.each { key, value ->
+            buildArgs.push("--build-arg ${key}=${value}")
+        }
+    }
+    log.info("${logPrefix} buildArgs=${JsonUtils.printToJsonString(buildArgs)}")
 
     dir (config.buildDir) {
 
@@ -111,15 +118,17 @@ void buildAndPublishImage(Logger log, Map config) {
         stage("${stageName}") {
             // ref: https://www.jenkins.io/doc/book/pipeline/docker/
             if (config?.buildPath && config?.dockerFile) {
-                app = docker.build(config.buildImageLabel, "-f ${config.dockerFile} ${config.buildPath}")
+                buildArgs.push("-f ${config.dockerFile} ${config.buildPath}")
             }
             else if (config?.dockerFile) {
-                app = docker.build(config.buildImageLabel, "-f ${config.dockerFile} .")
+                buildArgs.push("-f ${config.dockerFile} .")
             }
-            else if (config?.buildPath) {
-                app = docker.build(config.buildImageLabel, config.buildPath)
-            }
-            else {
+//             if (buildArgs.size()>0) {
+            if (buildArgs) {
+                String buildArgsString = buildArgs.join(" ")
+                log.info("${logPrefix} buildArgsString=${buildArgsString}")
+                app = docker.build(config.buildImageLabel, buildArgsString)
+            } else {
                 app = docker.build(config.buildImageLabel)
             }
         }
