@@ -69,6 +69,7 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.get("registryCredId", "docker-registry-admin")
     config.get("buildImageLabel", "${env.JOB_NAME.split('/')[-2]}")
     config.get("buildDir", ".")
+    config.get("buildPath", ".")
 //    config.get("buildImageList", [[ buildDir: ".", buildImageLabel: "${env.JOB_BASE_NAME}"]])
     config.get("buildImageList", [[ buildDir: config.buildDir, buildImageLabel: config.buildImageLabel]])
 
@@ -113,7 +114,7 @@ void buildAndPublishImage(Logger log, Map config) {
 
         def app
         String stageName = "build ${config.buildImageLabel}"
-        if (config.buildPath) stageName += " ${config.buildPath}"
+        if (config.buildPath!=".") stageName += " ${config.buildPath}"
 
         stage("${stageName}") {
             // ref: https://www.jenkins.io/doc/book/pipeline/docker/
