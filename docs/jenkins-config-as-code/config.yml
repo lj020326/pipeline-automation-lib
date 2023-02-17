@@ -14,28 +14,28 @@ unclassified:
   themeManager:
     disableUserThemes: true
     theme: "material-indigo"
-  simple-theme-plugin:
-    elements:
-      - cssText:
-          text: >
-            :root {
-                --material-primary: #ff973f !important;
-            }
-
-            #jenkins-head-icon {
-                display: none;
-            }
-
-            #jenkins-home-link::before {
-                background-image: url('data:image/jpg;base64, base64_encoded_jpeg_here');
-                background-repeat: no-repeat;
-                height: 40px;
-                display: inline-block;
-                width: 80px;
-                content: '';
-                background-size: contain;
-                vertical-align: middle;
-            }
+#  simple-theme-plugin:
+#    elements:
+#      - cssText:
+#          text: >
+#            :root {
+#                --material-primary: #ff973f !important;
+#            }
+#
+#            #jenkins-head-icon {
+#                display: none;
+#            }
+#
+#            #jenkins-home-link::before {
+#                background-image: url('data:image/jpg;base64, base64_encoded_jpeg_here');
+#                background-repeat: no-repeat;
+#                height: 40px;
+#                display: inline-block;
+#                width: 80px;
+#                content: '';
+#                background-size: contain;
+#                vertical-align: middle;
+#            }
 security:
   globalJobDslSecurityConfiguration:
     useScriptSecurity: false
