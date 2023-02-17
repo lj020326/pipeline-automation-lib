@@ -118,20 +118,12 @@ void buildAndPublishImage(Logger log, Map config) {
 
         stage("${stageName}") {
             // ref: https://www.jenkins.io/doc/book/pipeline/docker/
-//             if (config?.buildPath && config?.dockerFile) {
-//                 buildArgs.push("-f ${config.dockerFile} ${config.buildPath}")
-//             }
-//             else if (config?.dockerFile) {
-//                 buildArgs.push("-f ${config.dockerFile} .")
-//             }
-
             if (config?.dockerFile) {
                 buildArgs.push("-f ${config.dockerFile} ${config.buildPath}")
             }
             else {
                 buildArgs.push("${config.buildPath}")
             }
-//             if (buildArgs.size()>0) {
             if (buildArgs) {
                 String buildArgsString = buildArgs.join(" ")
                 log.info("${logPrefix} buildArgsString=${buildArgsString}")
