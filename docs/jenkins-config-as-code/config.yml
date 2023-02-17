@@ -1,0 +1,78 @@
+## ref: https://github.com/emnify/jenkins-casc-docker/blob/master/config.yml
+jenkins:
+  numExecutors: 1
+  crumbIssuer:
+    standard:
+      excludeClientIPFromCrumb: false
+  remotingSecurity:
+    enabled: false
+unclassified:
+  location:
+    url: "${JENKINS_HOST}"
+  slackNotifier:
+    baseUrl: "${SLACK_URL}"
+    tokenCredentialId: "slack-token"
+  themeManager:
+    disableUserThemes: true
+    theme: "material-indigo"
+#  simple-theme-plugin:
+#    elements:
+#      - cssText:
+#          text: >
+#            :root {
+#                --material-primary: #ff973f !important;
+#            }
+#
+#            #jenkins-head-icon {
+#                display: none;
+#            }
+#
+#            #jenkins-home-link::before {
+#                background-image: url('data:image/jpg;base64, base64_encoded_jpeg_here');
+#                background-repeat: no-repeat;
+#                height: 40px;
+#                display: inline-block;
+#                width: 80px;
+#                content: '';
+#                background-size: contain;
+#                vertical-align: middle;
+#            }
+security:
+  globalJobDslSecurityConfiguration:
+    useScriptSecurity: false
+credentials:
+  system:
+    domainCredentials:
+      - credentials:
+          - usernamePassword:
+              scope: GLOBAL
+              id: "github-token"
+              username: "${GITHUB_USERNAME}"
+              password: "${GITHUB_PASSWORD}"
+              description: "GitHub Token"
+          - string:
+              scope: GLOBAL
+              id: "slack-token"
+              secret: "${SLACK_TOKEN}"
+jobs:
+  - script: >
+      freeStyleJob('seedjob') {
+          displayName('Seedjob')
+          description('Create Jobs from this seedjob')
+
+          scm {
+              git {
+                  remote {
+                      github('${GITHUB_REPO_JOB_DSL}')
+                      credentials('github-token')
+                  }
+              }
+          }
+
+          steps {
+              dsl {
+                  removeAction('DISABLE')
+                  external('seed_jobdsl.groovy')
+              }
+          }
+      }
