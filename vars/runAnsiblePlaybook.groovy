@@ -51,12 +51,13 @@ def call(Map params=[:]) {
                 }
                 steps {
                     script {
+                        sh "ansible-galaxy --version"
                         // install galaxy roles
                         if (fileExists(config.ansibleCollectionsRequirements)) {
-                            sh "ansible-galaxy collection install ${config.ansibleGalaxyForceOptString} -r ${config.ansibleCollectionsRequirements}"
+                            sh "ansible-galaxy collection install --ignore-certs ${config.ansibleGalaxyForceOptString} -r ${config.ansibleCollectionsRequirements}"
                         }
                         if (fileExists(config.ansibleRolesRequirements)) {
-                            sh "ansible-galaxy install ${config.ansibleGalaxyForceOptString} -r ${config.ansibleRolesRequirements}"
+                            sh "ansible-galaxy install --ignore-certs ${config.ansibleGalaxyForceOptString} -r ${config.ansibleRolesRequirements}"
                         }
                     }
                 }
@@ -132,6 +133,7 @@ def call(Map params=[:]) {
                             sh "tree ${config.ansibleInventoryDir}/group_vars"
                         }
 
+                        sh "ansible --version"
                         withEnv(config.ansibleEnvVarsList) {
                             withCredentials(config.ansibleSecretVarsList) {
                                 ansible.execPlaybook(config)
