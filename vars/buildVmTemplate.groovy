@@ -15,6 +15,7 @@ def call(Map params=[:]) {
     Logger.init(this, LogLevel.INFO)
     Logger log = new Logger(this)
     String packerTool = "packer-1.6.2" // Name of Packer Installation
+//     String packerTool = "packer-1.8.6" // Name of Packer Installation
 
     Map config=[:]
     boolean vmTemplateExists = false

@@ -53,11 +53,20 @@ def call(Map params=[:]) {
                     script {
                         sh "ansible-galaxy --version"
                         // install galaxy roles
+                        List ansibleGalaxyArgs = []
+                        if (config.ansibleGalaxyIgnoreCerts) {
+                            ansibleGalaxyArgs.push("--ignore-certs")
+                        }
+                        if (config.ansibleGalaxyForceOpt) {
+                            ansibleGalaxyArgs.push("--force")
+                        }
+                        String ansibleGalaxyArgsString = ansibleGalaxyArgs.join(" ")
+
                         if (fileExists(config.ansibleCollectionsRequirements)) {
-                            sh "ansible-galaxy collection install --ignore-certs ${config.ansibleGalaxyForceOptString} -r ${config.ansibleCollectionsRequirements}"
+                            sh "ansible-galaxy collection install ${ansibleGalaxyArgsString} -r ${config.ansibleCollectionsRequirements}"
                         }
                         if (fileExists(config.ansibleRolesRequirements)) {
-                            sh "ansible-galaxy install --ignore-certs ${config.ansibleGalaxyForceOptString} -r ${config.ansibleRolesRequirements}"
+                            sh "ansible-galaxy install ${ansibleGalaxyArgsString} -r ${config.ansibleRolesRequirements}"
                         }
                     }
                 }
@@ -213,11 +222,8 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.ansibleInventory = config.get('ansibleInventory', 'hosts.yml')
     config.ansibleInventoryDir = config.ansibleInventory.take(config.ansibleInventory.lastIndexOf('/'))
 
+    config.ansibleGalaxyIgnoreCerts = config.get('AnsibleGalaxyIgnoreCerts',false)
     config.ansibleGalaxyForceOpt = config.get('ansibleGalaxyForceOpt', false)
-    config.ansibleGalaxyForceOptString=""
-    if (config.ansibleGalaxyForceOpt) {
-        config.ansibleGalaxyForceOptString="--force"
-    }
 
     config.ansibleSshCredId = config.get('ansibleSshCredId', 'jenkins-ansible-ssh')
     config.ansibleVaultCredId = config.get('ansibleVaultCredId', 'ansible-vault-pwd-file')
