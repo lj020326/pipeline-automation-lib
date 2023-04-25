@@ -65,12 +65,12 @@ class AnsibleIT extends LibraryIntegrationTestBase {
         "doGenerateSubmoduleConfigurations": false,
         "extensions"                       : [
             [$class: 'LocalBranch'],
-            [$class: 'RelativeTargetDirectory', relativeTargetDir: 'tecris.maven'],
-            [$class: 'ScmName', name: 'tecris.maven']
+            [$class: 'RelativeTargetDirectory', relativeTargetDir: 'tecris.ansible'],
+            [$class: 'ScmName', name: 'tecris.ansible']
         ],
         "submoduleCfg"                     : [],
         "userRemoteConfigs"                : [
-            [url: "https://github.com/tecris/ansible-maven.git"]
+            [url: "https://github.com/tecris/ansible-ansible.git"]
         ]
     ]
 
@@ -213,8 +213,8 @@ class AnsibleIT extends LibraryIntegrationTestBase {
           File mockedResponse = this.dslMock.locateTestResource("tools/ansible/williamyeh.oracle-java.json")
           return mockedResponse.getText("UTF-8")
           break
-        case "curl --silent 'https://galaxy.ansible.com/api/v1/roles/?owner__username=tecris&name=maven'":
-          File mockedResponse = this.dslMock.locateTestResource("tools/ansible/tecris.maven.json")
+        case "curl --silent 'https://galaxy.ansible.com/api/v1/roles/?owner__username=tecris&name=ansible'":
+          File mockedResponse = this.dslMock.locateTestResource("tools/ansible/tecris.ansible.json")
           return mockedResponse.getText("UTF-8")
           break
         default: throw new Exception()

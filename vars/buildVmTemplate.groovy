@@ -30,19 +30,19 @@ def call(Map params=[:]) {
             label "packer"
         }
 
-        tools {
-            "biz.neustar.jenkins.plugins.packer.PackerInstallation" "$packerTool"
-        }
+//         tools {
+//             "biz.neustar.jenkins.plugins.packer.PackerInstallation" "$packerTool"
+//         }
 
         environment {
             GOVC_INSECURE = true
         }
-        options {
-            buildDiscarder(logRotator(numToKeepStr: '10'))
-            disableConcurrentBuilds()
-            timestamps()
-            timeout(time: 3, unit: 'HOURS')
-        }
+//         options {
+//             buildDiscarder(logRotator(numToKeepStr: '10'))
+//             disableConcurrentBuilds()
+//             timestamps()
+//             timeout(time: 3, unit: 'HOURS')
+//         }
 
         stages {
 
@@ -284,7 +284,7 @@ Map loadPipelineConfig(Logger log, Map params) {
 
     List jobParts = JOB_NAME.split("/")
     log.info("${logPrefix} jobParts=${jobParts}")
-    config.jobBaseFolderLevel = config.jobBaseFolderLevel ?: 3
+    config.jobBaseFolderLevel = (jobParts.size() - 2)
     config.build_dir="templates"
     config.timeout = config.get('timeout', 3)
     config.timeoutUnit = config.get('timeoutUnit', 'HOURS')

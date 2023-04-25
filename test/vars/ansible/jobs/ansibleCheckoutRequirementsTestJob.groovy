@@ -17,12 +17,12 @@
  * limitations under the License.
  * #L%
  */
-package vars.execMaven.jobs
+package vars.execAnsible.jobs
 /**
- * Runs execMaven step with path to custom maven executable
+ * Runs execAnsible step with path to custom ansible executable
  *
  * @return The script
- * @see vars.execMaven.ExecMavenIT
+ * @see vars.execAnsible.ExecAnsibleIT
  */
 def execute() {
   ansible.checkoutRequirements("tools/ansible/requirements.yml")

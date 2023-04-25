@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 
+GIT_DEFAULT_BRANCH=main
+
 ## ref: https://intoli.com/blog/exit-on-errors-in-bash-scripts/
 # exit when any command fails
 set -e
 
 ## https://www.pixelstech.net/article/1577768087-Create-temp-file-in-Bash-using-mktemp-and-trap
-TMP_DIR="$(mktemp -d -p ~)"
+TMP_DIR=$(mktemp -d -p ~)
 
 # keep track of the last executed command
 trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
@@ -13,13 +15,16 @@ trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
 trap 'echo "\"${last_command}\" command filed with exit code $?."' EXIT
 trap 'rm -fr "$TMP_DIR"' EXIT
 
+GIT_REMOVE_CACHED_FILES=0
+
 CONFIRM=0
 SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
 
 #PROJECT_DIR="$( cd "$SCRIPT_DIR/../../../" && pwd )"
 #PROJECT_DIR="$( pwd . )"
 #PROJECT_DIR=$(git rev-parse --show-toplevel)
-PROJECT_DIR="$( cd "$SCRIPT_DIR/" && git rev-parse --show-toplevel )"
+#PROJECT_DIR="$( cd "$SCRIPT_DIR/" && git rev-parse --show-toplevel )"
+PROJECT_DIR="$( git rev-parse --show-toplevel )"
 
 PUBLIC_GITIGNORE=files/git/pub.gitignore
 
@@ -27,10 +32,15 @@ PUBLIC_GITIGNORE=files/git/pub.gitignore
 declare -a PRIVATE_CONTENT_ARRAY
 PRIVATE_CONTENT_ARRAY+=('**/private/***')
 PRIVATE_CONTENT_ARRAY+=('**/save/***')
+PRIVATE_CONTENT_ARRAY+=('**/vault.yml')
+PRIVATE_CONTENT_ARRAY+=('**/*vault.yml')
 PRIVATE_CONTENT_ARRAY+=('**/secrets.yml')
 PRIVATE_CONTENT_ARRAY+=('**/*secrets.yml')
 PRIVATE_CONTENT_ARRAY+=('.vault_pass')
-PRIVATE_CONTENT_ARRAY+=('***/*vault*')
+#PRIVATE_CONTENT_ARRAY+=('***/*vault*')
+PRIVATE_CONTENT_ARRAY+=('***/vault.yml')
+PRIVATE_CONTENT_ARRAY+=('**/integration_config.yml')
+PRIVATE_CONTENT_ARRAY+=('**/integration_config.vault.yml')
 PRIVATE_CONTENT_ARRAY+=('*.log')
 
 printf -v EXCLUDE_AND_REMOVE '%s,' "${PRIVATE_CONTENT_ARRAY[@]}"
@@ -59,7 +69,6 @@ echo "TMP_DIR=${TMP_DIR}"
 ## https://www.studytonight.com/linux-guide/how-to-exclude-files-and-directory-using-rsync
 RSYNC_OPTS_GIT_MIRROR=(
     -dar
-    --info=progress2
     --links
     --delete-excluded
     --exclude={"${EXCLUDES},${EXCLUDE_AND_REMOVE}"}
@@ -71,7 +80,7 @@ RSYNC_OPTS_GIT_UPDATE=(
 )
 
 git fetch --all
-git checkout master
+git checkout ${GIT_DEFAULT_BRANCH}
 
 #RSYNC_OPTS=${RSYNC_OPTS_GIT_MIRROR[@]}
 
@@ -84,13 +93,15 @@ eval $rsync_cmd
 echo "Checkout public branch"
 git checkout public
 
-echo "Removing files cached in git"
-git rm -r --cached .
+if [ $GIT_REMOVE_CACHED_FILES -eq 1 ]; then
+  echo "Removing files cached in git"
+  git rm -r --cached .
+fi
 
 #echo "Removing existing non-dot files for clean sync"
 #rm -fr *
 
-echo "Mirror ${TMP_DIR} to project dir $PROJECT_DIR"
+echo "Copy ${TMP_DIR} to project dir $PROJECT_DIR"
 #echo "rsync ${RSYNC_OPTS_GIT_UPDATE[@]} ${TMP_DIR}/ ${PROJECT_DIR}/"
 rsync_cmd="rsync ${RSYNC_OPTS_GIT_UPDATE[@]} ${TMP_DIR}/ ${PROJECT_DIR}/"
 echo "${rsync_cmd}"
@@ -117,7 +128,7 @@ echo "Show changes before push:"
 git status
 
 ## https://stackoverflow.com/questions/5989592/git-cannot-checkout-branch-error-pathspec-did-not-match-any-files-kn
-## git diff --name-only public master --
+## git diff --name-only public ${GIT_DEFAULT_BRANCH} --
 
 if [ $CONFIRM -eq 0 ]; then
   ## https://www.shellhacks.com/yes-no-bash-script-prompt-confirmation/
@@ -142,5 +153,5 @@ echo "Pushing branch '${LOCAL_BRANCH}' to remote origin branch '${LOCAL_BRANCH}'
 git push -f origin ${LOCAL_BRANCH} || true && \
 echo "Pushing public branch update to github repository (as main branch):" && \
 git push -f -u github public:main || true && \
-echo "Finally, checkout master branch:" && \
-git checkout master
+echo "Finally, checkout ${GIT_DEFAULT_BRANCH} branch:" && \
+git checkout ${GIT_DEFAULT_BRANCH}

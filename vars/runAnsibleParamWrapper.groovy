@@ -69,6 +69,7 @@ def call(Map config=[:]) {
         string(credentialsId: 'awx-oauth-token', variable: 'TOWER_OAUTH_TOKEN')
     ]
     config.ansibleSecretVarsList = ansibleSecretVarsList
+    config.ansibleVarFiles = ["./vars/vault.yml"]
 
 //     config.ansibleInventory = './inventory'
 //     config.ansibleInventory = './inventory/hosts.ini'

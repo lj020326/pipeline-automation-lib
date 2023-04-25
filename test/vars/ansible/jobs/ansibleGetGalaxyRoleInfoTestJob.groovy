@@ -22,10 +22,10 @@ package vars.ansible.jobs
 import com.dettonville.api.pipeline.tools.ansible.Role
 
 /**
- * Runs execMaven step with path to custom maven executable
+ * Runs execAnsible step with path to custom ansible executable
  *
  * @return The script
- * @see vars.execMaven.ExecMavenIT
+ * @see vars.execAnsible.ExecAnsibleIT
  */
 def execute() {
 

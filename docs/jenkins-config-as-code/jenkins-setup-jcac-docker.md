@@ -168,54 +168,55 @@ We can set the Jenkins URL using the Configuration as Code plugin with the steps
 2.  Copy the configuration file into the Docker image.
 3.  Set the CASC_JENKINS_CONFIG environment variable to the path of the configuration file to instruct the Configuration as Code plugin to read it.
 
-First, create a new file named casc.yaml:
+First, create a new file named jenkins_casc.yml:
 
 ```shell
-$ nano $HOME/playground/jcasc/casc.yaml
+$ nano $HOME/playground/jcasc/jenkins_casc.yml
 ```
 
 Then, add in the following lines:
 
 ```yaml
 unclassified:
-location:
-url: http://server_ip:8080/
+  location:
+    url: http://server_ip:8080/
 ```
 
 unclassified.location.url is the path for setting the Jenkins URL.
 
-Save the casc.yaml file, exit your editor, and open the Dockerfile file:
+Save the jenkins_casc.yml file, exit your editor, and open the Dockerfile file:
 
 ```shell
 $ nano $HOME/playground/jcasc/Dockerfile
 ```
 
-Add a COPY instruction to the end of the Dockerfile that copies the casc.yaml file into the image at /var/jenkins_home/casc.yaml. We have chosen /var/jenkins_home/ because that is the default directory where Jenkins stores all of its data:
+Add a COPY instruction to the end of the Dockerfile that copies the jenkins_casc.yml file into the image at /var/jenkins_home/jenkins_casc.yml. We have chosen /var/jenkins_home/ because that is the default directory where Jenkins stores all of its data:
 
 ```Dockerfile
 FROM jenkins/jenkins:latest
 ENV JAVA_OPTS -Djenkins.install.runSetupWizard=false
 COPY plugins.txt /usr/share/jenkins/ref/plugins.txt
 RUN /usr/local/bin/install-plugins.sh < /usr/share/jenkins/ref/plugins.txt
-COPY casc.yaml /var/jenkins_home/casc.yaml
+COPY jenkins_casc.yml /var/jenkins_home/jenkins_casc.yml
 ```
 
-Then, add a further ENV instruction that sets the CASC_JENKINS_CONFIG environment variable:
+Next add an `ENV` instruction that sets the `CASC_JENKINS_CONFIG` environment variable:
 
 ```Dockerfile
 FROM jenkins/jenkins:latest
 ENV JAVA_OPTS -Djenkins.install.runSetupWizard=false
-ENV CASC_JENKINS_CONFIG /var/jenkins_home/casc.yaml
+ENV CASC_JENKINS_CONFIG /var/jenkins_home/jenkins_casc.yml
 COPY plugins.txt /usr/share/jenkins/ref/plugins.txt
-RUN /usr/local/bin/install-plugins.sh < /usr/share/jenkins/ref/plugins.txt
-COPY casc.yaml /var/jenkins_home/casc.yaml
+#RUN /usr/local/bin/install-plugins.sh < /usr/share/jenkins/ref/plugins.txt
+RUN jenkins-plugin-cli --clean-download-directory --list --view-security-warnings -f /usr/share/jenkins/ref/plugins.txt
+COPY jenkins_casc.yml /var/jenkins_home/jenkins_casc.yml
 ```
 
-We have put the ENV instruction near the top because it is something that we are unlikely to change. By placing it before the COPY and RUN instructions, we can avoid invalidating the cached layer if we were to update the casc.yaml or plugins.txt.
+We have put the ENV instruction near the top because it is something that we are unlikely to change. By placing it before the COPY and RUN instructions, we can avoid invalidating the cached layer if we were to update the jenkins_casc.yml or plugins.txt.
 
 Save the file and exit the editor. Next, build the image and run the updated Jenkins image as we did in the initial step.
 
-Now, navigate to server_ip:8080/configure and scroll down to the Jenkins URL field. Confirm that the Jenkins URL has been set to the same value specified in the casc.yaml file.
+Now, navigate to server_ip:8080/configure and scroll down to the Jenkins URL field. Confirm that the Jenkins URL has been set to the same value specified in the jenkins_casc.yml file.
 
 Lastly, stop the container process by pressing CTRL+C.
 
@@ -223,10 +224,10 @@ Lastly, stop the container process by pressing CTRL+C.
 
 In this step, we will set up a basic, password-based authentication scheme and create a new user named admin.
 
-Start by opening the casc.yaml file:
+Start by opening the jenkins_casc.yml file:
 
 ```shell
-$ nano $HOME/playground/jcasc/casc.yaml
+$ nano $HOME/playground/jcasc/jenkins_casc.yml
 ```
 
 Then, add in the highlighted snippet:
@@ -246,7 +247,7 @@ unclassified:
 The local security realm means to use basic authentication where users must specify their ID/username and password.  
 Further the allowsSignup: false, prevents anonymous users from creating an account through the web interface.
 
-Next, build a new image to incorporate the changes made to the casc.yaml file:
+Next, build a new image to incorporate the changes made to the jenkins_casc.yml file:
 
 ```shell
 $ docker build -t jenkins:jcasc .
@@ -272,10 +273,10 @@ In this step, we will use the Matrix Authorization Strategy plugin to configure 
 
 The Matrix Authorization Strategy plugin provides a granular authorization strategy. It allows us to set user permissions globally, as well as per project/job.
 
-It also allows us to use the jenkins.authorizationStrategy.globalMatrix.permissions JCasC property to set global permissions. To use it, open the casc.yaml file:
+It also allows us to use the jenkins.authorizationStrategy.globalMatrix.permissions JCasC property to set global permissions. To use it, open the jenkins_casc.yml file:
 
 ```shell
-$ nano $HOME/playground/jcasc/casc.yaml
+$ nano $HOME/playground/jcasc/jenkins_casc.yml
 ```
 
 And add in the highlighted snippet:
@@ -295,7 +296,7 @@ unclassified:
 
 The globalMatrix property sets global permissions. Here, we are granting the Overall/Administer permissions to the admin user. We are also granting Overall/Read permissions all authenticated users.
 
-Save the casc.yaml file, exit your editor, and build a new image:
+Save the jenkins_casc.yml file, exit your editor, and build a new image:
 
 ```shell
 $ docker build -t jenkins:jcasc .
@@ -331,13 +332,13 @@ build-timeout:latest
 ...
 ```
 
-The plugin provides a new build authorization strategy, which we would need to specify in the JCasC configuration. Exit out of the plugins.txt file and open the casc.yaml file:
+The plugin provides a new build authorization strategy, which we would need to specify in the JCasC configuration. Exit out of the plugins.txt file and open the jenkins_casc.yml file:
 
 ```shell
-$ nano $HOME/playground/jcasc/casc.yaml
+$ nano $HOME/playground/jcasc/jenkins_casc.yml
 ```
 
-Add the highlighted block to your casc.yaml file:
+Add the highlighted block to your jenkins_casc.yml file:
 
 ```yaml
 ...
@@ -352,7 +353,7 @@ unclassified:
 ...
 ```
 
-Save the file and exit the editor. Then, build a new image using the modified plugins.txt and casc.yaml files:
+Save the file and exit the editor. Then, build a new image using the modified plugins.txt and jenkins_casc.yml files:
 
 ```shell
 $ docker build -t jenkins:jcasc .
@@ -374,10 +375,10 @@ The benefit of this configuration is that it is more scalable and fault-tolerant
 
 However, there may be instances where the agents cannot be trusted by the controller. Enabling Agent to Controller Access Control, we can control which commands and files the agents have access to.
 
-To enable Agent to Controller Access Control, open the casc.yaml file:
+To enable Agent to Controller Access Control, open the jenkins_casc.yml file:
 
 ```shell
-$ nano $HOME/playground/jcasc/casc.yaml
+$ nano $HOME/playground/jcasc/jenkins_casc.yml
 ```
 
 Then, add the following highlighted lines:

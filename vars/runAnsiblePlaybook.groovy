@@ -128,6 +128,12 @@ def call(Map params=[:]) {
                         if (config.containsKey('ansibleDiffMode')) {
                             ansibleCfg[ANSIBLE][ANSIBLE_EXTRA_PARAMETERS]+=['--diff']
                         }
+                        if (config.containsKey('ansibleVarFiles')) {
+                            config.ansibleVarFiles.each { String varFile ->
+                                String extraVarFileParam = "-e @${varFile}"
+                                ansibleCfg[ANSIBLE][ANSIBLE_EXTRA_PARAMETERS]+=[extraVarFileParam]
+                            }
+                        }
                         if (config.containsKey('ansibleLimitHosts')) {
                             ansibleCfg[ANSIBLE][ANSIBLE_LIMIT]=config.ansibleLimitHosts
                         }

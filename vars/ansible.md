@@ -116,7 +116,7 @@ ansible-playbook --extra-vars '{"string":"value","boolean":true,"integer":1,"lis
 
 #### Inject Build parameters into `--extra-vars`
 
-When enabled the step will automatically add all build parameters as extra variables an pass it to the playbook.
+When enabled the step will automatically add all build parameters as extra variables and pass them to the playbook.
 :bulb: These extra vars are combined with the variables defined via `ANSIBLE_EXTRA_VARS`.
 
 ```groovy
@@ -147,7 +147,7 @@ This config will execute the ansible playbook with the following `--extra-vars` 
 ansible-playbook --extra-vars '{"boolparam":false,"choiceparam":"choice1","stringparam":"defaultValue"}' [...]
 ```
 
-:exclamation: Pleaes note that all parameters are injected. If you want to decide which parameters are added as extra params use the `ANSIBLE_EXTRA_VARS` configuration option.
+:exclamation: Please note that all parameters are injected. If you want to decide which parameters are added as extra params use the `ANSIBLE_EXTRA_VARS` configuration option.
 
 #### Extra parameters
 
