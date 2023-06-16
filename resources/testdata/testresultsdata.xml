@@ -3,18 +3,18 @@
     <ac:rich-text-body>
         <p>Note - Test Results are extracted from Jenkins Logs.</p>
         <p>Total tests passing, failing and pending come from the Serenity Results page, e.g.&nbsp;<a
-                href="https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/master/272/Serenity_Reports/">
-            https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/master/272/Serenity_Reports/
+                href="https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/main/272/Serenity_Reports/">
+            https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/main/272/Serenity_Reports/
         </a>
         </p>
         <p>The difference e.g. (+19) comes from the test report, e.g.&nbsp;&nbsp;<a
-                href="https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/master/272/testReport/">
-            https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/master/272/testReport/
+                href="https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/main/272/testReport/">
+            https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/main/272/testReport/
         </a>
         </p>
         <p>Newly Failing, comes from the Blue Ocean results, e.g.&nbsp;<a
-                href="https://cd.dettonville.int/jenkins/blue/organizations/jenkins/DCAPI%2Fdcapi-test/detail/master/272/tests">
-            https://cd.dettonville.int/jenkins/blue/organizations/jenkins/DCAPI%2Fdcapi-test/detail/master/272/tests</a>&nbsp;or
+                href="https://cd.dettonville.int/jenkins/blue/organizations/jenkins/DCAPI%2Fdcapi-test/detail/main/272/tests">
+            https://cd.dettonville.int/jenkins/blue/organizations/jenkins/DCAPI%2Fdcapi-test/detail/main/272/tests</a>&nbsp;or
             by counting the 1'\''s ffor newly failed in the rest report.
         </p>
         <p>Newly Passing, is calculated as newly failing + the difference, e.g. run 270 had 25 newly failing, but
@@ -159,9 +159,9 @@
     <tr>
         <td colspan="1">31 Aug 2018</td>
         <td colspan="1">
-            <a href="https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/master/272/"
+            <a href="https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/main/272/"
                style="text-decoration: none;text-align: left;">
-                https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/master/276/
+                https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/main/276/
             </a>
         </td>
         <td colspan="1">&nbsp;</td>
@@ -190,9 +190,9 @@
             <span>&nbsp;</span>
         </td>
         <td colspan="1">
-            <a href="https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/master/272/"
+            <a href="https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/main/272/"
                style="text-decoration: none;text-align: left;">
-                https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/master/275/
+                https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/main/275/
             </a>
         </td>
         <td colspan="1">20</td>
@@ -217,9 +217,9 @@
         <td colspan="1"><time datetime="2018-08-29"/>&nbsp;
         </td>
         <td colspan="1">
-            <a href="https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/master/272/"
+            <a href="https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/main/272/"
                style="text-decoration: none;text-align: left;">
-                https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/master/274/
+                https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/main/274/
             </a>
         </td>
         <td colspan="1">&nbsp;</td>
@@ -239,9 +239,9 @@
         <td colspan="1"><time datetime="2018-08-29"/>&nbsp;
         </td>
         <td colspan="1">
-            <a href="https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/master/272/"
+            <a href="https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/main/272/"
                style="text-decoration: none;text-align: left;">
-                https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/master/273/
+                https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/main/273/
             </a>
         </td>
         <td colspan="1">&nbsp;</td>
@@ -261,8 +261,8 @@
         <td colspan="1"><time datetime="2018-08-28"/>&nbsp;
         </td>
         <td colspan="1">
-            <a href="https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/master/272/">
-                https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/master/272/
+            <a href="https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/main/272/">
+                https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/main/272/
             </a>
         </td>
         <td colspan="1">&nbsp;</td>
@@ -286,8 +286,8 @@
         <td><time datetime="2018-08-27"/>&nbsp;
         </td>
         <td>
-            <a href="https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/master/271/">
-                https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/master/271/
+            <a href="https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/main/271/">
+                https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/main/271/
             </a>
         </td>
         <td colspan="1">&nbsp;</td>

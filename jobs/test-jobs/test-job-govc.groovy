@@ -30,7 +30,7 @@ pipeline {
             steps {
                 script {
 
-                    withCredentials([usernamePassword(credentialsId: 'dcapi-govc-cred', passwordVariable: 'GOVC_PASSWORD', usernameVariable: 'GOVC_USERNAME')]) {
+                    withCredentials([usernamePassword(credentialsId: 'infra-govc-cred', passwordVariable: 'GOVC_PASSWORD', usernameVariable: 'GOVC_USERNAME')]) {
 
                         setPackerEnv()
                         echo "env.TEMPLATE_BUILD_ID=${env.TEMPLATE_BUILD_ID}"

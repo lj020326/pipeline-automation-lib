@@ -13,8 +13,8 @@ node ('DEVCLD-LIN7') {
     log.info("checkout test repo for find")
     checkout scm: [
         $class: 'GitSCM',
-        branches: [[name: "master"]],
-        userRemoteConfigs: [[credentialsId: 'dcapi_ci_vcs_user', url: 'https://gitrepository.dettonville.int/stash/scm/api/dcapi-test.git']]
+        branches: [[name: "main"]],
+        userRemoteConfigs: [[credentialsId: 'dcapi_ci_vcs_user', url: 'https://gitrepository.dettonville.int/stash/scm/api/infra-test.git']]
     ]
 
     log.info("test find")

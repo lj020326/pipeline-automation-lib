@@ -11,8 +11,8 @@ import com.dettonville.api.pipeline.utils.Utilities
 
 def call(Map config=[:]) {
 
-    Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this)
+//     Logger.init(this, LogLevel.INFO)
+    Logger log = new Logger(this, LogLevel.INFO)
 
     List paramList = [
             string(defaultValue: "org/image_1:tag_1 org/image_2:tag_2 ...", description: "Specify docker hub images/labels to remove", name: 'DockerImageLabels')

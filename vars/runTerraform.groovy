@@ -11,8 +11,7 @@ import com.dettonville.api.pipeline.utils.DockerUtil
 def call(Map params=[:]) {
 
 //    Logger.init(this, LogLevel.INFO)
-    Logger.init(this)
-    Logger log = new Logger(this)
+    Logger log = new Logger(this, LogLevel.INFO)
 
     log.info("Loading Default Configs")
 
@@ -36,7 +35,7 @@ def call(Map params=[:]) {
             //      stage('fetch_latest_code') {
             //        steps {
             ////          git credentialsId: '17371c59-6b11-42c7-bb25-a37a9febb4db', url: 'https://github.com/PrashantBhatasana/terraform-jenkins-ec2'
-            //          git credentialsId: 'dcapi-jenkins-git-user', url: 'https://gitea.admin.dettonville.int:8443/infra/terraform-jenkins.git'
+            //          git credentialsId: 'infra-jenkins-git-user', url: 'https://gitea.admin.dettonville.int:8443/infra/terraform-jenkins.git'
             //        }
             //      }
 

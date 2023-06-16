@@ -11,8 +11,8 @@ import com.dettonville.api.pipeline.utils.logging.Logger
 
 def call(Map params=[:]) {
 
-    Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this)
+//     Logger.init(this, LogLevel.INFO)
+    Logger log = new Logger(this, LogLevel.INFO)
 
     log.info("Loading Default Configs")
     Map config=loadPipelineConfig(log, params)
@@ -33,8 +33,8 @@ def call(Map params=[:]) {
         }
         environment {
             ARA_CLI = 'https://artifacts.dettonville.int/artifactory/releases/com/dettonville/ara/ara-release-cli/1.0.3/ara-release-cli-1.0.3.tar'
-            DEPLOY_JOB_DEV = "DCAPI/DeploymentJobs/DeployOpenAPINotifierDev/master"
-            DEPLOY_JOB_STAGE = "DCAPI/DeploymentJobs/DeployOpenAPINotifierStage/master"
+            DEPLOY_JOB_DEV = "DCAPI/DeploymentJobs/DeployOpenAPINotifierDev/main"
+            DEPLOY_JOB_STAGE = "DCAPI/DeploymentJobs/DeployOpenAPINotifierStage/main"
         }
 
         stages {
@@ -81,7 +81,7 @@ def call(Map params=[:]) {
 
             stage('Publish to Artifactory') {
                 steps {
-                    configFileProvider([configFile(fileId: 'dcapi-maven-settings-overrides', variable: 'MAVEN_SETTINGS')]) {
+                    configFileProvider([configFile(fileId: 'infra-maven-settings-overrides', variable: 'MAVEN_SETTINGS')]) {
                         sh """
                             mvn -s "${MAVEN_SETTINGS}" deploy -DskipTests --batch-mode
                         """
@@ -143,7 +143,7 @@ def call(Map params=[:]) {
 
             success {
                 script {
-                    if (BRANCH_NAME == 'master') {
+                    if (BRANCH_NAME == 'main') {
                         createGitTag(getMavenProjectVersion(), env)
                     }
                 }

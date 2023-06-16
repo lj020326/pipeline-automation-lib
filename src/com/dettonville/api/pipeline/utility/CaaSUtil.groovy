@@ -32,7 +32,7 @@ class CaaSUtil implements Serializable {
   * @param appHostName Name of the app, should be same as in manifest.
   * @param env what env we want the certs for. values can be 'nyc-dev', 'nyc-stage', or 'bel-prod'
   * @param returnMap A Map shared back to the caller where it can add the certs and passwords to
-  * @param cnForCert the CN name you want the cert to have. usually your appName + -client. like masterpass-switch-account-registry-services-client
+  * @param cnForCert the CN name you want the cert to have. usually your appName + -client. like dcuser-switch-account-registry-services-client
   */
   public void getJKSFromCaaS(script, String appHostName, String env, Map returnMap, String cnForCert,String ouForCert=null) {
 
@@ -61,7 +61,7 @@ class CaaSUtil implements Serializable {
     def jpn_prodDomain = "apps.jpn.pcfprod00.dettonville.int"
     def domain
 
-    steps.git branch: "master", url: "https://gitrepository.dettonville.int/stash/scm/ca/truststore-certs.git"
+    steps.git branch: "main", url: "https://gitrepository.dettonville.int/stash/scm/ca/truststore-certs.git"
 
     switch(env) {
       case 'nyc-dev':   truststorePassword = nyc_devTruststorePassword;

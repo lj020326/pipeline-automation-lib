@@ -92,7 +92,7 @@ class Utilities implements Serializable {
      */
     boolean isMainLineBranch(String scmType, String branchName) {
         if (scmType == 'git') {
-            return 'master' == branchName
+            return 'main' == branchName
         }
         return 'trunk' == branchName
     }

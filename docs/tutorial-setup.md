@@ -70,13 +70,13 @@ It is recommended to use folder based shared library!
   ![sharedLibrary002](assets/tutorial-setup/shared-library-002.png)
 * Explanation:
   * Name = `pipeline-library` (you can of course use your own name here)
-  * Default Version = `master` (use either master or a tag)
+  * Default Version = `main` (use either main or a tag)
   * Retrival Method is `Modern SCM` and we are checking out from a git
     repository
   * Make sure to check `Ignore on push notifications`, enable `Don't
     trigger a build on commit notifications` and add `Advanced clone
     behaviors` with `Shallow clone` enabled
-  * The GIT extensions ensure that a new master version of the pipeline
+  * The GIT extensions ensure that a new main version of the pipeline
     library will not
     * make your Jenkins going crazy by building every using job with an SCM
       trigger
@@ -128,14 +128,14 @@ The example lib consists out of
 * Configuration for global and local Maven settings auto lookup
 * Configuration for npmrd and npm user config auto lookup
 * Configuration for Bundler config auto lookup
-* A sample class ([`src/com/company/jenkins/pipeline/Demo.groovy`](https://repo.dettonville.int/stash/projects/API/repos/dcapi-automation-pipeline/pipeline-library-example/blob/master/vars/customStep.groovy))
+* A sample class ([`src/com/company/jenkins/pipeline/Demo.groovy`](https://repo.dettonville.int/stash/projects/API/repos/dcapi-automation-pipeline/pipeline-library-example/blob/main/vars/customStep.groovy))
 * A sample step
-  ([`vars/demo.groovy`](https://repo.dettonville.int/stash/projects/API/repos/dcapi-automation-pipeline/pipeline-library-example/blob/master/vars/demo.groovy))
+  ([`vars/demo.groovy`](https://repo.dettonville.int/stash/projects/API/repos/dcapi-automation-pipeline/pipeline-library-example/blob/main/vars/demo.groovy))
 
 ### SCM credentials
 
 The file
-[`credentials.json`](https://repo.dettonville.int/stash/projects/API/repos/dcapi-automation-pipeline/pipeline-library-example/blob/master/resources/credentials/scm/credentials.json)
+[`credentials.json`](https://repo.dettonville.int/stash/projects/API/repos/dcapi-automation-pipeline/pipeline-library-example/blob/main/resources/credentials/scm/credentials.json)
 contains the user data for checking out from your company git server.
 
 Since GIT checkout can be done via SSH and HTTPS there are two
@@ -144,7 +144,7 @@ credentials configured.
 ### Maven global settings
 
 The
-[`global-settings.json`](https://repo.dettonville.int/stash/projects/API/repos/dcapi-automation-pipeline/pipeline-library-example/blob/master/resources/mangedfiles/maven/global-settings.json)
+[`global-settings.json`](https://repo.dettonville.int/stash/projects/API/repos/dcapi-automation-pipeline/pipeline-library-example/blob/main/resources/mangedfiles/maven/global-settings.json)
 specifies the global maven settings `maven-global-settings-for-company`
 (stored in Jenkins via Config File Provider plugin), which is valid for
 all maven builds.
@@ -194,7 +194,7 @@ The global settings xml for the example looks like this:
 ### Maven local settings
 
 The
-[`settings.json`](https://repo.dettonville.int/stash/projects/API/repos/dcapi-automation-pipeline/pipeline-library-example/blob/master/resources/mangedfiles/maven/settings.json)
+[`settings.json`](https://repo.dettonville.int/stash/projects/API/repos/dcapi-automation-pipeline/pipeline-library-example/blob/main/resources/mangedfiles/maven/settings.json)
 specifies client/project specific maven settings
 `maven-local-settings-for-client` (stored in Jenkins via Config File
 Provider plugin), which is valid for all maven builds where the scm url
@@ -249,9 +249,9 @@ configure the deploy credentials here:
 
 ### npmrc and npm user config
 
-[`npm-config-userconfig.json`](https://repo.dettonville.int/stash/projects/API/repos/dcapi-automation-pipeline/pipeline-library-example/blob/master/resources/mangedfiles/npm/npm-config-userconfig.json)
+[`npm-config-userconfig.json`](https://repo.dettonville.int/stash/projects/API/repos/dcapi-automation-pipeline/pipeline-library-example/blob/main/resources/mangedfiles/npm/npm-config-userconfig.json)
 and
-[`npmrc`](https://repo.dettonville.int/stash/projects/API/repos/dcapi-automation-pipeline/pipeline-library-example/blob/master/resources/mangedfiles/npm/npmrc.json)
+[`npmrc`](https://repo.dettonville.int/stash/projects/API/repos/dcapi-automation-pipeline/pipeline-library-example/blob/main/resources/mangedfiles/npm/npmrc.json)
 are used to specify the NPM settings for your npm.company.com repository.
 
 Example for the managed file with id:
@@ -265,7 +265,7 @@ _auth = dGhpc2lzYXBpcGVsaW5lZGVtaQ==
 
 ## Bundler config auto lookup
 
-[`bundle-config.json`](https://repo.dettonville.int/stash/projects/API/repos/dcapi-automation-pipeline/pipeline-library-example/blob/master/resources/mangedfiles/ruby/bundle-config.json)
+[`bundle-config.json`](https://repo.dettonville.int/stash/projects/API/repos/dcapi-automation-pipeline/pipeline-library-example/blob/main/resources/mangedfiles/ruby/bundle-config.json)
 is used to define your settings for using bundler.company.com repository.
 
 Example for the managed file with id:
@@ -282,7 +282,7 @@ BUNDLE_BUNDLER__COMPANY__COM: company-jenkins-user-name:company-jenkins-user-pas
 ## Step 4: Add your library to jenkins and test it
 
 Add your library with the name `pipeline-library-example` and version
-`master` to the https://jenkins.company.com/job/tutorial/ folder as
+`main` to the https://jenkins.company.com/job/tutorial/ folder as
 described in [step 2](#step-2-use-the-library-in-a-job)
 
 Go to the configuration page of the test job

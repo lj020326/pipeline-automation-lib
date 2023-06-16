@@ -12,7 +12,7 @@ node ('QA-LINUX || PROD-LINUX') {
     cleanWs()
 
     log.info("Download something")
-    String downloadUrl = "https://fusion.dettonville.int/stash/projects/API/repos/certutils/raw/scripts/certs.tgz?at=refs%2Fheads%2Fmaster"
+    String downloadUrl = "https://fusion.dettonville.int/stash/projects/API/repos/certutils/raw/scripts/certs.tgz?at=refs%2Fheads%2Fmain"
     String downloadFilePath = "certs.tar.gz"
 
     String runDir = "foobar"

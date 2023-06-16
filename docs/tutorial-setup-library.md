@@ -42,7 +42,7 @@ Here we use the project based shared library approach.
 * Explanation:
   * Name = `pipeline-library`
     You can of course use your own library name here.  If doing so, make sure to change all library references in the following instructs.
-  * Default Version = `master` (use either master or a tag)
+  * Default Version = `main` (use either main or a tag)
     You may also refer to a specific library by tag/branch/commitRef - @Library('somelib@<tag/branch/commitRef>')
     E.g., @Library('pipeline-library@2.0.0-SNAPSHOT')
   * Retrieval Method is `Modern SCM` and we are checking out from a git
@@ -50,7 +50,7 @@ Here we use the project based shared library approach.
   * Make sure to check `Ignore on push notifications`, enable `Don't
     trigger a build on commit notifications` and add `Advanced clone
     behaviors` with `Shallow clone` enabled
-  * The GIT extensions ensure that a new master version of the pipeline
+  * The GIT extensions ensure that a new main version of the pipeline
     library will not
     * make your Jenkins going crazy by building every using job with an SCM
       trigger

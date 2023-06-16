@@ -8,8 +8,8 @@ import com.dettonville.api.pipeline.utils.logging.Logger
 
 def call(Map inConfig=[:]) {
 
-    Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this)
+//     Logger.init(this, LogLevel.INFO)
+    Logger log = new Logger(this, LogLevel.INFO)
 
     String logPrefix="runTerraformJob():"
 

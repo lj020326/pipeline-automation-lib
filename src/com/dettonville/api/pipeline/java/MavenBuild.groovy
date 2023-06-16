@@ -67,7 +67,7 @@ class MavenBuild implements Serializable {
     }
 
     /**
-     * The default way to build a branch (i.e. not Master or Trunk).
+     * The default way to build a branch (i.e. not Main or Trunk).
      * <br>
      * Assumption: current version is a snapshot. <br>
      * Outcome: current version ends up as snapshot in ${SystemLetterCode}-snapshots.
@@ -83,7 +83,7 @@ class MavenBuild implements Serializable {
     }
 
     /**
-     * The default maven build (assuming mainline: Trunk or Master)
+     * The default maven build (assuming mainline: Trunk or Main)
      *
      * @param pom the maven pom, outcome of readMavenPom()
      * @return the version that is published to nexus/tag

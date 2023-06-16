@@ -33,7 +33,7 @@ def call(Map params=[:]) {
                 }
                 steps {
                     script {
-                        // git credentialsId: 'bitbucket-ssh-lj020326', url: 'git@bitbucket.org:lj020326/ansible-datacenter.git'
+                        // git credentialsId: 'bitbucket-ssh-jenkins', url: 'git@bitbucket.org:lj020326/ansible-datacenter.git'
                         checkout scm: [
                             $class: 'GitSCM',
                             branches: [[name: "${config.gitBranch}"]],
@@ -164,12 +164,12 @@ Map loadPipelineConfig(Logger log, Map params) {
 
     // require SSH credentials for some ansible jobs (e.g., deploy-cacerts)
     // ref: https://emilwypych.com/2019/06/15/how-to-pass-credentials-to-jenkins-pipeline/
-    List secretVarsListDefault=[
-        usernamePassword(credentialsId: 'dcapi-ansible-ssh-password', passwordVariable: 'ANSIBLE_SSH_PASSWORD', usernameVariable: 'ANSIBLE_SSH_USERNAME')
-    ]
+//     List secretVarsListDefault=[
+//         usernamePassword(credentialsId: 'infra-ansible-ssh-password', passwordVariable: 'ANSIBLE_SSH_PASSWORD', usernameVariable: 'ANSIBLE_SSH_USERNAME')
+//     ]
+//     config.ansibleSecretVarsList = config.get('ansibleSecretVarsList', secretVarsListDefault)
+    config.ansibleSecretVarsList = config.get('ansibleSecretVarsList', [])
 
-    config.ansibleSecretVarsList = config.get('ansibleSecretVarsList', secretVarsListDefault)
-    
     config.collectionDir=config.get('collectionDir', 'ansible_collections/dettonville/inventory')
 
     log.debug("${logPrefix} params=${params}")

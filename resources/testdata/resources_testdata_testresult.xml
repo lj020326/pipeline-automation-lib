@@ -281,12 +281,12 @@
         <relativePath>target/jbehave/stories.KeyManagement.signingKeys.stats</relativePath>
     </artifact>
     <artifact>
-        <fileName>stories.masterpassMerchantOnboarding.masterpassOnboarding.html</fileName>
-        <relativePath>target/jbehave/stories.masterpassMerchantOnboarding.masterpassOnboarding.html</relativePath>
+        <fileName>stories.dcuserMerchantOnboarding.dcuserOnboarding.html</fileName>
+        <relativePath>target/jbehave/stories.dcuserMerchantOnboarding.dcuserOnboarding.html</relativePath>
     </artifact>
     <artifact>
-        <fileName>stories.masterpassMerchantOnboarding.masterpassOnboarding.stats</fileName>
-        <relativePath>target/jbehave/stories.masterpassMerchantOnboarding.masterpassOnboarding.stats</relativePath>
+        <fileName>stories.dcuserMerchantOnboarding.dcuserOnboarding.stats</fileName>
+        <relativePath>target/jbehave/stories.dcuserMerchantOnboarding.dcuserOnboarding.stats</relativePath>
     </artifact>
     <artifact>
         <fileName>stories.supportAndCommunications.blogs.html</fileName>
@@ -910,12 +910,12 @@
         <relativePath>target/jbehave/view/stories.KeyManagement.signingKeys.stats.html</relativePath>
     </artifact>
     <artifact>
-        <fileName>stories.masterpassMerchantOnboarding.masterpassOnboarding.html</fileName>
-        <relativePath>target/jbehave/view/stories.masterpassMerchantOnboarding.masterpassOnboarding.html</relativePath>
+        <fileName>stories.dcuserMerchantOnboarding.dcuserOnboarding.html</fileName>
+        <relativePath>target/jbehave/view/stories.dcuserMerchantOnboarding.dcuserOnboarding.html</relativePath>
     </artifact>
     <artifact>
-        <fileName>stories.masterpassMerchantOnboarding.masterpassOnboarding.stats.html</fileName>
-        <relativePath>target/jbehave/view/stories.masterpassMerchantOnboarding.masterpassOnboarding.stats.html
+        <fileName>stories.dcuserMerchantOnboarding.dcuserOnboarding.stats.html</fileName>
+        <relativePath>target/jbehave/view/stories.dcuserMerchantOnboarding.dcuserOnboarding.stats.html
         </relativePath>
     </artifact>
     <artifact>
@@ -28437,7 +28437,7 @@
     <displayName>#291</displayName>
     <duration>2771139</duration>
     <estimatedDuration>1588395</estimatedDuration>
-    <fullDisplayName>MC API » dcapi-test » master #291</fullDisplayName>
+    <fullDisplayName>DC API » dcapi-test » master #291</fullDisplayName>
     <id>291</id>
     <keepLog>false</keepLog>
     <number>291</number>

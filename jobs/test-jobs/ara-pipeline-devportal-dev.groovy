@@ -1,4 +1,4 @@
-@Library('dcapi-jenkins-pipeline-libs')
+@Library('infra-jenkins-pipeline-libs')
 import release
 
 /**

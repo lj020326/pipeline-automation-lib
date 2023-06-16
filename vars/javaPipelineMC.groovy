@@ -1,5 +1,5 @@
 
-@Library('dcapi-jenkins-pipeline-libs')
+@Library('infra-jenkins-pipeline-libs')
 import createGitTag
 import getMavenProjectVersion
 import gitCheckout
@@ -63,7 +63,7 @@ def call(def buildSlaveLabel) {
 
             success {
                 script {
-                    if (BRANCH_NAME == 'master') {
+                    if (BRANCH_NAME == 'main') {
                         createGitTag(getMavenProjectVersion(), env)
                     }
                 }

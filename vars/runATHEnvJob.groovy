@@ -9,15 +9,15 @@ import com.dettonville.api.pipeline.utils.Utilities
 
 def call(Map config=[:]) {
 
-    Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this)
+//     Logger.init(this, LogLevel.INFO)
+    Logger log = new Logger(this, LogLevel.INFO)
 
     String logPrefix="runATHEnvJob():"
 
     config.enabledParamList = config.get('enabledParamList', ['alwaysEmailList','useDryRun']) as List
     config.enableDevParams = config.get('enableDevParams', (config.enabledParamList.isEmpty()) ? true : false)
     config.enableBranchParam = config.enabledParamList.contains("athGitBranch") ? true : config.get('enableBranchParam', false)
-    config.athGitRepo = config.get('athGitRepo', "https://gitrepository.dettonville.int/stash/scm/api/dcapi-test.git")
+    config.athGitRepo = config.get('athGitRepo', "https://gitrepository.dettonville.int/stash/scm/api/infra-test.git")
     config.enableBranchSettings = config.enableBranchSettings ?: false
 
     Map configDefaultsMap
@@ -60,7 +60,7 @@ def call(Map config=[:]) {
 jobSettings:
     STAGE:
         SMOKE:
-            alwaysEmailList: "DST_Open_API_Development_Team@dettonville.org, dcapi-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com, dcapi_qa@dettonville.org"
+            alwaysEmailList: "DST_Open_API_Development_Team@dettonville.org, infra-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com, dcapi_qa@dettonville.org"
         SANITY:
             testCases:
                 chrome:
@@ -68,7 +68,7 @@ jobSettings:
 
     STAGE_EXTERNAL:
         SMOKE:
-            alwaysEmailList: "DST_Open_API_Development_Team@dettonville.org, dcapi-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com, dcapi_qa@dettonville.org"
+            alwaysEmailList: "DST_Open_API_Development_Team@dettonville.org, infra-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com, dcapi_qa@dettonville.org"
 
         SANITY:
             testCases:
@@ -96,7 +96,7 @@ jobSettings:
 
 branchSettings:
 
-    master:
+    main:
     
     develop:
 #        useSimulationMode: true

@@ -10,15 +10,24 @@ import static com.dettonville.api.pipeline.utils.ConfigConstants.*
 def call(Map params=[:]) {
 
     Logger log = new Logger(this, LogLevel.INFO)
-//    Logger log = new Logger(this)
-//    Logger.init(this, LogLevel.INFO)
+//     log.setLevel(LogLevel.DEBUG)
 
     Map config=loadPipelineConfig(log, params)
     def agentLabel = getJenkinsAgentLabel(config.jenkinsNodeLabel)
 
+    // Name of Ansible Installation
+    String ansibleTool = 'ansible-venv'
+//     String ansibleTool = 'ansible-local'
+
     pipeline {
         agent {
             label agentLabel as String
+        }
+        tools {
+            // ref: https://webapp.chatgpt4google.com/s/MzY5MjYw
+            // ref: https://stackoverflow.com/questions/47895668/how-to-select-multiple-jdk-version-in-declarative-pipeline-jenkins#48368506
+//             ansible 'ansible-venv'
+            ansible "${ansibleTool}"
         }
         options {
             disableConcurrentBuilds()
@@ -28,30 +37,33 @@ def call(Map params=[:]) {
             timeout(time: config.timeout, unit: config.timeoutUnit)
         }
         stages {
-            stage('Checkout') {
-                when {
-                    expression { config.gitPerformCheckout }
-                }
-                steps {
-                    script {
-                        // git credentialsId: 'bitbucket-ssh-lj020326', url: 'git@bitbucket.org:lj020326/ansible-datacenter.git'
-                        checkout scm: [
-                            $class: 'GitSCM',
-                            branches: [[name: "${config.gitBranch}"]],
-                            userRemoteConfigs: [[credentialsId: "${config.gitCredId}",
-                                                 url: "${config.gitRepoUrl}"]]
-                        ]
-
-                    }
-                }
-            }
+//             stage('Checkout') {
+//                 when {
+//                     expression { config.gitPerformCheckout }
+//                 }
+//                 steps {
+//                     script {
+//                         // git credentialsId: 'bitbucket-ssh-jenkins', url: 'git@bitbucket.org:lj020326/ansible-datacenter.git'
+//                         checkout scm: [
+//                             $class: 'GitSCM',
+//                             branches: [[name: "${config.gitBranch}"]],
+//                             userRemoteConfigs: [[credentialsId: "${config.gitCredId}",
+//                                                  url: "${config.gitRepoUrl}"]]
+//                         ]
+//
+//                     }
+//                 }
+//             }
             stage('Run collections and roles Install') {
                 when {
                     expression { config.ansibleCollectionsRequirements || config.ansibleRolesRequirements }
                 }
                 steps {
                     script {
-                        sh "ansible-galaxy --version"
+                        sh "env | sort"
+                        sh "${config.ansibleCmd} --version"
+                        sh "${config.ansibleGalaxyCmd} --version"
+
                         // install galaxy roles
                         List ansibleGalaxyArgs = []
                         if (config.ansibleGalaxyIgnoreCerts) {
@@ -62,11 +74,13 @@ def call(Map params=[:]) {
                         }
                         String ansibleGalaxyArgsString = ansibleGalaxyArgs.join(" ")
 
-                        if (fileExists(config.ansibleCollectionsRequirements)) {
-                            sh "ansible-galaxy collection install ${ansibleGalaxyArgsString} -r ${config.ansibleCollectionsRequirements}"
-                        }
-                        if (fileExists(config.ansibleRolesRequirements)) {
-                            sh "ansible-galaxy install ${ansibleGalaxyArgsString} -r ${config.ansibleRolesRequirements}"
+                        withCredentials(config.ansibleSecretVarsList) {
+                            if (fileExists(config.ansibleCollectionsRequirements)) {
+                                sh "${config.ansibleGalaxyCmd} collection install ${ansibleGalaxyArgsString} -r ${config.ansibleCollectionsRequirements}"
+                            }
+                            if (fileExists(config.ansibleRolesRequirements)) {
+                                sh "${config.ansibleGalaxyCmd} install ${ansibleGalaxyArgsString} -r ${config.ansibleRolesRequirements}"
+                            }
                         }
                     }
                 }
@@ -78,11 +92,12 @@ def call(Map params=[:]) {
 
                         Map ansibleCfg = [
                             (ANSIBLE) : [
-                                (ANSIBLE_INSTALLATION)    : "ansible-local",
                                 (ANSIBLE_PLAYBOOK)        : "${config.ansiblePlaybook}",
                                 (ANSIBLE_COLORIZED)       : true,
                                 (ANSIBLE_DISABLE_HOST_KEY_CHECK): true,
                                 (ANSIBLE_EXTRA_PARAMETERS): [],
+//                                 (ANSIBLE_INSTALLATION)    : "ansible-local-bin",
+//                                 (ANSIBLE_INSTALLATION)    : "ansible",
 //                                 (ANSIBLE_INVENTORY)       : "${config.ansibleInventory}",
 //                                 (ANSIBLE_TAGS)            : "${config.ansibleTags}",
 //                                 (ANSIBLE_CREDENTIALS_ID)  : "${config.ansibleSshCredId}",
@@ -94,6 +109,9 @@ def call(Map params=[:]) {
                             ]
                         ]
 
+                        if (config.containsKey('ansibleInstallation')) {
+                            ansibleCfg[ANSIBLE][ANSIBLE_INSTALLATION]=config.ansibleInstallation
+                        }
                         if (config.containsKey('ansibleInventory')) {
                             ansibleCfg[ANSIBLE][ANSIBLE_INVENTORY]=config.ansibleInventory
                         }
@@ -148,7 +166,6 @@ def call(Map params=[:]) {
                             sh "tree ${config.ansibleInventoryDir}/group_vars"
                         }
 
-                        sh "ansible --version"
                         withEnv(config.ansibleEnvVarsList) {
                             withCredentials(config.ansibleSecretVarsList) {
                                 ansible.execPlaybook(config)
@@ -231,20 +248,28 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.ansibleGalaxyIgnoreCerts = config.get('AnsibleGalaxyIgnoreCerts',false)
     config.ansibleGalaxyForceOpt = config.get('ansibleGalaxyForceOpt', false)
 
-    config.ansibleSshCredId = config.get('ansibleSshCredId', 'jenkins-ansible-ssh')
-    config.ansibleVaultCredId = config.get('ansibleVaultCredId', 'ansible-vault-pwd-file')
+//     config.ansibleSshCredId = config.get('ansibleSshCredId', 'jenkins-ansible-ssh')
+    config.ansibleVaultCredId = config.get('ansibleVaultCredId', 'ansible-vault-password-file')
     config.ansiblePlaybook = config.get('ansiblePlaybook', 'site.yml')
     config.ansibleTags = config.get('ansibleTags', '')
+
+    String ansibleGalaxyCmd = "ansible-galaxy"
+    String ansibleCmd = "ansible"
+    config.ansibleGalaxyCmd = ansibleGalaxyCmd
+    config.ansibleCmd = ansibleCmd
 
     config.ansibleEnvVarsList = config.get('ansibleEnvVarsList', [])
 
     // require SSH credentials for some ansible jobs (e.g., deploy-cacerts)
     // ref: https://emilwypych.com/2019/06/15/how-to-pass-credentials-to-jenkins-pipeline/
-    List secretVarsListDefault=[
-        usernamePassword(credentialsId: 'dcapi-ansible-ssh-password', passwordVariable: 'ANSIBLE_SSH_PASSWORD', usernameVariable: 'ANSIBLE_SSH_USERNAME')
-    ]
+    List secretVarsListDefault = []
+//     List secretVarsListDefault=[
+//         usernamePassword(credentialsId: 'ansible-ssh-password-linux', passwordVariable: 'ANSIBLE_SSH_PASSWORD', usernameVariable: 'ANSIBLE_SSH_USERNAME'),
+//         sshUserPrivateKey(credentialsId: 'bitbucket-ssh-jenkins')
+//     ]
+//     config.ansibleSecretVarsList = config.get('ansibleSecretVarsList', secretVarsListDefault)
 
-    config.ansibleSecretVarsList = config.get('ansibleSecretVarsList', secretVarsListDefault)
+    config.ansibleSecretVarsList = config.get('ansibleSecretVarsList', [])
 
     log.debug("${logPrefix} params=${params}")
     log.debug("${logPrefix} config=${config}")

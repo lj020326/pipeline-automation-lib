@@ -7,8 +7,8 @@ import com.dettonville.api.pipeline.utils.logging.Logger
 
 import com.dettonville.api.pipeline.utils.JsonUtils
 
-// ref: https://cd.dettonville.int/jenkins/job/DCAPI/job/DeploymentJobs/job/DeployFrontendStage/job/master/lastCompletedBuild/api/json?pretty=true
-// ref: https://cd.dettonville.int/jenkins/job/DCAPI/job/DeploymentJobs/job/DeployFrontendStage/job/master/721/api/json?pretty=true
+// ref: https://cd.dettonville.int/jenkins/job/DCAPI/job/DeploymentJobs/job/DeployFrontendStage/job/main/lastCompletedBuild/api/json?pretty=true
+// ref: https://cd.dettonville.int/jenkins/job/DCAPI/job/DeploymentJobs/job/DeployFrontendStage/job/main/721/api/json?pretty=true
 String deployJobInfoAfterStr='''
 {
   "_class" : "org.jenkinsci.plugins.workflow.job.WorkflowRun",
@@ -94,7 +94,7 @@ String deployJobInfoAfterStr='''
         ]
       },
       "remoteUrls" : [
-        "https://gitrepository.dettonville.int/stash/scm/api/dcapi-jenkins-pipeline-libs.git"
+        "https://gitrepository.dettonville.int/stash/scm/api/infra-jenkins-pipeline-libs.git"
       ],
       "scmName" : ""
     },
@@ -110,7 +110,7 @@ String deployJobInfoAfterStr='''
     {
       "_class" : "hudson.plugins.git.util.BuildData",
       "buildsByBranchName" : {
-        "master" : {
+        "main" : {
           "_class" : "hudson.plugins.git.util.Build",
           "buildNumber" : 721,
           "buildResult" : null,
@@ -119,7 +119,7 @@ String deployJobInfoAfterStr='''
             "branch" : [
               {
                 "SHA1" : "38cdd31cdaa3d07d1380cf91d282e08e71bb0e06",
-                "name" : "master"
+                "name" : "main"
               }
             ]
           },
@@ -128,7 +128,7 @@ String deployJobInfoAfterStr='''
             "branch" : [
               {
                 "SHA1" : "38cdd31cdaa3d07d1380cf91d282e08e71bb0e06",
-                "name" : "master"
+                "name" : "main"
               }
             ]
           }
@@ -139,7 +139,7 @@ String deployJobInfoAfterStr='''
         "branch" : [
           {
             "SHA1" : "38cdd31cdaa3d07d1380cf91d282e08e71bb0e06",
-            "name" : "master"
+            "name" : "main"
           }
         ]
       },
@@ -154,7 +154,7 @@ String deployJobInfoAfterStr='''
     {
       "_class" : "hudson.plugins.git.util.BuildData",
       "buildsByBranchName" : {
-        "master" : {
+        "main" : {
           "_class" : "hudson.plugins.git.util.Build",
           "buildNumber" : 721,
           "buildResult" : null,
@@ -163,7 +163,7 @@ String deployJobInfoAfterStr='''
             "branch" : [
               {
                 "SHA1" : "2c8143d26419e53c1495c9276d49871d7e42ff8f",
-                "name" : "master"
+                "name" : "main"
               }
             ]
           },
@@ -172,7 +172,7 @@ String deployJobInfoAfterStr='''
             "branch" : [
               {
                 "SHA1" : "2c8143d26419e53c1495c9276d49871d7e42ff8f",
-                "name" : "master"
+                "name" : "main"
               }
             ]
           }
@@ -183,7 +183,7 @@ String deployJobInfoAfterStr='''
         "branch" : [
           {
             "SHA1" : "2c8143d26419e53c1495c9276d49871d7e42ff8f",
-            "name" : "master"
+            "name" : "main"
           }
         ]
       },
@@ -198,7 +198,7 @@ String deployJobInfoAfterStr='''
     {
       "_class" : "hudson.plugins.git.util.BuildData",
       "buildsByBranchName" : {
-        "origin/master" : {
+        "origin/main" : {
           "_class" : "hudson.plugins.git.util.Build",
           "buildNumber" : 721,
           "buildResult" : null,
@@ -207,7 +207,7 @@ String deployJobInfoAfterStr='''
             "branch" : [
               {
                 "SHA1" : "2becaf9eed865452cee60f25842ca2aa7908ae2c",
-                "name" : "origin/master"
+                "name" : "origin/main"
               }
             ]
           },
@@ -216,7 +216,7 @@ String deployJobInfoAfterStr='''
             "branch" : [
               {
                 "SHA1" : "2becaf9eed865452cee60f25842ca2aa7908ae2c",
-                "name" : "origin/master"
+                "name" : "origin/main"
               }
             ]
           }
@@ -227,7 +227,7 @@ String deployJobInfoAfterStr='''
         "branch" : [
           {
             "SHA1" : "2becaf9eed865452cee60f25842ca2aa7908ae2c",
-            "name" : "origin/master"
+            "name" : "origin/main"
           }
         ]
       },
@@ -285,14 +285,14 @@ String deployJobInfoAfterStr='''
   "duration" : 282193,
   "estimatedDuration" : 292337,
   "executor" : null,
-  "fullDisplayName" : "MC API » Deployment Jobs » Deploy Frontend (Stage) » master #721",
+  "fullDisplayName" : "DC API » Deployment Jobs » Deploy Frontend (Stage) » main #721",
   "id" : "721",
   "keepLog" : false,
   "number" : 721,
   "queueId" : 681087,
   "result" : "SUCCESS",
   "timestamp" : 1566584575431,
-  "url" : "https://cd.dettonville.int/jenkins/job/DCAPI/job/DeploymentJobs/job/DeployFrontendStage/job/master/721/",
+  "url" : "https://cd.dettonville.int/jenkins/job/DCAPI/job/DeploymentJobs/job/DeployFrontendStage/job/main/721/",
   "changeSets" : [
     {
       "_class" : "hudson.plugins.git.GitChangeSetList",
@@ -300,7 +300,7 @@ String deployJobInfoAfterStr='''
         {
           "_class" : "hudson.plugins.git.GitChangeSet",
           "affectedPaths" : [
-            "MCAID/custom_rel_specs/release_spec_MC_AID_Allcomponent.json"
+            "DCAID/custom_rel_specs/release_spec_DC_AID_Allcomponent.json"
           ],
           "commitId" : "7b1275353e5bcf24bdbad2927bed682a158a5e95",
           "timestamp" : 1566502803000,
@@ -316,14 +316,14 @@ String deployJobInfoAfterStr='''
           "paths" : [
             {
               "editType" : "edit",
-              "file" : "MCAID/custom_rel_specs/release_spec_MC_AID_Allcomponent.json"
+              "file" : "DCAID/custom_rel_specs/release_spec_DC_AID_Allcomponent.json"
             }
           ]
         },
         {
           "_class" : "hudson.plugins.git.GitChangeSet",
           "affectedPaths" : [
-            "MCAID/custom_rel_specs/release_spec_MC_AID_TEST_ALLComponent.json"
+            "DCAID/custom_rel_specs/release_spec_DC_AID_TEST_ALLComponent.json"
           ],
           "commitId" : "fb06593f1f34b73460d82e370b6f6fbdb946b7f4",
           "timestamp" : 1566502941000,
@@ -332,21 +332,21 @@ String deployJobInfoAfterStr='''
             "fullName" : "Tulam, VenuGopal"
           },
           "authorEmail" : "VenuGopal.Tulam@dettonville.org",
-          "comment" : "testing the ara workflow mcaid\\n",
+          "comment" : "testing the ara workflow dcaid\\n",
           "date" : "2019-08-22 14:42:21 -0500",
           "id" : "fb06593f1f34b73460d82e370b6f6fbdb946b7f4",
-          "msg" : "testing the ara workflow mcaid",
+          "msg" : "testing the ara workflow dcaid",
           "paths" : [
             {
               "editType" : "edit",
-              "file" : "MCAID/custom_rel_specs/release_spec_MC_AID_TEST_ALLComponent.json"
+              "file" : "DCAID/custom_rel_specs/release_spec_DC_AID_TEST_ALLComponent.json"
             }
           ]
         },
         {
           "_class" : "hudson.plugins.git.GitChangeSet",
           "affectedPaths" : [
-            "MCAID/custom_rel_specs/release_spec_MC_AID_TEST_ALLComponent.json"
+            "DCAID/custom_rel_specs/release_spec_DC_AID_TEST_ALLComponent.json"
           ],
           "commitId" : "2770de79550681f45a3d8f9ed6c5542cfdc850e2",
           "timestamp" : 1566574018000,
@@ -362,7 +362,7 @@ String deployJobInfoAfterStr='''
           "paths" : [
             {
               "editType" : "delete",
-              "file" : "MCAID/custom_rel_specs/release_spec_MC_AID_TEST_ALLComponent.json"
+              "file" : "DCAID/custom_rel_specs/release_spec_DC_AID_TEST_ALLComponent.json"
             }
           ]
         }
@@ -383,12 +383,12 @@ String deployJobInfoAfterStr='''
   "nextBuild" : null,
   "previousBuild" : {
     "number" : 720,
-    "url" : "https://cd.dettonville.int/jenkins/job/DCAPI/job/DeploymentJobs/job/DeployFrontendStage/job/master/720/"
+    "url" : "https://cd.dettonville.int/jenkins/job/DCAPI/job/DeploymentJobs/job/DeployFrontendStage/job/main/720/"
   }
 }
 '''
 
-// ref: https://cd.dettonville.int/jenkins/job/DCAPI/job/DeploymentJobs/job/DeployFrontendStage/job/master/720/api/json?pretty=true
+// ref: https://cd.dettonville.int/jenkins/job/DCAPI/job/DeploymentJobs/job/DeployFrontendStage/job/main/720/api/json?pretty=true
 String deployJobInfoBeforeStr='''
 {
   "_class" : "org.jenkinsci.plugins.workflow.job.WorkflowRun",
@@ -474,7 +474,7 @@ String deployJobInfoBeforeStr='''
         ]
       },
       "remoteUrls" : [
-        "https://gitrepository.dettonville.int/stash/scm/api/dcapi-jenkins-pipeline-libs.git"
+        "https://gitrepository.dettonville.int/stash/scm/api/infra-jenkins-pipeline-libs.git"
       ],
       "scmName" : ""
     },
@@ -490,7 +490,7 @@ String deployJobInfoBeforeStr='''
     {
       "_class" : "hudson.plugins.git.util.BuildData",
       "buildsByBranchName" : {
-        "master" : {
+        "main" : {
           "_class" : "hudson.plugins.git.util.Build",
           "buildNumber" : 720,
           "buildResult" : null,
@@ -499,7 +499,7 @@ String deployJobInfoBeforeStr='''
             "branch" : [
               {
                 "SHA1" : "38cdd31cdaa3d07d1380cf91d282e08e71bb0e06",
-                "name" : "master"
+                "name" : "main"
               }
             ]
           },
@@ -508,7 +508,7 @@ String deployJobInfoBeforeStr='''
             "branch" : [
               {
                 "SHA1" : "38cdd31cdaa3d07d1380cf91d282e08e71bb0e06",
-                "name" : "master"
+                "name" : "main"
               }
             ]
           }
@@ -519,7 +519,7 @@ String deployJobInfoBeforeStr='''
         "branch" : [
           {
             "SHA1" : "38cdd31cdaa3d07d1380cf91d282e08e71bb0e06",
-            "name" : "master"
+            "name" : "main"
           }
         ]
       },
@@ -534,7 +534,7 @@ String deployJobInfoBeforeStr='''
     {
       "_class" : "hudson.plugins.git.util.BuildData",
       "buildsByBranchName" : {
-        "master" : {
+        "main" : {
           "_class" : "hudson.plugins.git.util.Build",
           "buildNumber" : 720,
           "buildResult" : null,
@@ -543,7 +543,7 @@ String deployJobInfoBeforeStr='''
             "branch" : [
               {
                 "SHA1" : "2c8143d26419e53c1495c9276d49871d7e42ff8f",
-                "name" : "master"
+                "name" : "main"
               }
             ]
           },
@@ -552,7 +552,7 @@ String deployJobInfoBeforeStr='''
             "branch" : [
               {
                 "SHA1" : "2c8143d26419e53c1495c9276d49871d7e42ff8f",
-                "name" : "master"
+                "name" : "main"
               }
             ]
           }
@@ -563,7 +563,7 @@ String deployJobInfoBeforeStr='''
         "branch" : [
           {
             "SHA1" : "2c8143d26419e53c1495c9276d49871d7e42ff8f",
-            "name" : "master"
+            "name" : "main"
           }
         ]
       },
@@ -578,7 +578,7 @@ String deployJobInfoBeforeStr='''
     {
       "_class" : "hudson.plugins.git.util.BuildData",
       "buildsByBranchName" : {
-        "origin/master" : {
+        "origin/main" : {
           "_class" : "hudson.plugins.git.util.Build",
           "buildNumber" : 720,
           "buildResult" : null,
@@ -587,7 +587,7 @@ String deployJobInfoBeforeStr='''
             "branch" : [
               {
                 "SHA1" : "7174d9e6faed34f1bfaacf9e523dd7263d0c3e9b",
-                "name" : "origin/master"
+                "name" : "origin/main"
               }
             ]
           },
@@ -596,7 +596,7 @@ String deployJobInfoBeforeStr='''
             "branch" : [
               {
                 "SHA1" : "7174d9e6faed34f1bfaacf9e523dd7263d0c3e9b",
-                "name" : "origin/master"
+                "name" : "origin/main"
               }
             ]
           }
@@ -607,7 +607,7 @@ String deployJobInfoBeforeStr='''
         "branch" : [
           {
             "SHA1" : "7174d9e6faed34f1bfaacf9e523dd7263d0c3e9b",
-            "name" : "origin/master"
+            "name" : "origin/main"
           }
         ]
       },
@@ -665,14 +665,14 @@ String deployJobInfoBeforeStr='''
   "duration" : 290260,
   "estimatedDuration" : 292337,
   "executor" : null,
-  "fullDisplayName" : "MC API » Deployment Jobs » Deploy Frontend (Stage) » master #720",
+  "fullDisplayName" : "DC API » Deployment Jobs » Deploy Frontend (Stage) » main #720",
   "id" : "720",
   "keepLog" : false,
   "number" : 720,
   "queueId" : 669480,
   "result" : "SUCCESS",
   "timestamp" : 1566573485535,
-  "url" : "https://cd.dettonville.int/jenkins/job/DCAPI/job/DeploymentJobs/job/DeployFrontendStage/job/master/720/",
+  "url" : "https://cd.dettonville.int/jenkins/job/DCAPI/job/DeploymentJobs/job/DeployFrontendStage/job/main/720/",
   "changeSets" : [
     
   ],
@@ -681,11 +681,11 @@ String deployJobInfoBeforeStr='''
   ],
   "nextBuild" : {
     "number" : 721,
-    "url" : "https://cd.dettonville.int/jenkins/job/DCAPI/job/DeploymentJobs/job/DeployFrontendStage/job/master/721/"
+    "url" : "https://cd.dettonville.int/jenkins/job/DCAPI/job/DeploymentJobs/job/DeployFrontendStage/job/main/721/"
   },
   "previousBuild" : {
     "number" : 719,
-    "url" : "https://cd.dettonville.int/jenkins/job/DCAPI/job/DeploymentJobs/job/DeployFrontendStage/job/master/719/"
+    "url" : "https://cd.dettonville.int/jenkins/job/DCAPI/job/DeploymentJobs/job/DeployFrontendStage/job/main/719/"
   }
 }'''
 
@@ -770,7 +770,7 @@ String jsonDeployInfoStr3='''
         ]
       },
       "remoteUrls" : [
-        "https://gitrepository.dettonville.int/stash/scm/api/dcapi-jenkins-pipeline-libs.git"
+        "https://gitrepository.dettonville.int/stash/scm/api/infra-jenkins-pipeline-libs.git"
       ],
       "scmName" : ""
     },
@@ -786,7 +786,7 @@ String jsonDeployInfoStr3='''
     {
       "_class" : "hudson.plugins.git.util.BuildData",
       "buildsByBranchName" : {
-        "master" : {
+        "main" : {
           "_class" : "hudson.plugins.git.util.Build",
           "buildNumber" : 213,
           "buildResult" : "",
@@ -795,7 +795,7 @@ String jsonDeployInfoStr3='''
             "branch" : [
               {
                 "SHA1" : "d162841d98eb088c40f9b5cb8d9bd24c6481b1cf",
-                "name" : "master"
+                "name" : "main"
               }
             ]
           },
@@ -804,7 +804,7 @@ String jsonDeployInfoStr3='''
             "branch" : [
               {
                 "SHA1" : "d162841d98eb088c40f9b5cb8d9bd24c6481b1cf",
-                "name" : "master"
+                "name" : "main"
               }
             ]
           }
@@ -815,7 +815,7 @@ String jsonDeployInfoStr3='''
         "branch" : [
           {
             "SHA1" : "d162841d98eb088c40f9b5cb8d9bd24c6481b1cf",
-            "name" : "master"
+            "name" : "main"
           }
         ]
       },
@@ -830,7 +830,7 @@ String jsonDeployInfoStr3='''
     {
       "_class" : "hudson.plugins.git.util.BuildData",
       "buildsByBranchName" : {
-        "master" : {
+        "main" : {
           "_class" : "hudson.plugins.git.util.Build",
           "buildNumber" : 213,
           "buildResult" : "",
@@ -839,7 +839,7 @@ String jsonDeployInfoStr3='''
             "branch" : [
               {
                 "SHA1" : "2c8143d26419e53c1495c9276d49871d7e42ff8f",
-                "name" : "master"
+                "name" : "main"
               }
             ]
           },
@@ -848,7 +848,7 @@ String jsonDeployInfoStr3='''
             "branch" : [
               {
                 "SHA1" : "2c8143d26419e53c1495c9276d49871d7e42ff8f",
-                "name" : "master"
+                "name" : "main"
               }
             ]
           }
@@ -859,7 +859,7 @@ String jsonDeployInfoStr3='''
         "branch" : [
           {
             "SHA1" : "2c8143d26419e53c1495c9276d49871d7e42ff8f",
-            "name" : "master"
+            "name" : "main"
           }
         ]
       },
@@ -874,7 +874,7 @@ String jsonDeployInfoStr3='''
     {
       "_class" : "hudson.plugins.git.util.BuildData",
       "buildsByBranchName" : {
-        "origin/master" : {
+        "origin/main" : {
           "_class" : "hudson.plugins.git.util.Build",
           "buildNumber" : 213,
           "buildResult" : "",
@@ -883,7 +883,7 @@ String jsonDeployInfoStr3='''
             "branch" : [
               {
                 "SHA1" : "a2a0e642b6958086f9a5c852e08264de406df4a2",
-                "name" : "origin/master"
+                "name" : "origin/main"
               }
             ]
           },
@@ -892,7 +892,7 @@ String jsonDeployInfoStr3='''
             "branch" : [
               {
                 "SHA1" : "a2a0e642b6958086f9a5c852e08264de406df4a2",
-                "name" : "origin/master"
+                "name" : "origin/main"
               }
             ]
           }
@@ -903,7 +903,7 @@ String jsonDeployInfoStr3='''
         "branch" : [
           {
             "SHA1" : "a2a0e642b6958086f9a5c852e08264de406df4a2",
-            "name" : "origin/master"
+            "name" : "origin/main"
           }
         ]
       },
@@ -961,14 +961,14 @@ String jsonDeployInfoStr3='''
   "duration" : 189857,
   "estimatedDuration" : 166506,
   "executor" : "",
-  "fullDisplayName" : "MC API Â» Deployment Jobs Â» Deploy OpenAPI Notifier (Stage) Â» master #213",
+  "fullDisplayName" : "DC API Â» Deployment Jobs Â» Deploy OpenAPI Notifier (Stage) Â» main #213",
   "id" : "213",
   "keepLog" : false,
   "number" : 213,
   "queueId" : 1566066,
   "result" : "FAILURE",
   "timestamp" : 1567605288538,
-  "url" : "https://cd.dettonville.int/jenkins/job/DCAPI/job/DeploymentJobs/job/DeployOpenAPINotifierStage/job/master/213/",
+  "url" : "https://cd.dettonville.int/jenkins/job/DCAPI/job/DeploymentJobs/job/DeployOpenAPINotifierStage/job/main/213/",
   "changeSets" : [
     
   ],
@@ -981,7 +981,7 @@ String jsonDeployInfoStr3='''
   "nextBuild" : "",
   "previousBuild" : {
     "number" : 212,
-    "url" : "https://cd.dettonville.int/jenkins/job/DCAPI/job/DeploymentJobs/job/DeployOpenAPINotifierStage/job/master/212/"
+    "url" : "https://cd.dettonville.int/jenkins/job/DCAPI/job/DeploymentJobs/job/DeployOpenAPINotifierStage/job/main/212/"
   }
 }
 '''
@@ -1033,7 +1033,7 @@ String componentBuildProject = deployJobInfoBefore.actions[0].causes[0].upstream
 String componentBuildVersion = deployJobInfoBefore.actions[2].parameters[0].value
 String componentBuildDeployUrl = deployJobInfoBefore.url
 
-String componentName="DCAPI-${componentBuildProject.split("/")[1]}"
+String componentName="INFRA-${componentBuildProject.split("/")[1]}"
 
 log.info("${componentBuildDeployUrl} => ${componentName}:${componentBuildVersion}:${componentBuildNumber}")
 
@@ -1048,8 +1048,8 @@ componentBuildNumber = componentBuildCausesAction.upstreamBuild
 componentBuildVersion = componentBuildParams.value
 componentBuildDeployUrl = jsonDeployInfo3.url
 
-//componentName="DCAPI-${componentBuildProject.split("/")[1]}"
-componentName="DCAPI-${componentBuildDeployUrl.split("/")[-4]}"
+//componentName="INFRA-${componentBuildProject.split("/")[1]}"
+componentName="INFRA-${componentBuildDeployUrl.split("/")[-4]}"
 
 log.info("${componentName}:${componentBuildVersion}:${componentBuildNumber} => ${componentBuildDeployUrl}")
 

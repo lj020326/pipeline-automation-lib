@@ -102,7 +102,7 @@ class Git implements Serializable {
         assert branchName: 'I need branchName to be valid'
 
         // Clean any locally modified files and ensure we are actually on origin/$env.BRANCH_NAME
-        // as a failed release could leave the local workspace ahead of origin/master
+        // as a failed release could leave the local workspace ahead of origin/main
         def gitCommand = "\"${git}\" clean -f && \"${git}\" reset --hard origin/${branchName}"
         shell(gitCommand)
     }

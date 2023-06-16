@@ -24,7 +24,7 @@ import com.dettonville.api.pipeline.utils.ListUtils
 
 /**
  * Jenkins groovy sandbox compatible version of
- * https://gitrepository.dettonville.int/stash/projects/API/repos/pipeline-automation-lib/blob/master/src/com.dettonville.api.pipeline/versioning/ListItem.groovy
+ * https://gitrepository.dettonville.int/stash/projects/API/repos/pipeline-automation-lib/blob/main/src/com.dettonville.api.pipeline/versioning/ListItem.groovy
  * https://github.com/apache/maven/blob/master/maven-artifact/src/main/java/org/apache/maven/artifact/versioning/ComparableVersion.java / ListItem
  *
  * Extending ArrayList<Item> like the Original is not possible due to the sandbox so List interface was implemented.

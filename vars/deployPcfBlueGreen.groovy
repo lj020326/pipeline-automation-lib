@@ -1,6 +1,6 @@
 #!groovy
 
-// ref: https://fusion.dettonville.int/stash/projects/MPASS/repos/masterpass-wallet-cookbook/browse/static/documents/blue-green-deployment/blue-green-deploy-Snapshot-Jenkinsfile
+// ref: https://fusion.dettonville.int/stash/projects/MPASS/repos/dcuser-wallet-cookbook/browse/static/documents/blue-green-deployment/blue-green-deploy-Snapshot-Jenkinsfile
 
 def pcfUtil = new com.dettonville.api.pipeline.utility.PCFUtil(this)
 def caasUtil = new com.dettonville.api.pipeline.utility.CaaSUtil(this)
@@ -12,7 +12,7 @@ def routeDomain = "apps.nyc.pcfstage00.dettonville.int"
 def cnName = "mpdirect-mobile-services"
 def spaceName = "mpdirect-wallet-services"
 def paasUrl = "api.system.nyc.pcfstage00.dettonville.int"
-def org = "Masterpass"
+def org = "dcuser"
 //setting profile to null so that the profile is picked up from
 //the manifest and not changed at deploy time.  If you wish to change
 //at deploy time set the profile here.
@@ -80,7 +80,7 @@ pipeline {
                 unstash "workspace"
                 dir("ci/blue-green-stage-dev") {
                     script {
-                        pcfUtil.deployToPCFGoRouter(this, greenAppName, 'nyc-stage', 'Masterpass', spaceName, 'pcf_stage', null, null, keyMap, true, false, activeProfile)
+                        pcfUtil.deployToPCFGoRouter(this, greenAppName, 'nyc-stage', 'dcuser', spaceName, 'pcf_stage', null, null, keyMap, true, false, activeProfile)
                     }
                 }
             }

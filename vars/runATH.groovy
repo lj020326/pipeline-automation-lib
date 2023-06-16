@@ -7,8 +7,8 @@ import com.dettonville.api.pipeline.ath.AcceptanceTestHarness
 
 def call(Map params=[:]) {
 
-    Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this)
+//     Logger.init(this, LogLevel.INFO)
+    Logger log = new Logger(this, LogLevel.INFO)
     AcceptanceTestHarness ath = new AcceptanceTestHarness(this)
 
     pipeline {

@@ -28,7 +28,7 @@ import com.dettonville.api.pipeline.environment.EnvironmentConstants
  * @see vars.execMavenRelease.ExecMavenReleaseIT
  */
 def execute() {
-  env.setProperty(EnvironmentConstants.GIT_BRANCH, "master")
+  env.setProperty(EnvironmentConstants.GIT_BRANCH, "main")
   env.setProperty(EnvironmentConstants.SCM_URL, "git@git-ssh.domain.tld:group/project.git")
   String test = env.getProperty(EnvironmentConstants.SCM_URL)
   execMavenRelease()

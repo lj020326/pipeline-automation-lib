@@ -40,7 +40,7 @@ import org.jenkinsci.plugins.workflow.cps.DSL
  * See <a href="vars/checkoutScm.md">checkoutScm.md</a> for detailed documentation
  *
  * Defaults:
- *      branches: master and develop
+ *      branches: main and develop
  *      extensions: LocalBranch
  *
  * @param config configuration object
@@ -88,7 +88,7 @@ def checkoutWithConfiguration(Map scmCfg, Logger log) {
     // parse the configuration with defaults
     String credentialsId = scmCfg[ConfigConstants.SCM_CREDENTIALS_ID]
     String url = scmCfg[ConfigConstants.SCM_URL]
-    List branches = (List) scmCfg[ConfigConstants.SCM_BRANCHES] ?: [[name: '*/master'], [name: '*/develop']]
+    List branches = (List) scmCfg[ConfigConstants.SCM_BRANCHES] ?: [[name: '*/main'], [name: '*/develop']]
     List submoduleCfg = (List) scmCfg[ConfigConstants.SCM_SUBMODULE_CONFIG] ?: []
     List extensions = (List) scmCfg[ConfigConstants.SCM_EXTENSIONS] ?: [[$class: 'LocalBranch']]
     Boolean doGenerateSubmoduleConfigurations = scmCfg[ConfigConstants.SCM_DO_GENERATE_SUBMODULE_CONFIGURATION] != null ? scmCfg[ConfigConstants.SCM_DO_GENERATE_SUBMODULE_CONFIGURATION] : false

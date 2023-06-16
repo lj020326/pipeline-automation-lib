@@ -186,7 +186,7 @@ pipeline:
 
     itf-admin:
       siteList:
-        - endpoint: itf.merchant.admin.masterpass.dettonville.int/merchantAdminContent/
+        - endpoint: itf.merchant.admin.dcuser.dettonville.int/merchantAdminContent/
 
     mpstage:
       siteList:
@@ -197,9 +197,9 @@ pipeline:
 
     mpstage-admin:
       siteList:
-        - endpoint: stage.merchant.admin.masterpass.dettonville.int/merchantAdminContent/
-        - endpoint: stage1.merchant.admin.masterpass.dettonville.int/merchantAdminContent/
-        - endpoint: stage2.merchant.admin.masterpass.dettonville.int/merchantAdminContent/
+        - endpoint: stage.merchant.admin.dcuser.dettonville.int/merchantAdminContent/
+        - endpoint: stage1.merchant.admin.dcuser.dettonville.int/merchantAdminContent/
+        - endpoint: stage2.merchant.admin.dcuser.dettonville.int/merchantAdminContent/
 
     external:
       httpProxyHost: outboundproxy.dettonville.int

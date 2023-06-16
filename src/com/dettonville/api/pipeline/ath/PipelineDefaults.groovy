@@ -24,8 +24,8 @@ pipeline:
     mvnLogOptions: "-B -Dorg.slf4j.simpleLogger.defaultLogLevel=warn -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn"
 
     appEnvironment: "STAGE_EXTERNAL"
-    athGitRepo: "https://gitrepository.dettonville.int/stash/scm/api/dcapi-test.git"
-    athGitBranch: "master"
+    athGitRepo: "https://gitrepository.dettonville.int/stash/scm/api/infra-test.git"
+    athGitBranch: "main"
 
     useLocalDir: false
     useTestGroups: true
@@ -204,17 +204,17 @@ pipeline:
 #        jobVersionParamName: "ArtifactVersion"
         artifactGroupId: com.dettonville.developer
         componentList:
-            - name: DCAPI-Frontend
+            - name: INFRA-Frontend
               deployJobName: Frontend
-              branch: master
+              branch: main
               artifactId: devportal-frontend
-            - name: DCAPI-DevPortal
+            - name: INFRA-DevPortal
               deployJobName: DevPortal
-              branch: master
+              branch: main
               artifactId: devportal
-            - name: DCAPI-OpenAPINotifier
+            - name: INFRA-OpenAPINotifier
               deployJobName: OpenAPINotifier
-              branch: master
+              branch: main
               artifactId: openapi-notifier
     
     buildStatusConfig:

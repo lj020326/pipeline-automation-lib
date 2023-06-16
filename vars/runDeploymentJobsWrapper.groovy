@@ -70,7 +70,7 @@ def call(Map config=[:]) {
 
     //config.debugPipeline = true
 
-    //    config.changedEmailList = "DST_Open_API_Development_Team@dettonville.org, dcapi-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com"
+    //    config.changedEmailList = "DST_Open_API_Development_Team@dettonville.org, infra-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com"
 
     params.each { key, value ->
         if (value != "") {

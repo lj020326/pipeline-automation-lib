@@ -80,7 +80,7 @@ def call(def buildSlaveLabel) {
                     }
                 } else { // Non-Mainline
                     mavenBuild.mavenBranchBuild()
-                    SkippedStep step = new SkippedStep("Maven Build", "Its a non mainline branch (not Master or Trunk) so not doing a maven release")
+                    SkippedStep step = new SkippedStep("Maven Build", "Its a non mainline branch (not main or Trunk) so not doing a maven release")
                     pipelineSummary.addStep(step)
                 }
 

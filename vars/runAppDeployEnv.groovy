@@ -10,8 +10,8 @@ import com.dettonville.api.pipeline.utils.JsonUtils
 def call(Map config=[:]) {
     String logPrefix="runAppDeployEnv():"
 
-    Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this)
+//     Logger.init(this, LogLevel.INFO)
+    Logger log = new Logger(this, LogLevel.INFO)
 
     String ymlConfigDefaultsString = """
 ---
@@ -24,8 +24,8 @@ appEnvironments:
 
 """
 
-//    String ymlDeployConfigFileUrl = "https://fusion.dettonville.int/stash/projects/API/repos/deployment_configs/raw/deployment_configs/dcapi/appDeployConfig.yml?at=refs%2Fheads%2Fmaster"
-    String ymlDeployConfigFileUrl = "https://gitrepository.dettonville.int/stash/projects/API/repos/deployment_configs/raw/deployment_configs/dcapi/appDeployConfig.yml?at=refs%2Fheads%2Fmaster"
+//    String ymlDeployConfigFileUrl = "https://fusion.dettonville.int/stash/projects/API/repos/deployment_configs/raw/deployment_configs/dcapi/appDeployConfig.yml?at=refs%2Fheads%2Fmain"
+    String ymlDeployConfigFileUrl = "https://gitrepository.dettonville.int/stash/projects/API/repos/deployment_configs/raw/deployment_configs/dcapi/appDeployConfig.yml?at=refs%2Fheads%2Fmain"
     String fetchYmlConfigCmd = "curl -s ${ymlDeployConfigFileUrl}"
 
     String ymlConfigString = ""

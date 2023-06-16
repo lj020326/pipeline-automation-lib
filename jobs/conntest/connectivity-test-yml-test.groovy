@@ -130,7 +130,7 @@ pipeline:
 
     dev-admin:
       siteList:
-        - endpoint: dev.eportal.dettonville.org/dcapi-dev-devportal/cms/
+        - endpoint: dev.eportal.dettonville.org/infra-dev-devportal/cms/
         - endpoint: dev.dcapiadmin.dettonville.org/dcapiadmin/DCAPIAdmin.html
         - endpoint: dev.sso.eportal.dettonville.org
         - endpoint: stage.sso.iapp.dettonville.int/dcapi/stage/dashboard

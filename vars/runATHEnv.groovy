@@ -9,8 +9,8 @@ import com.dettonville.api.pipeline.utils.MapMerge
 
 def call(Map inConfig=[:]) {
 
-    Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this)
+//     Logger.init(this, LogLevel.INFO)
+    Logger log = new Logger(this, LogLevel.INFO)
 
     String logPrefix="runATHEnv():"
 
@@ -167,28 +167,28 @@ appEnvironments:
     
     PROD_KSC:
         jenkinsRunTestsLabel: "PROD-LINUX"
-        athGitBranch: "master"
+        athGitBranch: "main"
         useBrowserstackLocalProxy: true
         alwaysEmailList: "dcapi_qa@dettonville.org, ljohnson@dettonville.org, SIT-engineer@dettonville.org, conor.dixon@dettonville.org, kedar.mohanty@dettonville.org, prashanth.krishnappa@dettonville.org, sandeep.singh@dettonville.org, jakub.kurtiak@dettonville.org,  corey.lawlor@dettonville.org"
     
     PROD_STL:
         jenkinsRunTestsLabel: "PROD-LINUX"
-        athGitBranch: "master"
+        athGitBranch: "main"
         useBrowserstackLocalProxy: true
         alwaysEmailList: "dcapi_qa@dettonville.org, ljohnson@dettonville.org, SIT-engineer@dettonville.org, conor.dixon@dettonville.org, kedar.mohanty@dettonville.org, prashanth.krishnappa@dettonville.org, sandeep.singh@dettonville.org, jakub.kurtiak@dettonville.org,  corey.lawlor@dettonville.org"
     
     PROD_COPRO:
         jenkinsRunTestsLabel: "PROD-LINUX"
-        athGitBranch: "master"
+        athGitBranch: "main"
         useBrowserstackLocalProxy: true
         alwaysEmailList: "dcapi_qa@dettonville.org, ljohnson@dettonville.org, SIT-engineer@dettonville.org, conor.dixon@dettonville.org, kedar.mohanty@dettonville.org, prashanth.krishnappa@dettonville.org, sandeep.singh@dettonville.org, jakub.kurtiak@dettonville.org,  corey.lawlor@dettonville.org"
     
     PROD_EXTERNAL:
         jenkinsRunTestsLabel: "DEVCLD-LIN7"
-        athGitBranch: "master"
+        athGitBranch: "main"
         useExecEnvJenkins: false
         useBrowserstackLocalProxy: false
-#        changedEmailList: "DST_Open_API_Development_Team@dettonville.org, dcapi-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com"
+#        changedEmailList: "DST_Open_API_Development_Team@dettonville.org, infra-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com"
         alwaysEmailList: "dcapi_qa@dettonville.org, ljohnson@dettonville.org, SIT-engineer@dettonville.org, conor.dixon@dettonville.org, kedar.mohanty@dettonville.org, prashanth.krishnappa@dettonville.org, sandeep.singh@dettonville.org, jakub.kurtiak@dettonville.org,  corey.lawlor@dettonville.org"
     
 """

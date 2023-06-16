@@ -62,10 +62,10 @@ def call(String yamlName) {
                             anyOf {
                                 branch 'develop'
                                 branch 'stage'
-                                branch 'master'
+                                branch 'main'
                                 environment name: 'CHANGE_TARGET', value: 'develop'
                                 environment name: 'CHANGE_TARGET', value: 'stage'
-                                environment name: 'CHANGE_TARGET', value: 'master'
+                                environment name: 'CHANGE_TARGET', value: 'main'
                             }
                         }
                         steps {
@@ -82,10 +82,10 @@ def call(String yamlName) {
                             anyOf {
                                 branch 'develop'
                                 branch 'stage'
-                                branch 'master'
+                                branch 'main'
                                 environment name: 'CHANGE_TARGET', value: 'develop'
                                 environment name: 'CHANGE_TARGET', value: 'stage'
-                                environment name: 'CHANGE_TARGET', value: 'master'
+                                environment name: 'CHANGE_TARGET', value: 'main'
                             }
                         }
                         steps {
@@ -112,9 +112,9 @@ def call(String yamlName) {
 //            when {
 //                anyOf {
 //                    branch 'develop'
-//                    branch 'master'
+//                    branch 'main'
 //                    environment name: 'CHANGE_TARGET', value: 'develop'
-//                    environment name: 'CHANGE_TARGET', value: 'master'
+//                    environment name: 'CHANGE_TARGET', value: 'main'
 //                }
 //            }
 //            steps {
@@ -135,7 +135,7 @@ def call(String yamlName) {
                     anyOf {
                         branch 'develop'
                         branch 'stage'
-                        branch 'master'
+                        branch 'main'
                     }
                 }
                 steps {
@@ -147,7 +147,7 @@ def call(String yamlName) {
 
                                 //
                                 // setup an app cluster instance for each foundation for the given branch
-                                // e.g., for the master branch (prod) there may be 2 foundations: nyc-prod & jpn-
+                                // e.g., for the main branch (prod) there may be 2 foundations: nyc-prod & jpn-
                                 //
                                 foundationList = envConfigs.pcfFoundations
                                 for (Map foundationConfigs : foundationList) {
@@ -224,7 +224,7 @@ def call(String yamlName) {
 
 
 def deployGreen(Map config) {
-    // artifactoryUtil.artifactoryDownload(this, "dcapi-artifactory")
+    // artifactoryUtil.artifactoryDownload(this, "infra-artifactory")
     // in absence of artifactory working - we simply stash for now
     unstash 'workspace'
 

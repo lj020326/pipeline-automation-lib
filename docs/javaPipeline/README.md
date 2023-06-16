@@ -71,7 +71,7 @@ applicationCode=SOLO
 ## 3. Pipeline Flow <a name="Pipeline-Flow"></a>
 
 The pipeline makes a distinction between a mainline build and a branch build.
-Mainline is **master** in the case of *Git* or **trunk** in the case of *Subversion*. 
+Mainline is **main** in the case of *Git* or **trunk** in the case of *Subversion*. 
 
 ### Mainline
 
@@ -132,13 +132,13 @@ This means that no matter if you've configured a BitBucket or subversion (SVN) r
 ### 3. Prepare Build Configuration
 
 Before we can build the application, we need to prepare the build configuration.
-We have to know if we're dealing with a mainline build (trunk/master), what is your maven/java version and any pipeline parameters you have configured in the jenkins.properties file.
+We have to know if we're dealing with a mainline build (trunk/main), what is your maven/java version and any pipeline parameters you have configured in the jenkins.properties file.
 
 Once this is done, we can execute the appropriate build.
 
 ### 4. Build
 
-If your build is on a mainline (master or trunk branch) it will do a *maven release* (see 4.b) and create a tag.
+If your build is on a mainline (main or trunk branch) it will do a *maven release* (see 4.b) and create a tag.
 If you're using Git, it will only push your tag. If you use SVN it will also update the version of your pom.xml as you'd expect from a maven release.
 
 If your build is not on a mainline it will do a *mvn deploy* (see 4.c) and use it can upload a snapshot build.

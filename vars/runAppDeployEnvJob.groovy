@@ -8,8 +8,8 @@ import com.dettonville.api.pipeline.utils.Utilities
 
 def call(Map inConfig=[:]) {
 
-    Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this)
+//     Logger.init(this, LogLevel.INFO)
+    Logger log = new Logger(this, LogLevel.INFO)
 
     String logPrefix="runAppDeployEnvJob():"
 
@@ -150,7 +150,7 @@ appComponents:
                 componentSettings.id = config.appComponentSet
 
                 if (config.enabledParamList.contains("AppComponentBranch")) {
-                    String defaultBranch = (config.appEnvironment == "PROD") ? "master" : "develop"
+                    String defaultBranch = (config.appEnvironment == "PROD") ? "main" : "develop"
                     List branchList = Utilities.getRepoBranchList(this, componentSettings.appComponentRepoUrl, defaultBranch)
                     paramList.add(choice(choices: branchList.join('\n'), description: "Choose Application Component Branch", name: 'AppComponentBranch'))
                 }

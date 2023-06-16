@@ -56,7 +56,7 @@ class ApiTestHarness extends AcceptanceTestHarness {
         if (config?.jbehaveExecutionThreads) mvnCmd += " -Djbehave.execution.threads=${config.jbehaveExecutionThreads}"
 
         // enable serenity reporting
-        // ref: https://fusion.dettonville.int/stash/projects/QE/repos/mtaf-jbehave-tools/browse/src/main/java/com/dettonville/testing/mtaf/jbehave/serenity/SerenitySupport.java?at=refs%2Fheads%2Fmaster
+        // ref: https://fusion.dettonville.int/stash/projects/QE/repos/mtaf-jbehave-tools/browse/src/main/java/com/dettonville/testing/mtaf/jbehave/serenity/SerenitySupport.java?at=refs%2Fheads%2Fmain
         if (config.runSerenityRpt) mvnCmd += " -DserenityReport=true"
         // skip unit tests
         mvnCmd += " -DskipTests=${config.skipTests}"

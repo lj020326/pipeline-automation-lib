@@ -19,7 +19,7 @@ def getBSAgent(Logger log, Map config) {
         dir('deploy_configs') {
             checkout scm: [
                     $class: 'GitSCM',
-                    branches: [[name: "master"]],
+                    branches: [[name: "main"]],
                     userRemoteConfigs: [[credentialsId: 'dcapi_ci_vcs_user', url: 'https://gitrepository.dettonville.int/stash/scm/api/deployment_configs.git']]
             ]
         }

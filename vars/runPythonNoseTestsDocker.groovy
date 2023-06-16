@@ -1,4 +1,4 @@
-@Library('dcapi-jenkins-pipeline-libs')
+@Library('infra-jenkins-pipeline-libs')
 import sendEmail
 
 def PYTHON_SDK_IMAGE="artifactory.dev.dettonville.int:6555/com-dettonville-api/sdk-python:develop"
@@ -13,7 +13,7 @@ pipeline {
 		string(name: 'ARTIFACT_VERSION', defaultValue: '1.0.0')
 		booleanParam(name: 'PUBLISH_TEST_PYPI',defaultValue: true, description: 'Should this artifact be published to testPyPI')
 		booleanParam(name: 'PUBLISH_PYPI', defaultValue: false, description: 'Should this artifact be deployed to PyPI')
-		string(name: 'SWAGGER_DEFINITIONS_BRANCH', defaultValue: 'master', description: 'Which branch of service-swagger-definitions should be checked out')
+		string(name: 'SWAGGER_DEFINITIONS_BRANCH', defaultValue: 'main', description: 'Which branch of service-swagger-definitions should be checked out')
     }
 
 	options {

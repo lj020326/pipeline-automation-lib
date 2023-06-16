@@ -126,7 +126,7 @@ def stageGenerateArtifact(project, cookbook, maxPromotionEnv, checkoutClosure, c
     } else if (maxPromotionEnv == 'PROD' && gitRepoBranch?.trim() && gitRepoBranch?.trim().matches("(?i)release/.*")) {
         gitBranch = gitRepoBranch?.trim()
     } else {
-        gitBranch = 'master'
+        gitBranch = 'main'
     }
     checkoutClosure.delegate = [branch: gitBranch]
     checkoutClosure()

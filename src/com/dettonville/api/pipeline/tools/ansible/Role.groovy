@@ -37,7 +37,7 @@ class Role implements Serializable {
 
   String scm = null
 
-  String version = "master"
+  String version = "main"
 
   /**
    * The src, either a galaxy role name or a scm path

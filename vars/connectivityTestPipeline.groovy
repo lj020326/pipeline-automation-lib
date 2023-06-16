@@ -49,7 +49,7 @@ def call(Map params=[:]) {
     pipeline {
 
 //        agent any
-        agent { label 'DEVCLD-LIN7 }
+        agent { label 'DEVCLD-LIN7' }
         tools {
             maven 'M3'
         }

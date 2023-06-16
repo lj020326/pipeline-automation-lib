@@ -9,8 +9,8 @@ import com.dettonville.api.pipeline.utils.BuildApiUtils
 import com.dettonville.api.pipeline.utils.JsonUtils
 import groovy.json.JsonOutput
 
-// ref: https://cd.dettonville.int/jenkins/job/DCAPI/job/DeploymentJobs/job/DeployFrontendStage/job/master/lastCompletedBuild/api/json?pretty=true
-// ref: https://cd.dettonville.int/jenkins/job/DCAPI/job/DeploymentJobs/job/DeployFrontendStage/job/master/721/api/json?pretty=true
+// ref: https://cd.dettonville.int/jenkins/job/DCAPI/job/DeploymentJobs/job/DeployFrontendStage/job/main/lastCompletedBuild/api/json?pretty=true
+// ref: https://cd.dettonville.int/jenkins/job/DCAPI/job/DeploymentJobs/job/DeployFrontendStage/job/main/721/api/json?pretty=true
 
 
 Logger.init(this, LogLevel.INFO)
@@ -22,7 +22,7 @@ JsonUtils jsonUtils = new JsonUtils(this)
 
 //log.info("jsonTxt.getClass()= ${jsonTxt.getClass()}")
 
-//String jobBaseUri = "jenkins/job/DCAPI/job/DeploymentJobs/job/DeployFrontendStage/job/master"
+//String jobBaseUri = "jenkins/job/DCAPI/job/DeploymentJobs/job/DeployFrontendStage/job/main"
 
 String globalConfigsYmlStr = '''
 ---
@@ -57,7 +57,7 @@ appEnvironments:
         useExecEnvJenkins: true
         useBrowserstackProxy: true
         useBrowserstackLocalProxy: false
-#        changedEmailList: "DST_Open_API_Development_Team@dettonville.org, dcapi-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com"
+#        changedEmailList: "DST_Open_API_Development_Team@dettonville.org, infra-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com"
 #        changedEmailList: "dcapi_qa@dettonville.org"
 #        alwaysEmailList: "dcapi_qa@dettonville.org"
         alwaysEmailList: "dcapi_qa@dettonville.org, ljohnson@dettonville.org, SIT-engineer@dettonville.org, conor.dixon@dettonville.org, kedar.mohanty@dettonville.org, prashanth.krishnappa@dettonville.org, sandeep.singh@dettonville.org, jakub.kurtiak@dettonville.org"
@@ -69,7 +69,7 @@ appEnvironments:
         useBrowserstackProxy: false
         useBrowserstackLocalProxy: false
         enableRallyProxy: false
-#        changedEmailList: "DST_Open_API_Development_Team@dettonville.org, dcapi-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com"
+#        changedEmailList: "DST_Open_API_Development_Team@dettonville.org, infra-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com"
 #        changedEmailList: "dcapi_qa@dettonville.org"
 #        alwaysEmailList: "dcapi_qa@dettonville.org"
         alwaysEmailList: "dcapi_qa@dettonville.org, ljohnson@dettonville.org, SIT-engineer@dettonville.org, conor.dixon@dettonville.org, kedar.mohanty@dettonville.org, prashanth.krishnappa@dettonville.org, sandeep.singh@dettonville.org, jakub.kurtiak@dettonville.org"
@@ -78,15 +78,15 @@ appEnvironments:
 deployConfig:
     jobBaseUri: "jenkins/job/DCAPI/job/DeploymentJobs/job"
     componentList:
-        - name: DCAPI-Frontend
+        - name: INFRA-Frontend
           deployJobName: DeployFrontend
-          branch: master
-        - name: DCAPI-DevPortal
+          branch: main
+        - name: INFRA-DevPortal
           deployJobName: DeployDevPortal
-          branch: master
-        - name: DCAPI-OpenAPINotifier
+          branch: main
+        - name: INFRA-OpenAPINotifier
           deployJobName: DeployOpenAPINotifier
-          branch: master
+          branch: main
 buildStatusConfig:
     prettyPrint: true
     getResultsFile: true

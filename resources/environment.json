@@ -9,7 +9,7 @@
     "locationUrl3": "https://stage.api.dettonville.org/atms/v1/countrysubdivision??Country=CAN&Format=xml",
     "QA Sandbox URL": "https://stage.api.dettonville.org/atms/v1/atm?PageOffset=0&Longitude=-99.2036859&City=usa&Latitude=19.4421888&PageLength=10&Format=xml",
     "QA Service": "Locations",
-    "Change Email Subject": "[Stage] Mastercard Developers Email Address Change",
+    "Change Email Subject": "[Stage] Dettonville Developers Email Address Change",
     "byPassCaptcha": "test_no_human_intervention",
     "byPassCaptchaValue": "true",
     "expectedResponse": "401 - Failed"
@@ -39,7 +39,7 @@
             "password": "testDcapi${random}",
             "profile.firstName": "DCAPI",
             "profile.lastName": "TestAutomation",
-            "profile.companyName": "Mastercard",
+            "profile.companyName": "Dettonville",
             "profile.country": "INDIA",
             "profile.streetAddress": "817",
             "profile.city": "Jersey City",

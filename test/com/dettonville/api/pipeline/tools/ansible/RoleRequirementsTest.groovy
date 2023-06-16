@@ -86,7 +86,7 @@ class RoleRequirementsTest extends DSLTestBase {
     Map expectedConfig1 = [
         (SCM): [
             (SCM_URL)       : "https://github.com/dettonville-com-devops/ansible-aem-cms.git",
-            (SCM_BRANCHES)  : [[name: "master"]],
+            (SCM_BRANCHES)  : [[name: "main"]],
             (SCM_EXTENSIONS): [
                 [$class: 'LocalBranch'],
                 [$class: 'RelativeTargetDirectory', relativeTargetDir: 'aem-cms'],

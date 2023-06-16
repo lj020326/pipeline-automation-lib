@@ -12,10 +12,11 @@ import groovy.json.*
 
 def call(Map params=[:]) {
 
-    Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this)
-    String packerTool = "packer-1.6.2" // Name of Packer Installation
-//     String packerTool = "packer-1.8.6" // Name of Packer Installation
+//     Logger.init(this, LogLevel.INFO)
+    Logger log = new Logger(this, LogLevel.INFO)
+
+//     String packerTool = "packer-1.6.2" // Name of Packer Installation
+// //     String packerTool = "packer-1.8.6" // Name of Packer Installation
 
     Map config=[:]
     boolean vmTemplateExists = false
@@ -29,20 +30,23 @@ def call(Map params=[:]) {
 //            label agentLabel as String
             label "packer"
         }
-
 //         tools {
-//             "biz.neustar.jenkins.plugins.packer.PackerInstallation" "$packerTool"
+//             // ref: https://webapp.chatgpt4google.com/s/MzY5MjYw
+//             customTool 'packer-local'
+//         }
+//         environment {
+//             PACKER_HOME = tool name: 'packwer-local', type: 'hudson.plugins.customtools.CustomTool'
 //         }
 
         environment {
             GOVC_INSECURE = true
         }
-//         options {
-//             buildDiscarder(logRotator(numToKeepStr: '10'))
-//             disableConcurrentBuilds()
-//             timestamps()
-//             timeout(time: 3, unit: 'HOURS')
-//         }
+        options {
+            buildDiscarder(logRotator(numToKeepStr: '10'))
+            disableConcurrentBuilds()
+            timestamps()
+            timeout(time: 3, unit: 'HOURS')
+        }
 
         stages {
 
@@ -62,9 +66,9 @@ def call(Map params=[:]) {
                 steps {
                     script {
                         log.info("checking if template already exists...")
-                        withCredentials([usernamePassword(credentialsId: 'dcapi-govc-cred', passwordVariable: 'GOVC_PASSWORD', usernameVariable: 'GOVC_USERNAME')]) {
+//                         withCredentials([usernamePassword(credentialsId: 'infra-govc-cred', passwordVariable: 'GOVC_PASSWORD', usernameVariable: 'GOVC_USERNAME')]) {
+                        withCredentials(config.secret_vars) {
                             sh "govc vm.info ${config.vm_name}"
-//                            sh "govc -u=${config.vcenter_host} vm.info ${config.vm_name}"
                             vmTemplateExists = sh(script: "govc vm.info ${config.vm_name} | grep 'UUID:'", returnStatus: true) == 0
                         }
                         log.info("initial check if template already exists=>${vmTemplateExists}")
@@ -87,20 +91,43 @@ def call(Map params=[:]) {
 
                 steps {
                     script {
-//                        String govcCmd = "govc datastore.ls -ds=${config.vm_remote_cache_datastore} ${config.iso_base_dir}/${config.iso_dir} | grep ${config.iso_file}"
-//                        boolean imageExists = sh(script: govcCmd, returnStatus: true)==0
-                        boolean imageExists = sh(script: "ls -Fla ${config.vm_data_dir}/${config.iso_base_dir}/${config.iso_dir}/ | grep ${config.iso_file} ", returnStatus: true)==0
+                        String vmware_images_dir = "${config.vm_data_dir}/${config.iso_base_dir}/${config.iso_dir}"
+
+                        boolean imageExists = sh(script: "ls -Fla ${config.os_image_dir}/ | grep ${config.iso_file} ",
+                            returnStatus: true)==0
 
                         if (!imageExists) {
                             sh """
                             ansible-playbook \
                               --inventory-file localhost, \
+                              -e fetch_os_images__vmware_images_dir='"${vmware_images_dir}"' \
+                              -e fetch_os_images__osimage_dir='"${config.os_image_dir}"' \
                               -e fetch_images='"[${JsonOutput.toJson(config.image_info)}]"' \
                               ansible/fetch_os_images.yml
                             """
 
-//                            sh "govc datastore.upload -ds=${config.vm_remote_cache_datastore} /data/osimages/${config.iso_file} ${config.iso_base_dir}/${config.iso_dir}/${config.iso_file}"
-//                            sh "cp -np /data/osimages/${config.iso_file} /vmware/${config.iso_base_dir}/${config.iso_dir}/"
+                            withCredentials(config.secret_vars) {
+                                String datastoreLsCmd = """
+                                    govc datastore.ls \
+                                     -ds=${config.vm_iso_datastore} \
+                                     ${config.iso_base_dir}/${config.iso_dir}/${config.iso_file} \
+                                     | grep "${config.iso_file}"
+                                """
+
+//                                 vmIsoExists = sh(script: "${datastoreLsCmd}", returnStatus: true) == 0
+//                                 log.info("vmIsoExists=${vmIsoExists}")
+//
+//                                 if (!vmIsoExists) {
+//                                     log.info("uploading ISO ${config.iso_file} to ${config.vm_iso_datastore}")
+//
+//                                     sh """
+//                                     govc datastore.upload \
+//                                      -ds=${config.vm_iso_datastore} \
+//                                      ${config.os_image_dir}/${config.iso_file} \
+//                                      ${config.iso_base_dir}/${config.iso_dir}/${config.iso_file}
+//                                      """
+//                                 }
+                            }
                         }
                     }
                 }
@@ -113,7 +140,6 @@ def call(Map params=[:]) {
                 environment {
                     GOVC_URL = "${config.vcenter_host}"
                 }
-
                 steps {
 
                     script {
@@ -126,34 +152,33 @@ def call(Map params=[:]) {
                                 sh "cp -p ${config.vm_init_file} ${config.vm_init_dir}/${config.vm_init_file}"
                             }
 
-                            // ref: https://docs.cloudbees.com/docs/cloudbees-ci/latest/cloud-secure-guide/injecting-secrets
-                            // require SSH credentials for some ansible jobs (e.g., deploy-cacerts)
-                            // ref: https://emilwypych.com/2019/06/15/how-to-pass-credentials-to-jenkins-pipeline/
-                            List secretVars=[
-                                    string(credentialsId: 'vmware-vcenter-password', variable: 'VMWARE_VCENTER_PASSWORD'),
-                                    string(credentialsId: 'vmware-esxi-password', variable: 'VMWARE_ESXI_PASSWORD'),
-                                    string(credentialsId: 'packer-ssh-password', variable: 'PACKER_SSH_PASSWORD'),
-                                    string(credentialsId: 'vm-root-password', variable: 'VM_ROOT_PASSWORD'),
-                                    string(credentialsId: 'ansible-vault-password', variable: 'ANSIBLE_VAULT_PASSWORD'),
-                            ]
-
-                            withCredentials(secretVars) {
+                            withCredentials(config.secret_vars) {
 
                                 // ref: https://vsupalov.com/packer-ami/
                                 // ref: https://blog.deimos.fr/2015/01/16/packer-build-multiple-images-easily/
                                 // ref: https://github.com/hashicorp/packer/pull/7184
-                                sh """
-                                ${tool packerTool}/packer validate \
-                                    -only ${config.build_type} \
-                                    -var-file=common-vars.json \
-                                    -var-file=${config.build_distribution_config_dir}/distribution-vars.json \
-                                    -var-file=${config.build_release_config_dir}/box_info.json \
-                                    -var-file=${config.build_release_config_dir}/template.json \
-                                    -var vm_build_id=${config.vm_build_id} \
-                                    -var iso_dir=${config.iso_dir} \
-                                    -var iso_file=${config.iso_file} \
-                                    ${env.WORKSPACE}/${config.build_dir}/${config.build_distribution_config_dir}/build-config.json
-                                """
+//                                 sh """
+//                                 ${tool packer-local}/packer validate \
+
+                                List buildArgs = []
+                                buildArgs.push("-only ${config.packer_build_only}")
+                                if (config.build_format == "json") {
+                                    buildArgs.push("-var-file=common-vars.${config.packer_var_format}")
+                                }
+                                buildArgs.push("-var-file=${config.build_distribution_config_dir}/distribution-vars.${config.packer_var_format}")
+                                buildArgs.push("-var-file=${config.build_release_config_dir}/box_info.${config.packer_var_format}")
+                                buildArgs.push("-var-file=${config.build_release_config_dir}/template.${config.packer_var_format}")
+                                buildArgs.push("-var vm_name=${config.vm_build_id}")
+                                buildArgs.push("-var iso_dir=${config.iso_dir}")
+                                buildArgs.push("-var iso_file=${config.iso_file}")
+                                buildArgs.push("${config.build_config}")
+                                String buildArgsString = buildArgs.join(" ")
+                                log.debug("buildArgsString=${buildArgsString}")
+
+                                // ref: https://stackoverflow.com/questions/45348761/jenkins-pipeline-how-do-i-use-the-tool-option-to-specify-a-custom-tool?noredirect=1&lq=1
+                                withEnv(["PATH+PACKER=${tool 'packer-local'}/bin"]) {
+                                    sh "packer validate ${buildArgsString}"
+                                }
                             }
 
                         }
@@ -181,36 +206,37 @@ def call(Map params=[:]) {
                                 sh "cp -p ${config.vm_init_file} ${config.vm_init_dir}/${config.vm_init_file}"
                             }
 
-                            // ref: https://docs.cloudbees.com/docs/cloudbees-ci/latest/cloud-secure-guide/injecting-secrets
-                            // require SSH credentials for some ansible jobs (e.g., deploy-cacerts)
-                            // ref: https://emilwypych.com/2019/06/15/how-to-pass-credentials-to-jenkins-pipeline/
-                            List secretVars=[
-                                    string(credentialsId: 'vmware-vcenter-password', variable: 'VMWARE_VCENTER_PASSWORD'),
-                                    string(credentialsId: 'vmware-esxi-password', variable: 'VMWARE_ESXI_PASSWORD'),
-                                    string(credentialsId: 'packer-ssh-password', variable: 'PACKER_SSH_PASSWORD'),
-                                    string(credentialsId: 'vm-root-password', variable: 'VM_ROOT_PASSWORD'),
-                                    string(credentialsId: 'ansible-vault-password', variable: 'ANSIBLE_VAULT_PASSWORD'),
-                            ]
-
-                            withCredentials(secretVars) {
+                            withCredentials(config.secret_vars) {
 
                                 // ref: https://vsupalov.com/packer-ami/
                                 // ref: https://blog.deimos.fr/2015/01/16/packer-build-multiple-images-easily/
                                 // ref: https://github.com/hashicorp/packer/pull/7184
-                                sh """
-                                ${tool packerTool}/packer build \
-                                    -only ${config.build_type} \
-                                    -on-error=abort \
-                                    -var-file=common-vars.json \
-                                    -var-file=${config.build_distribution_config_dir}/distribution-vars.json \
-                                    -var-file=${config.build_release_config_dir}/box_info.json \
-                                    -var-file=${config.build_release_config_dir}/template.json \
-                                    -var vm_build_id=${config.vm_build_id} \
-                                    -var iso_dir=${config.iso_dir} \
-                                    -var iso_file=${config.iso_file} \
-                                    -debug \
-                                    ${env.WORKSPACE}/${config.build_dir}/${config.build_distribution_config_dir}/build-config.json
-                                """
+//                                 sh """
+//                                 ${tool packerTool}/packer build \
+
+                                List buildArgs = []
+                                buildArgs.push("-only ${config.packer_build_only}")
+                                buildArgs.push("-on-error=${config.packer_build_on_error}")
+                                if (config.build_format == "json") {
+                                    buildArgs.push("-var-file=common-vars.${config.packer_var_format}")
+                                }
+                                buildArgs.push("-var-file=${config.build_distribution_config_dir}/distribution-vars.${config.packer_var_format}")
+                                buildArgs.push("-var-file=${config.build_release_config_dir}/box_info.${config.packer_var_format}")
+                                buildArgs.push("-var-file=${config.build_release_config_dir}/template.${config.packer_var_format}")
+                                buildArgs.push("-var vm_name=${config.vm_build_id}")
+                                buildArgs.push("-var iso_dir=${config.iso_dir}")
+                                buildArgs.push("-var iso_file=${config.iso_file}")
+                                buildArgs.push("-debug")
+                                buildArgs.push("${config.build_config}")
+                                String buildArgsString = buildArgs.join(" ")
+                                log.debug("buildArgsString=${buildArgsString}")
+
+                                // ref: https://stackoverflow.com/questions/45348761/jenkins-pipeline-how-do-i-use-the-tool-option-to-specify-a-custom-tool?noredirect=1&lq=1
+                                withEnv(["PATH+PACKER=${tool 'packer-local'}/bin"]) {
+                                    sh "env | sort"
+                                    sh "packer build ${buildArgsString}"
+                                }
+
                             }
 
                         }
@@ -229,7 +255,8 @@ def call(Map params=[:]) {
                 steps {
                     script {
 
-                        withCredentials([usernamePassword(credentialsId: 'dcapi-govc-cred', passwordVariable: 'GOVC_PASSWORD', usernameVariable: 'GOVC_USERNAME')]) {
+                        withCredentials(config.secret_vars) {
+//                         withCredentials([usernamePassword(credentialsId: 'infra-govc-cred', passwordVariable: 'GOVC_PASSWORD', usernameVariable: 'GOVC_USERNAME')]) {
 
                             sh "govc vm.info ${config.vm_name}"
                             vmTemplateExists = sh(script: "govc vm.info ${config.vm_name} | grep 'UUID:'", returnStatus: true) == 0
@@ -293,15 +320,8 @@ Map loadPipelineConfig(Logger log, Map params) {
     jobParts = jobParts.drop(config.jobBaseFolderLevel)
     log.info("${logPrefix} jobParts[after drop]=${jobParts}")
 
-//    int startIdx = config.jobBaseFolderLevel + 1
-////    int endIdx = jobParts.size() - 1
-//    int endIdx = jobParts.size() - 2
-
-//    config.build_distribution = jobParts[config.jobBaseFolderLevel]
     config.build_distribution = jobParts[0]
     config.build_release = jobParts[1]
-//    config.build_type = jobParts[2]
-//    config.build_type = "vmware-iso-new"
     config.build_type = "vsphere-iso"
 
     log.info("${logPrefix} build_distribution=${config.build_distribution}")
@@ -324,7 +344,8 @@ Map loadPipelineConfig(Logger log, Map params) {
 
     log.info("${logPrefix} loading common and build vars")
     Map commonVars = readJSON file: "./${config.build_dir}/common-vars.json"
-    config = MapMerge.merge(config, commonVars)
+//     config = MapMerge.merge(config, commonVars)
+    config = MapMerge.merge(config, commonVars.variables)
     log.info("${logPrefix} commonVars=${JsonUtils.printToJsonString(commonVars)}")
 
     Map distributionVars = readJSON file: "./${config.build_dir}/${config.build_distribution_config_dir}/distribution-vars.json"
@@ -346,6 +367,10 @@ Map loadPipelineConfig(Logger log, Map params) {
     }
     // ref: https://stackoverflow.com/questions/605696/get-file-name-from-url
     config.iso_file = config.iso_url.substring(config.iso_url.lastIndexOf('/') + 1, config.iso_url.length()).replace(".jigdo", ".iso")
+    if (config.iso_file.contains("?")) {
+        config.iso_file = config.iso_file.split("\\?")[0]
+    }
+    config.os_image_dir = config.get('os_image_dir', "/data/datacenter/jenkins/osimages")
 
     log.info("${logPrefix} build_distribution_config_dir=${config.build_distribution_config_dir}")
     log.info("${logPrefix} build_release_config_dir=${config.build_release_config_dir}")
@@ -390,6 +415,30 @@ Map loadPipelineConfig(Logger log, Map params) {
     imageInfo.iso_file = config.iso_file
     imageInfo.iso_checksum = "${config.iso_checksum_type}:${config.iso_checksum}"
     config.image_info = imageInfo
+
+    config.packer_build_on_error = config.get('packer_build_on_error', 'abort')
+    config.build_config = "${config.build_distribution_config_dir}/"
+    if (config.build_format == "json") {
+        config.packer_build_only = "${config.build_type}"
+        config.packer_var_format = "json"
+        config.packer_build_format = "json"
+        config.build_config = "${config.build_distribution_config_dir}/build-config.${config.packer_build_format}"
+    } else {
+        config.packer_build_only = "${config.build_type}.*"
+        config.packer_var_format = "json.pkrvars.hcl"
+        config.packer_build_format = "json.pkr.hcl"
+    }
+
+    // ref: https://docs.cloudbees.com/docs/cloudbees-ci/latest/cloud-secure-guide/injecting-secrets
+    // require SSH credentials for some ansible jobs (e.g., deploy-cacerts)
+    // ref: https://emilwypych.com/2019/06/15/how-to-pass-credentials-to-jenkins-pipeline/
+    List secretVars=[
+        usernamePassword(credentialsId: 'infra-vcenter-cred', passwordVariable: 'VMWARE_VCENTER_PASSWORD', usernameVariable: 'VMWARE_VCENTER_USERNAME'),
+        usernamePassword(credentialsId: 'infra-govc-cred', passwordVariable: 'GOVC_PASSWORD', usernameVariable: 'GOVC_USERNAME'),
+        string(credentialsId: 'packer-ssh-password', variable: 'PACKER_SSH_PASSWORD'),
+        string(credentialsId: 'ansible-vault-password', variable: 'ANSIBLE_VAULT_PASSWORD'),
+    ]
+    config.secret_vars = secretVars
 
     log.debug("${logPrefix} params=${JsonUtils.printToJsonString(params)}")
     log.debug("${logPrefix} config=${JsonUtils.printToJsonString(config)}")

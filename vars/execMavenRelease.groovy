@@ -109,7 +109,7 @@ void checkMavenReleasePluginVersion(config) {
 }
 
 /**
- * Checks if url is a git ssh url and git branch is master, otherwise the step will exit with an error
+ * Checks if url is a git ssh url and git branch is main, otherwise the step will exit with an error
  *
  * @param scmUrl The current scm url
  * @param scmBranch The current scm branch
@@ -131,7 +131,7 @@ void checkScm(String scmUrl, String scmBranch) {
     }
 
     // check for correct branch
-    if (scmBranch != 'master') {
-        error("Not allowed branch detected. You are only able to release from 'master' branch. Detected branch: '$scmBranch'. If you are seeing a commit hash make sure to checkout with 'checkout to local branch'.")
+    if (scmBranch != 'main') {
+        error("Not allowed branch detected. You are only able to release from 'main' branch. Detected branch: '$scmBranch'. If you are seeing a commit hash make sure to checkout with 'checkout to local branch'.")
     }
 }

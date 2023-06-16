@@ -8,15 +8,18 @@ import com.dettonville.api.pipeline.utils.Utilities
 
 def call(Map config=[:]) {
 
-    Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this)
+//     Logger.init(this, LogLevel.INFO)
+    Logger log = new Logger(this, LogLevel.INFO)
 
     String logPrefix="runAnsibleParamWrapper():"
 
     List paramList = []
 
     Map paramMap = [
-        ansibleLimitHosts  : string(defaultValue: "", description: "Limit playbook to specified inventory hosts\nE.g., 'host01', 'host01,host02'", name: 'AnsibleLimitHosts'),
+        ansibleLimitHosts  : string(
+            defaultValue: "",
+            description: "Limit playbook to specified inventory hosts\nE.g., 'app_adm','app_tableau','host01', 'host01,host02'",
+            name: 'AnsibleLimitHosts'),
         ansibleDebugFlag   : choice(choices: "\n-v\n-vv\n-vvv\n-vvvv", description: "Choose Ansible Debug Level", name: 'AnsibleDebugFlag'),
         ansibleGalaxyForceOpt  : booleanParam(defaultValue: false, description: "Use Ansible Galaxy Force Mode?", name: 'AnsibleGalaxyForceOpt'),
         useCheckDiffMode   : booleanParam(defaultValue: false, description: "Use Check+Diff Mode (Dry Run with Diffs)?", name: 'UseCheckDiffMode')
@@ -44,37 +47,31 @@ def call(Map config=[:]) {
     }
 
 //     config.skipDefaultCheckout = true
-    config.gitBranch = 'master'
-    config.gitRepoUrl = 'git@bitbucket.org:lj020326/ansible-datacenter.git'
-    config.gitCredId = 'bitbucket-ssh-lj020326'
+//     config.gitBranch = 'master'
+    config.gitBranch = config.get('gitBranch','main')
+    config.gitRepoUrl = config.get('gitRepoUrl','git@bitbucket.org:lj020326/ansible-datacenter.git')
+    config.gitCredId = config.get('gitCredId','bitbucket-ssh-jenkins')
 
-    config.ansibleCollectionsRequirements = 'collections/requirements.yml'
-    config.ansibleRolesRequirements = './roles/requirements.yml'
+//     config.ansibleCollectionsRequirements = config.get('ansibleCollectionsRequirements','./collections/requirements.molecule.yml')
+    config.ansibleRolesRequirements = config.get('ansibleRolesRequirements','./roles/requirements.yml')
+
 //     config.ansibleTags = "${env.JOB_BASE_NAME}"
     // ref: https://stackoverflow.com/questions/62213910/run-only-tasks-with-a-certain-tag-or-untagged
-    config.ansibleTags = "untagged,${env.JOB_BASE_NAME}"
-    config.environment = "${env.JOB_NAME.split('/')[-2]}"
+//     config.ansibleTags = config.get('ansibleTags',"untagged,${env.JOB_BASE_NAME}")
+    config.ansibleTags = config.get('ansibleTags',"${env.JOB_BASE_NAME}")
+    config.environment = config.get('environment',"${env.JOB_NAME.split('/')[-2]}")
 
-    config.towerHost = "https://awx.admin.dettonville.int"
+//     List ansibleSecretVarsList=[
+//         usernamePassword(credentialsId: 'ansible-ssh-password-linux', passwordVariable: 'ANSIBLE_SSH_PASSWORD', usernameVariable: 'ANSIBLE_SSH_USERNAME'),
+//         string(credentialsId: 'awx-oauth-token', variable: 'TOWER_OAUTH_TOKEN')
+//     ]
 
-    List ansibleEnvVarsList=[
-        "TOWER_HOST=${config.towerHost}",
-        "CONTROLLER_VERIFY_SSL=no",
-        "LANG=en_US.UTF-8"
-    ]
-    config.ansibleEnvVarsList = ansibleEnvVarsList
+    config.ansibleVarFiles = config.get('ansibleVarFiles', [])
+    if (config.containsKey('ansibleVault')) {
+        config.ansibleVarFiles += "${config.ansibleVault}"
+    }
 
-    List ansibleSecretVarsList=[
-        usernamePassword(credentialsId: 'dcapi-ansible-ssh-password', passwordVariable: 'ANSIBLE_SSH_PASSWORD', usernameVariable: 'ANSIBLE_SSH_USERNAME'),
-        string(credentialsId: 'awx-oauth-token', variable: 'TOWER_OAUTH_TOKEN')
-    ]
-    config.ansibleSecretVarsList = ansibleSecretVarsList
-    config.ansibleVarFiles = ["./vars/vault.yml"]
-
-//     config.ansibleInventory = './inventory'
-//     config.ansibleInventory = './inventory/hosts.ini'
-//    config.ansibleInventory = "./inventory/${config.environment}/hosts.ini"
-    config.ansibleInventory = "./inventory/${config.environment}/hosts.yml"
+    config.ansibleInventory = config.get('ansibleInventory',"./inventory/${config.environment}/hosts.yml")
 
     log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
 

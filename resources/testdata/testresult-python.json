@@ -374,13 +374,13 @@
     },
     {
       "displayPath": None,
-      "fileName": "stories.masterpassMerchantOnboarding.masterpassOnboarding.html",
-      "relativePath": "target/jbehave/stories.masterpassMerchantOnboarding.masterpassOnboarding.html"
+      "fileName": "stories.dcuserMerchantOnboarding.dcuserOnboarding.html",
+      "relativePath": "target/jbehave/stories.dcuserMerchantOnboarding.dcuserOnboarding.html"
     },
     {
       "displayPath": None,
-      "fileName": "stories.masterpassMerchantOnboarding.masterpassOnboarding.stats",
-      "relativePath": "target/jbehave/stories.masterpassMerchantOnboarding.masterpassOnboarding.stats"
+      "fileName": "stories.dcuserMerchantOnboarding.dcuserOnboarding.stats",
+      "relativePath": "target/jbehave/stories.dcuserMerchantOnboarding.dcuserOnboarding.stats"
     },
     {
       "displayPath": None,
@@ -1159,13 +1159,13 @@
     },
     {
       "displayPath": None,
-      "fileName": "stories.masterpassMerchantOnboarding.masterpassOnboarding.html",
-      "relativePath": "target/jbehave/view/stories.masterpassMerchantOnboarding.masterpassOnboarding.html"
+      "fileName": "stories.dcuserMerchantOnboarding.dcuserOnboarding.html",
+      "relativePath": "target/jbehave/view/stories.dcuserMerchantOnboarding.dcuserOnboarding.html"
     },
     {
       "displayPath": None,
-      "fileName": "stories.masterpassMerchantOnboarding.masterpassOnboarding.stats.html",
-      "relativePath": "target/jbehave/view/stories.masterpassMerchantOnboarding.masterpassOnboarding.stats.html"
+      "fileName": "stories.dcuserMerchantOnboarding.dcuserOnboarding.stats.html",
+      "relativePath": "target/jbehave/view/stories.dcuserMerchantOnboarding.dcuserOnboarding.stats.html"
     },
     {
       "displayPath": None,
@@ -28974,7 +28974,7 @@
   "duration": 2771139,
   "estimatedDuration": 1588395,
   "executor": None,
-  "fullDisplayName": "MC API » dcapi-test » master #291",
+  "fullDisplayName": "DC API » dcapi-test » master #291",
   "id": "291",
   "keepLog": False,
   "number": 291,

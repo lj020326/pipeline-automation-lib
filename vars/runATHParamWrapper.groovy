@@ -8,15 +8,15 @@ import com.dettonville.api.pipeline.utils.Utilities
 
 def call(Map config=[:]) {
 
-    Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this)
+//     Logger.init(this, LogLevel.INFO)
+    Logger log = new Logger(this, LogLevel.INFO)
 
     String logPrefix="runATHParamWrapper():"
 
     config.enabledParamList = config.get('enabledParamList', [])
     config.enableDevParams = config.get('enableDevParams', (config.enabledParamList.isEmpty()) ? true : false)
     config.enableBranchParam = config.enabledParamList.contains("athGitBranch") ? true : config.get('enableBranchParam', false)
-    config.athGitRepo = config.get('athGitRepo', "https://gitrepository.dettonville.int/stash/scm/api/dcapi-test.git")
+    config.athGitRepo = config.get('athGitRepo', "https://gitrepository.dettonville.int/stash/scm/api/infra-test.git")
 
     List paramList = []
 

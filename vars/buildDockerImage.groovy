@@ -13,8 +13,7 @@ import com.dettonville.api.pipeline.utils.logging.Logger
 def call(Map params=[:]) {
 
 //    Logger.init(this, LogLevel.INFO)
-    Logger.init(this)
-    Logger log = new Logger(this)
+    Logger log = new Logger(this, LogLevel.INFO)
 
     log.info("Loading Default Configs")
     Map config=loadPipelineConfig(log, params)
@@ -139,7 +138,7 @@ void buildAndPublishImage(Logger log, Map config) {
                 app.push "${env.BRANCH_NAME}"
                 app.push "build-${env.BUILD_ID}"
                 app.push "${commit_id}"
-                if (env.BRANCH_NAME == 'master') {
+                if (env.BRANCH_NAME in ['master','main']) {
                     app.push 'latest'
                 }
             }

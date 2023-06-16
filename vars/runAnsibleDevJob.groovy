@@ -8,8 +8,8 @@ import com.dettonville.api.pipeline.utils.Utilities
 
 def call(Map config=[:]) {
 
-    Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this)
+//     Logger.init(this, LogLevel.INFO)
+    Logger log = new Logger(this, LogLevel.INFO)
 
     String logPrefix="runAnsibleDevJob():"
 

@@ -47,13 +47,13 @@ void buildCode(String appName) {
 Application getRepositoryFromAppName(String appName) {
     switch (appName) {
         case "DEVPORTAL":
-            return new Repository(env.DEVPORTAL_GIT_PATH, "master", env.DEVPORTAL_GIT_FOLDER, env.DEVPORTAL_GIT_EXEC_FOLDER)
+            return new Repository(env.DEVPORTAL_GIT_PATH, "main", env.DEVPORTAL_GIT_FOLDER, env.DEVPORTAL_GIT_EXEC_FOLDER)
         case "DEVPORTAL-FRONTEND":
-            return new Repository(env.DEVPORTAL-FRONTEND_GIT_PATH, "master", env.DEVPORTAL-FRONTEND_GIT_FOLDER, env.DEVPORTAL-FRONTEND_GIT_EXEC_FOLDER)
+            return new Repository(env.DEVPORTAL-FRONTEND_GIT_PATH, "main", env.DEVPORTAL-FRONTEND_GIT_FOLDER, env.DEVPORTAL-FRONTEND_GIT_EXEC_FOLDER)
         case "ENCRYPTION-KEY-SERVICES":
-            return new Repository(env.ENCRYPTION-KEY-SERVICES_GIT_PATH, "master", env.ENCRYPTION-KEY-SERVICES_GIT_FOLDER, env.ENCRYPTION-KEY-SERVICES_GIT_EXEC_FOLDER)
+            return new Repository(env.ENCRYPTION-KEY-SERVICES_GIT_PATH, "main", env.ENCRYPTION-KEY-SERVICES_GIT_FOLDER, env.ENCRYPTION-KEY-SERVICES_GIT_EXEC_FOLDER)
         case "MONITORING-SERVICE":
-            return new Repository(env.MONITORING-SERVICE_GIT_PATH, "master", env.MONITORING-SERVICE_GIT_FOLDER, env.MONITORING-SERVICE_GIT_EXEC_FOLDER)
+            return new Repository(env.MONITORING-SERVICE_GIT_PATH, "main", env.MONITORING-SERVICE_GIT_FOLDER, env.MONITORING-SERVICE_GIT_EXEC_FOLDER)
         case "QA-UI-AUTOMATION-HARNESS":
             return new Repository(env.QA-UI-AUTOMATION-HARNESS_GIT_PATH, "master", env.QA-UI-AUTOMATION-HARNESS_GIT_FOLDER, env.QA-UI-AUTOMATION-HARNESS_GIT_EXEC_FOLDER)
         default:

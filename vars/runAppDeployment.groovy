@@ -7,8 +7,8 @@ import com.dettonville.api.pipeline.deployment.AppDeploymentUtil
 
 def call(Map params=[:]) {
 
-    Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this)
+//     Logger.init(this, LogLevel.INFO)
+    Logger log = new Logger(this, LogLevel.INFO)
     AppDeploymentUtil deployUtil = new AppDeploymentUtil(this)
 
     pipeline {

@@ -46,7 +46,7 @@ class CheckoutScmIT extends LibraryIntegrationTestBase {
 
     // test branches
     List branches = scmCheckoutCall.get("branches")
-    assertEquals("[[name:*/master], [name:*/develop]]", branches.toString())
+    assertEquals("[[name:*/main], [name:*/develop]]", branches.toString())
 
     List userRemoteConfigs = (List) scmCheckoutCall.get("userRemoteConfigs")
     assertEquals("One userRemoteConfig expected", 1, userRemoteConfigs.size())
@@ -128,7 +128,7 @@ class CheckoutScmIT extends LibraryIntegrationTestBase {
 
     // test branches
     List branches = scmCheckoutCall.get("branches")
-    assertEquals("[[name:*/master], [name:*/develop]]", branches.toString())
+    assertEquals("[[name:*/main], [name:*/develop]]", branches.toString())
 
     List userRemoteConfigs = (List) scmCheckoutCall.get("userRemoteConfigs")
     assertEquals("One userRemoteConfig expected", 1, userRemoteConfigs.size())

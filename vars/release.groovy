@@ -21,7 +21,7 @@ void call(String envSpecFile, String releaseSpecFile, String workflow, String ve
     dir('ara-spec-files') {
         checkout scm: [
                 $class           : 'GitSCM',
-                branches         : [[name: 'master']],
+                branches         : [[name: 'main']],
                 userRemoteConfigs: [[credentialsId: 'dcapi_ci_vcs_user', url: 'https://gitrepository.dettonville.int/stash/scm/dfsbizops/ara_spec_files.git']]
         ]
 

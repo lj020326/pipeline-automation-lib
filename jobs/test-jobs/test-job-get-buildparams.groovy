@@ -33,7 +33,7 @@ String jsonDeployInfoString='''
                                 {
                     "_class": "hudson.model.StringParameterValue",
                     "name": "AppComponentBranch",
-                    "value": "master"
+                    "value": "main"
                 },
                                 {
                     "_class": "hudson.model.BooleanParameterValue",
@@ -128,7 +128,7 @@ String jsonDeployInfoString='''
                     "name": "develop"
                 }]
             },
-            "remoteUrls": ["https://gitrepository.dettonville.int/stash/scm/api/dcapi-jenkins-pipeline-libs.git"],
+            "remoteUrls": ["https://gitrepository.dettonville.int/stash/scm/api/infra-jenkins-pipeline-libs.git"],
             "scmName": ""
         },
         {"_class": "org.jenkinsci.plugins.workflow.cps.EnvActionImpl"},
@@ -136,7 +136,7 @@ String jsonDeployInfoString='''
         {},
                 {
             "_class": "hudson.plugins.git.util.BuildData",
-            "buildsByBranchName": {"origin/master":             {
+            "buildsByBranchName": {"origin/main":             {
                 "_class": "hudson.plugins.git.util.Build",
                 "buildNumber": 3,
                 "buildResult": "",
@@ -144,14 +144,14 @@ String jsonDeployInfoString='''
                     "SHA1": "10381198359a284010cfe18577e706e22937bb60",
                     "branch": [                    {
                         "SHA1": "10381198359a284010cfe18577e706e22937bb60",
-                        "name": "origin/master"
+                        "name": "origin/main"
                     }]
                 },
                 "revision":                 {
                     "SHA1": "10381198359a284010cfe18577e706e22937bb60",
                     "branch": [                    {
                         "SHA1": "10381198359a284010cfe18577e706e22937bb60",
-                        "name": "origin/master"
+                        "name": "origin/main"
                     }]
                 }
             }},
@@ -159,7 +159,7 @@ String jsonDeployInfoString='''
                 "SHA1": "10381198359a284010cfe18577e706e22937bb60",
                 "branch": [                {
                     "SHA1": "10381198359a284010cfe18577e706e22937bb60",
-                    "name": "origin/master"
+                    "name": "origin/main"
                 }]
             },
             "remoteUrls": ["https://gitrepository.dettonville.int/stash/scm/dfsbizops/ara_spec_files.git"],
@@ -190,7 +190,7 @@ String jsonDeployInfoString='''
     "duration": 14791,
     "estimatedDuration": 25025,
     "executor": "",
-    "fullDisplayName": "MC API Â» Jobs Â» Deployment Jobs Â» STAGE Â» DevPortal #3",
+    "fullDisplayName": "DC API Â» Jobs Â» Deployment Jobs Â» STAGE Â» DevPortal #3",
     "id": "3",
     "keepLog": false,
     "number": 3,
@@ -235,8 +235,8 @@ componentBuildNumber = componentBuildCausesAction.upstreamBuild
 //componentBuildVersion = componentBuildVersionParam.value
 componentBuildDeployUrl = jsonDeployInfo.url
 
-//componentName="DCAPI-${componentBuildProject.split("/")[1]}"
-componentName="DCAPI-${componentBuildDeployUrl.split("/")[-4]}"
+//componentName="INFRA-${componentBuildProject.split("/")[1]}"
+componentName="INFRA-${componentBuildDeployUrl.split("/")[-4]}"
 
 log.info("${componentName}:${componentBuildVersion}:${componentBuildNumber} => ${componentBuildDeployUrl}")
 

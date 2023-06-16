@@ -26,7 +26,7 @@ node {
     env.PATH="${env.JAVA_HOME}/bin:${env.PATH}"
 
     // pull request or feature branch
-    if  (env.BRANCH_NAME != 'master') {
+    if  (env.BRANCH_NAME != 'main') {
         checkout()
         build()
         unitTest()
@@ -39,7 +39,7 @@ node {
             // Pull request
             sonarPreview()
         }
-    } // master branch / production
+    } // main branch / production
     else {
         checkout()
         build()

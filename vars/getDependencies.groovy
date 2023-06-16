@@ -13,7 +13,7 @@ def call(Map params=[:]) {
         }
         parameters {
             string(defaultValue: 'LTS', description: 'Provide Bitbucket Project Key', name: 'PROJECT')
-            string(defaultValue: 'master', description: 'Enter checkout Branch', name: 'BRANCH')
+            string(defaultValue: 'main', description: 'Enter checkout Branch', name: 'BRANCH')
             string(defaultValue: 'cdloyalty', description: 'What credentials ID should I use to checkout code from above project?', name: 'STASH_CREDENTIALS_ID')
             string(defaultValue: 'https://gitrepository.dettonville.int/stash/scm/~e074534/dependencymap.git', description: 'To which git repository should I commit dependency file?', name: 'GITDEPURL')
             string(defaultValue: 'cdloyalty', description: 'What credentials ID should I use to commit dependency file?', name: 'CREDENTIALS_ID')
@@ -129,11 +129,11 @@ def call(Map params=[:]) {
                                     println remoteOrigin
 
                                     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: CREDENTIALS_ID, usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD']]) {
-                                        git url: "${params.GITDEPURL}", branch: "master"
+                                        git url: "${params.GITDEPURL}", branch: "main"
                                         sh('git config --global user.email "jenkins@dettonville.org"')
                                         sh('git config --global user.name "Jenkins Pipeline"')
                                         sh("git remote set-url origin https://${GIT_USERNAME}:${GIT_PASSWORD}@${remoteOrigin}")
-                                        sh("git pull origin master")
+                                        sh("git pull origin main")
                                         sh("mkdir -p ${artifactId}-dependency")
                                         //sh("rm -fr ${artifactId}-dependency/")
                                         sh("cp *DependencyMap.csv ./${artifactId}-dependency/")

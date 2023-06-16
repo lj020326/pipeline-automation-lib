@@ -43,7 +43,7 @@ class AnsibleIT extends LibraryIntegrationTestBase {
     Map expectedCheckoutCall0 = [
         '$class'                           : "GitSCM",
         "branches"                         : [
-            ["name": "master"]
+            ["name": "main"]
         ],
         "doGenerateSubmoduleConfigurations": false,
         "extensions"                       : [
@@ -77,7 +77,7 @@ class AnsibleIT extends LibraryIntegrationTestBase {
     Map expectedCheckoutCall2 = [
         '$class'                           : "GitSCM",
         "branches"                         : [
-            ["name": "master"]
+            ["name": "main"]
         ],
         "doGenerateSubmoduleConfigurations": false,
         "extensions"                       : [

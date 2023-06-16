@@ -6,8 +6,8 @@
 ## ref: https://wiki.jenkins.io/display/JENKINS/Remote+access+API
 ##
 
-## https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/master/lastCompletedBuild/api/python
-## https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/master/291/api/python
+## https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/main/lastCompletedBuild/api/python
+## https://cd.dettonville.int/jenkins/job/DCAPI/job/dcapi-test/job/main/291/api/python
 
 import urllib2
 import base64

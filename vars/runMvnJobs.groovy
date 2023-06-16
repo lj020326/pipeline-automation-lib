@@ -7,8 +7,8 @@ import com.dettonville.api.pipeline.utils.JsonUtils
 
 def call(Map params=[:]) {
 
-    Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this)
+//     Logger.init(this, LogLevel.INFO)
+    Logger log = new Logger(this, LogLevel.INFO)
 
     log.info("Loading Default Configs")
     Map config=loadPipelineConfig(log, params)

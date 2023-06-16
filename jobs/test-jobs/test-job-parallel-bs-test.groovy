@@ -194,7 +194,7 @@ def getBSAgent(Logger log, Map config) {
         dir('deploy_configs') {
             checkout scm: [
                     $class: 'GitSCM',
-                    branches: [[name: "master"]],
+                    branches: [[name: "main"]],
                     userRemoteConfigs: [[credentialsId: config.jenkinsRepoCredId, url: config.bsAgentDistGitRepo]]
             ]
         }

@@ -131,7 +131,7 @@ ManagedFile autoLookupMavenSettings(String jsonPath, String scmUrl, Logger log) 
         managedFilesJson = jsonLibraryResource.load()
     } catch (AbortException ex) {
         log.warn("Exception during loading '$jsonPath', it seems that you do not have a pipeline configuration present, skip parsing of managedfiles. " +
-          "Refer to https://gitrepository.dettonville.int/stash/projects/API/repos/pipeline-automation-lib/blob/master/docs/tutorial-setup-library.md for proper setup.")
+          "Refer to https://gitrepository.dettonville.int/stash/projects/API/repos/pipeline-automation-lib/blob/main/docs/tutorial-setup-library.md for proper setup.")
         return null
     }
 
@@ -160,7 +160,7 @@ void addManagedFile(Logger log, String scmUrl, String jsonPath, String envVar, L
         managedFilesJson = jsonLibraryResource.load()
     } catch (AbortException ex) {
         log.warn("Exception during loading '$jsonPath', it seems that you do not have a pipeline configuration present, skip parsing of managedfiles. " +
-          "Refer to https://gitrepository.dettonville.int/stash/projects/API/repos/pipeline-automation-lib/blob/master/docs/tutorial-setup-library.md for proper setup.")
+          "Refer to https://gitrepository.dettonville.int/stash/projects/API/repos/pipeline-automation-lib/blob/main/docs/tutorial-setup-library.md for proper setup.")
         return
     }
 

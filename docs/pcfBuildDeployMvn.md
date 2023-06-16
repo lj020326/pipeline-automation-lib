@@ -304,7 +304,7 @@ This is an example of a pipeline that deploys a user defined service to multiple
 release:
     services:
       user_defined_services:
-        - service_name: 'mc-emoji-db-acceptance'
+        - service_name: 'dc-emoji-db-acceptance'
           use_credentials: true
           environment_overrides:
             nyc_dev:

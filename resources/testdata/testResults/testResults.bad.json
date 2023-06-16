@@ -17,11 +17,11 @@
           "errorDetails": "Delegate WebDriver not found.  Please verify that either\n1. You have set a Maven parameter 'default.web.execution.platform' with a valid value.\n2. You have included a meta tag in each JBehave story '@webPlatform' with a valid value\n3. You have included a meta tag for each JBehave scenario '@webPlatform' with a valid value.",
           "errorStackTrace": "Delegate WebDriver not found.  Please verify that either\n1. You have set a Maven parameter 'default.web.execution.platform' with a valid value.\n2. You have included a meta tag in each JBehave story '@webPlatform' with a valid value\n3. You have included a meta tag for each JBehave scenario '@webPlatform' with a valid value.",
           "failedSince": 51,
-          "name": "Authorized user can login to Mastercard Developers",
+          "name": "Authorized user can login to Dettonville Developers",
           "skipped": false,
           "skippedMessage": null,
           "status": "FAILED",
-          "stderr": "Delegate WebDriver not found.  Please verify that either\n1. You have set a Maven parameter 'default.web.execution.platform' with a valid value.\n2. You have included a meta tag in each JBehave story '@webPlatform' with a valid value\n3. You have included a meta tag for each JBehave scenario '@webPlatform' with a valid value.\ncom.dettonville.quality.engineering.mtaf.ui.providers.MasterCardWebDelegatingDriverProvider.get(MasterCardWebDelegatingDriverProvider.java:55)\ncom.dettonville.api.quality.configuration.UBLifecycleSteps.beforeScenario(UBLifecycleSteps.java:134)\n",
+          "stderr": "Delegate WebDriver not found.  Please verify that either\n1. You have set a Maven parameter 'default.web.execution.platform' with a valid value.\n2. You have included a meta tag in each JBehave story '@webPlatform' with a valid value\n3. You have included a meta tag for each JBehave scenario '@webPlatform' with a valid value.\ncom.dettonville.quality.engineering.mtaf.ui.providers.DettonvilleWebDelegatingDriverProvider.get(DettonvilleWebDelegatingDriverProvider.java:55)\ncom.dettonville.api.quality.configuration.UBLifecycleSteps.beforeScenario(UBLifecycleSteps.java:134)\n",
           "stdout": null
         }
       ],

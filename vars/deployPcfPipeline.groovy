@@ -75,7 +75,7 @@ pipeline {
                                     writeFile file: 'empty.dummy', text: ''
                                     git credentialsId: 'macd-plat-gitlab',
                                             url: 'git@git.epam.com:macd-plat/macd-api-testing.git',
-                                            branch: 'master'
+                                            branch: 'main'
                                 }
                             }
                         }

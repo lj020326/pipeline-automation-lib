@@ -10,8 +10,8 @@ import groovy.json.*
 
 def call(Map params=[:]) {
 
-    Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this)
+//     Logger.init(this, LogLevel.INFO)
+    Logger log = new Logger(this, LogLevel.INFO)
 
     log.info("Loading Default Configs")
     Map config=loadPipelineConfig(log, params)
@@ -1381,7 +1381,7 @@ def sendReports(Map config, String emailDist, def currentBuild, String notifyAct
  * @param appHostName Name of the app, should be same as in manifest.
  * @param env what env we want the certs for. values can be 'nyc-dev', 'nyc-stage', or 'bel-prod'
  * @param returnMap A Map shared back to the caller where it can add the certs and passwords to
- * @param cnForCert the CN name you want the cert to have. usually your appName + -client. like masterpass-switch-account-registry-services-client
+ * @param cnForCert the CN name you want the cert to have. usually your appName + -client. like dcuser-switch-account-registry-services-client
  */
 //void getJKSFromCaaS(script, String appHostName, String env, Map returnMap, String cnForCert,String ouForCert=null) {
 void getJKSFromCaaS(Logger log, Map config) {

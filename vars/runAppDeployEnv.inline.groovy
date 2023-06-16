@@ -10,8 +10,8 @@ import com.dettonville.api.pipeline.utils.JsonUtils
 def call(Map config=[:]) {
     String logPrefix="runAppDeployEnv():"
 
-    Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this)
+//     Logger.init(this, LogLevel.INFO)
+    Logger log = new Logger(this, LogLevel.INFO)
 
     def ymlConfigString = """
 ---
@@ -35,25 +35,25 @@ appEnvironments:
     STAGE:
         artifactVersion: "1.63.0-SNAPSHOT"
         appTestEnvironment: STAGE_EXTERNAL
-        alwaysEmailList: "DST_Open_API_Development_Team@dettonville.org, dcapi-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com, dcapi_qa@dettonville.org"
+        alwaysEmailList: "DST_Open_API_Development_Team@dettonville.org, infra-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com, dcapi_qa@dettonville.org"
         araEnvSpecFile: "DCAPI/env_specs/stage_env_spec.json"
     
     PROD_STL:
         artifactVersion: "1.62.0"
         appTestEnvironment: PROD_STL
-        alwaysEmailList: "DST_Open_API_Development_Team@dettonville.org, dcapi-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com, dcapi_qa@dettonville.org"
+        alwaysEmailList: "DST_Open_API_Development_Team@dettonville.org, infra-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com, dcapi_qa@dettonville.org"
         araEnvSpecFile: "DCAPI/env_specs/prod_nyc_env_spec.json"
     
     PROD_KSC:
         artifactVersion: "1.62.0"
         appTestEnvironment: PROD_KSC
-        alwaysEmailList: "DST_Open_API_Development_Team@dettonville.org, dcapi-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com, dcapi_qa@dettonville.org"
+        alwaysEmailList: "DST_Open_API_Development_Team@dettonville.org, infra-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com, dcapi_qa@dettonville.org"
         araEnvSpecFile: "DCAPI/env_specs/prod_jpn_env_spec.json"
 
 
 """
 
-    String ymlDeployConfigFileUrl = "curl https://fusion.dettonville.int/stash/projects/API/repos/deployment_configs/raw/deployment_configs/dcapi/appDeployConfig.yml?at=refs%2Fheads%2Fmaster
+    String ymlDeployConfigFileUrl = "curl https://fusion.dettonville.int/stash/projects/API/repos/deployment_configs/raw/deployment_configs/dcapi/appDeployConfig.yml?at=refs%2Fheads%2Fmain
     String ymlConfigString = sh(script: ymlDeployConfigFileUrl, returnStdout: true)
     log.info("browserstacklocal process already running: [\n${processInfoList}]")
 

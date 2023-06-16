@@ -129,9 +129,12 @@ void execPlaybook(Map config) {
             internalExtraVars[k] = v
         }
     }
-    String extraVarsJson = JsonOutput.toJson(internalExtraVars)
-    // add extra vars to extraparameters
-    internalExtraParameters.push("--extra-vars '${extraVarsJson}'")
+
+    if (internalExtraVars) {
+        log.info("add extra vars to extraparameters")
+        String extraVarsJson = JsonOutput.toJson(internalExtraVars)
+        internalExtraParameters.push("--extra-vars '${extraVarsJson}'")
+    }
 
     // build extras string
     String extras = internalExtraParameters.join(' ')
