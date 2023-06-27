@@ -20,7 +20,6 @@ folder(projectFolder) {
 //             inheriting()
         }
         permissions([
-            "GROUP:Overall/Administer:SG - Ansible-Admin",
             "GROUP:Overall/Administer:Domain Admins",
             "GROUP:Overall/Administer:admin",
             "GROUP:Overall/Read:authenticated",

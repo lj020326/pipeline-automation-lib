@@ -21,7 +21,6 @@ List vmTemplateList = [
     ['build_distribution': 'Debian', 'build_release': '10'],
     ['build_distribution': 'Debian', 'build_release': '9'],
     ['build_distribution': 'RedHat', 'build_release': '9'],
-    ['build_distribution': 'RedHat', 'build_release': '8-stream'],
     ['build_distribution': 'RedHat', 'build_release': '8'],
     ['build_distribution': 'RedHat', 'build_release': '7'],
     ['build_distribution': 'Ubuntu', 'build_release': '22.04'],
@@ -158,3 +157,39 @@ vmTemplateList.each { Map config ->
 
 }
 
+// ref: https://jenkinsci.github.io/job-dsl-plugin/#path/listView
+// ref: https://stackoverflow.com/questions/24248222/jenkins-job-views-with-different-job-names
+listView("VM-template-jobs") {
+    jobs {
+        regex("${basePath}/")
+    }
+    columns {
+        status()
+        weather()
+        name()
+        lastSuccess()
+        lastFailure()
+        lastDuration()
+        buildButton()
+    }
+}
+
+listView("VM-template-jobs-unstable") {
+    jobs {
+        regex("${basePath}/")
+    }
+    jobFilters {
+        status {
+            status(Status.UNSTABLE)
+        }
+    }
+    columns {
+        status()
+        weather()
+        name()
+        lastSuccess()
+        lastFailure()
+        lastDuration()
+        buildButton()
+    }
+}

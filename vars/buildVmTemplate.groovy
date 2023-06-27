@@ -65,18 +65,31 @@ def call(Map params=[:]) {
                 }
                 steps {
                     script {
-                        log.info("checking if template already exists...")
-//                         withCredentials([usernamePassword(credentialsId: 'infra-govc-cred', passwordVariable: 'GOVC_PASSWORD', usernameVariable: 'GOVC_USERNAME')]) {
+
                         withCredentials(config.secret_vars) {
+                            log.info("Checking if template folder at ${config.vm_template_folder} exists...")
+//                             sh "govc folder.info ${config.vm_template_folder}"
+                            vmTemplateFolderExists = sh(script: "govc folder.info ${config.vm_template_folder} | grep 'Path:'", returnStatus: true) == 0
+                            log.info("vmTemplateFolderExists=>${vmTemplateFolderExists}")
+
+                            if (!vmTemplateFolderExists) {
+                                log.info("Create template folder ${config.vm_template_folder}")
+                                sh "govc folder.create ${config.vm_template_folder}"
+                            }
+
+                            log.info("Ensure datastore template directory already exists...")
+                            sh "govc datastore.mkdir -p -ds=${config.vm_template_datastore} ${config.vcenter_folder}"
+
+                            log.info("Checking if template already exists...")
+
                             sh "govc vm.info ${config.vm_name}"
                             vmTemplateExists = sh(script: "govc vm.info ${config.vm_name} | grep 'UUID:'", returnStatus: true) == 0
-                        }
-                        log.info("initial check if template already exists=>${vmTemplateExists}")
+                            log.info("initial check if template already exists=>${vmTemplateExists}")
 
-                        if (vmTemplateExists) {
-                            log.info("vmTemplateExists=${vmTemplateExists} - skipping build")
+                            if (vmTemplateExists) {
+                                log.info("vmTemplateExists=${vmTemplateExists} - skipping build")
+                            }
                         }
-
                     }
                 }
             }
@@ -103,9 +116,11 @@ def call(Map params=[:]) {
                               -e fetch_os_images__vmware_images_dir='"${vmware_images_dir}"' \
                               -e fetch_os_images__osimage_dir='"${config.os_image_dir}"' \
                               -e fetch_images='"[${JsonOutput.toJson(config.image_info)}]"' \
-                              ansible/fetch_os_images.yml
+                              ansible-linux/fetch_os_images.yml
                             """
+                        }
 
+                        if (!config.vmware_iso_nfs_local_mounted) {
                             withCredentials(config.secret_vars) {
                                 String datastoreLsCmd = """
                                     govc datastore.ls \
@@ -113,20 +128,19 @@ def call(Map params=[:]) {
                                      ${config.iso_base_dir}/${config.iso_dir}/${config.iso_file} \
                                      | grep "${config.iso_file}"
                                 """
+                                vmIsoExists = sh(script: "${datastoreLsCmd}", returnStatus: true) == 0
+                                log.info("vmIsoExists=${vmIsoExists}")
 
-//                                 vmIsoExists = sh(script: "${datastoreLsCmd}", returnStatus: true) == 0
-//                                 log.info("vmIsoExists=${vmIsoExists}")
-//
-//                                 if (!vmIsoExists) {
-//                                     log.info("uploading ISO ${config.iso_file} to ${config.vm_iso_datastore}")
-//
-//                                     sh """
-//                                     govc datastore.upload \
-//                                      -ds=${config.vm_iso_datastore} \
-//                                      ${config.os_image_dir}/${config.iso_file} \
-//                                      ${config.iso_base_dir}/${config.iso_dir}/${config.iso_file}
-//                                      """
-//                                 }
+                                if (!vmIsoExists) {
+                                    log.info("uploading ISO ${config.iso_file} to ${config.vm_iso_datastore}")
+
+                                    sh """
+                                    govc datastore.upload \
+                                     -ds=${config.vm_iso_datastore} \
+                                     ${config.os_image_dir}/${config.iso_file} \
+                                     ${config.iso_base_dir}/${config.iso_dir}/${config.iso_file}
+                                     """
+                                }
                             }
                         }
                     }
@@ -233,7 +247,7 @@ def call(Map params=[:]) {
 
                                 // ref: https://stackoverflow.com/questions/45348761/jenkins-pipeline-how-do-i-use-the-tool-option-to-specify-a-custom-tool?noredirect=1&lq=1
                                 withEnv(["PATH+PACKER=${tool 'packer-local'}/bin"]) {
-                                    sh "env | sort"
+//                                     sh "env"
                                     sh "packer build ${buildArgsString}"
                                 }
 
@@ -256,7 +270,6 @@ def call(Map params=[:]) {
                     script {
 
                         withCredentials(config.secret_vars) {
-//                         withCredentials([usernamePassword(credentialsId: 'infra-govc-cred', passwordVariable: 'GOVC_PASSWORD', usernameVariable: 'GOVC_USERNAME')]) {
 
                             sh "govc vm.info ${config.vm_name}"
                             vmTemplateExists = sh(script: "govc vm.info ${config.vm_name} | grep 'UUID:'", returnStatus: true) == 0
@@ -267,8 +280,8 @@ def call(Map params=[:]) {
                                 sh "govc vm.destroy ${config.vm_name}"
                             }
 
-//                            sh "govc vm.clone -ds=${config.vm_template-datastore']} -vm=${config.vm_build_id} -pool=/johnsondc/host/${config.vm_template_host}/Resources -folder=${config.vm_template_folder} -template ${config.vm_name} >/dev/null"
-                            sh "govc vm.clone -ds=${config.vm_template_datastore} -vm=${config.vm_build_id} -host=${config.vm_template_host} -folder=${config.vm_template_folder} -template ${config.vm_name} >/dev/null"
+                            // ref: https://github.com/vmware/govmomi/blob/main/govc/USAGE.md#vmclone
+                            sh "govc vm.clone -ds=${config.vm_template_datastore} -vm=${config.vm_build_id} -host=${config.vm_template_host} -folder=${config.vm_template_folder} -on=false -template=true ${config.vm_name} >/dev/null"
 
                             String getVmPathCmd = "govc vm.info -json ${config.vm_name} | jq '.. |.Config?.VmPathName? | select(. != null)'"
                             sh "${getVmPathCmd}"
@@ -315,7 +328,7 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.build_dir="templates"
     config.timeout = config.get('timeout', 3)
     config.timeoutUnit = config.get('timeoutUnit', 'HOURS')
-    config.alwaysEmailList = config.get('alwaysEmailList', "ljohnson@dettonville.org")
+    config.alwaysEmailList = config.get('alwaysEmailList', "Lee.Johnson.Contractor@alsac.stjude.org")
 
     jobParts = jobParts.drop(config.jobBaseFolderLevel)
     log.info("${logPrefix} jobParts[after drop]=${jobParts}")
@@ -329,6 +342,7 @@ Map loadPipelineConfig(Logger log, Map params) {
 
     config.build_distribution_config_dir = config.build_distribution
     config.build_release_config_dir = jobParts.join("/") + "/server"
+    config.vmware_iso_nfs_local_mounted = config.get('vmware_iso_nfs_local_mounted', false)
 
     log.info("${logPrefix} loading build config")
 
@@ -437,6 +451,8 @@ Map loadPipelineConfig(Logger log, Map params) {
         usernamePassword(credentialsId: 'infra-govc-cred', passwordVariable: 'GOVC_PASSWORD', usernameVariable: 'GOVC_USERNAME'),
         string(credentialsId: 'packer-ssh-password', variable: 'PACKER_SSH_PASSWORD'),
         string(credentialsId: 'ansible-vault-password', variable: 'ANSIBLE_VAULT_PASSWORD'),
+        string(credentialsId: 'bitbucket-ssh-jenkins-string', variable: 'ANSIBLE_BITBUCKET_SSH_KEY_STRING'),
+        sshUserPrivateKey(credentialsId: 'bitbucket-ssh-jenkins', keyFileVariable: 'ANSIBLE_BITBUCKET_SSH_KEY')
     ]
     config.secret_vars = secretVars
 
