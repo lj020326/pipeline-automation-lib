@@ -67,21 +67,20 @@ def call(Map params=[:]) {
                     script {
 
                         withCredentials(config.secret_vars) {
-                            log.info("Checking if template folder at ${config.vm_template_folder} exists...")
-//                             sh "govc folder.info ${config.vm_template_folder}"
-                            vmTemplateFolderExists = sh(script: "govc folder.info ${config.vm_template_folder} | grep 'Path:'", returnStatus: true) == 0
+                            log.info("Checking if template folder at ${config.vm_template_build_folder} exists...")
+//                             sh "govc folder.info ${config.vm_template_build_folder}"
+                            vmTemplateFolderExists = sh(script: "govc folder.info ${config.vm_template_build_folder} | grep 'Path:'", returnStatus: true) == 0
                             log.info("vmTemplateFolderExists=>${vmTemplateFolderExists}")
 
                             if (!vmTemplateFolderExists) {
-                                log.info("Create template folder ${config.vm_template_folder}")
-                                sh "govc folder.create ${config.vm_template_folder}"
+                                log.info("Create template folder ${config.vm_template_build_folder}")
+                                sh "govc folder.create ${config.vm_template_build_folder}"
                             }
 
-                            log.info("Ensure datastore template directory already exists...")
-                            sh "govc datastore.mkdir -p -ds=${config.vm_template_datastore} ${config.vcenter_folder}"
+                            log.info("Ensure datastore template directory ${config.vcenter_build_folder} already exists...")
+                            sh "govc datastore.mkdir -p -ds=${config.vm_template_datastore} ${config.vcenter_build_folder}"
 
                             log.info("Checking if template already exists...")
-
                             sh "govc vm.info ${config.vm_name}"
                             vmTemplateExists = sh(script: "govc vm.info ${config.vm_name} | grep 'UUID:'", returnStatus: true) == 0
                             log.info("initial check if template already exists=>${vmTemplateExists}")
@@ -116,7 +115,7 @@ def call(Map params=[:]) {
                               -e fetch_os_images__vmware_images_dir='"${vmware_images_dir}"' \
                               -e fetch_os_images__osimage_dir='"${config.os_image_dir}"' \
                               -e fetch_images='"[${JsonOutput.toJson(config.image_info)}]"' \
-                              ansible-linux/fetch_os_images.yml
+                              ansible/fetch_os_images.yml
                             """
                         }
 
@@ -281,7 +280,11 @@ def call(Map params=[:]) {
                             }
 
                             // ref: https://github.com/vmware/govmomi/blob/main/govc/USAGE.md#vmclone
-                            sh "govc vm.clone -ds=${config.vm_template_datastore} -vm=${config.vm_build_id} -host=${config.vm_template_host} -folder=${config.vm_template_folder} -on=false -template=true ${config.vm_name} >/dev/null"
+                            log.info("Ensure datastore template deploy directory [${config.vcenter_deploy_folder}] already exists...")
+                            sh "govc datastore.mkdir -p -ds=${config.vm_template_datastore} ${config.vcenter_deploy_folder}"
+
+                            log.info("Clone template to deploy directory [${config.vm_template_deploy_folder}] already exists...")
+                            sh "govc vm.clone -ds=${config.vm_template_datastore} -vm=${config.vm_build_id} -host=${config.vm_template_host} -folder=${config.vm_template_deploy_folder} -on=false -template=true ${config.vm_name} >/dev/null"
 
                             String getVmPathCmd = "govc vm.info -json ${config.vm_name} | jq '.. |.Config?.VmPathName? | select(. != null)'"
                             sh "${getVmPathCmd}"
@@ -292,19 +295,19 @@ def call(Map params=[:]) {
                             vmPath = vmPath.substring(0, vmPath.lastIndexOf("/"))
                             log.info("vmDatastore=${vmDatastore} vmPath='${vmPath}'")
 
-                            String targetPath = "[${config.vm_template_datastore}] ${config.vm_template_folder}"
+                            String targetPath = "[${config.vm_template_datastore}] ${config.vm_template_deploy_folder}"
                             log.info("targetPath='${targetPath}'")
 
                             if (vmPath != targetPath) {
                                 log.info("moving VM from '${vmPath}' to '${targetPath}'")
                                 // ref: https://github.com/vmware/govmomi/blob/main/govc/USAGE.md
                                 sh "govc vm.unregister ${config.vm_name}"
-                                sh "govc datastore.mkdir -p -ds=${config.vm_template_datastore} ${config.vm_template_folder}"
-                                sh "govc datastore.rm -f -ds=${config.vm_template_datastore} ${config.vm_template_folder}/${config.vm_name}"
-                                sh "govc datastore.mv -ds=${config.vm_template_datastore} ${config.vm_name} ${config.vm_template_folder}/${config.vm_name}"
-                                sh "govc vm.register -template=true -ds=${config.vm_template_datastore} -folder=${config.vm_template_folder} -host=${config.vm_template_host} ${config.vm_template_folder}/${config.vm_name}/${config.vm_name}.vmtx"
+                                sh "govc datastore.mkdir -p -ds=${config.vm_template_datastore} ${config.vm_template_deploy_folder}"
+                                sh "govc datastore.rm -f -ds=${config.vm_template_datastore} ${config.vm_template_deploy_folder}/${config.vm_name}"
+                                sh "govc datastore.mv -ds=${config.vm_template_datastore} ${config.vm_name} ${config.vm_template_deploy_folder}/${config.vm_name}"
+                                sh "govc vm.register -template=true -ds=${config.vm_template_datastore} -folder=${config.vm_template_deploy_folder} -host=${config.vm_template_host} ${config.vm_template_deploy_folder}/${config.vm_name}/${config.vm_name}.vmtx"
                             }
-                            sh "govc datastore.ls -ds=${config.vm_template_datastore} ${config.vm_template_folder}"
+                            sh "govc datastore.ls -ds=${config.vm_template_datastore} ${config.vm_template_deploy_folder}"
                             log.info("removing temporary template build ${config.vm_build_id}")
                             sh "govc vm.destroy ${config.vm_build_id}"
                         }
@@ -438,7 +441,7 @@ Map loadPipelineConfig(Logger log, Map params) {
         config.packer_build_format = "json"
         config.build_config = "${config.build_distribution_config_dir}/build-config.${config.packer_build_format}"
     } else {
-        config.packer_build_only = "${config.build_type}.*"
+        config.packer_build_only = "${config.build_type}.${config.build_distribution}"
         config.packer_var_format = "json.pkrvars.hcl"
         config.packer_build_format = "json.pkr.hcl"
     }

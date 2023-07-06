@@ -216,7 +216,7 @@ runEnvList.each { String run_environment ->
                                 submoduleOptions {
                                     disable(false)
                                     recursive(true)
-                                    tracking(false)
+                                    tracking(true)
                                     reference(null)
                                     timeout(null)
                                     parentCredentials(true)

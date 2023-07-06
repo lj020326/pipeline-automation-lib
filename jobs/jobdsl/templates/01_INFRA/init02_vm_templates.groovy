@@ -142,7 +142,7 @@ vmTemplateList.each { Map config ->
                             submoduleOptions {
                                 disable(false)
                                 recursive(true)
-                                tracking(false)
+                                tracking(true)
                                 reference(null)
                                 timeout(null)
                                 parentCredentials(true)
