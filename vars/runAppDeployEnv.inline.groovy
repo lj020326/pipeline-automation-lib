@@ -53,7 +53,7 @@ appEnvironments:
 
 """
 
-    String ymlDeployConfigFileUrl = "curl https://fusion.dettonville.int/stash/projects/API/repos/deployment_configs/raw/deployment_configs/dcapi/appDeployConfig.yml?at=refs%2Fheads%2Fmain
+    String ymlDeployConfigFileUrl = "curl https://fusion.dettonville.int/stash/projects/API/repos/deployment_configs/raw/deployment_configs/dcapi/appDeployConfig.yml?at=refs%2Fheads%2Fmain"
     String ymlConfigString = sh(script: ymlDeployConfigFileUrl, returnStdout: true)
     log.info("browserstacklocal process already running: [\n${processInfoList}]")
 

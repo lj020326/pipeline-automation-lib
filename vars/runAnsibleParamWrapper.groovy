@@ -16,13 +16,14 @@ def call(Map config=[:]) {
     List paramList = []
 
     Map paramMap = [
-        ansibleLimitHosts  : string(
+        ansibleLimitHosts : string(
             defaultValue: "",
             description: "Limit playbook to specified inventory hosts\nE.g., 'app_adm','app_tableau','host01', 'host01,host02'",
             name: 'AnsibleLimitHosts'),
-        ansibleDebugFlag   : choice(choices: "\n-v\n-vv\n-vvv\n-vvvv", description: "Choose Ansible Debug Level", name: 'AnsibleDebugFlag'),
-        ansibleGalaxyForceOpt  : booleanParam(defaultValue: false, description: "Use Ansible Galaxy Force Mode?", name: 'AnsibleGalaxyForceOpt'),
-        useCheckDiffMode   : booleanParam(defaultValue: false, description: "Use Check+Diff Mode (Dry Run with Diffs)?", name: 'UseCheckDiffMode')
+        ansibleDebugFlag : choice(choices: "\n-v\n-vv\n-vvv\n-vvvv", description: "Choose Ansible Debug Level", name: 'AnsibleDebugFlag'),
+        ansibleGalaxyForceOpt : booleanParam(defaultValue: false, description: "Use Ansible Galaxy Force Mode?", name: 'AnsibleGalaxyForceOpt'),
+        useCheckDiffMode : booleanParam(defaultValue: false, description: "Use Check+Diff Mode (Dry Run with Diffs)?", name: 'UseCheckDiffMode'),
+        skipUntagged : booleanParam(defaultValue: false, description: "Skip Untagged plays?", name: 'SkipUntagged')
     ]
 
     paramMap.each { String key, def param ->
@@ -46,6 +47,16 @@ def call(Map config=[:]) {
         config.ansibleDiffMode=true
     }
 
+    config.environment = config.get('environment',"${env.JOB_NAME.split('/')[-2]}")
+
+    if (config.skipUntagged) {
+        ansibleTagsDefault = "${env.JOB_BASE_NAME}"
+    } else {
+        // ref: https://stackoverflow.com/questions/62213910/run-only-tasks-with-a-certain-tag-or-untagged
+        ansibleTagsDefault = "untagged,${env.JOB_BASE_NAME}"
+    }
+    config.ansibleTags = config.get('ansibleTags',"${ansibleTagsDefault}")
+
 //     config.skipDefaultCheckout = true
 //     config.gitBranch = 'master'
     config.gitBranch = config.get('gitBranch','main')
@@ -53,13 +64,7 @@ def call(Map config=[:]) {
     config.gitCredId = config.get('gitCredId','bitbucket-ssh-jenkins')
 
 //     config.ansibleCollectionsRequirements = config.get('ansibleCollectionsRequirements','./collections/requirements.molecule.yml')
-    config.ansibleRolesRequirements = config.get('ansibleRolesRequirements','./roles/requirements.yml')
-
-//     config.ansibleTags = "${env.JOB_BASE_NAME}"
-    // ref: https://stackoverflow.com/questions/62213910/run-only-tasks-with-a-certain-tag-or-untagged
-//     config.ansibleTags = config.get('ansibleTags',"untagged,${env.JOB_BASE_NAME}")
-    config.ansibleTags = config.get('ansibleTags',"${env.JOB_BASE_NAME}")
-    config.environment = config.get('environment',"${env.JOB_NAME.split('/')[-2]}")
+//     config.ansibleRolesRequirements = config.get('ansibleRolesRequirements','./roles/requirements.yml')
 
 //     List ansibleSecretVarsList=[
 //         usernamePassword(credentialsId: 'ansible-ssh-password-linux', passwordVariable: 'ANSIBLE_SSH_PASSWORD', usernameVariable: 'ANSIBLE_SSH_USERNAME'),

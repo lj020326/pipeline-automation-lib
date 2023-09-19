@@ -15,20 +15,21 @@ String gitCredentialsId = "bitbucket-ssh-jenkins"
 String gitPipelineLibCredId = "bitbucket-ssh-jenkins"
 
 List vmTemplateList = [
-    ['build_distribution': 'CentOS', 'build_release': '8-stream'],
-    ['build_distribution': 'CentOS', 'build_release': '8'],
-    ['build_distribution': 'CentOS', 'build_release': '7'],
-    ['build_distribution': 'Debian', 'build_release': '10'],
-    ['build_distribution': 'Debian', 'build_release': '9'],
-    ['build_distribution': 'RedHat', 'build_release': '9'],
-    ['build_distribution': 'RedHat', 'build_release': '8'],
-    ['build_distribution': 'RedHat', 'build_release': '7'],
-    ['build_distribution': 'Ubuntu', 'build_release': '22.04'],
-    ['build_distribution': 'Ubuntu', 'build_release': '20.04'],
-    ['build_distribution': 'Ubuntu', 'build_release': '18.04'],
-    ['build_distribution': 'Windows', 'build_release': '2019'],
-    ['build_distribution': 'Windows', 'build_release': '2016'],
-    ['build_distribution': 'Windows', 'build_release': '2012r2'],
+    [ build_distribution: 'CentOS',  build_release: '9'],
+    [ build_distribution: 'CentOS',  build_release: '8-stream'],
+    [ build_distribution: 'CentOS',  build_release: '8'],
+    [ build_distribution: 'CentOS',  build_release: '7'],
+    [ build_distribution: 'Debian',  build_release: '10'],
+    [ build_distribution: 'Debian',  build_release: '9'],
+    [ build_distribution: 'RedHat',  build_release: '9'],
+    [ build_distribution: 'RedHat',  build_release: '8'],
+    [ build_distribution: 'RedHat',  build_release: '7'],
+    [ build_distribution: 'Ubuntu',  build_release: '22.04'],
+    [ build_distribution: 'Ubuntu',  build_release: '20.04'],
+    [ build_distribution: 'Ubuntu',  build_release: '18.04'],
+    [ build_distribution: 'Windows',  build_release: '2019'],
+    [ build_distribution: 'Windows',  build_release: '2016'],
+    [ build_distribution: 'Windows',  build_release: '2012r2'],
 ]
 
 // def scmFolderLibraryTraits = { folder ->
@@ -130,10 +131,12 @@ vmTemplateList.each { Map config ->
                         // ref: https://stackoverflow.com/questions/47620060/jenkins-add-git-submodule-to-multibranchpipelinejob-with-dsl#48693179
                         extensions {
                             cleanBeforeCheckout()
-                            cleanAfterCheckout()
+                            cleanCheckout {
+                                // Deletes untracked submodules and any other subdirectories which contain .git directories.
+                                deleteUntrackedNestedRepositories(true)
+                            }
                             cloneOptions {
-                                shallow(true)
-                                depth(1)
+                                shallow(false)
                                 noTags(true)
                                 reference(null)
                                 honorRefspec(false)

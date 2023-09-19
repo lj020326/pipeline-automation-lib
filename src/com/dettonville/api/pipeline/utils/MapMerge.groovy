@@ -47,7 +47,14 @@ class MapMerge {
                     result[k] = merge(result[k], v)
                 } else if (result[k] instanceof List) {
                     // ref: https://stackoverflow.com/questions/45791945/how-to-join-list-of-maps-in-groovy
-                    result[k] = (result[k] + v).groupBy { it.name }.collect{ it.value }.collect{ item -> Map m = [:] ; item.collect{ m +=it }; m }
+//                     result[k] = (result[k] + v).groupBy { it.name }.collect{ it.value }.collect{ item -> Map m = [:] ; item.collect{ m +=it }; m }
+                    if (v[0] instanceof Map) {
+                        result[k] = (result[k] + v).groupBy {
+                                (it instanceof Map) ? (it['name'] ?: it['id'] ?: it['key'] ?: it.keySet()[0]) : it
+                            }.collect{ it.value }.collect{ item -> Map m = [:] ; item.collect{ m +=it }; m }
+                    } else {
+                        result[k] = (result[k] + v)
+                    }
                 } else {
                     result[k] = v
                 }

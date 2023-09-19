@@ -22,6 +22,7 @@
 import groovy.json.JsonOutput
 import com.dettonville.api.pipeline.tools.ansible.Role
 import com.dettonville.api.pipeline.tools.ansible.RoleRequirements
+import com.dettonville.api.pipeline.utils.logging.LogLevel
 import com.dettonville.api.pipeline.utils.logging.Logger
 import com.dettonville.api.pipeline.utils.maps.MapUtils
 
@@ -81,6 +82,7 @@ void checkoutRequirements(String requirementsYmlPath) {
  */
 void execPlaybook(Map config) {
     Logger log = new Logger("ansible:execPlaybook -> ")
+//     log.setLevel(LogLevel.TRACE)
 
     Map ansibleCfg = config[ANSIBLE] ?: null
 

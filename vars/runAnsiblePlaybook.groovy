@@ -7,27 +7,23 @@ import com.dettonville.api.pipeline.utils.logging.Logger
 
 import static com.dettonville.api.pipeline.utils.ConfigConstants.*
 
+// import jenkins.model.CauseOfInterruption.*
+import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException
+
 def call(Map params=[:]) {
 
     Logger log = new Logger(this, LogLevel.INFO)
 //     log.setLevel(LogLevel.DEBUG)
 
     Map config=loadPipelineConfig(log, params)
-    def agentLabel = getJenkinsAgentLabel(config.jenkinsNodeLabel)
-
-    // Name of Ansible Installation
-    String ansibleTool = 'ansible-venv'
-//     String ansibleTool = 'ansible-local'
+    String agentLabel = getJenkinsAgentLabel(config.jenkinsNodeLabel)
+//     def agentLabel = getJenkinsAgentLabel(config.jenkinsNodeLabel)
+//     String ansibleTool = 'ansible-venv'
+    String ansibleLogSummary = "No results"
 
     pipeline {
         agent {
             label agentLabel as String
-        }
-        tools {
-            // ref: https://webapp.chatgpt4google.com/s/MzY5MjYw
-            // ref: https://stackoverflow.com/questions/47895668/how-to-select-multiple-jdk-version-in-declarative-pipeline-jenkins#48368506
-//             ansible 'ansible-venv'
-            ansible "${ansibleTool}"
         }
         options {
             disableConcurrentBuilds()
@@ -37,49 +33,37 @@ def call(Map params=[:]) {
             timeout(time: config.timeout, unit: config.timeoutUnit)
         }
         stages {
-//             stage('Checkout') {
-//                 when {
-//                     expression { config.gitPerformCheckout }
-//                 }
-//                 steps {
-//                     script {
-//                         // git credentialsId: 'bitbucket-ssh-jenkins', url: 'git@bitbucket.org:lj020326/ansible-datacenter.git'
-//                         checkout scm: [
-//                             $class: 'GitSCM',
-//                             branches: [[name: "${config.gitBranch}"]],
-//                             userRemoteConfigs: [[credentialsId: "${config.gitCredId}",
-//                                                  url: "${config.gitRepoUrl}"]]
-//                         ]
-//
-//                     }
-//                 }
-//             }
             stage('Run collections and roles Install') {
                 when {
                     expression { config.ansibleCollectionsRequirements || config.ansibleRolesRequirements }
                 }
+                tools {
+                    // ref: https://webapp.chatgpt4google.com/s/MzY5MjYw
+                    // ref: https://stackoverflow.com/questions/47895668/how-to-select-multiple-jdk-version-in-declarative-pipeline-jenkins#48368506
+                    ansible "${config.ansibleInstallation}"
+                }
                 steps {
                     script {
-                        sh "env | sort"
-                        sh "${config.ansibleCmd} --version"
-                        sh "${config.ansibleGalaxyCmd} --version"
-
                         // install galaxy roles
-                        List ansibleGalaxyArgs = []
+                        List ansibleGalaxyArgList = []
                         if (config.ansibleGalaxyIgnoreCerts) {
-                            ansibleGalaxyArgs.push("--ignore-certs")
+                            ansibleGalaxyArgList.push("--ignore-certs")
                         }
                         if (config.ansibleGalaxyForceOpt) {
-                            ansibleGalaxyArgs.push("--force")
+                            ansibleGalaxyArgList.push("--force")
                         }
-                        String ansibleGalaxyArgsString = ansibleGalaxyArgs.join(" ")
+                        String ansibleGalaxyArgs = ansibleGalaxyArgList.join(" ")
 
                         withCredentials(config.ansibleSecretVarsList) {
+                            // ref: https://stackoverflow.com/questions/60756020/print-environment-variables-sorted-by-name-including-variables-with-newlines
+//                             sh "env -0 | sort -z | tr \'\0\' \'\n\'"
+                            sh "export -p | sed 's/declare -x //'"
+                            sh "${config.ansibleGalaxyCmd} --version"
                             if (fileExists(config.ansibleCollectionsRequirements)) {
-                                sh "${config.ansibleGalaxyCmd} collection install ${ansibleGalaxyArgsString} -r ${config.ansibleCollectionsRequirements}"
+                                sh "${config.ansibleGalaxyCmd} collection install ${ansibleGalaxyArgs} -r ${config.ansibleCollectionsRequirements}"
                             }
                             if (fileExists(config.ansibleRolesRequirements)) {
-                                sh "${config.ansibleGalaxyCmd} install ${ansibleGalaxyArgsString} -r ${config.ansibleRolesRequirements}"
+                                sh "${config.ansibleGalaxyCmd} install ${ansibleGalaxyArgs} -r ${config.ansibleRolesRequirements}"
                             }
                         }
                     }
@@ -87,6 +71,11 @@ def call(Map params=[:]) {
             }
 
             stage('Run Ansible Playbook') {
+                tools {
+                    // ref: https://webapp.chatgpt4google.com/s/MzY5MjYw
+                    // ref: https://stackoverflow.com/questions/47895668/how-to-select-multiple-jdk-version-in-declarative-pipeline-jenkins#48368506
+                    ansible "${config.ansibleInstallation}"
+                }
                 steps {
                     script {
 
@@ -168,10 +157,32 @@ def call(Map params=[:]) {
 
                         withEnv(config.ansibleEnvVarsList) {
                             withCredentials(config.ansibleSecretVarsList) {
-                                ansible.execPlaybook(config)
+                                sh "${config.ansibleCmd} --version"
+                                // ref: https://stackoverflow.com/questions/44022775/jenkins-ignore-failure-in-pipeline-build-step#47789656
+                                try {
+                                    catchError{
+                                        ansible.execPlaybook(config)
+                                    }
+                                } catch (hudson.AbortException ae) {
+                                    // handle an AbortException
+                                    // ref: https://github.com/jenkinsci/pipeline-model-definition-plugin/blob/master/pipeline-model-definition/src/main/groovy/org/jenkinsci/plugins/pipeline/modeldefinition/Utils.groovy
+//                                     return getResultFromException(ae)
+                                    if (manager.build.getAction(InterruptedBuildAction.class) ||
+                                        // this ambiguous condition means a user _probably_ aborted, not sure if this one is really necessary
+                                        (error instanceof org.jenkinsci.plugins.workflow.steps.FlowInterruptedException && error.causes.size() == 0)) {
+                                        throw error
+                                    } else {
+                                        ansibleLogSummary = "ansible.execPlaybook error: " + e.getMessage()
+                                        log.error("ansible.execPlaybook error: " + e.getMessage())
+                                    }
+                                    currentBuild.result = 'FAILURE'
+                                }
+                                if (fileExists("ansible.log")) {
+                                    ansibleLogSummary = sh(returnStdout: true, script: "tail -n 50 ansible.log").trim()
+                                }
+                                log.info("**** currentBuild.result=${currentBuild.result}")
                             }
                         }
-
                     }
                 }
             }
@@ -179,17 +190,14 @@ def call(Map params=[:]) {
         post {
             always {
                 script {
-                    if (fileExists("ansible.log")) {
-//                         sendEmailReport(config.emailFrom, config.emailDist, currentBuild, 'ansible.log')
-                        ansibleLogSummary = sh(returnStdout: true, script: "tail -n 50 ansible.log").trim()
-                        def build_status = "${currentBuild.result ? currentBuild.result : 'SUCCESS'}"
-                        emailext (
-                            to: "${config.emailDist}",
-                            from: "${config.emailFrom}",
-                            subject: "BUILD ${build_status}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-                            body: "${env.EMAIL_BODY} \n\nBuild Log:\n${ansibleLogSummary}",
-                        )
-                    }
+//                     sendEmailReport(config.emailFrom, config.emailDist, currentBuild, 'ansible.log')
+//                     def build_status = "${currentBuild.result ? currentBuild.result : 'SUCCESS'}"
+//                     emailext (
+//                         to: "${config.emailDist}",
+//                         from: "${config.emailFrom}",
+//                         subject: "BUILD ${build_status}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+//                         body: "${env.EMAIL_BODY} \n\nBuild Log:\n${ansibleLogSummary}",
+//                     )
                     sendEmail(currentBuild, env)
                 }
 
@@ -200,6 +208,30 @@ def call(Map params=[:]) {
     }
 
 } // body
+
+// ref: https://github.com/jenkinsci/pipeline-model-definition-plugin/blob/master/pipeline-model-definition/src/main/groovy/org/jenkinsci/plugins/pipeline/modeldefinition/Utils.groovy
+static Result getResultFromException(Throwable e) {
+    // ref: https://issues.jenkins.io/browse/JENKINS-34376
+    // ref: https://gist.github.com/stephansnyt/3ad161eaa6185849872c3c9fce43ca81#file-exceptionhandle-groovy
+//     if (e.getMessage().contains('script returned exit code 143')) {
+//         throw new jenkins.model.CauseOfInterruption.UserInterruptedException(e)
+//     } else {
+//         log.error("ansible.execPlaybook error: " + e.getMessage())
+//     }
+//     if (manager.build.getAction(InterruptedBuildAction.class) ||
+//         // this ambiguous condition means a user _probably_ aborted, not sure if this one is really necessary
+//         (error instanceof org.jenkinsci.plugins.workflow.steps.FlowInterruptedException && error.causes.size() == 0)) {
+//         throw error
+//     } else {
+//         log.error("ansible.execPlaybook error: " + e.getMessage())
+//     }
+
+    if (e instanceof FlowInterruptedException) {
+        return ((FlowInterruptedException)e).result
+    } else {
+        return Result.FAILURE
+    }
+}
 
 //@NonCPS
 Map loadPipelineConfig(Logger log, Map params) {
@@ -248,13 +280,15 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.ansibleGalaxyIgnoreCerts = config.get('AnsibleGalaxyIgnoreCerts',false)
     config.ansibleGalaxyForceOpt = config.get('ansibleGalaxyForceOpt', false)
 
-//     config.ansibleSshCredId = config.get('ansibleSshCredId', 'jenkins-ansible-ssh')
+    config.ansibleSshCredId = config.get('ansibleSshCredId', 'jenkins-ansible-ssh')
     config.ansibleVaultCredId = config.get('ansibleVaultCredId', 'ansible-vault-password-file')
     config.ansiblePlaybook = config.get('ansiblePlaybook', 'site.yml')
     config.ansibleTags = config.get('ansibleTags', '')
 
     String ansibleGalaxyCmd = "ansible-galaxy"
     String ansibleCmd = "ansible"
+
+    config.ansibleInstallation = config.get('ansibleInstallation', 'ansible-venv')
     config.ansibleGalaxyCmd = ansibleGalaxyCmd
     config.ansibleCmd = ansibleCmd
 
@@ -267,9 +301,8 @@ Map loadPipelineConfig(Logger log, Map params) {
 //         usernamePassword(credentialsId: 'ansible-ssh-password-linux', passwordVariable: 'ANSIBLE_SSH_PASSWORD', usernameVariable: 'ANSIBLE_SSH_USERNAME'),
 //         sshUserPrivateKey(credentialsId: 'bitbucket-ssh-jenkins')
 //     ]
-//     config.ansibleSecretVarsList = config.get('ansibleSecretVarsList', secretVarsListDefault)
 
-    config.ansibleSecretVarsList = config.get('ansibleSecretVarsList', [])
+    config.ansibleSecretVarsList = config.get('ansibleSecretVarsList', secretVarsListDefault)
 
     log.debug("${logPrefix} params=${params}")
     log.debug("${logPrefix} config=${config}")

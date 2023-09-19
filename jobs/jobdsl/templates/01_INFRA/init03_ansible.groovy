@@ -19,83 +19,43 @@ List runEnvList = [
     'prod'
 ]
 
-List runTagList = [
-    'bootstrap-ansible',
-    'bootstrap-docker',
-    'bootstrap-docker-stack',
-    'bootstrap-docker-swarm',
-    'bootstrap-idrac',
-    'bootstrap-jenkins-agent',
-    'bootstrap-linux',
-    'bootstrap-linux-core',
-    'bootstrap-linux-firewall',
-    'bootstrap-linux-logrotate',
-    'bootstrap-linux-package',
-    'bootstrap-linux-user',
-    'bootstrap-mounts',
-    'bootstrap-nfs',
-    'bootstrap-nfs-client',
-    'bootstrap-nfs-server',
-    'bootstrap-ntp',
-    'bootstrap-ntp-client',
-    'bootstrap-ntp-server',
-    'bootstrap-pip',
-    'bootstrap-postfix',
-    'bootstrap-postfix-client',
-    'bootstrap-postfix-server',
-    'bootstrap-signing-certs',
-    'bootstrap-sshd',
-    'bootstrap-vmware-esxi',
-    'deploy-cacerts',
-    'deploy-caroot',
-    'deploy-registry-certs',
-    'deploy-vm',
-    "add-disk-space",
-    "bitbucket-server",
-    "cis-rhel7-remediation",
-    "cis-rhel8-remediation",
-    "controlm",
-    "create-ocp-route",
-    "diskspace-check",
-    "distribute-ca-cert",
-    "dmz-local-users",
-    "etl-manager",
-    "fetch-os-images",
-    "insights-client",
-    "install-IR-Agent",
-    "install-cohesity",
-    "install-ivanti-agent",
-    "install-logrhythm-agent",
-    "install-snmp-agent",
-    "install-trellix-agent",
-    "install-trend-agent",
-    "linux-auth-management",
-    "linux-patching-orchestration",
-    "linux-post-provisioning",
-    "manage-embold",
-    "manage-etech",
-    "manage-httpd",
-    "manage-sentinelone-agent",
-    "oracle-post-provisioning",
-    "pci-audit",
-    "postfix",
-    "reboot-linux-machine",
-    "register-to-satellite",
-    "rhel-remediation",
-    "root-password-change",
-    "rsync-files",
-    "scan-cis",
-    "setup-adminapps",
-    "setup-bamboo",
-    "setup-java",
-    "setup-mdm",
-    "site",
-    "soda-sql-prereqs",
-    "uninstall-trellix-agent",
-    "uninstall-trend-agent",
-    "unregister-from-satellite",
-    "vmtools-service-start",
-    "yum-package-add"
+List ansibleJobList = [
+    [ansible_tag: 'bootstrap-ansible'],
+    [ansible_tag: 'bootstrap-ansible-user', skip_untagged: true],
+    [ansible_tag: 'bootstrap-docker'],
+    [ansible_tag: 'bootstrap-docker-stack'],
+    [ansible_tag: 'bootstrap-docker-swarm'],
+    [ansible_tag: 'bootstrap-idrac'],
+    [ansible_tag: 'bootstrap-jenkins-agent'],
+    [ansible_tag: 'bootstrap-linux'],
+    [ansible_tag: 'bootstrap-linux-core'],
+    [ansible_tag: 'bootstrap-linux-firewall'],
+    [ansible_tag: 'bootstrap-linux-logrotate'],
+    [ansible_tag: 'bootstrap-linux-package'],
+    [ansible_tag: 'bootstrap-linux-user'],
+    [ansible_tag: 'bootstrap-mounts'],
+    [ansible_tag: 'bootstrap-nfs'],
+    [ansible_tag: 'bootstrap-nfs-client'],
+    [ansible_tag: 'bootstrap-nfs-server'],
+    [ansible_tag: 'bootstrap-ntp'],
+    [ansible_tag: 'bootstrap-ntp-client'],
+    [ansible_tag: 'bootstrap-ntp-server'],
+    [ansible_tag: 'bootstrap-pip'],
+    [ansible_tag: 'bootstrap-postfix'],
+    [ansible_tag: 'bootstrap-postfix-client'],
+    [ansible_tag: 'bootstrap-postfix-server'],
+    [ansible_tag: 'bootstrap-python3'],
+    [ansible_tag: 'bootstrap-signing-certs'],
+    [ansible_tag: 'bootstrap-sshd'],
+    [ansible_tag: 'bootstrap-vcenter', skip_untagged: true],
+    [ansible_tag: 'bootstrap-vm', skip_untagged: true],
+    [ansible_tag: 'bootstrap-vmware-esxi', skip_untagged: true],
+    [ansible_tag: 'deploy-cacerts'],
+    [ansible_tag: 'deploy-caroot'],
+    [ansible_tag: 'deploy-registry-certs'],
+    [ansible_tag: 'deploy-vm', skip_untagged: true],
+    [ansible_tag: 'display-controller-vars'],
+    [ansible_tag: 'display-hostvars']
 ]
 
 
@@ -148,10 +108,12 @@ folder(basePath) {
 
 runEnvList.each { String run_environment ->
 
-    runTagList.each { String run_tag ->
+    ansibleJobList.each { Map job_config ->
+        String ansible_tag = job_config.ansible_tag
+        boolean skip_untagged = job_config.get('skip_untagged', false)
 
         folder("${basePath}/${run_environment}") {
-            description 'This folder contains jobs to build VM templates for release ${run_environment}/${run_tag}'
+            description 'This folder contains jobs to build VM templates for release ${run_environment}/${ansible_tag}'
             properties {
                 authorizationMatrix {
                     inheritanceStrategy {
@@ -161,8 +123,8 @@ runEnvList.each { String run_environment ->
             }
         }
 
-        pipelineJob("${basePath}/${run_environment}/${run_tag}") {
-            description "Build VM template jobs for ${run_environment}/${run_tag}"
+        pipelineJob("${basePath}/${run_environment}/${ansible_tag}") {
+            description "Build VM template jobs for ${run_environment}/${ansible_tag}"
             properties {
                 authorizationMatrix {
                     inheritanceStrategy {
@@ -178,6 +140,7 @@ runEnvList.each { String run_environment ->
                 choiceParam("AnsibleDebugFlag", ['', '-v', '-vv', '-vvv', '-vvvv'], "Choose Ansible Debug Level")
                 booleanParam("AnsibleGalaxyForceOpt", false, 'Use Ansible Galaxy Force Mode?')
                 booleanParam("UseCheckDiffMode", false, 'Use Check+Diff Mode (Dry Run with Diffs)?')
+                booleanParam("SkipUntagged", skip_untagged, 'Skip Untagged plays?')
             }
             definition {
                 logRotator {
@@ -204,7 +167,10 @@ runEnvList.each { String run_environment ->
                             // ref: https://stackoverflow.com/questions/47620060/jenkins-add-git-submodule-to-multibranchpipelinejob-with-dsl#48693179
                             extensions {
                                 cleanBeforeCheckout()
-                                cleanAfterCheckout()
+                                cleanCheckout {
+                                    // Deletes untracked submodules and any other subdirectories which contain .git directories.
+                                    deleteUntrackedNestedRepositories(true)
+                                }
                                 cloneOptions {
                                     shallow(true)
                                     depth(1)
@@ -216,7 +182,7 @@ runEnvList.each { String run_environment ->
                                 submoduleOptions {
                                     disable(false)
                                     recursive(true)
-                                    tracking(true)
+                                    tracking(false)
                                     reference(null)
                                     timeout(null)
                                     parentCredentials(true)
@@ -229,6 +195,4 @@ runEnvList.each { String run_environment ->
             disabled(false)
         }
     }
-
 }
-
