@@ -29,6 +29,106 @@ import com.dettonville.api.pipeline.utils.maps.MapUtils
 import static com.dettonville.api.pipeline.utils.ConfigConstants.*
 
 /**
+ * Executes a ansible playbook with the given configuration.
+ * Please refer to the documentation for details about the configuration options
+ * 
+ * @param config The configuration used to execute the playbook
+ */
+void execPlaybook(Map config) {
+    Logger log = new Logger("ansible:execPlaybook -> ")
+//     log.setLevel(LogLevel.TRACE)
+
+    Map ansibleCfg = config[ANSIBLE] ?: null
+
+    if (ansibleCfg == null) {
+        log.fatal("provided ansible configuration is null, make sure to configure properly.")
+        error("provided ansible configuration is null, make sure to configure properly.")
+    }
+
+    if (ansibleCfg.containsKey(ANSIBLE_LOG_LEVEL)) {
+        log.setLevel(ansibleCfg[ANSIBLE_LOG_LEVEL])
+    }
+
+    Boolean colorized = ansibleCfg[ANSIBLE_COLORIZED] != null ? ansibleCfg[ANSIBLE_COLORIZED] : true
+
+    String installation = ansibleCfg[ANSIBLE_INSTALLATION] ?: null
+    Integer forks = ansibleCfg[ANSIBLE_FORKS] ?: 5
+    String limit = ansibleCfg[ANSIBLE_LIMIT] ?: null
+    String playbook = ansibleCfg[ANSIBLE_PLAYBOOK] ?: null
+    String credentialsId = ansibleCfg[ANSIBLE_CREDENTIALS_ID] ?: null
+    String vaultCredentialsId = ansibleCfg[ANSIBLE_VAULT_CREDENTIALS_ID] ?: null
+    String inventory = ansibleCfg[ANSIBLE_INVENTORY] ?: null
+    String skippedTags = ansibleCfg[ANSIBLE_SKIPPED_TAGS] ?: null
+    String startAtTask = ansibleCfg[ANSIBLE_START_AT_TASK] ?: null
+    Boolean sudo = ansibleCfg[ANSIBLE_SUDO] != null ? ansibleCfg[ANSIBLE_SUDO] : false
+    String sudoUser = ansibleCfg[ANSIBLE_SUDO_USER] ?: null
+    String tags = ansibleCfg[ANSIBLE_TAGS] ?: null
+
+    Boolean injectParams = ansibleCfg[ANSIBLE_INJECT_PARAMS] != null ? ansibleCfg[ANSIBLE_INJECT_PARAMS] : false
+
+    Map extraVars = (Map) ansibleCfg[ANSIBLE_EXTRA_VARS] ?: [:]
+    Map internalExtraVars = MapUtils.merge(extraVars)
+
+    List extraParameters = (List) ansibleCfg[ANSIBLE_EXTRA_PARAMETERS] ?: []
+    List internalExtraParameters = []
+    for (extraParameter in extraParameters) {
+        internalExtraParameters.push(extraParameter)
+    }
+
+    log.trace("debug: extraParameters.size: ${extraParameters.size()}")
+    log.trace("debug: extraVars.size: ${extraVars.size()}")
+
+    if (injectParams == true) {
+        log.info("injecting build parameters as extra vars into playbook")
+        params.each { String k, Object v ->
+            log.debug("adding key '$k' with value '$v'")
+            internalExtraVars[k] = v
+        }
+    }
+    String extraVarsJson = JsonOutput.toJson(internalExtraVars)
+    // add extra vars to extraparameters
+    if (internalExtraVars.size()>0) {
+        internalExtraParameters.push("--extra-vars '${extraVarsJson}'")
+    }
+
+    // build extras string
+    String extras = internalExtraParameters.join(' ')
+
+    log.trace("Calling ansiblePlaybook with:")
+    log.trace("colorized: $colorized")
+    log.trace("extras: $extras")
+    log.trace("forks: $forks")
+    log.trace("installation: $installation")
+    log.trace("inventory: $inventory")
+    log.trace("limit: $limit")
+    log.trace("playbook: $playbook")
+    log.trace("skippedTags: $skippedTags")
+    log.trace("startAtTask: $startAtTask")
+    log.trace("sudo: $sudo")
+    log.trace("sudoUser: $sudoUser")
+    log.trace("tags: $tags")
+    log.trace("credentialsId: $credentialsId")
+    log.trace("vaultCredentialsId: $vaultCredentialsId")
+
+    ansiblePlaybook(
+        colorized: colorized,
+        extras: extras,
+        forks: forks,
+        installation: installation,
+        inventory: inventory,
+        limit: limit,
+        playbook: playbook,
+        skippedTags: skippedTags,
+        startAtTask: startAtTask,
+        sudo: sudo,
+        sudoUser: sudoUser,
+        tags: tags,
+        credentialsId: credentialsId,
+        vaultCredentialsId: vaultCredentialsId
+    )
+}
+
+/**
  * Checks out ansible galaxy requirements based upon a provided
  * path to a requirements YAML file.
  *
@@ -72,107 +172,6 @@ void checkoutRequirements(String requirementsYmlPath) {
     for (Map checkoutConfig in checkoutScmConfigs) {
         checkoutScm(checkoutConfig)
     }
-}
-
-/**
- * Executes a ansible playbook with the given configuration.
- * Please refer to the documentation for details about the configuration options
- * 
- * @param config The configuration used to execute the playbook
- */
-void execPlaybook(Map config) {
-    Logger log = new Logger("ansible:execPlaybook -> ")
-//     log.setLevel(LogLevel.TRACE)
-
-    Map ansibleCfg = config[ANSIBLE] ?: null
-
-    if (ansibleCfg == null) {
-        log.fatal("provided ansible configuration is null, make sure to configure properly.")
-        error("provided ansible configuration is null, make sure to configure properly.")
-    }
-
-    if (ansibleCfg.containsKey(ANSIBLE_LOG_LEVEL)) {
-        log.setLevel(ansibleCfg[ANSIBLE_LOG_LEVEL])
-    }
-
-    Boolean colorized = ansibleCfg[ANSIBLE_COLORIZED] != null ? ansibleCfg[ANSIBLE_COLORIZED] : true
-
-    String installation = ansibleCfg[ANSIBLE_INSTALLATION] ?: null
-    Integer forks = ansibleCfg[ANSIBLE_FORKS] ?: 5
-    String limit = ansibleCfg[ANSIBLE_LIMIT] ?: null
-    String playbook = ansibleCfg[ANSIBLE_PLAYBOOK] ?: null
-    String credentialsId = ansibleCfg[ANSIBLE_CREDENTIALS_ID] ?: null
-    String vaultCredentialsId = ansibleCfg[ANSIBLE_VAULT_CREDENTIALS_ID] ?: null
-    String inventory = ansibleCfg[ANSIBLE_INVENTORY] ?: null
-    String skippedTags = ansibleCfg[ANSIBLE_SKIPPED_TAGS] ?: null
-    String startAtTask = ansibleCfg[ANSIBLE_START_AT_TASK] ?: null
-    Boolean sudo = ansibleCfg[ANSIBLE_SUDO] != null ? ansibleCfg[ANSIBLE_SUDO] : false
-    String sudoUser = ansibleCfg[ANSIBLE_SUDO_USER] ?: null
-    String tags = ansibleCfg[ANSIBLE_TAGS] ?: null
-
-    List extraParameters = (List) ansibleCfg[ANSIBLE_EXTRA_PARAMETERS] ?: []
-    Map extraVars = (Map) ansibleCfg[ANSIBLE_EXTRA_VARS] ?: [:]
-    Boolean injectParams = ansibleCfg[ANSIBLE_INJECT_PARAMS] != null ? ansibleCfg[ANSIBLE_INJECT_PARAMS] : false
-
-    // create copies
-    Map internalExtraVars = MapUtils.merge(extraVars)
-    List internalExtraParameters = []
-    for (extraParameter in extraParameters) {
-        internalExtraParameters.push(extraParameter)
-    }
-
-    log.trace("debug: extraParameters.size: ${extraParameters.size()}")
-    log.trace("debug: extraVars.size: ${extraVars.size()}")
-
-    if (injectParams == true) {
-        log.info("injecting build parameters as extra vars into playbook")
-        params.each { String k, Object v ->
-            log.debug("adding key '$k' with value '$v'")
-            internalExtraVars[k] = v
-        }
-    }
-
-    if (internalExtraVars) {
-        log.info("add extra vars to extraparameters")
-        String extraVarsJson = JsonOutput.toJson(internalExtraVars)
-        internalExtraParameters.push("--extra-vars '${extraVarsJson}'")
-    }
-
-    // build extras string
-    String extras = internalExtraParameters.join(' ')
-
-    log.trace("Calling ansiblePlaybook with:")
-    log.trace("colorized: $colorized")
-    log.trace("extras: $extras")
-    log.trace("forks: $forks")
-    log.trace("installation: $installation")
-    log.trace("inventory: $inventory")
-    log.trace("limit: $limit")
-    log.trace("playbook: $playbook")
-    log.trace("skippedTags: $skippedTags")
-    log.trace("startAtTask: $startAtTask")
-    log.trace("sudo: $sudo")
-    log.trace("sudoUser: $sudoUser")
-    log.trace("tags: $tags")
-    log.trace("credentialsId: $credentialsId")
-    log.trace("vaultCredentialsId: $vaultCredentialsId")
-
-    ansiblePlaybook(
-        colorized: colorized,
-        extras: extras,
-        forks: forks,
-        installation: installation,
-        inventory: inventory,
-        limit: limit,
-        playbook: playbook,
-        skippedTags: skippedTags,
-        startAtTask: startAtTask,
-        sudo: sudo,
-        sudoUser: sudoUser,
-        tags: tags,
-        credentialsId: credentialsId,
-        vaultCredentialsId: vaultCredentialsId
-    )
 }
 
 /**

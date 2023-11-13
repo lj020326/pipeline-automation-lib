@@ -3,13 +3,27 @@
  * @param currentBuild Refers to the currently running build
  * @param env Environment variables applicable to the currently running build
  */
-void call(def currentBuild, def env) {
+void call(def currentBuild, def env, List emailDistList=[], List emailAdditionalDistList=[]) {
 
-    def recipients = emailextrecipients([
-            [$class: 'CulpritsRecipientProvider'],
-            [$class: 'DevelopersRecipientProvider'],
-            [$class: 'RequesterRecipientProvider']
-    ])
+    List emailDistListDefault = [
+        [$class: 'CulpritsRecipientProvider'],
+        [$class: 'DevelopersRecipientProvider'],
+        [$class: 'RequesterRecipientProvider']
+    ]
+
+    if (emailDistList.isEmpty()) {
+        emailDistList=emailDistListDefault
+    }
+
+    def recipients = emailextrecipients(emailDistList)
+
+    if (!emailAdditionalDistList.isEmpty()) {
+        for (String recipient : emailList) {
+            if (!recipients.toLowerCase().contains(recipient.toLowerCase())) {
+                recipients += ", ${recipient}"
+            }
+        }
+    }
 
     if (recipients) {
         emailext (

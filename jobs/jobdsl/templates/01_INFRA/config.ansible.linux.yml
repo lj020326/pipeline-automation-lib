@@ -1,0 +1,64 @@
+---
+
+pipelineConfig:
+  baseFolder: "INFRA/ansible"
+  repoFolder: "ansible-linux"
+  repoUrl: "git@bitbucket.org:lj020326/ansible-datacenter.git"
+  mirrorRepoDir: "/var/jenkins_home/git_repo_references/ansible-datacenter/ansible-datacenter.git"
+  gitCredentialsId: "bitbucket-ssh-jenkins"
+  runEnvList:
+    - dev
+    - qa
+    - prod
+  ansibleJobList:
+    - ansible_tag: bootstrap-ansible
+    - ansible_tag: bootstrap-ansible-user
+      skip_untagged: 'true'
+    - ansible_tag: bootstrap-certs
+      skip_untagged: 'true'
+      ansible_limit: localhost
+    - ansible_tag: bootstrap-docker
+    - ansible_tag: bootstrap-docker-stack
+    - ansible_tag: bootstrap-docker-swarm
+    - ansible_tag: bootstrap-idrac
+      skip_untagged: 'true'
+    - ansible_tag: bootstrap-jenkins-agent
+    - ansible_tag: bootstrap-linux
+    - ansible_tag: bootstrap-linux-core
+    - ansible_tag: bootstrap-linux-firewall
+    - ansible_tag: bootstrap-linux-logrotate
+    - ansible_tag: bootstrap-linux-package
+    - ansible_tag: bootstrap-linux-user
+    - ansible_tag: bootstrap-mounts
+    - ansible_tag: bootstrap-nfs
+    - ansible_tag: bootstrap-nfs-client
+    - ansible_tag: bootstrap-nfs-server
+    - ansible_tag: bootstrap-ntp
+    - ansible_tag: bootstrap-ntp-client
+    - ansible_tag: bootstrap-ntp-server
+    - ansible_tag: bootstrap-pip
+    - ansible_tag: bootstrap-postfix
+    - ansible_tag: bootstrap-postfix-client
+    - ansible_tag: bootstrap-postfix-server
+    - ansible_tag: bootstrap-python3
+    - ansible_tag: bootstrap-signing-certs
+      ansible_limit: localhost
+    - ansible_tag: bootstrap-sshd
+    - ansible_tag: bootstrap-vcenter
+      skip_untagged: 'true'
+      ansible_limit: localhost
+    - ansible_tag: bootstrap-vm
+      skip_untagged: 'true'
+    - ansible_tag: bootstrap-vmware-esxi
+      skip_untagged: 'true'
+      ansible_limit: localhost
+    - ansible_tag: deploy-cacerts
+    - ansible_tag: deploy-caroot
+    - ansible_tag: deploy-registry-certs
+    - ansible_tag: deploy-vm
+      skip_untagged: 'true'
+      ansible_limit: localhost
+    - ansible_tag: display-controller-vars
+      skip_untagged: 'true'
+      ansible_limit: localhost
+    - ansible_tag: display-hostvars

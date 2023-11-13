@@ -10,7 +10,7 @@ import com.dettonville.api.pipeline.utils.JsonUtils
 import groovy.json.*
 //import groovy.json.JsonOutput
 
-def call(Map params=[:]) {
+def call() {
 
 //     Logger.init(this, LogLevel.INFO)
     Logger log = new Logger(this, LogLevel.INFO)
@@ -23,6 +23,29 @@ def call(Map params=[:]) {
 
 //    Map config=loadPipelineConfig(log, params)
 //    String agentLabel = getJenkinsAgentLabel(config.jenkinsNodeLabel)
+
+    List paramList = []
+
+    Map paramMap = [
+        replaceExistingTemplate  : booleanParam(defaultValue: false, description: "Replace Existing Template?", name: 'ReplaceExistingTemplate')
+    ]
+
+    paramMap.each { String key, def param ->
+        paramList.addAll([param])
+    }
+
+    properties([
+        parameters(paramList),
+        disableConcurrentBuilds()
+    ])
+
+    params.each { key, value ->
+        key=Utilities.decapitalize(key)
+        log.info("key=${key} value=${value}")
+        if (value!="") {
+            config[key] = value
+        }
+    }
 
     pipeline {
 
@@ -44,6 +67,7 @@ def call(Map params=[:]) {
         options {
             buildDiscarder(logRotator(numToKeepStr: '10'))
             disableConcurrentBuilds()
+            skipDefaultCheckout(false)
             timestamps()
             timeout(time: 3, unit: 'HOURS')
         }
@@ -53,6 +77,8 @@ def call(Map params=[:]) {
             stage("Initialize") {
                 steps {
                     script {
+//                         sh "env -0 | sort -z | tr \'\0\' \'\n\'"
+//                         sh "export -p | sed 's/declare -x //' | sed 's/export //'"
                         config=loadPipelineConfig(log, params)
                         log.info("config=${JsonUtils.printToJsonString(config)}")
                     }
@@ -67,9 +93,9 @@ def call(Map params=[:]) {
                     script {
 
                         withCredentials(config.secret_vars) {
-                            log.info("Checking if template folder at ${config.vm_template_build_folder} exists...")
-//                             sh "govc folder.info ${config.vm_template_build_folder}"
-                            vmTemplateFolderExists = sh(script: "govc folder.info ${config.vm_template_build_folder} | grep 'Path:'", returnStatus: true) == 0
+                            log.info("Checking if template folder at ${config.vm_build_folder} exists...")
+//                             sh "govc folder.info ${config.vm_build_folder}"
+                            vmTemplateFolderExists = sh(script: "govc folder.info ${config.vm_build_folder} | grep 'Path:'", returnStatus: true) == 0
                             log.info("vmTemplateFolderExists=>${vmTemplateFolderExists}")
 
                             if (!vmTemplateFolderExists) {
@@ -77,17 +103,22 @@ def call(Map params=[:]) {
                                 sh "govc folder.create ${config.vm_template_build_folder}"
                             }
 
-                            log.info("Ensure datastore template directory ${config.vcenter_build_folder} already exists...")
-                            sh "govc datastore.mkdir -p -ds=${config.vm_template_datastore} ${config.vcenter_build_folder}"
+                            log.info("Ensure datastore template directory ${config.vm_build_folder} already exists...")
+                            sh "govc datastore.mkdir -p -ds=${config.vm_template_datastore} ${config.vm_build_folder}"
 
                             log.info("Checking if template already exists...")
-                            sh "govc vm.info ${config.vm_name}"
-                            vmTemplateExists = sh(script: "govc vm.info ${config.vm_name} | grep 'UUID:'", returnStatus: true) == 0
+                            sh "govc vm.info ${config.vm_template_build_name}"
+                            vmTemplateExists = sh(script: "govc vm.info ${config.vm_template_build_name} | grep 'UUID:'", returnStatus: true) == 0
                             log.info("initial check if template already exists=>${vmTemplateExists}")
 
-                            if (vmTemplateExists) {
-                                log.info("vmTemplateExists=${vmTemplateExists} - skipping build")
-                            }
+//                             if (vmTemplateExists) {
+//                                 if (config.replaceExistingTemplate?.toBoolean()) {
+//                                     log.info("destroying existing template ${config.vm_template_build_name}")
+//                                     sh "govc vm.destroy ${config.vm_template_build_name}"
+//                                 } else {
+//                                     log.info("vmTemplateExists=${vmTemplateExists} - skipping build")
+//                                 }
+//                             }
                         }
                     }
                 }
@@ -95,7 +126,7 @@ def call(Map params=[:]) {
 
             stage('Fetch OS image') {
                 when {
-                    expression { !vmTemplateExists }
+                    expression { !vmTemplateExists || config.replaceExistingTemplate?.toBoolean() }
                 }
                 environment {
                     GOVC_URL = "${config.vcenter_host}"
@@ -103,7 +134,8 @@ def call(Map params=[:]) {
 
                 steps {
                     script {
-                        String vmware_images_dir = "${config.vm_data_dir}/${config.iso_base_dir}/${config.iso_dir}"
+//                         String vmware_images_dir = "${config.vm_data_dir}/${config.iso_base_dir}/${config.iso_dir}"
+//                         log.info("vmware_images_dir=>${vmware_images_dir}")
 
                         boolean imageExists = sh(script: "ls -Fla ${config.os_image_dir}/ | grep ${config.iso_file} ",
                             returnStatus: true)==0
@@ -112,14 +144,16 @@ def call(Map params=[:]) {
                             sh """
                             ansible-playbook \
                               --inventory-file localhost, \
-                              -e fetch_os_images__vmware_images_dir='"${vmware_images_dir}"' \
+                              -e fetch_os_images__vmware_images_dir='"${config.vmware_images_dir}"' \
                               -e fetch_os_images__osimage_dir='"${config.os_image_dir}"' \
                               -e fetch_images='"[${JsonOutput.toJson(config.image_info)}]"' \
-                              ansible/fetch_os_images.yml
+                              ${config.ansible_fetch_images_playbook}
                             """
                         }
 
-                        if (!config.vmware_iso_nfs_local_mounted) {
+                        log.info("config.vmware_iso_nfs_local_mounted=${config.vmware_iso_nfs_local_mounted}")
+
+                        if (!(config.vmware_iso_nfs_local_mounted?.toBoolean())) {
                             withCredentials(config.secret_vars) {
                                 String datastoreLsCmd = """
                                     govc datastore.ls \
@@ -148,10 +182,10 @@ def call(Map params=[:]) {
 
             stage("Run Packer to validate json settings") {
                 when {
-                    expression { !vmTemplateExists && !config.skip_packer_build?.toBoolean() }
-                }
-                environment {
-                    GOVC_URL = "${config.vcenter_host}"
+                    allOf {
+                        expression { !vmTemplateExists || config.replaceExistingTemplate?.toBoolean() }
+                        expression { !config.skip_packer_build?.toBoolean() }
+                    }
                 }
                 steps {
 
@@ -161,7 +195,7 @@ def call(Map params=[:]) {
 
                             // ref: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html-single/installation_guide/index#s2-kickstart2-boot-media
                             // ref: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html-single/installation_guide/index#s2-kickstart2-networkbased
-                            if (config.build_type == "vsphere-iso-nfs") {
+                            if (config.builder_type == "vsphere-iso-nfs") {
                                 sh "cp -p ${config.vm_init_file} ${config.vm_init_dir}/${config.vm_init_file}"
                             }
 
@@ -179,9 +213,10 @@ def call(Map params=[:]) {
                                     buildArgs.push("-var-file=common-vars.${config.packer_var_format}")
                                 }
                                 buildArgs.push("-var-file=${config.build_distribution_config_dir}/distribution-vars.${config.packer_var_format}")
-                                buildArgs.push("-var-file=${config.build_release_config_dir}/box_info.${config.packer_var_format}")
                                 buildArgs.push("-var-file=${config.build_release_config_dir}/template.${config.packer_var_format}")
-                                buildArgs.push("-var vm_name=${config.vm_build_id}")
+//                                 buildArgs.push("-var-file=${config.build_release_config_dir}/box_info.${config.packer_var_format}")
+                                buildArgs.push("-var-file=${config.build_release_config_dir}/box_info.${config.packer_var_format}")
+                                buildArgs.push("-var vm_template_build_name=${config.vm_build_id}")
                                 buildArgs.push("-var iso_dir=${config.iso_dir}")
                                 buildArgs.push("-var iso_file=${config.iso_file}")
                                 buildArgs.push("${config.build_config}")
@@ -201,7 +236,10 @@ def call(Map params=[:]) {
 
             stage("Run Packer to build template") {
                 when {
-                    expression { !vmTemplateExists && !config.skip_packer_build?.toBoolean() }
+                    allOf {
+                        expression { !vmTemplateExists || config.replaceExistingTemplate?.toBoolean() }
+                        expression { !config.skip_packer_build?.toBoolean() }
+                    }
                 }
                 environment {
                     GOVC_URL = "${config.vcenter_host}"
@@ -215,7 +253,7 @@ def call(Map params=[:]) {
 
                             // ref: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html-single/installation_guide/index#s2-kickstart2-boot-media
                             // ref: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html-single/installation_guide/index#s2-kickstart2-networkbased
-                            if (config.build_type == "vsphere-iso-nfs") {
+                            if (config.builder_type == "vsphere-iso-nfs") {
                                 sh "cp -p ${config.vm_init_file} ${config.vm_init_dir}/${config.vm_init_file}"
                             }
 
@@ -224,9 +262,6 @@ def call(Map params=[:]) {
                                 // ref: https://vsupalov.com/packer-ami/
                                 // ref: https://blog.deimos.fr/2015/01/16/packer-build-multiple-images-easily/
                                 // ref: https://github.com/hashicorp/packer/pull/7184
-//                                 sh """
-//                                 ${tool packerTool}/packer build \
-
                                 List buildArgs = []
                                 buildArgs.push("-only ${config.packer_build_only}")
                                 buildArgs.push("-on-error=${config.packer_build_on_error}")
@@ -234,9 +269,10 @@ def call(Map params=[:]) {
                                     buildArgs.push("-var-file=common-vars.${config.packer_var_format}")
                                 }
                                 buildArgs.push("-var-file=${config.build_distribution_config_dir}/distribution-vars.${config.packer_var_format}")
-                                buildArgs.push("-var-file=${config.build_release_config_dir}/box_info.${config.packer_var_format}")
                                 buildArgs.push("-var-file=${config.build_release_config_dir}/template.${config.packer_var_format}")
-                                buildArgs.push("-var vm_name=${config.vm_build_id}")
+//                                 buildArgs.push("-var-file=${config.build_release_config_dir}/box_info.${config.packer_var_format}")
+                                buildArgs.push("-var-file=${config.build_release_config_dir}/box_info.${config.packer_var_format}")
+                                buildArgs.push("-var vm_template_build_name=${config.vm_build_id}")
                                 buildArgs.push("-var iso_dir=${config.iso_dir}")
                                 buildArgs.push("-var iso_file=${config.iso_file}")
                                 buildArgs.push("-debug")
@@ -247,8 +283,73 @@ def call(Map params=[:]) {
                                 // ref: https://stackoverflow.com/questions/45348761/jenkins-pipeline-how-do-i-use-the-tool-option-to-specify-a-custom-tool?noredirect=1&lq=1
                                 withEnv(["PATH+PACKER=${tool 'packer-local'}/bin"]) {
 //                                     sh "env"
-                                    sh "packer build ${buildArgsString}"
+
+                                    try {
+                                        sh "packer build ${buildArgsString}"
+
+                                        log.info("packer build complete - check build template exists for ${config.vm_build_id}")
+
+                                        vmBuildTemplateExists = sh(script: "govc vm.info ${config.vm_build_id} | grep 'UUID:'", returnStatus: true) == 0
+                                        log.info("vmBuildTemplateExists=${vmBuildTemplateExists}")
+
+                                        if (vmBuildTemplateExists) {
+                                            currentBuild.result = 'SUCCESS'
+                                        } else {
+                                            currentBuild.result = 'FAILURE'
+                                        }
+                                    } catch (hudson.AbortException ae) {
+                                        currentBuild.result = 'FAILURE'
+                                        log.error("packer build abort occurred: " + ae.getMessage())
+                                        throw ae
+                                    } catch (Exception ex) {
+                                        log.error("packer build error: " + ex.getMessage())
+                                        throw ex
+                                    }
+
                                 }
+
+                                sh "govc vm.info ${config.vm_template_build_name}"
+                                vmTemplateExists = sh(script: "govc vm.info ${config.vm_template_build_name} | grep 'UUID:'", returnStatus: true) == 0
+                                log.info("vmTemplateExists=${vmTemplateExists}")
+
+                                if (vmTemplateExists) {
+                                    if (config.replaceExistingTemplate?.toBoolean()) {
+                                        log.info("destroying existing template ${config.vm_template_build_name}")
+                                        sh "govc vm.destroy ${config.vm_template_build_name}"
+                                    } else {
+                                        log.error("FOLLOWING CONDITION SHOULD NOT EXIST!")
+                                        log.error("(vmTemplateExists == true) AND (replaceExistingTemplate == false)!")
+                                    }
+                                }
+
+                                vmTemplateFolderExists = sh(script: "govc folder.info ${config.vm_template_deploy_folder} | grep 'Path:'", returnStatus: true) == 0
+                                log.info("vmTemplateFolderExists=>${vmTemplateFolderExists}")
+
+                                if (!vmTemplateFolderExists) {
+                                    log.info("Create template folder ${config.vm_template_deploy_folder}")
+                                    sh "govc folder.create ${config.vm_template_deploy_folder}"
+                                }
+                                log.info("Ensure datastore template directory ${config.vm_deploy_folder} exists")
+                                sh "govc datastore.mkdir -p -ds=${config.vm_template_datastore} ${config.vm_deploy_folder}"
+
+                                log.info("Clone template to deploy directory [${config.vm_deploy_folder}]")
+                                try {
+                                    sh """
+                                        govc vm.clone \
+                                        -ds=${config.vm_template_datastore} \
+                                        -vm=${config.vm_build_id} \
+                                        -host=${config.vm_template_host} \
+                                        -folder=${config.vm_deploy_folder} \
+                                        -on=false -template=true \
+                                        ${config.vm_template_build_name} >/dev/null
+                                     """
+                                } catch (Exception ex) {
+                                    log.error("govc vm.clone error: " + ex.getMessage())
+                                    throw ex
+                                }
+
+                                log.info("Remove temporary template build ${config.vm_build_id}")
+                                sh "govc vm.destroy ${config.vm_build_id}"
 
                             }
 
@@ -257,64 +358,83 @@ def call(Map params=[:]) {
                 }
             }
 
-            stage("Deploy Template") {
+            stage("Export Template to ovf") {
                 when {
-                    expression { !vmTemplateExists && !config.skip_packer_build?.toBoolean() }
+                    allOf {
+                        expression { currentBuild.result == 'SUCCESS' }
+                        expression { !vmTemplateExists || config.replaceExistingTemplate?.toBoolean() }
+                    }
                 }
                 environment {
                     GOVC_URL = "${config.vcenter_host}"
                 }
-
                 steps {
                     script {
-
+                        log.info("Export template to ovf [${config.vmware_images_dir}]")
                         withCredentials(config.secret_vars) {
-
-                            sh "govc vm.info ${config.vm_name}"
-                            vmTemplateExists = sh(script: "govc vm.info ${config.vm_name} | grep 'UUID:'", returnStatus: true) == 0
-                            log.info("vmTemplateExists=${vmTemplateExists}")
-
-                            if (vmTemplateExists) {
-                                log.info("destroying existing template ${config.vm_name}")
-                                sh "govc vm.destroy ${config.vm_name}"
+                            try {
+                                sh """
+                                    govc export.ovf -f=true -i=false \
+                                        -dc=${config.vcenter_datacenter} \
+                                        -vm ${config.vm_template_build_name} \
+                                        ${config.vmware_images_dir} >/dev/null
+                                """
+                                log.info("Export template ovf complete")
+                            } catch (Exception ex) {
+                                log.error("govc export.ovf error: " + ex.getMessage())
+                                throw ex
                             }
 
-                            // ref: https://github.com/vmware/govmomi/blob/main/govc/USAGE.md#vmclone
-                            log.info("Ensure datastore template deploy directory [${config.vcenter_deploy_folder}] already exists...")
-                            sh "govc datastore.mkdir -p -ds=${config.vm_template_datastore} ${config.vcenter_deploy_folder}"
-
-                            log.info("Clone template to deploy directory [${config.vm_template_deploy_folder}] already exists...")
-                            sh "govc vm.clone -ds=${config.vm_template_datastore} -vm=${config.vm_build_id} -host=${config.vm_template_host} -folder=${config.vm_template_deploy_folder} -on=false -template=true ${config.vm_name} >/dev/null"
-
-                            String getVmPathCmd = "govc vm.info -json ${config.vm_name} | jq '.. |.Config?.VmPathName? | select(. != null)'"
-                            sh "${getVmPathCmd}"
-                            String vmPath = sh(script: "${getVmPathCmd}", returnStdout: true).replaceAll('"',"")
-//                            String vmDatastore = vmPath.split("/")[-1].replaceAll('([|])+','')
-//                            String vmDatastore = vmPath.split(" ")[-1].replaceAll('([|])+','')
-                            String vmDatastore = vmPath.split(" ")[0].replaceAll('([|])+','')
-                            vmPath = vmPath.substring(0, vmPath.lastIndexOf("/"))
-                            log.info("vmDatastore=${vmDatastore} vmPath='${vmPath}'")
-
-                            String targetPath = "[${config.vm_template_datastore}] ${config.vm_template_deploy_folder}"
-                            log.info("targetPath='${targetPath}'")
-
-                            if (vmPath != targetPath) {
-                                log.info("moving VM from '${vmPath}' to '${targetPath}'")
-                                // ref: https://github.com/vmware/govmomi/blob/main/govc/USAGE.md
-                                sh "govc vm.unregister ${config.vm_name}"
-                                sh "govc datastore.mkdir -p -ds=${config.vm_template_datastore} ${config.vm_template_deploy_folder}"
-                                sh "govc datastore.rm -f -ds=${config.vm_template_datastore} ${config.vm_template_deploy_folder}/${config.vm_name}"
-                                sh "govc datastore.mv -ds=${config.vm_template_datastore} ${config.vm_name} ${config.vm_template_deploy_folder}/${config.vm_name}"
-                                sh "govc vm.register -template=true -ds=${config.vm_template_datastore} -folder=${config.vm_template_deploy_folder} -host=${config.vm_template_host} ${config.vm_template_deploy_folder}/${config.vm_name}/${config.vm_name}.vmtx"
-                            }
-                            sh "govc datastore.ls -ds=${config.vm_template_datastore} ${config.vm_template_deploy_folder}"
-                            log.info("removing temporary template build ${config.vm_build_id}")
-                            sh "govc vm.destroy ${config.vm_build_id}"
                         }
                     }
                 }
             }
+            stage("Deploy Template") {
+                when {
+                    allOf {
+                        expression { currentBuild.result == 'SUCCESS' }
+                        expression { !vmTemplateExists || config.replaceExistingTemplate?.toBoolean() }
+                    }
+                }
+                steps {
+                    script {
 
+                        Map deployConfigPrimary = [:]
+
+                        deployConfigPrimary.vm_template_build_name = config.vm_template_build_name
+                        deployConfigPrimary.vm_template_datastore = config.vm_template_datastore
+                        deployConfigPrimary.vm_template_deploy_folder = config.vm_template_deploy_folder
+                        deployConfigPrimary.vm_deploy_folder = config.vm_deploy_folder
+                        deployConfigPrimary.vm_template_host = config.vm_template_host
+                        deployConfigPrimary.vcenter_host = config.vcenter_host
+                        deployConfigPrimary.vcenter_shortname = config.vcenter_shortname1
+                        deployConfigPrimary.secret_vars = config.secret_vars
+
+                        log.info("Move template in ${config.vcenter_shortname1} to ${config.vm_template_deploy_folder}")
+                        moveTemplate(this, log, deployConfigPrimary)
+
+                    }
+                }
+            }
+        }
+        post {
+            always {
+                script {
+                    List emailAdditionalDistList = []
+                    if (config.alwaysEmailDistList) {
+                        emailAdditionalDistList = config.alwaysEmailDistList
+                    }
+                    if (config.gitBranch in ['origin/main','main']) {
+                        log.info("post(${env.BRANCH_NAME}): sendEmail(${currentBuild.result})")
+                        sendEmail(currentBuild, env, emailAdditionalDistList=alwaysEmailDistList)
+                    } else {
+                        log.info("post(${env.BRANCH_NAME}): sendEmail(${currentBuild.result}, 'RequesterRecipientProvider')")
+                        sendEmail(currentBuild, env, [[$class: 'RequesterRecipientProvider']])
+                    }
+                    log.info("Empty current workspace dir")
+                    cleanWs()
+                }
+            }
         }
     }
 
@@ -327,7 +447,7 @@ Map loadPipelineConfig(Logger log, Map params) {
 
     List jobParts = JOB_NAME.split("/")
     log.info("${logPrefix} jobParts=${jobParts}")
-    config.jobBaseFolderLevel = (jobParts.size() - 2)
+    config.jobBaseFolderLevel = (jobParts.size() - 3)
     config.build_dir="templates"
     config.timeout = config.get('timeout', 3)
     config.timeoutUnit = config.get('timeoutUnit', 'HOURS')
@@ -338,14 +458,18 @@ Map loadPipelineConfig(Logger log, Map params) {
 
     config.build_distribution = jobParts[0]
     config.build_release = jobParts[1]
-    config.build_type = "vsphere-iso"
+    config.builder_type = "vsphere-iso"
+    config.gitBranch = env.GIT_BRANCH
 
     log.info("${logPrefix} build_distribution=${config.build_distribution}")
     log.info("${logPrefix} build_release=${config.build_release}")
 
     config.build_distribution_config_dir = config.build_distribution
-    config.build_release_config_dir = jobParts.join("/") + "/server"
+    config.build_release_config_dir = jobParts[0..1].join("/") + "/server"
+    log.info("${logPrefix} build_release_config_dir=${config.build_release_config_dir}")
+
     config.vmware_iso_nfs_local_mounted = config.get('vmware_iso_nfs_local_mounted', false)
+    config.replaceExistingTemplate = config.get('replaceExistingTemplate', false)
 
     log.info("${logPrefix} loading build config")
 
@@ -369,13 +493,14 @@ Map loadPipelineConfig(Logger log, Map params) {
     config = MapMerge.merge(config, distributionVars)
     log.info("distributionVars=${JsonUtils.printToJsonString(distributionVars)}")
 
-    Map boxInfoVars = readJSON file: "./${config.build_dir}/${config.build_release_config_dir}/box_info.json"
-    config = MapMerge.merge(config, boxInfoVars)
-    log.info("boxInfoVars=${JsonUtils.printToJsonString(boxInfoVars)}")
-
     Map templateVars = readJSON file: "./${config.build_dir}/${config.build_release_config_dir}/template.json"
     config = MapMerge.merge(config, templateVars)
     log.info("templateConfig=${JsonUtils.printToJsonString(templateVars)}")
+
+//     Map boxInfoVars = readJSON file: "./${config.build_dir}/${config.build_release_config_dir}/box_info.json"
+    Map boxInfoVars = readJSON file: "./${config.build_dir}/${config.build_release_config_dir}/box_info.json"
+    config = MapMerge.merge(config, boxInfoVars)
+    log.info("boxInfoVars=${JsonUtils.printToJsonString(boxInfoVars)}")
 
     if (config.build_distribution=="Windows") {
         config.iso_dir = "${config.build_distribution.toLowerCase()}/${config.build_release}"
@@ -420,7 +545,7 @@ Map loadPipelineConfig(Logger log, Map params) {
 
     log.setLevel(config.logLevel)
 
-    if (config.debugPipeline) {
+    if (config.debugPipeline?.toBoolean()) {
         log.setLevel(LogLevel.DEBUG)
     }
 
@@ -436,15 +561,22 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.packer_build_on_error = config.get('packer_build_on_error', 'abort')
     config.build_config = "${config.build_distribution_config_dir}/"
     if (config.build_format == "json") {
-        config.packer_build_only = "${config.build_type}"
+        config.packer_build_only = "${config.builder_type}"
         config.packer_var_format = "json"
         config.packer_build_format = "json"
         config.build_config = "${config.build_distribution_config_dir}/build-config.${config.packer_build_format}"
     } else {
-        config.packer_build_only = "${config.build_type}.${config.build_distribution}"
+        config.packer_build_only = "${config.builder_type}.${config.build_distribution}"
         config.packer_var_format = "json.pkrvars.hcl"
         config.packer_build_format = "json.pkr.hcl"
     }
+    config.vmware_images_dir = "${config.vm_data_dir}/${config.iso_base_dir}/${config.iso_dir}"
+
+    // ref: https://stackoverflow.com/questions/7935858/the-split-method-in-java-does-not-work-on-a-dot
+    config.vcenter_shortname1 = config.vcenter_host.tokenize('.')[0]
+    config.vcenter_shortname2 = config.vcenter_host2.tokenize('.')[0]
+
+    config.ansibleGalaxyTokenCredId = config.get('ansibleGalaxyTokenCredId', 'ansible-galaxy-pah-token')
 
     // ref: https://docs.cloudbees.com/docs/cloudbees-ci/latest/cloud-secure-guide/injecting-secrets
     // require SSH credentials for some ansible jobs (e.g., deploy-cacerts)
@@ -469,3 +601,71 @@ String getJenkinsAgentLabel(String jenkinsLabel) {
     // ref: https://stackoverflow.com/questions/46630168/in-a-declarative-jenkins-pipeline-can-i-set-the-agent-label-dynamically
     return "${-> println 'Right Now the Jenkins Agent Label Name is ' + jenkinsLabel; return jenkinsLabel}"
 }
+
+void moveTemplate(def dsl, Logger log, Map deployConfig) {
+    String logPrefix="moveTemplate(${deployConfig.vcenter_shortname}):"
+
+    String vm_template_build_name = deployConfig.vm_template_build_name
+    String vm_template_datastore = deployConfig.vm_template_datastore
+    String vm_template_deploy_folder = deployConfig.vm_template_deploy_folder
+    String vm_deploy_folder = deployConfig.vm_deploy_folder
+    String vm_template_host = deployConfig.vm_template_host
+    String vcenter_host = deployConfig.vcenter_host
+
+    log.info("${logPrefix} vm_template_build_name=${vm_template_build_name}")
+    log.info("${logPrefix} vm_template_datastore=${vm_template_datastore}")
+    log.info("${logPrefix} vm_template_deploy_folder=${vm_template_deploy_folder}")
+    log.info("${logPrefix} vm_deploy_folder=${vm_deploy_folder}")
+    log.info("${logPrefix} vm_template_host=${vm_template_host}")
+    log.info("${logPrefix} vcenter_host=${vcenter_host}")
+
+    dsl.withEnv(["GOVC_URL=${vcenter_host}"]) {
+        dsl.withCredentials(deployConfig.secret_vars) {
+
+//             sh "govc folder.info ${vm_template_deploy_folder}"
+            vmTemplateFolderExists = sh(script: "govc folder.info ${vm_template_deploy_folder} | grep 'Path:'", returnStatus: true) == 0
+            log.info("vmTemplateFolderExists=>${vmTemplateFolderExists}")
+
+            if (!vmTemplateFolderExists) {
+                log.info("Create template folder ${vm_template_deploy_folder}")
+                sh "govc folder.create ${vm_template_deploy_folder}"
+            }
+
+            log.info("Ensure datastore template directory ${vm_deploy_folder} already exists...")
+            sh "govc datastore.mkdir -p -ds=${vm_template_datastore} ${vm_deploy_folder}"
+
+            String targetPath = "[${vm_template_datastore}] ${vm_deploy_folder}"
+            log.info("${logPrefix} targetPath='${targetPath}'")
+
+            String getVmPathCmd = "govc vm.info -json ${vm_template_build_name} | jq '.. |.Config?.VmPathName? | select(. != null)'"
+            dsl.sh "${getVmPathCmd}"
+            String vmPath = dsl.sh(script: "${getVmPathCmd}", returnStdout: true).replaceAll('"',"")
+            log.info("${logPrefix} vmPath='${vmPath}'")
+//     //        String vmDatastore = vmPath.split("/")[-1].replaceAll('([|])+','')
+//     //        String vmDatastore = vmPath.split(" ")[-1].replaceAll('([|])+','')
+//             String vmDatastore = vmPath.split(" ")[0].replaceAll('([|])+','')
+//             vmPath = vmPath.substring(0, vmPath.lastIndexOf("/"))
+//             String vmFolder = vmPath.split(" ")[1].split("/${vm_template_build_name}/")[0]
+            String vmFolderPath = vmPath.split("/${vm_template_build_name}/")[0]
+            log.info("${logPrefix} vmFolderPath='${vmFolderPath}'")
+
+            if (vmFolderPath != targetPath) {
+                log.info("${logPrefix} moving VM from '${vmFolderPath}' to '${targetPath}'")
+                // ref: https://github.com/vmware/govmomi/blob/main/govc/USAGE.md
+                dsl.sh "govc vm.unregister ${vm_template_build_name}"
+                dsl.sh "govc datastore.rm -f -ds=${vm_template_datastore} ${vm_deploy_folder}/${vm_template_build_name}"
+                dsl.sh "govc datastore.mv -ds=${vm_template_datastore} ${vm_template_build_name} ${vm_deploy_folder}/${vm_template_build_name}"
+                dsl.sh """
+                    govc vm.register -template=true \
+                    -ds=${vm_template_datastore} \
+                    -folder=${vm_deploy_folder} \
+                    -host=${vm_template_host} \
+                    ${vm_deploy_folder}/${vm_template_build_name}/${vm_template_build_name}.vmtx
+                """
+            }
+            log.info("${logPrefix} templates/VMs in [${vm_template_datastore}] ${vm_template_deploy_folder}:")
+            dsl.sh "govc datastore.ls -ds=${vm_template_datastore} ${vm_deploy_folder}"
+        }
+    }
+}
+

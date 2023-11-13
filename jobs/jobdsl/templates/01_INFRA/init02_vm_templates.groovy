@@ -1,36 +1,27 @@
 #!/usr/bin/env groovy
 
-// ref: https://github.com/sheehan/job-dsl-gradle-example/blob/master/src/jobs/example4Jobs.groovy
-String projectName = "INFRA"
+// separate configuration from job dsl "seedjob" code
+// ref: https://stackoverflow.com/questions/47443106/jenkins-dsl-parse-yaml-for-complex-processing#54665138
+@Grab('org.yaml:snakeyaml:1.17')
+import org.yaml.snakeyaml.Yaml
 
-String projectFolder = projectName.toUpperCase()
-String basePath = "${projectFolder}/vm-templates"
+String pipelineConfigYaml = "config.vm-template-jobs.yml"
 
-// String repoUrl = "ssh://git@gitea.admin.dettonville.int:2222/infra/packer-boxes.git"
-String repoUrl = "git@bitbucket.org:lj020326/packer-templates.git"
-String pipelineRepoUrl = "ssh://git@gitea.admin.dettonville.int:2222/infra/pipeline-automation-lib.git"
+// ref: https://stackoverflow.com/questions/47336502/get-absolute-path-of-the-script-directory-that-is-being-processed-by-job-dsl#47336735
+String jobfilePath = "${new File(__FILE__).parent}"
+println("jobfilePath: ${jobfilePath}")
 
-// String gitCredentialsId = "infra-jenkins-git-user"
-String gitCredentialsId = "bitbucket-ssh-jenkins"
-String gitPipelineLibCredId = "bitbucket-ssh-jenkins"
+Map seedJobConfigs = new Yaml().load(("${jobfilePath}/${pipelineConfigYaml}" as File).text)
+// println("seedJobConfigs=${seedJobConfigs}")
 
-List vmTemplateList = [
-    [ build_distribution: 'CentOS',  build_release: '9'],
-    [ build_distribution: 'CentOS',  build_release: '8-stream'],
-    [ build_distribution: 'CentOS',  build_release: '8'],
-    [ build_distribution: 'CentOS',  build_release: '7'],
-    [ build_distribution: 'Debian',  build_release: '10'],
-    [ build_distribution: 'Debian',  build_release: '9'],
-    [ build_distribution: 'RedHat',  build_release: '9'],
-    [ build_distribution: 'RedHat',  build_release: '8'],
-    [ build_distribution: 'RedHat',  build_release: '7'],
-    [ build_distribution: 'Ubuntu',  build_release: '22.04'],
-    [ build_distribution: 'Ubuntu',  build_release: '20.04'],
-    [ build_distribution: 'Ubuntu',  build_release: '18.04'],
-    [ build_distribution: 'Windows',  build_release: '2019'],
-    [ build_distribution: 'Windows',  build_release: '2016'],
-    [ build_distribution: 'Windows',  build_release: '2012r2'],
-]
+Map pipelineConfig = seedJobConfigs.pipelineConfig
+println("pipelineConfig=${pipelineConfig}")
+
+String baseFolder = pipelineConfig.baseFolder
+String repoUrl = pipelineConfig.repoUrl
+String mirrorRepoDir = pipelineConfig.mirrorRepoDir
+String gitCredentialsId = pipelineConfig.gitCredentialsId
+List vmTemplateList = pipelineConfig.vmTemplateList
 
 // def scmFolderLibraryTraits = { folder ->
 //   folder / 'properties' / 'org.jenkinsci.plugins.workflow.libs.FolderLibraries' / 'libraries' / 'org.jenkinsci.plugins.workflow.libs.LibraryConfiguration' / retriever / scm / traits {
@@ -45,31 +36,9 @@ List vmTemplateList = [
 // }
 
 // ref: https://gist.github.com/nocode99/d4c654514ff2b683af90d7dd5e0156e0
-folder(basePath) {
-    description 'This folder contains jobs to build vmware/vsphere templates'
+folder(baseFolder) {
+    description "This folder contains jobs to build vmware/vsphere templates"
     properties {
-        folderLibraries {
-            libraries {
-                // ref: https://issues.jenkins.io/browse/JENKINS-66402
-                // ref: https://devops.stackexchange.com/questions/11833/how-do-i-load-a-jenkins-shared-library-in-a-jenkins-job-dsl-seed
-                libraryConfiguration {
-                    name("pipeline-automation-lib")
-                    defaultVersion("main")
-                    implicit(true)
-                    includeInChangesets(false)
-                    retriever {
-                        modernSCM {
-                            scm {
-                                git {
-                                    remote(pipelineRepoUrl)
-                                    credentialsId(gitPipelineLibCredId)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
         authorizationMatrix {
             inheritanceStrategy {
                 inheriting()
@@ -81,12 +50,12 @@ folder(basePath) {
 
 vmTemplateList.each { Map config ->
 
-    // folder("<%= "${basePath}/${config.build_distribution}" %>") {
-    //     description 'This folder contains jobs to build VM templates for distribution ${config.build_distribution}'
+    // folder("<%= "${baseFolder}/${config.build_distribution}" %>") {
+    //     description "This folder contains jobs to build VM templates for distribution ${config.build_distribution}"
     // }
 
-    folder("${basePath}/${config.build_distribution}") {
-        description 'This folder contains jobs to build VM templates for release ${config.build_distribution}/${config.build_release}'
+    folder("${baseFolder}/${config.build_distribution}") {
+        description "This folder contains jobs to build VM templates for release ${config.build_distribution}"
         properties {
             authorizationMatrix {
                 inheritanceStrategy {
@@ -95,8 +64,7 @@ vmTemplateList.each { Map config ->
             }
         }
     }
-
-    pipelineJob("${basePath}/${config.build_distribution}/${config.build_release}") {
+    pipelineJob("${baseFolder}/${config.build_distribution}/${config.build_release}") {
         description "Build VM template jobs for ${config.build_distribution}/${config.build_release}"
         properties {
             authorizationMatrix {
@@ -130,23 +98,24 @@ vmTemplateList.each { Map config ->
                         // ref: https://jenkinsci.github.io/job-dsl-plugin/#method/javaposse.jobdsl.dsl.helpers.ScmContext.git
                         // ref: https://stackoverflow.com/questions/47620060/jenkins-add-git-submodule-to-multibranchpipelinejob-with-dsl#48693179
                         extensions {
-                            cleanBeforeCheckout()
-                            cleanCheckout {
-                                // Deletes untracked submodules and any other subdirectories which contain .git directories.
-                                deleteUntrackedNestedRepositories(true)
-                            }
+//                             cleanBeforeCheckout()
+//                             cleanCheckout {
+//                                 // Deletes untracked submodules and any other subdirectories which contain .git directories.
+//                                 deleteUntrackedNestedRepositories(true)
+//                             }
                             cloneOptions {
-                                shallow(false)
+                                shallow(true)
+                                depth(2)
                                 noTags(true)
-                                reference(null)
+                                reference(mirrorRepoDir)
                                 honorRefspec(false)
-                                timeout(10)
+                                timeout(1)
                             }
                             submoduleOptions {
                                 disable(false)
                                 recursive(true)
                                 tracking(true)
-                                reference(null)
+                                reference(mirrorRepoDir)
                                 timeout(null)
                                 parentCredentials(true)
                             }
@@ -160,11 +129,40 @@ vmTemplateList.each { Map config ->
 
 }
 
+pipelineJob("${baseFolder}/run-all-builds") {
+	description()
+	keepDependencies(false)
+    parameters {
+        booleanParam("ReplaceExistingTemplate", false, 'Replace Existing Template?')
+    }
+	definition {
+        logRotator {
+           daysToKeep(-1)
+           numToKeep(10)
+           artifactNumToKeep(-1)
+           artifactDaysToKeep(-1)
+        }
+		cpsScm {
+			scm {
+				git {
+					remote {
+                        url(repoUrl)
+                        credentials(gitCredentialsId)
+					}
+					branch("*/main")
+				}
+			}
+			scriptPath("runAllBuilds.groovy")
+		}
+	}
+	disabled(false)
+}
+
 // ref: https://jenkinsci.github.io/job-dsl-plugin/#path/listView
 // ref: https://stackoverflow.com/questions/24248222/jenkins-job-views-with-different-job-names
-listView("VM-template-jobs") {
+listView("${baseFolder}/VM-template-jobs") {
     jobs {
-        regex("${basePath}/")
+        regex("${baseFolder}/")
     }
     columns {
         status()
@@ -177,9 +175,9 @@ listView("VM-template-jobs") {
     }
 }
 
-listView("VM-template-jobs-unstable") {
+listView("${baseFolder}/VM-template-jobs-unstable") {
     jobs {
-        regex("${basePath}/")
+        regex("${baseFolder}/")
     }
     jobFilters {
         status {

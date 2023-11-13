@@ -1,0 +1,9 @@
+---
+
+pipelineConfig:
+  baseFolder: "INFRA/gitea-infra-orgs"
+  serverUrl: "https://gitea.admin.dettonville.int"
+  gitCredentialsId: "infra-jenkins-git-user"
+  ownerList:
+  - ownerName: "infra"
+    repoScript: "Jenkinsfile"
