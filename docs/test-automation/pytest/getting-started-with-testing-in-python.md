@@ -538,13 +538,13 @@ If you’re using the Microsoft Visual Studio Code IDE, support for `unittest`, 
 
 If you have the Python plugin installed, you can set up the configuration of your tests by opening the Command Palette with Ctrl+Shift+P and typing “Python test”. You will see a range of options:
 
-![Visual Studio Code Step 1](./img/vscode-test-capture.dfefa1d20789.PNG)
+![Visual Studio Code Step 1](./img/vscode-test-capture.dfefa1d20789.png)
 
 Choose _Debug All Unit Tests_, and VSCode will then raise a prompt to configure the test framework. Click on the cog to select the test runner (`unittest`) and the home directory (`.`).
 
 Once this is set up, you will see the status of your tests at the bottom of the window, and you can quickly access the test logs and run the tests again by clicking on these icons:
 
-![Visual Studio Code Step 2](./img/vscode-test-results.951be75c3d3b.PNG)
+![Visual Studio Code Step 2](./img/vscode-test-results.951be75c3d3b.png)
 
 This shows the tests are executing, but some of them are failing.
 
