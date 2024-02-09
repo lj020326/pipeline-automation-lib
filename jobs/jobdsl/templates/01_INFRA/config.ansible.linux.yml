@@ -7,9 +7,9 @@ pipelineConfig:
   mirrorRepoDir: "/var/jenkins_home/git_repo_references/ansible-datacenter/ansible-datacenter.git"
   gitCredentialsId: "bitbucket-ssh-jenkins"
   runEnvList:
-    - dev
-    - qa
-    - prod
+    - DEV
+    - QA
+    - PROD
   ansibleJobList:
     - ansible_tag: bootstrap-ansible
     - ansible_tag: bootstrap-ansible-user

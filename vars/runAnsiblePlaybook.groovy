@@ -73,12 +73,12 @@ def call(Map params=[:]) {
                             withCredentials(config.galaxySecretVarsListDefault) {
                                 // ref: https://stackoverflow.com/questions/60756020/print-environment-variables-sorted-by-name-including-variables-with-newlines
 //                                 sh "env -0 | sort -z | tr \'\0\' \'\n\'"
-                                sh "export -p | sed 's/declare -x //' | sed 's/export //'"
+//                                 sh "export -p | sed 's/declare -x //' | sed 's/export //'"
                                 sh "${config.ansibleGalaxyCmd} --version"
                                 if (config.ansibleCollectionsRequirements && fileExists(config.ansibleCollectionsRequirements)) {
                                     sh "${config.ansibleGalaxyCmd} collection install ${ansibleGalaxyArgs} -r ${config.ansibleCollectionsRequirements}"
                                 }
-                                if (config.ansibleRolesRequirements && fileExists(config.ansibleRolesRequirements)) {
+                                if (config?.ansibleRolesRequirements && fileExists(config.ansibleRolesRequirements)) {
                                     sh "${config.ansibleGalaxyCmd} install ${ansibleGalaxyArgs} -r ${config.ansibleRolesRequirements}"
                                 }
                             }
@@ -117,12 +117,23 @@ def call(Map params=[:]) {
 
                         withEnv(config.ansibleEnvVarsList) {
                             withCredentials(config.ansibleSecretVarsList) {
+
+                                if (config.isTestPipeline) {
+//                                     notifyBitbucket(
+//                                         credentialsId: 'ansible-bitbucket-api-cred',
+//                                         stashServerBaseUrl: "https://bitbucket.alsac.stjude.org:8443"
+//                                     )
+                                    dir(config.testBaseDir) { deleteDir() }
+                                }
+
+                                sh "export -p | sed 's/declare -x //' | sed 's/export //'"
                                 Map ansibleConfig = getAnsibleCommandConfig(log, config)
 
                                 config = MapMerge.merge(ansibleConfig, config)
                                 log.info("config.ansible=${JsonUtils.printToJsonString(config.ansible)}")
 
                                 sh "${config.ansibleCmd} --version"
+
                                 // ref: https://stackoverflow.com/questions/44022775/jenkins-ignore-failure-in-pipeline-build-step#47789656
                                 try {
                                     catchError{
@@ -142,11 +153,24 @@ def call(Map params=[:]) {
                                         ansibleLogSummary = "ansible.execPlaybook error: " + e.getMessage()
                                         log.error("ansible.execPlaybook error: " + e.getMessage())
                                     }
+                                } finally {
+                                    if (fileExists("ansible.log")) {
+                                        ansibleLogSummary = sh(returnStdout: true, script: "tail -n 50 ansible.log").trim()
+                                    }
+
+                                    if (config.isTestPipeline) {
+                                        sh "tree ${config.testBasePath}/"
+//                                         archiveArtifacts allowEmptyArchive: true, artifacts: "${config.testBasePath}/**"
+//                                         archiveArtifacts allowEmptyArchive: true, artifacts: "${config.testBasePath}/"
+//                                         archiveArtifacts allowEmptyArchive: true, artifacts: "**/${config.testBaseDir}/**"
+//                                         archiveArtifacts allowEmptyArchive: true, artifacts: "${config.testBaseDir}/**/*"
+//                                         archiveArtifacts allowEmptyArchive: true, artifacts: "${config.testBaseDir}/*"
+//                                          archiveArtifacts allowEmptyArchive: true, artifacts: "${config.testBasePath}/**/*"
+//                                          archiveArtifacts allowEmptyArchive: true, artifacts: 'test-results/**'
+                                         archiveArtifacts allowEmptyArchive: true, artifacts: "${config.testBasePath}/**"
+                                    }
+                                    log.info("**** currentBuild.result=${currentBuild.result}")
                                 }
-                                if (fileExists("ansible.log")) {
-                                    ansibleLogSummary = sh(returnStdout: true, script: "tail -n 50 ansible.log").trim()
-                                }
-                                log.info("**** currentBuild.result=${currentBuild.result}")
                             }
                         }
                     }
@@ -156,15 +180,21 @@ def call(Map params=[:]) {
         post {
             always {
                 script {
+//                     if (config.isTestPipeline) {
+//                         notifyBitbucket(
+//                             credentialsId: 'ansible-bitbucket-api-cred',
+//                             stashServerBaseUrl: "https://bitbucket.alsac.stjude.org:8443"
+//                         )
+//                     }
                     List emailAdditionalDistList = []
                     if (config.alwaysEmailDistList) {
                         emailAdditionalDistList = config.alwaysEmailDistList
                     }
                     if (config.gitBranch in ['origin/main','main']) {
-                        log.info("post(${env.BRANCH_NAME}): sendEmail(${currentBuild.result})")
-                        sendEmail(currentBuild, env, emailAdditionalDistList=alwaysEmailDistList)
+                        log.info("post(${config.gitBranch}): sendEmail(${currentBuild.result})")
+                        sendEmail(currentBuild, env, emailAdditionalDistList=emailAdditionalDistList)
                     } else {
-                        log.info("post(${env.BRANCH_NAME}): sendEmail(${currentBuild.result}, 'RequesterRecipientProvider')")
+                        log.info("post(${config.gitBranch}): sendEmail(${currentBuild.result}, 'RequesterRecipientProvider')")
                         sendEmail(currentBuild, env, [[$class: 'RequesterRecipientProvider']])
                     }
                     log.info("Empty current workspace dir")
@@ -210,18 +240,29 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.skipDefaultCheckout = config.get('skipDefaultCheckout', false)
     config.gitPerformCheckout = config.get('gitPerformCheckout', !config.get('skipDefaultCheckout',false))
 
-//     config.gitBranch = env.BRANCH_NAME
-    config.gitBranch = env.GIT_BRANCH
-//     config.gitBranch = config.get('gitBranch', '')
+// //     config.gitBranch = env.BRANCH_NAME
+//     config.gitBranch = env.GIT_BRANCH
+// //     config.gitBranch = config.get('gitBranch', '')
     config.gitRepoUrl = config.get('gitRepoUrl', '')
     config.gitCredId = config.get('gitCredId', '')
 
-    config.ansibleCollectionsRequirements = config.get('ansibleCollectionsRequirements', './collections/requirements.yml')
-    config.ansibleRolesRequirements = config.get('ansibleRolesRequirements', './roles/requirements.yml')
+    config.varFilesRelativeToPlaybookDir = config.get('varFilesRelativeToPlaybookDir', false)
+    config.inventoryPathRelativeToPlaybookDir = config.get('inventoryPathRelativeToPlaybookDir', false)
+    config.requirementsPathsRelativeToPlaybookDir = config.get('requirementsPathsRelativeToPlaybookDir', false)
+
+//     config.ansiblePlaybookDir = config.get('ansiblePlaybookDir', 'ansible-linux')
+//     config.ansiblePlaybookDir = config.get('ansiblePlaybookDir',"ansible/${env.JOB_NAME.split('/')[-2]}")
+
+    config.ansibleCollectionsRequirements = config.get('ansibleCollectionsRequirements', 'collections/requirements.yml')
+    if (config.requirementsPathsRelativeToPlaybookDir?.toBoolean() && config.ansiblePlaybookDir) {
+        config.ansibleCollectionsRequirements = "${config.ansiblePlaybookDir}/${config.ansibleCollectionsRequirements}"
+    }
+
+//     config.ansibleRolesRequirements = config.get('ansibleRolesRequirements', './roles/requirements.yml')
 //    config.ansibleInventory = config.get('ansibleInventory', 'inventory')
 //    config.ansibleInventory = config.get('ansibleInventory', 'hosts.yml')
     if ( config.ansibleInventory ) {
-        if (config.inventoryPathRelativeToPlaybookDir?.toBoolean() && config.ansiblePlaybookDir) {
+        if (config?.inventoryPathRelativeToPlaybookDir && config.inventoryPathRelativeToPlaybookDir.toBoolean() && config.ansiblePlaybookDir) {
             config.ansibleInventory = "${config.ansiblePlaybookDir}/${config.ansibleInventory}"
         }
         config.ansibleInventoryDir = config.ansibleInventory.take(config.ansibleInventory.lastIndexOf('/'))
@@ -271,6 +312,11 @@ Map loadPipelineConfig(Logger log, Map params) {
 //
 //     config.galaxySecretVarsListDefault = config.get('galaxySecretVarsListDefault', galaxySecretVarsListDefault)
 
+    config.isTestPipeline = config.get('isTestPipeline', false)
+    if (config.isTestPipeline) {
+        config.testBaseDir = "test-results"
+    }
+
     config.ansibleEnvVarsList = config.get('ansibleEnvVarsList', [])
 
     // require SSH credentials for some ansible jobs (e.g., deploy-cacerts)
@@ -287,7 +333,7 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.ansibleSecretVarsList = config.get('ansibleSecretVarsList', secretVarsListDefault)
 
     log.debug("${logPrefix} params=${params}")
-    log.debug("${logPrefix} config=${config}")
+    log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
 
     return config
 }
@@ -386,15 +432,20 @@ Map getAnsibleCommandConfig(Logger log, Map config) {
         extraVars+=config.ansibleExtraVars
     }
     config.isTestPipeline = config.get('isTestPipeline', false)
-    if (config.isTestPipeline) {
-//         gitBranch = java.net.URLDecoder.decode(env.JOB_BASE_NAME, "UTF-8")
-//         gitBranch = java.net.URLDecoder.decode(env.BRANCH_NAME, "UTF-8")
-        gitBranch = java.net.URLDecoder.decode(env.GIT_BRANCH, "UTF-8")
-        log.info("${logPrefix} gitBranch=${gitBranch}")
-        config.gitBranch = config.get('gitBranch',"${gitBranch}")
-        config.gitCommitHash = env.GIT_COMMIT
-        log.info("${logPrefix} config.gitCommitHash=${config.gitCommitHash}")
 
+//     String gitBranch = java.net.URLDecoder.decode(env.JOB_BASE_NAME, "UTF-8")
+//     String gitBranch = java.net.URLDecoder.decode(env.BRANCH_NAME, "UTF-8")
+    String gitBranch = java.net.URLDecoder.decode(env.GIT_BRANCH, "UTF-8")
+    log.info("${logPrefix} gitBranch=${gitBranch}")
+    config.gitBranch = config.get('gitBranch',"${gitBranch}")
+    config.gitCommitHash = env.GIT_COMMIT
+    log.info("${logPrefix} config.gitCommitHash=${config.gitCommitHash}")
+
+    if (config.isTestPipeline) {
+//         config.testBasePath = "${env.WORKSPACE}/${config.testBaseDir}"
+//         config.testBasePath = "${env.WORKSPACE_TMP}/${config.testBaseDir}"
+        config.testBasePath = "${env.WORKSPACE}/${config.testBaseDir}"
+        extraVars.test_job__test_base_dir = config.testBasePath
         extraVars.test_git_branch = config.gitBranch
         extraVars.test_git_commit_hash = config.gitCommitHash
 
