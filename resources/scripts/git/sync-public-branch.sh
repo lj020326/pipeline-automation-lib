@@ -42,6 +42,17 @@ PROJECT_DIR="$(cd "${SCRIPT_DIR}" && git rev-parse --show-toplevel)"
 
 source "${PROJECT_DIR}/resources/scripts/logger.sh"
 
+MIRROR_DIR_LIST="
+docs
+jobs
+lib
+resources
+src
+test
+tools
+vars
+"
+
 PUBLIC_GITIGNORE=files/git/pub.gitignore
 
 ## ref: https://stackoverflow.com/questions/53839253/how-can-i-convert-an-array-into-a-comma-separated-string
@@ -196,8 +207,18 @@ function sync_public_branch() {
   #echo "rsync ${RSYNC_OPTS_GIT_UPDATE[@]} ${TMP_DIR}/ ${PROJECT_DIR}/"
   RSYNC_CMD="rsync ${RSYNC_OPTS_GIT_UPDATE[*]} ${TMP_DIR}/ ${PROJECT_DIR}/"
   echo "${RSYNC_CMD}"
-  eval $RSYNC_CMD
-  
+  eval ${RSYNC_CMD}
+
+  IFS=$'\n'
+  for dir in ${MIRROR_DIR_LIST}
+  do
+    echo "Mirror ${TMP_DIR}/${dir}/ to project dir $PROJECT_DIR/${dir}/"
+#    RSYNC_CMD="rsync ${RSYNC_OPTS_GIT_UPDATE[*]} --delete --update --exclude=save ${TMP_DIR}/${dir}/ ${PROJECT_DIR}/${dir}/"
+    RSYNC_CMD="rsync ${RSYNC_OPTS_GIT_MIRROR[*]} ${TMP_DIR}/${dir}/ ${PROJECT_DIR}/${dir}/"
+    echo "${RSYNC_CMD}"
+    eval ${RSYNC_CMD}
+  done
+
   printf -v TO_REMOVE '%s ' "${PRIVATE_CONTENT_ARRAY[@]}"
   TO_REMOVE="${TO_REMOVE% }"
   echo "TO_REMOVE=${TO_REMOVE}"
