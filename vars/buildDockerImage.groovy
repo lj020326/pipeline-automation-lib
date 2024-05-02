@@ -30,14 +30,27 @@ def call(Map params=[:]) {
         }
 
         stages {
+			stage('Load docker build config file') {
+				when {
+                    expression { fileExists config.buildConfigFile }
+				}
+				steps {
+					script {
+                        config = loadPipelineConfigFile(log, config)
+					}
+				}
+			}
             stage("Build and Publish Docker Image") {
                 steps {
                     script {
-                        config.buildImageList.each { String buildInfo ->
-//                             config.get("buildInfo", buildInfo)
-//                             config = MapMerge.merge(config, buildInfo)
-//                             buildAndPublishImage(log, config)
-                            Map buildConfig = MapMerge.merge(config.findAll { !["buildImageList"].contains(it.key) }, buildInfo)
+                        config.buildImageList.each { Map buildConfigRaw ->
+                            log.info("buildConfigRaw=${JsonUtils.printToJsonString(buildConfigRaw)}")
+
+//                             Map buildConfig = MapMerge.merge(config.findAll { !["buildImageList"].contains(it.key) }, buildConfigRaw)
+                            Map buildConfig = config.findAll { !["buildImageList"].contains(it.key) } + buildConfigRaw
+
+                            log.info("buildConfig=${JsonUtils.printToJsonString(buildConfig)}")
+
                             buildAndPublishImage(log, buildConfig)
                         }
                     }
@@ -83,8 +96,16 @@ Map loadPipelineConfig(Logger log, Map params) {
     }
     log.info("${logPrefix} log.level=${log.level}")
 
+    // ref: https://issues.jenkins.io/browse/JENKINS-61372
+    List dockerEnvVarsListDefault = [
+        "BUILDX_CONFIG=/home/jenkins/.docker/buildx"
+    ]
+    config.dockerEnvVarsList = config.get('dockerEnvVarsList', dockerEnvVarsListDefault)
+
     log.debug("${logPrefix} params=${JsonUtils.printToJsonString(params)}")
     log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+
+    config.buildConfigFile = config.get('buildConfigFile', ".jenkins/docker-build-config.yml")
 
     return config
 }
@@ -118,11 +139,9 @@ void buildAndPublishImage(Logger log, Map config) {
         stage("${stageName}") {
             // ref: https://www.jenkins.io/doc/book/pipeline/docker/
             if (config?.dockerFile) {
-                buildArgs.push("-f ${config.dockerFile} ${config.buildPath}")
+                buildArgs.push("-f ${config.dockerFile}")
             }
-            else {
-                buildArgs.push("${config.buildPath}")
-            }
+            buildArgs.push("${config.buildPath}")
             if (buildArgs) {
                 String buildArgsString = buildArgs.join(" ")
                 log.info("${logPrefix} buildArgsString=${buildArgsString}")
@@ -135,11 +154,17 @@ void buildAndPublishImage(Logger log, Map config) {
         stage("publish ${config.buildImageLabel}") {
 
             docker.withRegistry(config.registryUrl, config.registryCredId) {
-                app.push "${env.BRANCH_NAME}"
-                app.push "build-${env.BUILD_ID}"
-                app.push "${commit_id}"
-                if (env.BRANCH_NAME in ['master','main']) {
-                    app.push 'latest'
+                withEnv(config.dockerEnvVarsList) {
+                    app.push "${env.BRANCH_NAME}"
+                    if (config?.buildId) {
+                        app.push "${config.buildId}"
+                    } else {
+                        app.push "build-${env.BUILD_ID}"
+                    }
+//                     app.push "${commit_id}"
+                    if (env.BRANCH_NAME in ['master','main']) {
+                        app.push 'latest'
+                    }
                 }
             }
         }
@@ -147,4 +172,17 @@ void buildAndPublishImage(Logger log, Map config) {
 
 }
 
+Map loadPipelineConfigFile(Logger log, Map config) {
+    String logPrefix="loadPipelineConfigFile():"
+
+    Map dockerBuildConfigMap = readYaml file: config.buildConfigFile
+
+    Map buildConfigs=dockerBuildConfigMap.pipeline
+    log.info("${logPrefix} buildConfigs=${JsonUtils.printToJsonString(buildConfigs)}")
+
+    config = config + buildConfigs
+
+    log.info("${logPrefix} Merged config=${JsonUtils.printToJsonString(config)}")
+    return config
+}
 

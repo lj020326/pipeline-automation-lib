@@ -211,13 +211,13 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.gitCredId = config.get('gitCredId', '')
 
     config.ansibleCollectionsRequirements = config.get('ansibleCollectionsRequirements', './collections/requirements.yml')
-    config.ansibleRolesRequirements = config.get('ansibleRolesRequirements', './roles/requirements.yml')
+//     config.ansibleRolesRequirements = config.get('ansibleRolesRequirements', './roles/requirements.yml')
 //    config.ansibleInventory = config.get('ansibleInventory', 'inventory')
 //    config.ansibleInventory = config.get('ansibleInventory', 'hosts.ini')
     config.ansibleInventory = config.get('ansibleInventory', 'hosts.yml')
     config.ansibleInventoryDir = config.ansibleInventory.take(config.ansibleInventory.lastIndexOf('/'))
 
-    config.ansibleGalaxyIgnoreCerts = config.get('AnsibleGalaxyIgnoreCerts',false)
+    config.ansibleGalaxyIgnoreCerts = config.get('ansibleGalaxyIgnoreCerts',false)
     config.ansibleGalaxyForceOpt = config.get('ansibleGalaxyForceOpt', false)
 
 //     config.ansibleSshCredId = config.get('ansibleSshCredId', 'jenkins-ansible-ssh')

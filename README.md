@@ -6,6 +6,10 @@ The jenkins enabled docker image used in examples here can be found on [dockerhu
 
 The jenkins-agent enabled docker images used in examples here can be found on [dockerhub](https://hub.docker.com/repository/docker/lj020326/jenkins-docker-cicd-agent).  
 
+## Pipeline Development
+
+Notes for [how to develop and test pipelines using config-as-code is here](docs/how-to-develop-and-test-pipelines.md).
+
 ## Key Concepts
 
 The pipeline library was developed with a focus to ease build processes which have a more or less similar project structure e.g.
@@ -34,6 +38,17 @@ So the key concepts of the pipeline enable you to
 Running this pipeline library will result in more structured and easier to maintain pipeline scripts.
 
 Looking for an example on how a pipeline script looks like when using Pipeline? Have a look at [Usage examples](docs/pcfBuildDeployMvn.md)
+
+### Ansible role to setup docker jenkins control node
+
+An ansible role is used to setup all docker stack instances.
+
+The `docker-stack` ansible role used to stand up the docker stack [can be found here](https://github.com/lj020326/ansible-datacenter/tree/main/roles/docker-stack).
+
+The [`docker-stack` ansible role](https://github.com/lj020326/ansible-datacenter/tree/main/roles/docker-stack) contains the [__jenkins config-as-code (jcac) yaml definition__](https://github.com/lj020326/ansible-datacenter/blob/main/roles/docker-stack/templates/jenkins_jcac/jenkins_casc.yml.j2) in template form used to setup the jenkins jcac instance.
+
+[The jcac definition can be found here](https://github.com/lj020326/ansible-datacenter/blob/main/roles/docker-stack/templates/jenkins_jcac/jenkins_casc.yml.j2).  
+
 
 ### Library Setup
 
@@ -73,7 +88,7 @@ Some of the most often used pipelines in this library include:
   * [runAnsibleDevJob](./vars/runAnsibleDevJob.groovy) - used to develop ansible playbooks against a branch of the ansible source repo.
 * Build Vm Template
   * [buildVmTemplate](./vars/buildVmTemplate.groovy) - pipeline used to build vm templates for vmware vsphere, kvm, virtualbox, hyperv, and other possible hypervisor environments.<br>
-    See [here](https://github.com/lj020326/packer-templates/blob/main/README.md) for document explaining example setup and usage of this pipeline.
+    See [here](https://github.com/lj020326/vm-templates/blob/main/README.md) for document explaining example setup and usage of this pipeline.
 * Build Docker Image
   * [buildDockerImage](./vars/buildDockerImage.groovy) - pipeline used to build docker images<br>
     See [Jenkinsfile here for advanced example with multiple-image dependencies](https://github.com/lj020326/jenkins-docker-agent/blob/master/Jenkinsfile).

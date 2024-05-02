@@ -8,7 +8,6 @@ import com.dettonville.api.pipeline.utils.Utilities
 
 def call(Map config=[:]) {
 
-//     Logger.init(this, LogLevel.INFO)
     Logger log = new Logger(this, LogLevel.INFO)
 
     String logPrefix="runAnsibleParamWrapper():"
@@ -22,6 +21,7 @@ def call(Map config=[:]) {
             name: 'AnsibleLimitHosts'),
         ansibleDebugFlag : choice(choices: "\n-v\n-vv\n-vvv\n-vvvv", description: "Choose Ansible Debug Level", name: 'AnsibleDebugFlag'),
         ansibleGalaxyForceOpt : booleanParam(defaultValue: false, description: "Use Ansible Galaxy Force Mode?", name: 'AnsibleGalaxyForceOpt'),
+        ansibleGalaxyUpgradeOpt : booleanParam(defaultValue: true, description: "Use Ansible Galaxy Upgrade?", name: 'AnsibleGalaxyUpgradeOpt'),
         useCheckDiffMode : booleanParam(defaultValue: false, description: "Use Check+Diff Mode (Dry Run with Diffs)?", name: 'UseCheckDiffMode'),
         skipUntagged : booleanParam(defaultValue: false, description: "Skip Untagged plays?", name: 'SkipUntagged')
     ]
@@ -47,7 +47,8 @@ def call(Map config=[:]) {
         config.ansibleDiffMode=true
     }
 
-    config.environment = config.get('environment',"${env.JOB_NAME.split('/')[-2]}")
+    config.environment = config.get('environment',"${env.JOB_NAME.split('/')[-3]}")
+    config.ansibleInstallation = config.get('ansibleInstallation',"ansible-venv")
 
     if (config.skipUntagged) {
         ansibleTagsDefault = "${env.JOB_BASE_NAME}"
@@ -56,6 +57,20 @@ def call(Map config=[:]) {
         ansibleTagsDefault = "untagged,${env.JOB_BASE_NAME}"
     }
     config.ansibleTags = config.get('ansibleTags',"${ansibleTagsDefault}")
+
+    config.ansiblePipelineConfigFile = config.get('ansiblePipelineConfigFile',".jenkins.ansible.yml")
+//     config.ansibleInventory = config.get('ansibleInventory',"./inventory/${config.environment}/hosts.yml")
+    config.ansibleInventory = config.get('ansibleInventory',"./inventory/${config.environment}")
+
+    List ansibleEnvVarsListDefault = [
+        "ANSIBLE_COLLECTIONS_PATH=~/.ansible/collections:/usr/share/ansible/collections:./requirements_collections:./collections"
+    ]
+    config.ansibleEnvVarsList = config.get('ansibleEnvVarsList',ansibleEnvVarsListDefault)
+
+    config.ansibleVarFiles = config.get('ansibleVarFiles', [])
+    if (config.ansibleVault) {
+        config.ansibleVarFiles += ["${config.ansibleVault}"]
+    }
 
 //     config.skipDefaultCheckout = true
 //     config.gitBranch = 'master'
@@ -70,13 +85,6 @@ def call(Map config=[:]) {
 //         usernamePassword(credentialsId: 'ansible-ssh-password-linux', passwordVariable: 'ANSIBLE_SSH_PASSWORD', usernameVariable: 'ANSIBLE_SSH_USERNAME'),
 //         string(credentialsId: 'awx-oauth-token', variable: 'TOWER_OAUTH_TOKEN')
 //     ]
-
-    config.ansibleVarFiles = config.get('ansibleVarFiles', [])
-    if (config.containsKey('ansibleVault')) {
-        config.ansibleVarFiles += "${config.ansibleVault}"
-    }
-
-    config.ansibleInventory = config.get('ansibleInventory',"./inventory/${config.environment}/hosts.yml")
 
     log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
 

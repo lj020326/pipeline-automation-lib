@@ -1,0 +1,6 @@
+---
+
+pipelineConfig:
+  baseFolder: "INFRA/repo-test-automation"
+  yamlProjectConfigList:
+  - pipelineConfigYaml: "config.repo-test.ansible-inventory.yml"
