@@ -130,7 +130,7 @@ void createAnsibleJobs(def dsl, Map pipelineConfig) {
             }
 
             // ref: https://github.com/jenkinsci/job-dsl-plugin/wiki/Job-DSL-Commands#job
-            // ref: https://infracicdd1s1.alsac.stjude.org/jenkins/plugin/job-dsl/api-viewer/index.html#path/multibranchPipelineJob
+            // ref: https://jenkins.admin.dettonville.int/plugin/job-dsl/api-viewer/index.html#path/multibranchPipelineJob
             def jobObject = dsl.pipelineJob("${baseFolder}/${runEnvironment}/${repoFolder}/${ansibleTag}") {
                 description "Run ansible SITE play tag for ${runEnvironment}/${ansibleTag}"
                 properties {

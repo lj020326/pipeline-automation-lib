@@ -18,6 +18,7 @@ def call(Map params=[:]) {
     int exception_count = 0
     String pyTestVersion = "2024.1.1"
     ComparableSemanticVersion minVersionPyTest = new ComparableSemanticVersion(pyTestVersion)
+    ComparableSemanticVersion testScriptVersion
     boolean pytest_failed = false
 
     pipeline {
@@ -45,20 +46,26 @@ def call(Map params=[:]) {
                         config.gitCommitHash = env.GIT_COMMIT
                         log.info("config=${JsonUtils.printToJsonString(config)}")
 
+                        // ref: https://github.com/jenkinsci/bitbucket-build-status-notifier-plugin
                         bitbucketStatusNotify(
-                            credentialsId: 'ansible-integration-cred'
-                            commitSha1: config.gitCommitHash
+                            buildKey: 'test',
+                            buildName: 'Test',
+                            buildState: 'INPROGRESS',
+                            repoSlug: 'ansible-datacenter',
+                            commitId: config.gitCommitHash
                         )
+                        log.info("pre-test complete")
                     }
                 }
             }
             stage('Run ansible inventory tests') {
                 steps {
                     script {
+                        log.info("fetch test script version")
                         config.testScriptVersion = getTestScriptVersion(this, log, config.testScript)
                         log.info("config.testScriptVersion=${config.testScriptVersion}")
 
-                        ComparableSemanticVersion testScriptVersion = new ComparableSemanticVersion(config.testScriptVersion)
+                        testScriptVersion = new ComparableSemanticVersion(config.testScriptVersion)
                         log.info("testScriptVersion=${testScriptVersion.toString()}")
                         log.info("minVersionPyTest=${minVersionPyTest.toString()}")
 
@@ -100,6 +107,7 @@ def call(Map params=[:]) {
                           log.info("==> TEST FAILED!")
                         }
                         currentBuild.result = (numTestsFailed>0) ? "FAILURE" : "SUCCESS"
+                        config.bitbucketResult = (numTestsFailed>0) ? "FAILED" : "SUCCESSFUL"
                     }
                 }
             }
@@ -107,15 +115,18 @@ def call(Map params=[:]) {
         post {
             always {
                 script {
-                    ComparableSemanticVersion testScriptVersion = new ComparableSemanticVersion(config.testScriptVersion)
-                    if (testScriptVersion >= minVersionPyTest) {
-    //                     junit testResults: ".test-results/*.xml", skipPublishingChecks: true
+//                     ComparableSemanticVersion testScriptVersion = new ComparableSemanticVersion(config.testScriptVersion)
+                    if (testScriptVersion && testScriptVersion >= minVersionPyTest) {
+//                         junit testResults: ".test-results/*.xml", skipPublishingChecks: true
                         junit testResults: "${config.junitXmlReportDir}/*.xml", skipPublishingChecks: true
                     }
 
                     bitbucketStatusNotify(
-                        credentialsId: 'ansible-integration-cred'
-                        commitSha1: config.gitCommitHash
+                        buildKey: 'test',
+                        buildName: 'Test',
+                        buildState: config.bitbucketResult,
+                        repoSlug: 'ansible-datacenter',
+                        commitId: config.gitCommitHash
                     )
                     List emailAdditionalDistList = []
                     if (config.alwaysEmailDistList) {
@@ -171,8 +182,8 @@ Map loadPipelineConfig(Logger log, Map params) {
         'lee.james.johnson@gmail.com'
     ]
 
-    // config.alwaysEmailDist = config.alwaysEmailDist ?: "Lee.Johnson.Contractor@alsac.stjude.org"
-    config.emailFrom = config.emailFrom ?: "admin+ansible@alsac.stjude.org"
+    // config.alwaysEmailDist = config.alwaysEmailDist ?: "lee.james.johnson@gmail.com"
+    config.emailFrom = config.emailFrom ?: "admin+ansible@dettonville.com"
 
 //     config.ansibleInventory = config.get('ansibleInventory', 'hosts.yml')
     config.ansibleInventoryBaseDir = config.get('ansibleInventoryBaseDir', '.')

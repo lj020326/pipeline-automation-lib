@@ -132,11 +132,13 @@ def call(Map params=[:]) {
                         }
 
                         if (config.isTestPipeline) {
-                            // ref: https://www.jenkins.io/doc/pipeline/steps/stashNotifier/
-                            notifyBitbucket(
-                                credentialsId: 'ansible-bitbucket-api-cred',
-                                stashServerBaseUrl: "https://bitbucket.alsac.stjude.org:8443",
-                                commitSha1: config.gitCommitHash
+                            // ref: https://github.com/jenkinsci/bitbucket-build-status-notifier-plugin
+                            bitbucketStatusNotify(
+                                buildKey: 'test',
+                                buildName: 'Test',
+                                buildState: 'INPROGRESS',
+                                repoSlug: 'ansible-datacenter',
+                                commitId: config.gitCommitHash
                             )
                             dir(config.testBaseDir) { deleteDir() }
                         }
@@ -158,7 +160,9 @@ def call(Map params=[:]) {
                                         ansible.execPlaybook(config)
                                     }
                                     currentBuild.result = 'SUCCESS'
+                                    config.bitbucketResult = "SUCCESSFUL"
                                 } catch (hudson.AbortException ae) {
+                                    config.bitbucketResult = "FAILED"
                                     currentBuild.result = 'FAILURE'
                                     // handle an AbortException
                                     // ref: https://github.com/jenkinsci/pipeline-model-definition-plugin/blob/master/pipeline-model-definition/src/main/groovy/org/jenkinsci/plugins/pipeline/modeldefinition/Utils.groovy
@@ -202,11 +206,12 @@ def call(Map params=[:]) {
             always {
                 script {
                     if (config.isTestPipeline) {
-                        // ref: https://www.jenkins.io/doc/pipeline/steps/stashNotifier/
-                        notifyBitbucket(
-                            credentialsId: 'ansible-bitbucket-api-cred',
-                            stashServerBaseUrl: "https://bitbucket.alsac.stjude.org:8443",
-                            commitSha1: config.gitCommitHash
+                        bitbucketStatusNotify(
+                            buildKey: 'test',
+                            buildName: 'Test',
+                            buildState: config.bitbucketResult,
+                            repoSlug: 'ansible-datacenter',
+                            commitId: config.gitCommitHash
                         )
                     }
                     List emailAdditionalDistList = []

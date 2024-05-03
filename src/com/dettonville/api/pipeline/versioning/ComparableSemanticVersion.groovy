@@ -5,7 +5,7 @@ package com.dettonville.api.pipeline.versioning
 // ref: https://github.com/Wonno/groovy-semver-tool/blob/master/src/main/groovy/com/github/wonno/semver/Semver.groovy
 //
 // usage examples:
-// import org.alsac.pipeline.versioning.Semver
+// import com.dettonville.api.pipeline.versioning.Semver
 // 
 // //version validation
 // assert !Semver.validate("1.2.invalid")
@@ -107,10 +107,12 @@ class ComparableSemanticVersion implements Comparable<ComparableSemanticVersion>
         return new ComparableSemanticVersion(versionCore() + opt(prerel, '-') + opt(build, '+'))
     }
 
+    @NonCPS
     String text() {
         return versionCore() + opt(prerel, '-') + opt(build, '+')
     }
 
+    @NonCPS
     private static String opt(String value, String sep) {
         return (value ? "${sep}${value}" : "");
     }
@@ -181,6 +183,7 @@ class ComparableSemanticVersion implements Comparable<ComparableSemanticVersion>
         return text()
     }
 
+    @NonCPS
     private String versionCore() {
         return "${major}.${minor}.${patch}"
     }

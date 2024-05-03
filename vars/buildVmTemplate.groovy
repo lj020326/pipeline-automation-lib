@@ -540,7 +540,7 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.build_dir="templates"
     config.timeout = config.get('timeout', 3)
     config.timeoutUnit = config.get('timeoutUnit', 'HOURS')
-    config.alwaysEmailList = config.get('alwaysEmailList', "Lee.Johnson.Contractor@alsac.stjude.org")
+    config.alwaysEmailList = config.get('alwaysEmailList', "lee.james.johnson@gmail.com")
     config.tmpDirMaxFileCount = config.get('tmpDirMaxFileCount', 100)
 
     // ref: https://blog.mrhaki.com/2011/09/groovy-goodness-take-and-drop-items.html
