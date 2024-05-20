@@ -155,8 +155,6 @@ function search_repo_keywords () {
   logDebug "${LOG_PREFIX} GREP_COMMAND=${GREP_COMMAND}"
 
   local FIND_DELIM=' -o '
-#  printf -v FIND_EXCLUDE_DIRS "\055path %s${FIND_DELIM}" "${REPO_EXCLUDE_DIR_LIST[@]}"
-#  printf -v FIND_EXCLUDE_DIRS "! -path %s${FIND_DELIM}" "${REPO_EXCLUDE_DIR_LIST[@]}"
 #  printf -v FIND_EXCLUDE_DIRS "\055path '*/%s/*' -prune${FIND_DELIM}" "${REPO_EXCLUDE_DIR_LIST[@]}"
   printf -v FIND_EXCLUDE_DIRS "! -path '*/%s/*'${FIND_DELIM}" "${REPO_EXCLUDE_DIR_LIST[@]}"
   local FIND_EXCLUDE_DIRS=${FIND_EXCLUDE_DIRS%$FIND_DELIM}
@@ -165,12 +163,11 @@ function search_repo_keywords () {
 
   ## this works:
   ## find . \( -path '*/.git/*' \) -prune -name '.*' -o -exec grep -i example {} 2>/dev/null +
+  ## find . \( -path '*/save/*' -prune -o -path '*/.git/*' -prune \) -o -exec grep -i alsac {} 2>/dev/null +
+  ## find . \( ! -path '*/save/*' -o ! -path '*/.git/*' \) -o -exec grep -i alsac {} 2>/dev/null +
   ## ref: https://stackoverflow.com/questions/6565471/how-can-i-exclude-directories-from-grep-r#8692318
   ## ref: https://unix.stackexchange.com/questions/342008/find-and-echo-file-names-only-with-pattern-found
   ## ref: https://www.baeldung.com/linux/find-exclude-paths
-#  local FIND_CMD="find ${PROJECT_DIR}/ -type f \( ${FIND_EXCLUDE_DIRS} \) -prune -o -exec ${GREP_COMMAND} {} 2>/dev/null \;"
-#  local FIND_CMD="find ${PROJECT_DIR}/ -name '.*' -type f \( ${FIND_EXCLUDE_DIRS} \) -prune -o -exec ${GREP_COMMAND} {} 2>/dev/null +"
-#  local FIND_CMD="find ${PROJECT_DIR}/ \( ${FIND_EXCLUDE_DIRS} \) -prune -name '.*'  -o -exec ${GREP_COMMAND} {} 2>/dev/null +"
   local FIND_CMD="find ${PROJECT_DIR}/ \( ${FIND_EXCLUDE_DIRS} \) -o -exec ${GREP_COMMAND} {} 2>/dev/null +"
   logInfo "${LOG_PREFIX} ${FIND_CMD}"
 
