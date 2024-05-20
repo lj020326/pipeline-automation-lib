@@ -88,6 +88,7 @@ EXCLUDES_ARRAY+=('*.log')
 printf -v EXCLUDES '%s,' "${EXCLUDES_ARRAY[@]}"
 EXCLUDES="${EXCLUDES%,}"
 
+
 ## https://serverfault.com/questions/219013/showing-total-progress-in-rsync-is-it-possible
 ## https://www.studytonight.com/linux-guide/how-to-exclude-files-and-directory-using-rsync
 RSYNC_OPTS_GIT_MIRROR=(
@@ -145,11 +146,11 @@ function search_repo_keywords () {
   printf -v GREP_PATTERN_SEARCH "${GREP_DELIM}%s" "${REPO_EXCLUDE_KEYWORDS_ARRAY[@]}"
 
   ## strip prefix
-  local GREP_PATTERN_SEARCH=${GREP_PATTERN_SEARCH#"$GREP_DELIM"}
+  GREP_PATTERN_SEARCH=${GREP_PATTERN_SEARCH#"$GREP_DELIM"}
   ## strip suffix
   #GREP_PATTERN_SEARCH=${GREP_PATTERN_SEARCH%"$GREP_DELIM"}
 
-  logDebug "${LOG_PREFIX} GREP_PATTERN_SEARCH=${GREP_PATTERN_SEARCH}"
+  logInfo "${LOG_PREFIX} GREP_PATTERN_SEARCH=${GREP_PATTERN_SEARCH}"
 
   local GREP_COMMAND="grep ${GREP_PATTERN_SEARCH}"
   logDebug "${LOG_PREFIX} GREP_COMMAND=${GREP_COMMAND}"
@@ -157,19 +158,21 @@ function search_repo_keywords () {
   local FIND_DELIM=' -o '
 #  printf -v FIND_EXCLUDE_DIRS "\055path %s${FIND_DELIM}" "${REPO_EXCLUDE_DIR_LIST[@]}"
 #  printf -v FIND_EXCLUDE_DIRS "! -path %s${FIND_DELIM}" "${REPO_EXCLUDE_DIR_LIST[@]}"
-  printf -v FIND_EXCLUDE_DIRS "\055path '*/%s/*'${FIND_DELIM}" "${REPO_EXCLUDE_DIR_LIST[@]}"
+  printf -v FIND_EXCLUDE_DIRS "\055path '*/%s/*' -prune${FIND_DELIM}" "${REPO_EXCLUDE_DIR_LIST[@]}"
   local FIND_EXCLUDE_DIRS=${FIND_EXCLUDE_DIRS%$FIND_DELIM}
 
-  logDebug "${LOG_PREFIX} FIND_EXCLUDE_DIRS=${FIND_EXCLUDE_DIRS}"
+  logInfo "${LOG_PREFIX} FIND_EXCLUDE_DIRS=${FIND_EXCLUDE_DIRS}"
 
   ## this works:
   ## find . \( -path '*/.git/*' \) -prune -name '.*' -o -exec grep -i example {} 2>/dev/null +
   ## ref: https://stackoverflow.com/questions/6565471/how-can-i-exclude-directories-from-grep-r#8692318
   ## ref: https://unix.stackexchange.com/questions/342008/find-and-echo-file-names-only-with-pattern-found
+  ## ref: https://www.baeldung.com/linux/find-exclude-paths
 #  local FIND_CMD="find ${PROJECT_DIR}/ -type f \( ${FIND_EXCLUDE_DIRS} \) -prune -o -exec ${GREP_COMMAND} {} 2>/dev/null \;"
 #  local FIND_CMD="find ${PROJECT_DIR}/ -name '.*' -type f \( ${FIND_EXCLUDE_DIRS} \) -prune -o -exec ${GREP_COMMAND} {} 2>/dev/null +"
-  local FIND_CMD="find ${PROJECT_DIR}/ \( ${FIND_EXCLUDE_DIRS} \) -prune -name '.*'  -o -exec ${GREP_COMMAND} {} 2>/dev/null +"
-  logDebug "${LOG_PREFIX} ${FIND_CMD}"
+#  local FIND_CMD="find ${PROJECT_DIR}/ \( ${FIND_EXCLUDE_DIRS} \) -prune -name '.*'  -o -exec ${GREP_COMMAND} {} 2>/dev/null +"
+  local FIND_CMD="find ${PROJECT_DIR}/ \( ${FIND_EXCLUDE_DIRS} \) -o -exec ${GREP_COMMAND} {} 2>/dev/null +"
+  logInfo "${LOG_PREFIX} ${FIND_CMD}"
 
   local EXCEPTION_COUNT=$(eval "${FIND_CMD} | wc -l")
   if [[ $EXCEPTION_COUNT -eq 0 ]]; then
@@ -294,8 +297,7 @@ function main() {
   logDebug "PROJECT_DIR=${PROJECT_DIR}"
   logDebug "TMP_DIR=${TMP_DIR}"
 
-#  search_repo_keywords
-  eval search_repo_keywords
+  search_repo_keywords
   local RETURN_STATUS=$?
   if [[ $RETURN_STATUS -ne 0 ]]; then
     logError "${LOG_PREFIX} search_repo_keywords: FAILED"
