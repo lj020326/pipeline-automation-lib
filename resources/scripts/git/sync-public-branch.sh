@@ -88,7 +88,6 @@ EXCLUDES_ARRAY+=('*.log')
 printf -v EXCLUDES '%s,' "${EXCLUDES_ARRAY[@]}"
 EXCLUDES="${EXCLUDES%,}"
 
-
 ## https://serverfault.com/questions/219013/showing-total-progress-in-rsync-is-it-possible
 ## https://www.studytonight.com/linux-guide/how-to-exclude-files-and-directory-using-rsync
 RSYNC_OPTS_GIT_MIRROR=(
@@ -146,11 +145,11 @@ function search_repo_keywords () {
   printf -v GREP_PATTERN_SEARCH "${GREP_DELIM}%s" "${REPO_EXCLUDE_KEYWORDS_ARRAY[@]}"
 
   ## strip prefix
-  GREP_PATTERN_SEARCH=${GREP_PATTERN_SEARCH#"$GREP_DELIM"}
+  local GREP_PATTERN_SEARCH=${GREP_PATTERN_SEARCH#"$GREP_DELIM"}
   ## strip suffix
-  #GREP_PATTERN_SEARCH=${GREP_PATTERN_SEARCH%"$GREP_DELIM"}
+  #local GREP_PATTERN_SEARCH=${GREP_PATTERN_SEARCH%"$GREP_DELIM"}
 
-  logInfo "${LOG_PREFIX} GREP_PATTERN_SEARCH=${GREP_PATTERN_SEARCH}"
+  logDebug "${LOG_PREFIX} GREP_PATTERN_SEARCH=${GREP_PATTERN_SEARCH}"
 
   local GREP_COMMAND="grep ${GREP_PATTERN_SEARCH}"
   logDebug "${LOG_PREFIX} GREP_COMMAND=${GREP_COMMAND}"
@@ -158,7 +157,8 @@ function search_repo_keywords () {
   local FIND_DELIM=' -o '
 #  printf -v FIND_EXCLUDE_DIRS "\055path %s${FIND_DELIM}" "${REPO_EXCLUDE_DIR_LIST[@]}"
 #  printf -v FIND_EXCLUDE_DIRS "! -path %s${FIND_DELIM}" "${REPO_EXCLUDE_DIR_LIST[@]}"
-  printf -v FIND_EXCLUDE_DIRS "\055path '*/%s/*' -prune${FIND_DELIM}" "${REPO_EXCLUDE_DIR_LIST[@]}"
+#  printf -v FIND_EXCLUDE_DIRS "\055path '*/%s/*' -prune${FIND_DELIM}" "${REPO_EXCLUDE_DIR_LIST[@]}"
+  printf -v FIND_EXCLUDE_DIRS "! -path '*/%s/*'${FIND_DELIM}" "${REPO_EXCLUDE_DIR_LIST[@]}"
   local FIND_EXCLUDE_DIRS=${FIND_EXCLUDE_DIRS%$FIND_DELIM}
 
   logInfo "${LOG_PREFIX} FIND_EXCLUDE_DIRS=${FIND_EXCLUDE_DIRS}"
