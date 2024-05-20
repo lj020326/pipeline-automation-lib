@@ -9,8 +9,8 @@ pipelineConfig:
 
   ## top level org scan
   periodicInterval: "60m"
-  ## child org folder level scan = 30 mins
-  childTriggerInterval: 1800000
+  ## child org folder level scan interval (in milliseconds) = 2 mins
+  childTriggerInterval: 120000
   numToKeep: 10
 #  ## run at 11 am
 #  cronSpecification: "H 11 * * *"

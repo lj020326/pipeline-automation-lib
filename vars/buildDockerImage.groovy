@@ -89,6 +89,18 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.logLevel = config.get('logLevel', "DEBUG")
     config.debugPipeline = config.get('debugPipeline', false)
 
+    // ref: https://stackoverflow.com/questions/40261710/getting-current-timestamp-in-inline-pipeline-script-using-pipeline-plugin-of-hud
+    Date now = new Date()
+
+    String buildDate = now.format("yyyy-MM-dd", TimeZone.getTimeZone('UTC'))
+    log.info("buildDate=${buildDate}")
+
+    String buildId = "${env.BUILD_NUMBER}"
+    log.info("buildId=${buildId}")
+
+    config.get("buildId", buildId)
+    config.get("buildDate", buildDate)
+
     log.setLevel(config.logLevel)
 
     if (config.debugPipeline) {
@@ -127,6 +139,15 @@ void buildAndPublishImage(Logger log, Map config) {
         config.buildArgs.each { key, value ->
             buildArgs.push("--build-arg ${key}=${value}")
         }
+        if (!config.buildArgs?.buildId) {
+            buildArgs.push("--build-arg BUILD_ID=${config.buildId}")
+        }
+        if (!config.buildArgs?.buildDate) {
+            buildArgs.push("--build-arg BUILD_DATE=${config.buildDate}")
+        }
+    } else {
+        buildArgs.push("--build-arg BUILD_ID=${config.buildId}")
+        buildArgs.push("--build-arg BUILD_DATE=${config.buildDate}")
     }
     log.info("${logPrefix} buildArgs=${JsonUtils.printToJsonString(buildArgs)}")
 
@@ -159,7 +180,10 @@ void buildAndPublishImage(Logger log, Map config) {
                     if (config?.buildId) {
                         app.push "${config.buildId}"
                     } else {
-                        app.push "build-${env.BUILD_ID}"
+                        app.push "build-${env.BUILD_NUMBER}"
+                    }
+                    if (config?.buildDate) {
+                        app.push "${config.buildDate}"
                     }
 //                     app.push "${commit_id}"
                     if (env.BRANCH_NAME in ['master','main']) {

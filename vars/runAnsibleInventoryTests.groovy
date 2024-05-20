@@ -54,14 +54,12 @@ def call(Map params=[:]) {
                             repoSlug: 'ansible-datacenter',
                             commitId: config.gitCommitHash
                         )
-                        log.info("pre-test complete")
                     }
                 }
             }
             stage('Run ansible inventory tests') {
                 steps {
                     script {
-                        log.info("fetch test script version")
                         config.testScriptVersion = getTestScriptVersion(this, log, config.testScript)
                         log.info("config.testScriptVersion=${config.testScriptVersion}")
 
