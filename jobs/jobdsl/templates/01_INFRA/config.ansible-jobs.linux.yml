@@ -40,6 +40,7 @@ pipelineConfig:
     - ansible_tag: bootstrap-linux-logrotate
     - ansible_tag: bootstrap-linux-package
     - ansible_tag: bootstrap-linux-user
+    - ansible_tag: bootstrap-cron
     - ansible_tag: bootstrap-mounts
     - ansible_tag: bootstrap-nfs
     - ansible_tag: bootstrap-nfs-client
