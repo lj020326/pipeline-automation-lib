@@ -199,10 +199,10 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.timeout = config.get('timeout', 3)
     config.timeoutUnit = config.get('timeoutUnit', 'HOURS')
 
-//    config.emailDist = config.emailDist ?: "Lee.Johnson.Contractor@alsac.stjude.org"
-    config.emailDist = config.get('emailDist',"Lee.Johnson.Contractor@alsac.stjude.org")
-    // config.alwaysEmailDist = config.alwaysEmailDist ?: "Lee.Johnson.Contractor@alsac.stjude.org"
-    config.emailFrom = config.emailFrom ?: "admin+ansible@alsac.stjude.org"
+//    config.emailDist = config.emailDist ?: "lee.james.johnson@gmail.com"
+    config.emailDist = config.get('emailDist',"lee.james.johnson@gmail.com")
+    // config.alwaysEmailDist = config.alwaysEmailDist ?: "lee.james.johnson@gmail.com"
+    config.emailFrom = config.emailFrom ?: "admin+ansible@dettonville.com"
 
     config.skipDefaultCheckout = config.get('skipDefaultCheckout', false)
     config.gitPerformCheckout = config.get('gitPerformCheckout', !config.get('skipDefaultCheckout',false))
@@ -211,13 +211,13 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.gitCredId = config.get('gitCredId', '')
 
     config.ansibleCollectionsRequirements = config.get('ansibleCollectionsRequirements', './collections/requirements.yml')
-    config.ansibleRolesRequirements = config.get('ansibleRolesRequirements', './roles/requirements.yml')
+//     config.ansibleRolesRequirements = config.get('ansibleRolesRequirements', './roles/requirements.yml')
 //    config.ansibleInventory = config.get('ansibleInventory', 'inventory')
 //    config.ansibleInventory = config.get('ansibleInventory', 'hosts.ini')
     config.ansibleInventory = config.get('ansibleInventory', 'hosts.yml')
     config.ansibleInventoryDir = config.ansibleInventory.take(config.ansibleInventory.lastIndexOf('/'))
 
-    config.ansibleGalaxyIgnoreCerts = config.get('AnsibleGalaxyIgnoreCerts',false)
+    config.ansibleGalaxyIgnoreCerts = config.get('ansibleGalaxyIgnoreCerts',false)
     config.ansibleGalaxyForceOpt = config.get('ansibleGalaxyForceOpt', false)
 
 //     config.ansibleSshCredId = config.get('ansibleSshCredId', 'jenkins-ansible-ssh')
@@ -251,7 +251,7 @@ Map loadPipelineConfig(Logger log, Map params) {
 
     config.ansibleSecretVarsList = config.get('ansibleSecretVarsList', secretVarsListDefault)
     
-    config.collectionDir=config.get('collectionDir', 'ansible_collections/alsac/inventory')
+    config.collectionDir=config.get('collectionDir', 'ansible_collections')
 
     log.debug("${logPrefix} params=${params}")
     log.debug("${logPrefix} config=${config}")

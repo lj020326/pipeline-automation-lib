@@ -1,19 +1,14 @@
 package com.dettonville.api.pipeline.utils
 
-
 import groovy.json.*
 //import groovy.json.JsonSlurper
 
 //import net.sf.json.JSON
 
-import com.dettonville.api.pipeline.utils.logging.LogLevel
-import com.dettonville.api.pipeline.utils.logging.Logger
-
 // ref: https://gist.github.com/tadaedo/c6394e0d34abf7cf6cf3
 class JsonUtils implements Serializable {
     private static final long serialVersionUID = 1L
 
-    com.dettonville.api.pipeline.utils.logging.Logger log = new com.dettonville.api.pipeline.utils.logging.Logger(this)
 //    DSL dsl
     def dsl
 
@@ -23,7 +18,6 @@ class JsonUtils implements Serializable {
 //    JsonUtils(DSL dsl) {
     JsonUtils(dsl) {
         this.dsl = dsl
-        com.dettonville.api.pipeline.utils.logging.Logger.init(this.dsl, com.dettonville.api.pipeline.utils.logging.LogLevel.INFO)
     }
 
 //    @NonCPS

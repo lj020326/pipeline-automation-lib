@@ -1,0 +1,22 @@
+---
+
+pipelineConfig:
+  jobFolder: "INFRA/repo-test-automation"
+  repoName: "ansible-inventory"
+  repoUrl: "git@bitbucket.org:lj020326/ansible-datacenter.git"
+  mirrorRepoDir: "/var/jenkins_home/git_repo_references/ansible-datacenter/ansible-datacenter.git"
+  gitCredentialsId: "bitbucket-ssh-jenkins"
+  useSuppressionStrategy: false
+  initializeJobMode: false
+  periodicFolderTriggerInterval: "2m"
+  skipInitialBuildOnFirstBranchIndexing: false
+  runEnvMap:
+    DEV:
+      environment: DEV
+    PROD:
+      environment: PROD
+
+  jobList:
+  - jobName: run-inventory-tests
+    jobScript: ".jenkins/runInventoryTests.groovy"
+    description: "run aap-inventory test automation jobs"

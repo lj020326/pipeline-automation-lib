@@ -4,7 +4,6 @@
 String projectName = "ADMIN"
 
 String projectFolder = projectName.toUpperCase()
-String basePath = "${projectFolder}/vm-templates"
 
 String pipelineRepoUrl = "ssh://git@gitea.admin.dettonville.int:2222/infra/pipeline-automation-lib.git"
 String gitPipelineLibCredId = "bitbucket-ssh-jenkins"
@@ -43,6 +42,39 @@ folder(projectFolder) {
         inheritanceStrategy {
             nonInheriting()
 //             inheriting()
+        }
+        // ref: https://github.com/jenkinsci/matrix-auth-plugin/releases
+        entries {
+          user {
+              name('admin')
+              permissions([
+                'Overall/Administer'
+              ])
+          }
+          group {
+              name('admin')
+              permissions([
+                'Overall/Administer'
+              ])
+          }
+          group {
+              name('infra-admin')
+              permissions([
+                'Overall/Administer'
+              ])
+          }
+          group {
+              name('Domain Admins')
+              permissions([
+                'Overall/Administer'
+              ])
+          }
+          group {
+              name('authenticated')
+              permissions([
+                'Overall/Read'
+              ])
+          }
         }
       }
     }

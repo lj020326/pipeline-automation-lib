@@ -1,0 +1,81 @@
+---
+
+pipelineConfig:
+  baseFolder: "INFRA/ansible"
+  repoFolder: "ansible-linux"
+  repoUrl: "git@bitbucket.org:lj020326/ansible-datacenter.git"
+  mirrorRepoDir: "/var/jenkins_home/git_repo_references/ansible-datacenter/ansible-datacenter.git"
+  gitCredentialsId: "bitbucket-ssh-jenkins"
+  jobScript: ".jenkins/runAnsibleSiteTag.groovy"
+
+  runEnvMap:
+    DEV:
+      - environment: DEV
+    QA:
+      - environment: QA
+    PROD:
+      - environment: DEV
+      - environment: QA
+      - environment: PROD
+  ansibleJobList:
+    - ansible_tag: bootstrap-ansible
+    - ansible_tag: bootstrap-ansible-user
+      skip_untagged: 'true'
+    - ansible_tag: bootstrap-cacerts
+      ansible_limit: ca_keystore
+    - ansible_tag: bootstrap-certs
+      ansible_limit: ca_keystore
+    - ansible_tag: bootstrap-docker
+      ansible_limit: docker
+    - ansible_tag: bootstrap-docker-stack
+      ansible_limit: docker_stack
+    - ansible_tag: bootstrap-docker-swarm
+    - ansible_tag: bootstrap-idrac
+      ansible_limit: dell_idrac_hosts
+      skip_untagged: 'true'
+    - ansible_tag: bootstrap-jenkins-agent
+    - ansible_tag: bootstrap-linux
+    - ansible_tag: bootstrap-linux-core
+    - ansible_tag: bootstrap-linux-firewall
+    - ansible_tag: bootstrap-linux-logrotate
+    - ansible_tag: bootstrap-linux-package
+    - ansible_tag: bootstrap-linux-user
+    - ansible_tag: bootstrap-cron
+    - ansible_tag: bootstrap-mounts
+    - ansible_tag: bootstrap-nfs
+    - ansible_tag: bootstrap-nfs-client
+    - ansible_tag: bootstrap-nfs-server
+    - ansible_tag: bootstrap-ntp
+    - ansible_tag: bootstrap-ntp-client
+    - ansible_tag: bootstrap-ntp-server
+    - ansible_tag: bootstrap-pip
+    - ansible_tag: bootstrap-postfix
+    - ansible_tag: bootstrap-postfix-client
+    - ansible_tag: bootstrap-postfix-server
+    - ansible_tag: bootstrap-python3
+    - ansible_tag: bootstrap-signing-certs
+      ansible_limit: localhost
+    - ansible_tag: bootstrap-sshd
+    - ansible_tag: bootstrap-vcenter
+      ansible_limit: localhost
+      skip_untagged: 'true'
+    - ansible_tag: bootstrap-vm
+      skip_untagged: 'true'
+    - ansible_tag: bootstrap-vmware-esxi
+      skip_untagged: 'true'
+      ansible_limit: localhost
+    - ansible_tag: bootstrap-webmin
+    - ansible_tag: deploy-cacerts
+      ansible_limit: os_linux
+    - ansible_tag: deploy-caroot
+      ansible_limit: os_linux
+    - ansible_tag: deploy-registry-certs
+      ansible_limit: docker
+    - ansible_tag: deploy-vm
+      skip_untagged: 'true'
+      ansible_limit: localhost
+    - ansible_tag: display-common-vars
+    - ansible_tag: display-controller-vars
+      skip_untagged: 'true'
+      ansible_limit: localhost
+    - ansible_tag: display-hostvars

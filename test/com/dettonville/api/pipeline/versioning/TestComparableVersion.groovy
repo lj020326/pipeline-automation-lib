@@ -23,7 +23,7 @@ import org.junit.Test
 
 import static org.junit.Assert.*
 
-class ComparableVersionTest {
+class TestComparableVersion {
 
   private static final List<String> VERSIONS_QUALIFIER =
       ["1-alpha2snapshot", "1-alpha2", "1-alpha-123", "1-beta-2", "1-beta123", "1-m2", "1-m11", "1-rc", "1-cr2",
