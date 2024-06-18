@@ -163,8 +163,8 @@ function search_repo_keywords () {
 
   ## this works:
   ## find . \( -path '*/.git/*' \) -prune -name '.*' -o -exec grep -i example {} 2>/dev/null +
-  ## find . \( -path '*/save/*' -prune -o -path '*/.git/*' -prune \) -o -exec grep -i alsac {} 2>/dev/null +
-  ## find . \( ! -path '*/save/*' -o ! -path '*/.git/*' \) -o -exec grep -i alsac {} 2>/dev/null +
+  ## find . \( -path '*/save/*' -prune -o -path '*/.git/*' -prune \) -o -exec grep -i example {} 2>/dev/null +
+  ## find . \( ! -path '*/save/*' -o ! -path '*/.git/*' \) -o -exec grep -i example {} 2>/dev/null +
   ## ref: https://stackoverflow.com/questions/6565471/how-can-i-exclude-directories-from-grep-r#8692318
   ## ref: https://unix.stackexchange.com/questions/342008/find-and-echo-file-names-only-with-pattern-found
   ## ref: https://www.baeldung.com/linux/find-exclude-paths

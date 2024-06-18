@@ -47,15 +47,16 @@ println("Finished creating repo test jobs")
 //******************************************************
 //  Function definitions from this point forward
 //
-void createRepoTestJobs(def dsl, Map pipelineConfig) {
+void createRepoTestJobs(def dsl, Map repoJobConfigs) {
     String logPrefix = "createRepoTestJobs():"
 
-//     println("${logPrefix} pipelineConfig=${JsonUtils.printToJsonString(pipelineConfig)}")
+//     println("${logPrefix} repoJobConfigs=${JsonUtils.printToJsonString(repoJobConfigs)}")
 
-    String baseFolder = pipelineConfig.baseFolder
-    String repoName = pipelineConfig.repoName
-    String repoFolder = "${pipelineConfig.baseFolder}/${repoName}"
-    Map runEnvMap = pipelineConfig.runEnvMap
+    String jobFolder = repoJobConfigs.jobFolder
+    String repoName = repoJobConfigs.repoName
+//     String repoFolder = "${repoJobConfigs.jobFolder}/${repoName}"
+    String baseFolder = "${jobFolder.substring(0, jobFolder.lastIndexOf("/"))}"
+    Map runEnvMap = repoJobConfigs.runEnvMap
 
     // ref: https://stackoverflow.com/questions/40215394/how-to-get-environment-variable-in-jenkins-groovy-script-console
     def envVars = Jenkins.instance.
@@ -76,7 +77,7 @@ void createRepoTestJobs(def dsl, Map pipelineConfig) {
     }
 
     Map envConfigsRaw = runEnvMap[jenkinsEnv]
-    Map envConfigs = MapMerge.merge(pipelineConfig.findAll { !["runEnvMap","testJobList"].contains(it.key) }, envConfigsRaw)
+    Map envConfigs = MapMerge.merge(repoJobConfigs.findAll { !["runEnvMap","jobList"].contains(it.key) }, envConfigsRaw)
 //     String runEnvironment = envConfigs.environment
 
     // ref: https://gist.github.com/nocode99/d4c654514ff2b683af90d7dd5e0156e0
@@ -92,28 +93,15 @@ void createRepoTestJobs(def dsl, Map pipelineConfig) {
         }
     }
 
-    // ref: https://gist.github.com/nocode99/d4c654514ff2b683af90d7dd5e0156e0
-    println("${logPrefix} creating repoFolder=[${repoFolder}]")
-    dsl.folder(repoFolder) {
-        description "This folder contains jobs to run REPO TEST PLAYS"
-        properties {
-            authorizationMatrix {
-                inheritanceStrategy {
-                    inheriting()
-                }
-            }
-        }
-    }
-
-    baseConfigs = pipelineConfig.findAll { !['testJobList'].contains(it.key) }
-    if (pipelineConfig?.testJobList) {
-        List testJobList = pipelineConfig.testJobList
-        createTestJobs(dsl, baseConfigs, testJobList)
-    }
+//     baseConfigs = repoJobConfigs.findAll { !['jobList'].contains(it.key) }
+//     if (repoJobConfigs?.jobList) {
+//         createTestJobs(dsl, repoJobConfigs)
+//     }
+    createTestJobs(dsl, repoJobConfigs)
 
     // ref: https://jenkinsci.github.io/job-dsl-plugin/#path/listView
     // ref: https://stackoverflow.com/questions/24248222/jenkins-job-views-with-different-job-names
-    dsl.listView("${repoFolder}/repo-test-jobs") {
+    dsl.listView("${jobFolder}") {
         jobs {
             regex(".*")
         }
@@ -128,7 +116,7 @@ void createRepoTestJobs(def dsl, Map pipelineConfig) {
         }
     }
 
-    dsl.listView("${repoFolder}/repo-test-jobs-unstable") {
+    dsl.listView("${jobFolder}/repo-test-jobs-unstable") {
         jobs {
             regex(".*")
         }
@@ -150,78 +138,81 @@ void createRepoTestJobs(def dsl, Map pipelineConfig) {
     println("Finished creating repo test jobs")
 }
 
-void createTestJobs(dsl, Map baseConfigs, List testJobList) {
-    String logPrefix = "createTestJobs():"
+void createTestJobs(dsl, Map testJobConfigs) {
 
-    String baseFolder = baseConfigs.baseFolder
-    String repoName = baseConfigs.repoName
-    String repoFolder = "${baseConfigs.baseFolder}/${repoName}"
+    String jobFolder = testJobConfigs.jobFolder
 
-    testJobList.each { Map testJobConfigRaw ->
+    String logPrefix = "createTestJobs(${jobFolder}):"
 
-        Map testJobConfig = MapMerge.merge(baseConfigs, testJobConfigRaw)
-        println("${logPrefix} testJobConfig=${JsonUtils.printToJsonString(testJobConfig)}")
+//     println("${logPrefix} testJobConfigs=${JsonUtils.printToJsonString(testJobConfigs)}")
 
-        String testRepoUrl = testJobConfig.repoUrl
-
-        if (testJobConfig?.testGroupName) {
-            String testGroupName = testJobConfig.testGroupName
-            String testBaseFolder = "${repoFolder}/${testGroupName}"
-            List jobList = testJobConfig.testJobList
-            List jobFolderList = testJobConfig.get('jobFolders', [])
-
-            // ref: https://gist.github.com/nocode99/d4c654514ff2b683af90d7dd5e0156e0
-            println("${logPrefix} creating testBaseFolder ${testBaseFolder}")
-            dsl.folder(testBaseFolder) {
-                description "Jobs to run REPO TEST PLAYS FOR ${testGroupName}"
-                properties {
-                    authorizationMatrix {
-                        inheritanceStrategy {
-                            inheriting()
-                        }
-                    }
+    String folderDescription = testJobConfigs.get('folderDescription', "This folder contains jobs to run REPO TEST PLAYS")
+    // ref: https://gist.github.com/nocode99/d4c654514ff2b683af90d7dd5e0156e0
+    println("${logPrefix} creating jobFolder=[${jobFolder}]")
+    dsl.folder(jobFolder) {
+        description "${folderDescription}"
+        properties {
+            authorizationMatrix {
+                inheritanceStrategy {
+                    inheriting()
                 }
             }
+        }
+    }
 
-            if (jobFolderList) {
-                jobFolderList.each { Map jobFolderConfig ->
-                    jobProjectFolder = "${testBaseFolder}/${jobFolderConfig.name}"
-                    println("${logPrefix} jobFolderConfig=${jobFolderConfig}")
-                    println("${logPrefix} creating jobProjectFolder=[${jobProjectFolder}]")
-                    folder("${jobProjectFolder}") {
-                        description "${jobFolderConfig.description}"
-                    }
-                    jobList.each { Map jobConfigRaw ->
-                        println("${logPrefix} jobConfigRaw=${JsonUtils.printToJsonString(jobConfigRaw)}")
-                        println("${logPrefix} creating job job in project JOB folder ${jobProjectFolder}")
+    if (testJobConfigs?.jobGroupName) {
+        String jobGroupName = testJobConfigs.jobGroupName
+        String jobGroupFolder = "${jobFolder}/${jobGroupName}"
+        println("${logPrefix} testJobConfigs.jobGroupName=${testJobConfigs.jobGroupName}")
+        // ref: https://gist.github.com/nocode99/d4c654514ff2b683af90d7dd5e0156e0
+        println("${logPrefix} creating jobGroupFolder ${jobGroupFolder}")
+        dsl.folder(jobGroupFolder) {
+            description "Jobs to run REPO TEST PLAYS FOR ${jobGroupName}"
+        }
 
-                        Map jobConfig = MapMerge.merge(testJobConfig.findAll { !["testJobList", "jobFolders"].contains(it.key) }, jobConfigRaw)
-
-                        createTestJob(dsl, jobProjectFolder, jobConfig)
-                    }
-                }
-            } else {
-                jobList.each { Map jobConfigRaw ->
-                    println("${logPrefix} jobConfigRaw=${JsonUtils.printToJsonString(jobConfigRaw)}")
-                    println("${logPrefix} creating job job in project folder ${testBaseFolder}")
-
-                    Map jobConfig = MapMerge.merge(testJobConfig.findAll { !["testJobList", "jobFolders"].contains(it.key) }, jobConfigRaw)
-
-                    createTestJob(dsl, testBaseFolder, jobConfig)
-                }
+        Map groupJobConfig = testJobConfigs.findAll { !["jobGroupName"].contains(it.key) }
+        groupJobConfig.jobFolder = jobGroupFolder
+        createTestJobs(dsl, groupJobConfig)
+    } else if (testJobConfigs?.jobFolders) {
+        List jobFolderList = testJobConfigs.jobFolders
+        println("${logPrefix} jobFolderList=${jobFolderList}")
+        jobFolderList.each { Map jobFolderConfig ->
+            println("${logPrefix} jobFolderConfig=${JsonUtils.printToJsonString(jobFolderConfig)}")
+            jobChildFolder = "${testJobConfigs.jobFolder}/${jobFolderConfig.name}"
+            println("${logPrefix} creating jobChildFolder=[${jobChildFolder}]")
+            folder(jobChildFolder) {
+                description "${jobFolderConfig.description}"
             }
-        } else {
-            if (testJobConfig?.jobName && testJobConfig?.jobScript) {
-                println("${logPrefix} Create test job without testGroup for testJobConfig=${JsonUtils.printToJsonString(testJobConfig)}")
-                createTestJob(dsl, repoFolder, testJobConfig)
-            }
+
+            Map folderJobConfig = testJobConfigs.findAll { !["jobFolders"].contains(it.key) }
+            folderJobConfig.jobFolder = jobChildFolder
+            createTestJobs(dsl, folderJobConfig)
+        }
+    } else if (testJobConfigs?.jobList) {
+
+        List jobList = testJobConfigs.jobList
+
+        jobList.each { Map testJobConfigRaw ->
+
+            Map testJobConfig = MapMerge.merge(testJobConfigs.findAll {
+                !["jobList"].contains(it.key)
+                }, testJobConfigRaw)
+
+            println("${logPrefix} creating child job with testJobConfig=${JsonUtils.printToJsonString(testJobConfig)}")
+            createTestJobs(dsl, testJobConfig)
+        }
+    } else {
+        println("${logPrefix} lesf node with testJobConfigs=${JsonUtils.printToJsonString(testJobConfigs)}")
+        if (testJobConfigs?.jobName && testJobConfigs?.jobScript) {
+            println("${logPrefix} Create test job for testJobConfigs.jobName=${testJobConfigs.jobName}")
+            createTestJob(dsl, testJobConfigs)
         }
     }
 
 }
 
-void createTestJob(def dsl, String jobBaseFolder, Map jobConfigs) {
-    String logPrefix = "createTestJob():"
+def createMultibranchPipelineJobNoAutoBuilds(def dsl, String jobFolder, Map jobConfigs) {
+    String logPrefix = "createMultibranchPipelineJobNoAutoBuilds(${jobConfigs.jobName}):"
 
     println("${logPrefix} jobConfigs=${JsonUtils.printToJsonString(jobConfigs)}")
 
@@ -233,15 +224,164 @@ void createTestJob(def dsl, String jobBaseFolder, Map jobConfigs) {
 
     String jobName = jobConfigs.jobName
     String jobScript = jobConfigs.jobScript
-    String jobFolderPath = "${jobBaseFolder}/${jobName}"
+    String jobFolderPath = "${jobFolder}/${jobName}"
 
     String testJobId = "test-${jobName}"
-    if (jobConfigs?.testGroupName) {
-        testJobId = "test-${jobConfigs.testGroupName}-${jobName}"
+    if (jobConfigs?.jobGroupName) {
+        testJobId = "test-${jobConfigs.jobGroupName}-${jobName}"
     }
 
     // ref: https://github.com/jenkinsci/job-dsl-plugin/wiki/Job-DSL-Commands#job
     // ref: https://jenkins.admin.dettonville.int/plugin/job-dsl/api-viewer/index.html#path/multibranchPipelineJob
+    def jobObject = dsl.multibranchPipelineJob("${jobFolderPath}") {
+        description "Create test job ${jobName}"
+        branchSources {
+            branchSource {
+                source {
+                    git {
+                        // IMPORTANT: use a constant and unique identifier
+                        id(testJobId)
+                        remote(testRepoUrl)
+                        credentialsId(gitCredentialsId)
+                        traits {
+                            gitBranchDiscovery()
+                            pruneStaleBranch()
+                            pruneStaleTag()
+                            cloneOption {
+                                extension {
+                                    shallow(true)
+                                    depth(2)
+                                    noTags(true)
+                                    reference(mirrorRepoDir)
+                                    honorRefspec(false)
+                                    timeout(1)
+                                }
+                            }
+                        }
+                    }
+                }
+                strategy {
+                    defaultBranchPropertyStrategy {
+                        props {
+                            noTriggerBranchProperty()
+                        }
+                    }
+                }
+            }
+        }
+
+        // ref: https://stackoverflow.com/questions/48284589/jenkins-jobdsl-multibranchpipelinejob-change-script-path
+        factory {
+            workflowBranchProjectFactory {
+                scriptPath(jobScript)
+            }
+        }
+        orphanedItemStrategy {
+            discardOldItems {
+                numToKeep(10)
+//                 daysToKeep(-1)
+            }
+            defaultOrphanedItemStrategy {
+//                 abortBuilds(true)
+                pruneDeadBranches(true)
+                numToKeepStr("10")
+                daysToKeepStr("-1")
+            }
+        }
+        properties {
+            suppressFolderAutomaticTriggering {
+                strategy('NONE')
+                branches('^$')
+            }
+            authorizationMatrix {
+                inheritanceStrategy {
+                    inheriting()
+                }
+            }
+        }
+    }
+
+    // ref: https://stackoverflow.com/questions/62760438/jenkins-job-dsl-trigger-is-deprecated
+    if (jobConfigs?.useSuppressionStrategy && jobConfigs.useSuppressionStrategy.toBoolean()) {
+        println("${logPrefix} adding job suppression strategy")
+
+        // ref: https://stackoverflow.com/questions/77314303/dsl-script-suppressfolderautomatictriggering-property-isnt-working
+        // ref: https://jenkins.admin.dettonville.int/plugin/job-dsl/api-viewer/index.html#path/multibranchPipelineJob-properties-suppressFolderAutomaticTriggering-strategy
+        // Allows you to control which branches should be built automatically
+        // and which could be only scheduled manually.
+        // Two configuration options are available
+        // - (1) allowed branches regular expression and
+        // - (2) suppression strategy.
+        //
+        // The used algorithm works as follows:
+        //
+        //     all branches which names don't match the regular expression are suppressed
+        //     when a branch name matches the regular expression, the suppression strategy is checked
+        //     to determine whether the trigger should be suppressed or not
+        //
+        if (jobConfigs?.branchesToBuild) {
+            println("${logPrefix} adding trigger indexing suppression strategy for branches ${jobConfigs.branchesToBuild}")
+            jobObject.properties {
+                suppressFolderAutomaticTriggering {
+                    strategy('EVENTS')
+                    branches(jobConfigs.branchesToBuild.join(' '))
+                }
+            }
+            jobObject.configure {
+                def traits = it / sources / data / 'jenkins.branch.BranchSource' / source / traits
+                traits << 'jenkins.scm.impl.trait.WildcardSCMHeadFilterTrait' {
+                    includes(jobConfigs.branchesToBuild.join(' '))
+                    excludes('')
+                }
+            }
+        }
+//         else {
+//             // ref: https://stackoverflow.com/questions/47291748/adding-suppress-automatic-scm-triggering-except-for-named-branches-in-jenkins-jo
+//             // ref: https://stackoverflow.com/questions/77314303/dsl-script-suppressfolderautomatictriggering-property-isnt-working
+//             println("${logPrefix} adding trigger suppression strategy - no branches automatically build/trigger")
+//             jobObject.properties {
+//                 suppressFolderAutomaticTriggering {
+//                     branches('^$')
+//                     strategy('NONE')
+//                 }
+//             }
+//             jobObject.configure {
+//                 it / sources / data / 'jenkins.branch.BranchSource' / strategy {
+//                     allBranchesSame {
+//                         props {
+//                             suppressAutomaticTriggering {
+//                                 strategy('NONE')
+//                                 triggeredBranchesRegex('^$')
+//                             }
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+    }
+    return jobObject
+}
+
+def createMultibranchPipelineJobAutoBuilds(def dsl, String jobFolder, Map jobConfigs) {
+    String logPrefix = "createMultibranchPipelineJobAutoBuilds(${jobConfigs.jobName}):"
+
+    println("${logPrefix} jobConfigs=${JsonUtils.printToJsonString(jobConfigs)}")
+
+    String testRepoUrl = jobConfigs.repoUrl
+    String gitCredentialsId = jobConfigs.gitCredentialsId
+    String mirrorRepoDir = jobConfigs.mirrorRepoDir
+//     String periodicFolderTriggerIntervalDefault = "30m"
+//     String periodicFolderTriggerInterval = jobConfigs.get('periodicFolderTriggerInterval', periodicFolderTriggerIntervalDefault)
+
+    String jobName = jobConfigs.jobName
+    String jobScript = jobConfigs.jobScript
+    String jobFolderPath = "${jobFolder}/${jobName}"
+
+    String testJobId = "test-${jobName}"
+    if (jobConfigs?.jobGroupName) {
+        testJobId = "test-${jobConfigs.jobGroupName}-${jobName}"
+    }
+
     def jobObject = dsl.multibranchPipelineJob("${jobFolderPath}") {
         description "Create test job ${jobName}"
         branchSources {
@@ -307,6 +447,124 @@ void createTestJob(def dsl, String jobBaseFolder, Map jobConfigs) {
             }
         }
     }
+    return jobObject
+}
+
+
+def createMultibranchPipelineJobBranchAutoBuilds(def dsl, String jobFolder, Map jobConfigs) {
+    String logPrefix = "createMultibranchPipelineJobBranchAutoBuilds(${jobConfigs.jobName}):"
+
+    println("${logPrefix} jobConfigs=${JsonUtils.printToJsonString(jobConfigs)}")
+
+    String testRepoUrl = jobConfigs.repoUrl
+    String gitCredentialsId = jobConfigs.gitCredentialsId
+    String mirrorRepoDir = jobConfigs.mirrorRepoDir
+//     String periodicFolderTriggerIntervalDefault = "30m"
+//     String periodicFolderTriggerInterval = jobConfigs.get('periodicFolderTriggerInterval', periodicFolderTriggerIntervalDefault)
+
+    String jobName = jobConfigs.jobName
+    String jobScript = jobConfigs.jobScript
+    String jobFolderPath = "${jobFolder}/${jobName}"
+
+    String testJobId = "test-${jobName}"
+    if (jobConfigs?.jobGroupName) {
+        testJobId = "test-${jobConfigs.jobGroupName}-${jobName}"
+    }
+
+    def jobObject = dsl.multibranchPipelineJob("${jobFolderPath}") {
+        description "Create test job ${jobName}"
+        branchSources {
+            branchSource {
+                source {
+                    git {
+                        // IMPORTANT: use a constant and unique identifier
+                        id(testJobId)
+                        remote(testRepoUrl)
+                        credentialsId(gitCredentialsId)
+                        traits {
+                            gitBranchDiscovery()
+                            pruneStaleBranch()
+                            pruneStaleTag()
+                            cloneOption {
+                                extension {
+                                    shallow(true)
+                                    depth(2)
+                                    noTags(true)
+                                    reference(mirrorRepoDir)
+                                    honorRefspec(false)
+                                    timeout(1)
+                                }
+                            }
+                        }
+                    }
+                }
+                // NOTE: REQUIRES the `basic-branch-build-strategies` plugin for the buildStrategies part to work
+                // ref: https://stackoverflow.com/questions/48284589/jenkins-jobdsl-multibranchpipelinejob-change-script-path
+                buildStrategies {
+                    buildNamedBranches {
+                        filters {
+                            wildcards {
+                                includes(jobConfigs.branchesToBuild.join(' '))
+                                excludes('')
+                                caseSensitive(true)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // ref: https://stackoverflow.com/questions/48284589/jenkins-jobdsl-multibranchpipelinejob-change-script-path
+        factory {
+            workflowBranchProjectFactory {
+                scriptPath(jobScript)
+            }
+        }
+        orphanedItemStrategy {
+            discardOldItems {
+                numToKeep(10)
+//                 daysToKeep(-1)
+            }
+            defaultOrphanedItemStrategy {
+//                 abortBuilds(true)
+                pruneDeadBranches(true)
+                numToKeepStr("10")
+                daysToKeepStr("-1")
+            }
+        }
+        properties {
+            suppressFolderAutomaticTriggering {
+                strategy('INDEXING')
+                branches(jobConfigs.branchesToBuild.join(' '))
+            }
+            authorizationMatrix {
+                inheritanceStrategy {
+                    inheriting()
+                }
+            }
+        }
+    }
+    return jobObject
+}
+
+void createTestJob(def dsl, Map jobConfigs) {
+    String jobFolder = jobConfigs.jobFolder
+    String logPrefix = "createTestJob(${jobConfigs.jobFolder}, ${jobConfigs.jobName}):"
+
+    println("${logPrefix} jobConfigs=${JsonUtils.printToJsonString(jobConfigs)}")
+
+    // ref: https://github.com/jenkinsci/job-dsl-plugin/wiki/Job-DSL-Commands#job
+    // ref: https://jenkins.admin.dettonville.int/plugin/job-dsl/api-viewer/index.html#path/multibranchPipelineJob
+    def jobObject
+    if (jobConfigs.useSuppressionStrategy) {
+        jobObject = createMultibranchPipelineJobNoAutoBuilds(dsl, jobFolder, jobConfigs)
+    } else {
+        if (jobConfigs?.branchesToBuild && jobConfigs.branchesToBuild) {
+            jobObject = createMultibranchPipelineJobBranchAutoBuilds(dsl, jobFolder, jobConfigs)
+        } else {
+            jobObject = createMultibranchPipelineJobAutoBuilds(dsl, jobFolder, jobConfigs)
+        }
+    }
 
     if (jobConfigs?.skipInitialBuildOnFirstBranchIndexing && jobConfigs.skipInitialBuildOnFirstBranchIndexing.toBoolean()) {
         println("${logPrefix} adding skipInitialBuildOnFirstBranchIndexing() strategy")
@@ -321,7 +579,7 @@ void createTestJob(def dsl, String jobBaseFolder, Map jobConfigs) {
     // ref: https://stackoverflow.com/a/69783984
     // ref: https://stackoverflow.com/questions/62760438/jenkins-job-dsl-trigger-is-deprecated
     if (jobConfigs?.periodicFolderTriggerInterval) {
-        println("${logPrefix} adding to job periodicFolderTriggerInterval=[${jobConfigs?.periodicFolderTriggerInterval}]")
+        println("${logPrefix} configuring job with periodicFolderTriggerInterval=[${jobConfigs?.periodicFolderTriggerInterval}]")
         jobObject.triggers {
             periodicFolderTrigger {
                 interval(jobConfigs.periodicFolderTriggerInterval)
@@ -329,74 +587,61 @@ void createTestJob(def dsl, String jobBaseFolder, Map jobConfigs) {
         }
     }
 
-    if (jobConfigs?.branchesToBuild) {
+    if (jobConfigs?.branchesToDiscover) {
         // ref: https://stackoverflow.com/questions/68773981/how-to-let-jenkins-pipeline-build-only-for-given-branches
         // ref: https://stackoverflow.com/questions/62858219/multibranchpipelinejob-job-dsl-how-to-enable-filter-by-name-with-wildcards
         // ref: https://ftclausen.github.io/infra/jenkins/jenkins-jobdsl-git-traits/
         // ref: https://groups.google.com/g/jenkinsci-users/c/GHsvyCI7Xoo
         // ref: https://stackoverflow.com/questions/69813779/what-is-jcasc-job-dsl-option-for-build-when-a-change-is-pushed-to-bitbucket
+        println("${logPrefix} adding build strategy for branches: [${jobConfigs.branchesToDiscover.join(' ')}]")
         jobObject.configure {
             def traits = it / sources / data / 'jenkins.branch.BranchSource' / source / traits
             traits << 'jenkins.scm.impl.trait.WildcardSCMHeadFilterTrait' {
-                includes(jobConfigs.branchesToBuild.join(' '))
+                includes(jobConfigs.branchesToDiscover.join(' '))
                 excludes('')
             }
         }
-    }
-    // ref: https://stackoverflow.com/questions/62760438/jenkins-job-dsl-trigger-is-deprecated
-    if (jobConfigs?.useSuppressionStrategy && jobConfigs.useSuppressionStrategy.toBoolean()) {
-        println("${logPrefix} adding job suppression strategy")
-
-        // ref: https://stackoverflow.com/questions/77314303/dsl-script-suppressfolderautomatictriggering-property-isnt-working
-        // ref: https://jenkins.admin.dettonville.int/plugin/job-dsl/api-viewer/index.html#path/multibranchPipelineJob-properties-suppressFolderAutomaticTriggering-strategy
-        // Allows you to control which branches should be built automatically
-        // and which could be only scheduled manually.
-        // Two configuration options are available
-        // - (1) allowed branches regular expression and
-        // - (2) suppression strategy.
-        //
-        // The used algorithm works as follows:
-        //
-        //     all branches which names don't match the regular expression are suppressed
-        //     when a branch name matches the regular expression, the suppression strategy is checked
-        //     to determine whether the trigger should be suppressed or not
-        //
-        if (jobConfigs?.branchesToBuild) {
-            println("${logPrefix} adding trigger indexing suppression strategy")
-            jobObject.properties {
-                suppressFolderAutomaticTriggering {
-                    strategy('INDEXING')
-                    branches(jobConfigs.branchesToBuild.join(' '))
-                }
-            }
-        } else {
-            // ref: https://stackoverflow.com/questions/47291748/adding-suppress-automatic-scm-triggering-except-for-named-branches-in-jenkins-jo
-            // ref: https://stackoverflow.com/questions/77314303/dsl-script-suppressfolderautomatictriggering-property-isnt-working
-            println("${logPrefix} adding trigger suppression strategy - no branches automatically build/trigger")
-            jobObject.properties {
-                suppressFolderAutomaticTriggering {
-                    branches('^$')
-                    strategy('NONE')
-                }
-            }
-        }
+//    if (jobConfigs?.branchesToBuild) {
+//         jobObject.configure {
+//             it / sources / data / 'jenkins.branch.BranchSource' / buildStrategies {
+//                 buildNamedBranches {
+//                     filters {
+//                         wildcards {
+//                             includes(jobConfigs.branchesToBuild.join(' '))
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//         else {
+//             println("${logPrefix} adding build strategy for ALL branches")
+//             jobObject.configure {
+//                 it / sources / data / 'jenkins.branch.BranchSource' / buildStrategies {
+//                     buildAllBranches {
+//                         strategies {
+//                             buildRegularBranches()
+//                         }
+//                     }
+//                 }
+//             }
+//         }
     }
 
 //     println("${logPrefix} Initialize test jobs")
 //     if (jobConfigs?.initializeJobMode && jobConfigs.initializeJobMode.toBoolean()) {
 //         println("${logPrefix} Running test job initialization for jobConfigs=${JsonUtils.printToJsonString(jobConfigs)}")
-//         initTestJobs(dsl, jobBaseFolder, jobConfigs)
+//         initTestJobs(dsl, jobFolder, jobConfigs)
 //     }
 
 }
 
-void initTestJobs(def dsl, String jobBaseFolder, Map jobConfigs) {
+void initTestJobs(def dsl, String jobFolder, Map jobConfigs) {
     String logPrefix = "initTestJobs():"
 
     println("${logPrefix} jobConfigs=${JsonUtils.printToJsonString(jobConfigs)}")
 
     String jobName = jobConfigs.jobName
-    String jobFolderPath = "${jobBaseFolder}/${jobName}"
+    String jobFolderPath = "${jobFolder}/${jobName}"
 
 //     def allJobs = Jenkins.instance.getItemByFullName(jobFolderPath)
 //     def allJobs = Jenkins.instance.getAllItems()
