@@ -79,7 +79,7 @@ def call(Map config=[:]) {
     }
 
     List recipientList = (config?.alwaysEmailList && config.alwaysEmailList != "") ? (config.alwaysEmailList.contains(",")) ? config.alwaysEmailList.tokenize(',') : [config.alwaysEmailList] : []
-    recipientList.add("ljohnson@dettonville.org")
+    recipientList.add("lee.johnson@dettonville.com")
     //    recipientList.add("SIT-engineer@dettonville.org")
     config.alwaysEmailList = recipientList.join(",")
 

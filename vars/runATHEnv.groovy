@@ -71,8 +71,8 @@ appTestSuites:
         cronCfg: "H(0-5) * * * *"
         collectTestResults: true
         maxTestResultsHistory: 24
-        alwaysEmailList: "ljohnson@dettonville.org"
-        changedEmailList: "dcapi_qa@dettonville.org, ljohnson@dettonville.org, SIT-engineer@dettonville.org, conor.dixon@dettonville.org, kedar.mohanty@dettonville.org, prashanth.krishnappa@dettonville.org, sandeep.singh@dettonville.org, jakub.kurtiak@dettonville.org,  corey.lawlor@dettonville.org"
+        alwaysEmailList: "lee.johnson@dettonville.com"
+        changedEmailList: "dcapi_qa@dettonville.org, lee.johnson@dettonville.com, SIT-engineer@dettonville.org"
 
     HEALTHCHECKS/DAILY/API-GRID:
         metaFilterTags: "+APIGridProduction"
@@ -80,53 +80,53 @@ appTestSuites:
         cronCfg: "H 2 * * *"
         collectTestResults: true
         maxTestResultsHistory: 30
-        alwaysEmailList: "ljohnson@dettonville.org"
-        changedEmailList: "dcapi_qa@dettonville.org, ljohnson@dettonville.org, SIT-engineer@dettonville.org, conor.dixon@dettonville.org, kedar.mohanty@dettonville.org, prashanth.krishnappa@dettonville.org, sandeep.singh@dettonville.org, jakub.kurtiak@dettonville.org,  corey.lawlor@dettonville.org"
+        alwaysEmailList: "lee.johnson@dettonville.com"
+        changedEmailList: "dcapi_qa@dettonville.org, lee.johnson@dettonville.com, SIT-engineer@dettonville.org"
 
     SIMPLETEST: 
         metaFilterTags: "+TestId TC1025418"
         browserstackBrowser: "chrome"
         parallelRunCount: 1
-        alwaysEmailList: "dcapi_qa@dettonville.org, ljohnson@dettonville.org, SIT-engineer@dettonville.org, conor.dixon@dettonville.org, kedar.mohanty@dettonville.org, prashanth.krishnappa@dettonville.org, sandeep.singh@dettonville.org, jakub.kurtiak@dettonville.org,  corey.lawlor@dettonville.org"
+        alwaysEmailList: "dcapi_qa@dettonville.org, lee.johnson@dettonville.com, SIT-engineer@dettonville.org"
         changedEmailList: "dcapi_qa@dettonville.org"
 
     SMOKE: 
         metaFilterTags: "+smoke"
         parallelRunCount: 4
         waitingTime: 4
-        alwaysEmailList: "dcapi_qa@dettonville.org, ljohnson@dettonville.org, SIT-engineer@dettonville.org, conor.dixon@dettonville.org, kedar.mohanty@dettonville.org, prashanth.krishnappa@dettonville.org, sandeep.singh@dettonville.org, jakub.kurtiak@dettonville.org,  corey.lawlor@dettonville.org"
+        alwaysEmailList: "dcapi_qa@dettonville.org, lee.johnson@dettonville.com, SIT-engineer@dettonville.org"
         changedEmailList: "dcapi_qa@dettonville.org"
         
     SANITY: 
         metaFilterTags: "+sanity"
         parallelRunCount: 12
         waitingTime: 10
-        alwaysEmailList: "dcapi_qa@dettonville.org, ljohnson@dettonville.org, SIT-engineer@dettonville.org, conor.dixon@dettonville.org, kedar.mohanty@dettonville.org, prashanth.krishnappa@dettonville.org, sandeep.singh@dettonville.org, jakub.kurtiak@dettonville.org,  corey.lawlor@dettonville.org"
+        alwaysEmailList: "dcapi_qa@dettonville.org, lee.johnson@dettonville.com, SIT-engineer@dettonville.org"
         changedEmailList: "dcapi_qa@dettonville.org"
 
     API: 
         testSuiteName: "API Tests"
-        alwaysEmailList: "dcapi_qa@dettonville.org, ljohnson@dettonville.org, SIT-engineer@dettonville.org, conor.dixon@dettonville.org, kedar.mohanty@dettonville.org, prashanth.krishnappa@dettonville.org, sandeep.singh@dettonville.org, jakub.kurtiak@dettonville.org,  corey.lawlor@dettonville.org"
+        alwaysEmailList: "dcapi_qa@dettonville.org, lee.johnson@dettonville.com, SIT-engineer@dettonville.org"
         changedEmailList: "dcapi_qa@dettonville.org"
 
     REGRESSION:
         metaFilterTags: "+regression"
         parallelRunCount: 12
         waitingTime: 10
-        alwaysEmailList: "dcapi_qa@dettonville.org, ljohnson@dettonville.org, SIT-engineer@dettonville.org, conor.dixon@dettonville.org, kedar.mohanty@dettonville.org, prashanth.krishnappa@dettonville.org, sandeep.singh@dettonville.org, jakub.kurtiak@dettonville.org,  corey.lawlor@dettonville.org"
+        alwaysEmailList: "dcapi_qa@dettonville.org, lee.johnson@dettonville.com, SIT-engineer@dettonville.org"
         changedEmailList: "dcapi_qa@dettonville.org"
 
     GWCALLS: 
         testSuiteName: "GW Calls"
         metaFilterTags: "+gw"
         parallelRunCount: 1
-        alwaysEmailList: "dcapi_qa@dettonville.org, ljohnson@dettonville.org, SIT-engineer@dettonville.org, conor.dixon@dettonville.org, kedar.mohanty@dettonville.org, prashanth.krishnappa@dettonville.org, sandeep.singh@dettonville.org, jakub.kurtiak@dettonville.org,  corey.lawlor@dettonville.org"
+        alwaysEmailList: "dcapi_qa@dettonville.org, lee.johnson@dettonville.com, SIT-engineer@dettonville.org"
         changedEmailList: "dcapi_qa@dettonville.org"
                 
     LIVE-CHAT: 
         metaFilterTags: "+chat"
         parallelRunCount: 1
-        alwaysEmailList: "dcapi_qa@dettonville.org, ljohnson@dettonville.org, SIT-engineer@dettonville.org, conor.dixon@dettonville.org, kedar.mohanty@dettonville.org, prashanth.krishnappa@dettonville.org, sandeep.singh@dettonville.org, jakub.kurtiak@dettonville.org,  corey.lawlor@dettonville.org"
+        alwaysEmailList: "dcapi_qa@dettonville.org, lee.johnson@dettonville.com, SIT-engineer@dettonville.org"
         changedEmailList: "dcapi_qa@dettonville.org"    
 
     PRODUCT-OWNER: 
@@ -148,14 +148,14 @@ appEnvironments:
 #        browserstackProxyPort: "1080"
 #        browserstackProxyHost: "ech-10-170-129-41.dettonville.int"
 #        browserstackProxyPort: "80"
-        alwaysEmailList: "dcapi_qa@dettonville.org, ljohnson@dettonville.org, SIT-engineer@dettonville.org, conor.dixon@dettonville.org, kedar.mohanty@dettonville.org, prashanth.krishnappa@dettonville.org, sandeep.singh@dettonville.org, jakub.kurtiak@dettonville.org,  corey.lawlor@dettonville.org"
+        alwaysEmailList: "dcapi_qa@dettonville.org, lee.johnson@dettonville.com, SIT-engineer@dettonville.org"
     
     STAGE:
         jenkinsRunTestsLabel: "QA-LINUX"
         athGitBranch: "develop"
         deployJobEnvName: "Stage"
         useBrowserstackLocalProxy: true
-        alwaysEmailList: "dcapi_qa@dettonville.org, ljohnson@dettonville.org, SIT-engineer@dettonville.org, conor.dixon@dettonville.org, kedar.mohanty@dettonville.org, prashanth.krishnappa@dettonville.org, sandeep.singh@dettonville.org, jakub.kurtiak@dettonville.org,  corey.lawlor@dettonville.org"
+        alwaysEmailList: "dcapi_qa@dettonville.org, lee.johnson@dettonville.com, SIT-engineer@dettonville.org"
     
     STAGE_EXTERNAL:
         jenkinsRunTestsLabel: "DEVCLD-LIN7"
@@ -163,25 +163,25 @@ appEnvironments:
         deployJobEnvName: "Stage"
         useBrowserstackLocalProxy: false
         useExecEnvJenkins: false
-        alwaysEmailList: "dcapi_qa@dettonville.org, ljohnson@dettonville.org, SIT-engineer@dettonville.org, conor.dixon@dettonville.org, kedar.mohanty@dettonville.org, prashanth.krishnappa@dettonville.org, sandeep.singh@dettonville.org, jakub.kurtiak@dettonville.org,  corey.lawlor@dettonville.org"
+        alwaysEmailList: "dcapi_qa@dettonville.org, lee.johnson@dettonville.com, SIT-engineer@dettonville.org"
     
     PROD_KSC:
         jenkinsRunTestsLabel: "PROD-LINUX"
         athGitBranch: "main"
         useBrowserstackLocalProxy: true
-        alwaysEmailList: "dcapi_qa@dettonville.org, ljohnson@dettonville.org, SIT-engineer@dettonville.org, conor.dixon@dettonville.org, kedar.mohanty@dettonville.org, prashanth.krishnappa@dettonville.org, sandeep.singh@dettonville.org, jakub.kurtiak@dettonville.org,  corey.lawlor@dettonville.org"
+        alwaysEmailList: "dcapi_qa@dettonville.org, lee.johnson@dettonville.com, SIT-engineer@dettonville.org"
     
     PROD_STL:
         jenkinsRunTestsLabel: "PROD-LINUX"
         athGitBranch: "main"
         useBrowserstackLocalProxy: true
-        alwaysEmailList: "dcapi_qa@dettonville.org, ljohnson@dettonville.org, SIT-engineer@dettonville.org, conor.dixon@dettonville.org, kedar.mohanty@dettonville.org, prashanth.krishnappa@dettonville.org, sandeep.singh@dettonville.org, jakub.kurtiak@dettonville.org,  corey.lawlor@dettonville.org"
+        alwaysEmailList: "dcapi_qa@dettonville.org, lee.johnson@dettonville.com, SIT-engineer@dettonville.org"
     
     PROD_COPRO:
         jenkinsRunTestsLabel: "PROD-LINUX"
         athGitBranch: "main"
         useBrowserstackLocalProxy: true
-        alwaysEmailList: "dcapi_qa@dettonville.org, ljohnson@dettonville.org, SIT-engineer@dettonville.org, conor.dixon@dettonville.org, kedar.mohanty@dettonville.org, prashanth.krishnappa@dettonville.org, sandeep.singh@dettonville.org, jakub.kurtiak@dettonville.org,  corey.lawlor@dettonville.org"
+        alwaysEmailList: "dcapi_qa@dettonville.org, lee.johnson@dettonville.com, SIT-engineer@dettonville.org"
     
     PROD_EXTERNAL:
         jenkinsRunTestsLabel: "DEVCLD-LIN7"
@@ -189,7 +189,7 @@ appEnvironments:
         useExecEnvJenkins: false
         useBrowserstackLocalProxy: false
 #        changedEmailList: "DST_Open_API_Development_Team@dettonville.org, infra-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com"
-        alwaysEmailList: "dcapi_qa@dettonville.org, ljohnson@dettonville.org, SIT-engineer@dettonville.org, conor.dixon@dettonville.org, kedar.mohanty@dettonville.org, prashanth.krishnappa@dettonville.org, sandeep.singh@dettonville.org, jakub.kurtiak@dettonville.org,  corey.lawlor@dettonville.org"
+        alwaysEmailList: "dcapi_qa@dettonville.org, lee.johnson@dettonville.com, SIT-engineer@dettonville.org"
     
 """
 

@@ -64,6 +64,9 @@ pipelineConfig:
     - ansible_tag: bootstrap-vmware-esxi
       skip_untagged: 'true'
       ansible_limit: localhost
+    - ansible_tag: bootstrap-vmware-mounts
+      skip_untagged: 'true'
+      ansible_limit: localhost
     - ansible_tag: bootstrap-webmin
     - ansible_tag: deploy-cacerts
       ansible_limit: os_linux
@@ -79,3 +82,6 @@ pipelineConfig:
       skip_untagged: 'true'
       ansible_limit: localhost
     - ansible_tag: display-hostvars
+    - ansible_tag: vmware-remount-datastores
+      skip_untagged: 'true'
+      ansible_limit: localhost

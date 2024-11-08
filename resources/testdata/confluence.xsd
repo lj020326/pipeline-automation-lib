@@ -1,12 +1,177 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html
-  PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Confluence confluence.xsd - Complete documentation and samples</title><link href="../sitestyle2.css" rel="stylesheet" type="text/css" /><script type="text/javascript" src="../search3.js"></script></head><body><div id="hd"><div class="left"><a href="../index.html" title="Schema Central home">Schema Central</a><span class="divider"> &gt; </span><a href="ss.html" title="Confluence Overview">Confluence</a><span class="divider"> &gt; </span><span class="topname">confluence.xsd</span></div><form id="searchformtop" action="searchres.html" method="get"><div><div id="searchbox"><input name="terms" size="30" type="text" /><input title="Search Confluence" id="go" value="Search" type="submit" /></div><input name="stype" value="N" type="hidden" /><input name="ns" value="null" type="hidden" /><input name="compsE" value="E" type="hidden" /><input name="compsCT" value="CT" type="hidden" /><input name="compsST" value="ST" type="hidden" /><input name="compsA" value="A" type="hidden" /><input name="compsG" value="G" type="hidden" /><input name="compsAG" value="AG" type="hidden" /> <a href="search.html">Advanced search</a></div></form></div><div class="main-container"><div class="ads"></div><div class="main"><h1>confluence.xsd</h1><pre class="d">
-    Confluence page XML schema:
-    "master" schema, defining document root element (confluence)
-    and other markup in the same namespace.
+        PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <title>Confluence confluence.xsd - Complete documentation and samples</title>
+        <link href="../sitestyle2.css" rel="stylesheet" type="text/css"/>
+        <script type="text/javascript" src="../search3.js"></script>
+    </head>
+    <body>
+        <div id="hd">
+            <div class="left">
+                <a href="../index.html" title="Schema Central home">Schema Central</a>
+                <span class="divider">&gt;</span>
+                <a href="ss.html" title="Confluence Overview">Confluence</a>
+                <span class="divider">&gt;</span>
+                <span class="topname">confluence.xsd</span>
+            </div>
+            <form id="searchformtop" action="searchres.html" method="get">
+                <div>
+                    <div id="searchbox">
+                        <input name="terms" size="30" type="text"/>
+                        <input title="Search Confluence" id="go" value="Search" type="submit"/>
+                    </div>
+                    <input name="stype" value="N" type="hidden"/>
+                    <input name="ns" value="null" type="hidden"/>
+                    <input name="compsE" value="E" type="hidden"/>
+                    <input name="compsCT" value="CT" type="hidden"/>
+                    <input name="compsST" value="ST" type="hidden"/>
+                    <input name="compsA" value="A" type="hidden"/>
+                    <input name="compsG" value="G" type="hidden"/>
+                    <input name="compsAG" value="AG" type="hidden"/>
+                    <a href="search.html">Advanced search</a>
+                </div>
+            </form>
+        </div>
+        <div class="main-container">
+            <div class="ads"></div>
+            <div class="main">
+                <h1>confluence.xsd</h1>
+                <pre class="d">
+                    Confluence page XML schema:
+                    "master" schema, defining document root element (confluence)
+                    and other markup in the same namespace.
 
-    Date: 2012-04-18.
+                    Date: 2012-04-18.
 
-    Author: Graham Hannington (Confluence user; no other affiliation with Atlassian).
-    </pre><h2>Schema Document Information</h2><div class="columns-container"><div class="column"><p><span class="label">Namespace: </span>http://www.atlassian.com/schema/confluence/4/ac/</p><p><span class="label">File Path: </span>confluence.xsd</p></div><div class="column"><p><span class="label">Properties: </span><i>Version</i>: 1.0, <i>Element Form Default</i>: qualified, <i>Attribute Form Default</i>: qualified, <i>Language</i>: en</p></div></div><div class="columns-container"><div class="columncomp"><h2>Elements</h2><p><a href="e-ac_confluence.html">ac:confluence</a></p><p><a href="e-ac_default-parameter.html">ac:default-parameter</a></p><p><a href="e-ac_emoticon.html">ac:emoticon</a></p><p><a href="e-ac_image.html">ac:image</a></p><p><a href="e-ac_link.html">ac:link</a></p><p><a href="e-ac_link-body.html">ac:link-body</a></p><p><a href="e-ac_macro.html">ac:macro</a></p><p><a href="e-ac_parameter.html">ac:parameter</a></p><p><a href="e-ac_plain-text-body.html">ac:plain-text-body</a></p><p><a href="e-ac_plain-text-link-body.html">ac:plain-text-link-body</a></p><p><a href="e-ac_rich-text-body.html">ac:rich-text-body</a></p></div><div class="columncomp"><h2>Attributes</h2><p><a href="a-ac_align-1.html">ac:align</a></p><p><a href="a-ac_alt-1.html">ac:alt</a></p><p><a href="a-ac_anchor-1.html">ac:anchor</a></p><p><a href="a-ac_border-1.html">ac:border</a></p><p><a href="a-ac_class-1.html">ac:class</a></p><p><a href="a-ac_height-1.html">ac:height</a></p><p><a href="a-ac_hspace-1.html">ac:hspace</a></p><p><a href="a-ac_name-1.html">ac:name</a></p><p><a href="a-ac_name-3.html">ac:name</a></p><p><a href="a-ac_queryparams-1.html">ac:queryparams</a></p><p><a href="a-ac_style-1.html">ac:style</a></p><p><a href="a-ac_thumbnail-1.html">ac:thumbnail</a></p><p><a href="a-ac_title-1.html">ac:title</a></p><p><a href="a-ac_tooltip-1.html">ac:tooltip</a></p><p><a href="a-ac_vspace-1.html">ac:vspace</a></p><p><a href="a-ac_width-1.html">ac:width</a></p></div><div class="columncomp"><h2>Groups</h2><p><a href="g-ac_confluence.ac.block.html">ac:confluence.ac.block</a></p><p><a href="g-ac_confluence.ac.inline.html">ac:confluence.ac.inline</a></p></div></div></div></div><div id="ft"><p class="footer"></p><p class="left">Site developed and hosted by <a href="http://www.datypic.com/">Datypic, Inc.</a></p><p class="right">Please report errors or comments about this site to <a href="mailto:contrib@functx.com">contrib@functx.com</a></p></div></body></html>
+                    Author: Lee Johnson
+                </pre>
+                <h2>Schema Document Information</h2>
+                <div class="columns-container">
+                    <div class="column">
+                        <p><span class="label">Namespace:</span>http://www.atlassian.com/schema/confluence/4/ac/
+                        </p>
+                        <p><span class="label">File Path:</span>confluence.xsd
+                        </p>
+                    </div>
+                    <div class="column">
+                        <p>
+                            <span class="label">Properties:</span>
+                            <i>Version</i>: 1.0, <i>Element Form Default</i>: qualified, <i>Attribute Form Default</i>:
+                            qualified, <i>Language</i>: en
+                        </p>
+                    </div>
+                </div>
+                <div class="columns-container">
+                    <div class="columncomp">
+                        <h2>Elements</h2>
+                        <p>
+                            <a href="e-ac_confluence.html">ac:confluence</a>
+                        </p>
+                        <p>
+                            <a href="e-ac_default-parameter.html">ac:default-parameter</a>
+                        </p>
+                        <p>
+                            <a href="e-ac_emoticon.html">ac:emoticon</a>
+                        </p>
+                        <p>
+                            <a href="e-ac_image.html">ac:image</a>
+                        </p>
+                        <p>
+                            <a href="e-ac_link.html">ac:link</a>
+                        </p>
+                        <p>
+                            <a href="e-ac_link-body.html">ac:link-body</a>
+                        </p>
+                        <p>
+                            <a href="e-ac_macro.html">ac:macro</a>
+                        </p>
+                        <p>
+                            <a href="e-ac_parameter.html">ac:parameter</a>
+                        </p>
+                        <p>
+                            <a href="e-ac_plain-text-body.html">ac:plain-text-body</a>
+                        </p>
+                        <p>
+                            <a href="e-ac_plain-text-link-body.html">ac:plain-text-link-body</a>
+                        </p>
+                        <p>
+                            <a href="e-ac_rich-text-body.html">ac:rich-text-body</a>
+                        </p>
+                    </div>
+                    <div class="columncomp">
+                        <h2>Attributes</h2>
+                        <p>
+                            <a href="a-ac_align-1.html">ac:align</a>
+                        </p>
+                        <p>
+                            <a href="a-ac_alt-1.html">ac:alt</a>
+                        </p>
+                        <p>
+                            <a href="a-ac_anchor-1.html">ac:anchor</a>
+                        </p>
+                        <p>
+                            <a href="a-ac_border-1.html">ac:border</a>
+                        </p>
+                        <p>
+                            <a href="a-ac_class-1.html">ac:class</a>
+                        </p>
+                        <p>
+                            <a href="a-ac_height-1.html">ac:height</a>
+                        </p>
+                        <p>
+                            <a href="a-ac_hspace-1.html">ac:hspace</a>
+                        </p>
+                        <p>
+                            <a href="a-ac_name-1.html">ac:name</a>
+                        </p>
+                        <p>
+                            <a href="a-ac_name-3.html">ac:name</a>
+                        </p>
+                        <p>
+                            <a href="a-ac_queryparams-1.html">ac:queryparams</a>
+                        </p>
+                        <p>
+                            <a href="a-ac_style-1.html">ac:style</a>
+                        </p>
+                        <p>
+                            <a href="a-ac_thumbnail-1.html">ac:thumbnail</a>
+                        </p>
+                        <p>
+                            <a href="a-ac_title-1.html">ac:title</a>
+                        </p>
+                        <p>
+                            <a href="a-ac_tooltip-1.html">ac:tooltip</a>
+                        </p>
+                        <p>
+                            <a href="a-ac_vspace-1.html">ac:vspace</a>
+                        </p>
+                        <p>
+                            <a href="a-ac_width-1.html">ac:width</a>
+                        </p>
+                    </div>
+                    <div class="columncomp">
+                        <h2>Groups</h2>
+                        <p>
+                            <a href="g-ac_confluence.ac.block.html">ac:confluence.ac.block</a>
+                        </p>
+                        <p>
+                            <a href="g-ac_confluence.ac.inline.html">ac:confluence.ac.inline</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="ft">
+            <p class="footer"></p>
+            <p class="left">Site developed and hosted by
+                <a href="http://www.dettonville.com/">Dettonville, LLC</a>
+            </p>
+            <p class="right">Please report errors or comments about this site to
+                <a href="mailto:admin@dettonville.com">admin@dettonville.com</a>
+            </p>
+        </div>
+    </body>
+</html>

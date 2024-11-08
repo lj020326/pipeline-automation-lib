@@ -83,7 +83,7 @@ void createVmTemplateJobs(def dsl, Map pipelineConfig) {
         String runEnvironment = envConfigs.environment
 
         dsl.folder("${baseFolder}/${runEnvironment}") {
-            description "This folder contains jobs to run ansible SITE play tags for ${runEnvironment}"
+            description "This folder contains jobs to build VM templates for ${runEnvironment}"
             properties {
                 authorizationMatrix {
                     inheritanceStrategy {
@@ -96,6 +96,7 @@ void createVmTemplateJobs(def dsl, Map pipelineConfig) {
         vmTemplateList.each { Map templateConfigsRaw ->
 
             Map templateConfigs = MapMerge.merge(envConfigs.findAll { !["jobList"].contains(it.key) }, templateConfigsRaw)
+            templateConfigs.buildType = templateConfigs.get("buildType", "medium")
             println("${logPrefix} templateConfigs=${JsonUtils.printToJsonString(templateConfigs)}")
 
             List templateDistFolderList = templateConfigs.buildDistribution.split('/')[0..-1]

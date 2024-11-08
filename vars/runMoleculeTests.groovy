@@ -92,8 +92,8 @@ def call(Map params=[:]) {
                         log.info("post(${env.BRANCH_NAME}): sendEmail(${currentBuild.result})")
                         sendEmail(currentBuild, env, emailAdditionalDistList=emailAdditionalDistList)
                     } else {
-                        log.info("post(${env.BRANCH_NAME}): sendEmail(${currentBuild.result}, 'RequesterRecipientProvider')")
-                        sendEmail(currentBuild, env, [[$class: 'RequesterRecipientProvider']])
+                        log.info("post(${env.BRANCH_NAME}): sendEmail(${currentBuild.result})")
+                        sendEmail(currentBuild, env)
                     }
                     log.info("Empty current workspace dir")
                     cleanWs()
@@ -133,7 +133,7 @@ Map loadPipelineConfig(Logger log, Map params) {
 
 //    config.emailDist = config.emailDist ?: "lee.james.johnson@gmail.com"
     config.emailDist = config.get('emailDist',"lee.james.johnson@gmail.com")
-    config.alwaysEmailDistList = ["ljohnson@dettonville.org"]
+    config.alwaysEmailDistList = ["lee.johnson@dettonville.com"]
 
     // config.alwaysEmailDist = config.alwaysEmailDist ?: "lee.james.johnson@gmail.com"
     config.emailFrom = config.emailFrom ?: "admin+ansible@dettonville.com"

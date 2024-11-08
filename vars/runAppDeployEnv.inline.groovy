@@ -18,13 +18,13 @@ def call(Map config=[:]) {
 appDeployStrategies:
     DAILY_JOBS:
         cronCfg: "H 2 * * *"
-        alwaysEmailList: "ljohnson@dettonville.org, conor.dixon@dettonville.org"
+        alwaysEmailList: "lee.johnson@dettonville.com"
 
 appEnvironments:
     DEV: 
         artifactVersion: "1.63.0-SNAPSHOT"
         appTestEnvironment: DEV
-        alwaysEmailList: "ljohnson@dettonville.org, conor.dixon@dettonville.org"
+        alwaysEmailList: "lee.johnson@dettonville.com"
         araEnvSpecFile: "DCAPI/env_specs/dev_env_spec.json"
 
 ## following section used for demo purposes:

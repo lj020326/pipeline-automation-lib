@@ -58,8 +58,8 @@ pipeline:
 #  logLevel: "DEBUG"
 #  useSimulationMode: true
 
-  alwaysEmailDist: "SIT-engineer@dettonville.org, ljohnson@dettonville.org"
-#  alwaysEmailDist: "ljohnson@dettonville.org"
+  alwaysEmailDist: "SIT-engineer@dettonville.org, lee.johnson@dettonville.com"
+#  alwaysEmailDist: "lee.johnson@dettonville.com"
 
   timeout: 4
   runcount: 5
@@ -126,8 +126,8 @@ config.configFile = 'connectivity-check-defaults.yml'
 //
 // static / other Connectivity Test environmental params
 //
-config.emailDist = "ljohnson@dettonville.org"
-config.alwaysEmailDist = "ljohnson@dettonville.org"
+config.emailDist = "lee.johnson@dettonville.com"
+config.alwaysEmailDist = "lee.johnson@dettonville.com"
 config.sendEmail = false
 config.failFast = false
 
@@ -170,8 +170,8 @@ pipeline:
 #  logLevel: "DEBUG"
 #  useSimulationMode: true
 
-#  emailDist: "ljohnson@dettonville.org"
-#  alwaysEmailDist: "ljohnson@dettonville.org"
+#  emailDist: "lee.johnson@dettonville.com"
+#  alwaysEmailDist: "lee.johnson@dettonville.com"
 #  emailFrom: "DCAPI.TestAutomation@dettonville.org"
 
   timeout: 10

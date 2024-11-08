@@ -223,7 +223,7 @@ def call(Map params=[:]) {
                         sendEmail(currentBuild, env, emailAdditionalDistList=emailAdditionalDistList)
                     } else {
                         log.info("post(${config.gitBranch}): sendEmail(${currentBuild.result}, 'RequesterRecipientProvider')")
-                        sendEmail(currentBuild, env, [[$class: 'RequesterRecipientProvider']])
+                        sendEmail(currentBuild, env)
                     }
                     log.info("Empty current workspace dir")
                     cleanWs()
@@ -262,9 +262,9 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.timeoutUnit = config.get('timeoutUnit', 'HOURS')
     config.tmpDirMaxFileCount = config.get('tmpDirMaxFileCount', 100)
 
-//    config.emailDist = config.emailDist ?: "ljohnson@dettonville.org"
-    config.emailDist = config.get('emailDist',"ljohnson@dettonville.org")
-    // config.alwaysEmailDist = config.alwaysEmailDist ?: "ljohnson@dettonville.org"
+//    config.emailDist = config.emailDist ?: "lee.johnson@dettonville.com"
+    config.emailDist = config.get('emailDist',"lee.johnson@dettonville.com")
+    // config.alwaysEmailDist = config.alwaysEmailDist ?: "lee.johnson@dettonville.com"
     config.emailFrom = config.emailFrom ?: "admin+ansible@dettonville.com"
 
     config.skipDefaultCheckout = config.get('skipDefaultCheckout', false)

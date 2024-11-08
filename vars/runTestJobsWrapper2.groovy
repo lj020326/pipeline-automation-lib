@@ -7,7 +7,7 @@ def ymlConfig='''
 --- 
 pipeline: 
   continueIfFailed: false
-  alwaysEmailList: ljohnson@dettonville.org
+  alwaysEmailList: lee.johnson@dettonville.com
   runInParallel: false
 
   testJobList: 

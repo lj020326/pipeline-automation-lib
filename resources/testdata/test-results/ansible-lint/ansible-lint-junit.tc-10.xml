@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<testsuites>
+    <testsuite errors="1835" failures="0" tests="1835" time="0">
+        <testcase name="roles/bootstrap_windows_firewall-1176">
+            <failure file="roles/bootstrap_windows_firewall" line="1"
+                     message="role-name: Role name ansible-win-firewall does not match ``^*$`` pattern."
+                     type="Ansible Lint">role-name: Role name ansible-win-firewall does not match ``^*$`` pattern.
+            </failure>
+        </testcase>
+    </testsuite>
+</testsuites>

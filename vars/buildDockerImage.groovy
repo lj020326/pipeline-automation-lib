@@ -28,6 +28,12 @@ def call(Map params=[:]) {
 //             label "docker-in-docker"
             label "docker"
         }
+        options {
+            buildDiscarder(logRotator(numToKeepStr: '10'))
+            disableConcurrentBuilds()
+            timestamps()
+            timeout(time: 3, unit: 'HOURS')
+        }
 
         stages {
 			stage('Load docker build config file') {
@@ -43,16 +49,7 @@ def call(Map params=[:]) {
             stage("Build and Publish Docker Image") {
                 steps {
                     script {
-                        config.buildImageList.each { Map buildConfigRaw ->
-                            log.info("buildConfigRaw=${JsonUtils.printToJsonString(buildConfigRaw)}")
-
-//                             Map buildConfig = MapMerge.merge(config.findAll { !["buildImageList"].contains(it.key) }, buildConfigRaw)
-                            Map buildConfig = config.findAll { !["buildImageList"].contains(it.key) } + buildConfigRaw
-
-                            log.info("buildConfig=${JsonUtils.printToJsonString(buildConfig)}")
-
-                            buildAndPublishImage(log, buildConfig)
-                        }
+                        buildAndPublishImages(log, config)
                     }
                 }
             }
@@ -95,7 +92,8 @@ Map loadPipelineConfig(Logger log, Map params) {
     String buildDate = now.format("yyyy-MM-dd", TimeZone.getTimeZone('UTC'))
     log.info("buildDate=${buildDate}")
 
-    String buildId = "${env.BUILD_NUMBER}"
+//     String buildId = "${env.BUILD_NUMBER}"
+    String buildId = "build-${env.BUILD_NUMBER}"
     log.info("buildId=${buildId}")
 
     config.get("buildId", buildId)
@@ -107,6 +105,10 @@ Map loadPipelineConfig(Logger log, Map params) {
         log.setLevel(LogLevel.DEBUG)
     }
     log.info("${logPrefix} log.level=${log.level}")
+
+    config.runGroupsInParallel = config.get('runGroupsInParallel', false)
+    config.runInParallel = config.get('runInParallel', false)
+    config.parallelJobsBatchSize = config.get('parallelJobsBatchSize', 0)
 
     // ref: https://issues.jenkins.io/browse/JENKINS-61372
     List dockerEnvVarsListDefault = [
@@ -120,6 +122,125 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.buildConfigFile = config.get('buildConfigFile', ".jenkins/docker-build-config.yml")
 
     return config
+}
+
+void buildAndPublishImages(Logger log, Map config) {
+    String logPrefix = "buildAndPublishImages():"
+    if (config.containsKey("buildImageGroups")) {
+        buildAndPublishImageGroups(log, config)
+    } else {
+        buildAndPublishImageList(log, config)
+    }
+}
+
+void buildAndPublishImageGroups(Logger log, Map config) {
+    String logPrefix = "buildAndPublishImageGroups():"
+    Map parallelJobs = [:]
+    config.buildImageGroups.each { groupName, groupConfigRaw ->
+
+        log.info("${logPrefix} groupName=${groupName} groupConfigRaw=${JsonUtils.printToJsonString(groupConfigRaw)}")
+
+        // job configs overlay parent settings
+        Map groupConfig = config.findAll { !["buildImageGroups","groups"].contains(it.key) } + groupConfigRaw
+        groupConfig.groupName = groupName
+        String stageName = "build group ${groupName}"
+
+        if (groupConfig?.buildImageList) {
+            if (groupConfig?.runGroupsInParallel && groupConfig.runGroupsInParallel.toBoolean()) {
+                parallelJobs["split-${groupConfig.groupName}"] = {
+                    buildAndPublishImageList(log, groupConfig)
+//                     stage("${stageName}") {
+//                         buildAndPublishImageList(log, groupConfig)
+//                     }
+                }
+            } else {
+                stage("${stageName}") {
+                    buildAndPublishImageList(log, groupConfig)
+                }
+            }
+        }
+    }
+
+    if (parallelJobs.size()>0) {
+        log.info("${logPrefix} parallelJobs=${parallelJobs}")
+        parallel parallelJobs
+        if (config?.parallelJobsBatchSize && config.parallelJobsBatchSize>0) {
+            log.info("${logPrefix} config.parallelJobsBatchSize=${config.parallelJobsBatchSize}")
+            Integer batchSize = config.parallelJobsBatchSize
+            Map parallelJobsBatch = [:]
+            for (String key : parallelJobs.keySet()) {
+                parallelJobsBatch.put(key, parallelJobs.get(key))
+                if (batchSize-- == 1) {
+                    parallel parallelJobsBatch
+                    parallelJobsBatch = [:]
+                }
+            }
+            if ((parallelJobsBatch.keySet()).size()> 1) {
+                parallel parallelJobsBatch
+            }
+
+            log.info("${logPrefix} parallelJobs=${parallelJobs}")
+            parallel parallelJobs
+        } else {
+            log.info("${logPrefix} parallelJobs=${parallelJobs}")
+            parallel parallelJobs
+        }
+    }
+
+    log.info("${logPrefix} finished: result")
+    return
+}
+
+void buildAndPublishImageList(Logger log, Map config) {
+    String logPrefix = "buildAndPublishImageList():"
+    Map parallelJobs = [:]
+    config.buildImageList.each { Map buildConfigRaw ->
+        log.debug("buildConfigRaw=${JsonUtils.printToJsonString(buildConfigRaw)}")
+
+        Map buildConfig = config.findAll { !["buildImageList"].contains(it.key) } + buildConfigRaw
+
+        log.info("buildConfig=${JsonUtils.printToJsonString(buildConfig)}")
+
+        if (buildConfig?.runInParallel && buildConfig.runInParallel.toBoolean()) {
+            parallelJobs["split-${buildConfig.buildImageLabel}"] = {
+                buildAndPublishImage(log, buildConfig)
+//                 stage("build and publish ${buildConfig.buildImageLabel}") {
+//                     buildAndPublishImage(log, buildConfig)
+//                 }
+            }
+        } else {
+            stage("build and publish ${buildConfig.buildImageLabel}") {
+                buildAndPublishImage(log, buildConfig)
+            }
+        }
+    }
+
+    if (parallelJobs.size()>0) {
+        log.info("${logPrefix} parallelJobs=${parallelJobs}")
+        parallel parallelJobs
+        if (config?.parallelJobsBatchSize && config.parallelJobsBatchSize>0) {
+            log.info("${logPrefix} config.parallelJobsBatchSize=${config.parallelJobsBatchSize}")
+            Integer batchSize = config.parallelJobsBatchSize
+            Map parallelJobsBatch = [:]
+            for (String key : parallelJobs.keySet()) {
+                parallelJobsBatch.put(key, parallelJobs.get(key))
+                if (batchSize-- == 1) {
+                    parallel parallelJobsBatch
+                    parallelJobsBatch = [:]
+                }
+            }
+            if ((parallelJobsBatch.keySet()).size()> 1) {
+                parallel parallelJobsBatch
+            }
+
+            log.info("${logPrefix} parallelJobs=${parallelJobs}")
+            parallel parallelJobs
+        } else {
+            log.info("${logPrefix} parallelJobs=${parallelJobs}")
+            parallel parallelJobs
+        }
+    }
+
 }
 
 void buildAndPublishImage(Logger log, Map config) {
@@ -139,10 +260,10 @@ void buildAndPublishImage(Logger log, Map config) {
         config.buildArgs.each { key, value ->
             buildArgs.push("--build-arg ${key}=${value}")
         }
-        if (!config.buildArgs?.buildId) {
+        if (!config.buildArgs?.BUILD_ID) {
             buildArgs.push("--build-arg BUILD_ID=${config.buildId}")
         }
-        if (!config.buildArgs?.buildDate) {
+        if (!config.buildArgs?.BUILD_DATE) {
             buildArgs.push("--build-arg BUILD_DATE=${config.buildDate}")
         }
     } else {
@@ -154,41 +275,33 @@ void buildAndPublishImage(Logger log, Map config) {
     dir (config.buildDir) {
 
         def app
-        String stageName = "build ${config.buildImageLabel}"
-        if (config.buildPath!=".") stageName += " ${config.buildPath}"
-
-        stage("${stageName}") {
-            // ref: https://www.jenkins.io/doc/book/pipeline/docker/
-            if (config?.dockerFile) {
-                buildArgs.push("-f ${config.dockerFile}")
-            }
-            buildArgs.push("${config.buildPath}")
-            if (buildArgs) {
-                String buildArgsString = buildArgs.join(" ")
-                log.info("${logPrefix} buildArgsString=${buildArgsString}")
-                app = docker.build(config.buildImageLabel, buildArgsString)
-            } else {
-                app = docker.build(config.buildImageLabel)
-            }
+        // ref: https://www.jenkins.io/doc/book/pipeline/docker/
+        if (config?.dockerFile) {
+            buildArgs.push("-f ${config.dockerFile}")
+        }
+        buildArgs.push("${config.buildPath}")
+        if (buildArgs) {
+            String buildArgsString = buildArgs.join(" ")
+            log.info("${logPrefix} buildArgsString=${buildArgsString}")
+            app = docker.build(config.buildImageLabel, buildArgsString)
+        } else {
+            app = docker.build(config.buildImageLabel)
         }
 
-        stage("publish ${config.buildImageLabel}") {
-
-            docker.withRegistry(config.registryUrl, config.registryCredId) {
-                withEnv(config.dockerEnvVarsList) {
-                    app.push "${env.BRANCH_NAME}"
-                    if (config?.buildId) {
-                        app.push "${config.buildId}"
-                    } else {
-                        app.push "build-${env.BUILD_NUMBER}"
-                    }
-                    if (config?.buildDate) {
-                        app.push "${config.buildDate}"
-                    }
+        docker.withRegistry(config.registryUrl, config.registryCredId) {
+            withEnv(config.dockerEnvVarsList) {
+                app.push "${env.BRANCH_NAME}"
+                if (config?.buildId) {
+                    app.push "${config.buildId}"
+                } else {
+                    app.push "build-${env.BUILD_NUMBER}"
+                }
+                if (config?.buildDate) {
+                    app.push "${config.buildDate}"
+                }
 //                     app.push "${commit_id}"
-                    if (env.BRANCH_NAME in ['master','main']) {
-                        app.push 'latest'
-                    }
+                if (env.BRANCH_NAME in ['master','main']) {
+                    app.push 'latest'
                 }
             }
         }

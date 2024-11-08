@@ -251,9 +251,9 @@ Map loadPipelineConfig(Logger log, Map params, String configFile=null) {
 //    config.runParallelTests = config.get('runParallelTests', false)
     config.runParallelTests = config.get('runParallelTests', true)
 
-//    config.emailDist = config.emailDist ?: "ljohnson@dettonville.org"
-    config.emailDist = config.get('emailDist',"ljohnson@dettonville.org")
-    config.alwaysEmailDist = config.alwaysEmailDist ?: "ljohnson@dettonville.org"
+//    config.emailDist = config.emailDist ?: "lee.johnson@dettonville.com"
+    config.emailDist = config.get('emailDist',"lee.johnson@dettonville.com")
+    config.alwaysEmailDist = config.alwaysEmailDist ?: "lee.johnson@dettonville.com"
     config.emailFrom = config.emailFrom ?: "DCAPI.TestAutomation@dettonville.org"
 
     config.sendEmail = config.sendEmail ?: false
