@@ -199,7 +199,7 @@ void buildAndPublishImages(Map config) {
 //         List buildImageListDefault = [[ buildDir: config.buildDir, buildImageLabel: config.buildImageLabel]]
 //         config.get("buildImageList", buildImageListDefault)
 //         buildAndPublishImageList(config)
-        jobResult = buildAndPublishImage(buildConfig)
+        jobResult = buildAndPublishImage(config)
     }
     return jobResult
 }
