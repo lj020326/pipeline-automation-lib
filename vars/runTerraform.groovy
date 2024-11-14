@@ -6,16 +6,20 @@ import com.dettonville.api.pipeline.utils.logging.Logger
 import com.dettonville.api.pipeline.utils.DockerUtil
 
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+@Field Logger log = new Logger(this, LogLevel.INFO)
+
 // ref: https://gist.github.com/fortunecookiezen/b3bc3214a07a14529608857d078b32dd
 
 def call(Map params=[:]) {
 
-//    Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this, LogLevel.INFO)
+// //    Logger.init(this, LogLevel.INFO)
+//     Logger log = new Logger(this, LogLevel.INFO)
 
     log.info("Loading Default Configs")
 
-    Map config=loadPipelineConfig(log, params)
+    Map config=loadPipelineConfig(params)
 
     List secretVars = [
         string(credentialsId: 'vmware-vcenter-password', variable: 'VSPHERE_PASSWORD'),
@@ -160,7 +164,7 @@ def call(Map params=[:]) {
 }
 
 //@NonCPS
-Map loadPipelineConfig(Logger log, Map params) {
+Map loadPipelineConfig(Map params) {
     String logPrefix="loadPipelineConfig():"
     Map config = [:]
 

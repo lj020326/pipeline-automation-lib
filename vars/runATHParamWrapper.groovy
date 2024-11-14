@@ -45,7 +45,7 @@ def call(Map config=[:]) {
             debugMvn            : booleanParam(defaultValue: false, description: "Debug Maven?", name: 'DebugMvn'),
             debugPipeline       : booleanParam(defaultValue: false, description: "Debug Pipeline?", name: 'DebugPipeline'),
             logLevel            : choice(choices: "INFO\nDEBUG\nWARN\nERROR", description: "Choose Log Level", name: 'LogLevel'),
-            jenkinsRunTestsLabel: string(defaultValue: "", description: "Specify the Jenkins Test node label\nIf empty - the env is set to default based on env \nE.g., '', 'DEVCLD-LIN7', 'QA-LINUX', 'PROD-LINUX',...'any'", name: 'JenkinsRunTestsLabel')
+            jenkinsRunTestsLabel: string(defaultValue: "", description: "Specify the Jenkins Test node label\nIf empty - the env is set to default based on env\nE.g., '', 'DEVCLD-LIN7', 'QA-LINUX', 'PROD-LINUX',...'any'", name: 'JenkinsRunTestsLabel')
     ]
 
     if (config.enableDevParams) {

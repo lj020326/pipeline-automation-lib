@@ -2,7 +2,7 @@
  * #%L
  * dcapi.dettonville.org
  * %%
- * Copyright (C) 2018 Dettonville DevOps
+ * Copyright (C) 2024 Dettonville DevOps
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

@@ -5,13 +5,17 @@ import com.dettonville.api.pipeline.utils.logging.Logger
 import com.dettonville.api.pipeline.utils.JsonUtils
 //import groovy.json.*
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+@Field Logger log = new Logger(this, LogLevel.INFO)
+
 def call(Map params=[:]) {
 
-//     Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this, LogLevel.INFO)
+// //     Logger.init(this, LogLevel.INFO)
+//     Logger log = new Logger(this, LogLevel.INFO)
 
     log.info("Loading Default Configs")
-    Map config=loadPipelineConfig(log, params)
+    Map config=loadPipelineConfig(params)
 
     def agentLabelM3 = getJenkinsAgentLabel(config.jenkinsM3NodeLabel)
     Map testResults
@@ -40,7 +44,7 @@ def call(Map params=[:]) {
                 steps {
                     script {
                         log.info("Running tests")
-                        testResults = runTestJobs(log, config)
+                        testResults = runTestJobs(config)
                     }
                 }
             }
@@ -103,7 +107,7 @@ def getYamlInt(Map config, String key) {
 }
 
 //@NonCPS
-Map loadPipelineConfig(Logger log, Map params, String configFile=null) {
+Map loadPipelineConfig(Map params, String configFile=null) {
     String logPrefix="loadPipelineConfig():"
     Map config = [:]
 //    config.testJobList = ['SMOKE','SANITY','REGRESSION']
@@ -160,7 +164,7 @@ String createJobId(Map config, i) {
     return (config?.jobId) ? "${config.jobId}.${i+1}" : "job-${i+1}"
 }
 
-Map runTestJobs(Logger log, Map config) {
+Map runTestJobs(Map config) {
     String logPrefix="runTestJobs():"
     log.info("${logPrefix} started")
 
@@ -184,7 +188,7 @@ Map runTestJobs(Logger log, Map config) {
             log.debug("${logPrefix} testStage ${testStage}: resultList=${resultList}")
             log.debug("${logPrefix} testStage ${testStage}: prior stage results=${result}")
             if (result || config.continueIfFailed) {
-                result = runJobs(log, stageConfig)
+                result = runJobs(stageConfig)
                 testResults["${testStage}"] = result
 
                 log.info("${logPrefix} finishing stage ${testStage}: result=${result}")
@@ -199,7 +203,7 @@ Map runTestJobs(Logger log, Map config) {
 
 }
 
-boolean runJobs(Logger log, Map config) {
+boolean runJobs(Map config) {
 
     String logPrefix="runJobs():"
     log.info("${logPrefix} started")
@@ -222,7 +226,7 @@ boolean runJobs(Logger log, Map config) {
         jobConfig.jobId = createJobId(config, i)
 
         if (jobConfig?.jobs) {
-            jobResults.add(runJobs(log, jobConfig))
+            jobResults.add(runJobs(jobConfig))
         }
 
         if (jobConfig?.job) {
@@ -230,10 +234,10 @@ boolean runJobs(Logger log, Map config) {
 
             if (jobConfig?.runInParallel) {
                 parallelJobs["split-${jobConfig.jobId}"] = {
-                    jobResults.add(runJob(log, jobConfig))
+                    jobResults.add(runJob(jobConfig))
                 }
             } else {
-                jobResults.add(runJob(log, jobConfig))
+                jobResults.add(runJob(jobConfig))
             }
         } else {
             jobResults.add(false)
@@ -268,7 +272,7 @@ boolean runJobs(Logger log, Map config) {
     return result
 }
 
-boolean runJob(Logger log, Map config) {
+boolean runJob(Map config) {
 
     String logPrefix="runJob():"
 

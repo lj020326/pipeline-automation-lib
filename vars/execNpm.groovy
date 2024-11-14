@@ -2,7 +2,7 @@
  * #%L
  * dettonville.org
  * %%
- * Copyright (C) 2018 dettonville.org DevOps
+ * Copyright (C) 2024 dettonville.org DevOps
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,10 @@ import org.jenkinsci.plugins.workflow.cps.DSL
 
 import static com.dettonville.api.pipeline.utils.ConfigConstants.*
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+@Field Logger log = new Logger(this, LogLevel.INFO)
+
 /**
  * Executes npm
  * This step implements
@@ -40,7 +44,6 @@ import static com.dettonville.api.pipeline.utils.ConfigConstants.*
  */
 void call(Map config = null) {
     config = config ?: [:]
-    Logger log = new Logger(this)
 
     // retrieve the configuration and set defaults
     Map npmConfig = (Map) config[NPM] ?: [:]
@@ -60,10 +63,10 @@ void call(Map config = null) {
     List configFiles = []
 
     // add config file for NPM_CONF_USERCONFIG if defined
-    addManagedFile(log, scmUrl, ManagedFileConstants.NPM_CONFIG_USERCONFIG_PATH, ManagedFileConstants.NPM_CONF_USERCONFIG_ENV, configFiles)
+    addManagedFile(scmUrl, ManagedFileConstants.NPM_CONFIG_USERCONFIG_PATH, ManagedFileConstants.NPM_CONF_USERCONFIG_ENV, configFiles)
 
     // add config file for NPM_CONF_GLOBALCONFIG if defined
-    addManagedFile(log, scmUrl, ManagedFileConstants.NPMRC_PATH, ManagedFileConstants.NPM_CONF_GLOBALCONFIG_ENV, configFiles)
+    addManagedFile(scmUrl, ManagedFileConstants.NPMRC_PATH, ManagedFileConstants.NPM_CONF_GLOBALCONFIG_ENV, configFiles)
 
     log.debug("configFiles", configFiles)
 
@@ -99,7 +102,7 @@ void call(Map config = null) {
  * @param envVar The environment variable where the configFileProvider should store the path in
  * @param configFiles List of config files where the found file has to be added
  */
-void addManagedFile(Logger log, String scmUrl, String jsonPath, String envVar, List configFiles) {
+void addManagedFile(String scmUrl, String jsonPath, String envVar, List configFiles) {
     try {
         // load and parse the json
         JsonLibraryResource jsonLibraryResource = new JsonLibraryResource(steps, jsonPath)

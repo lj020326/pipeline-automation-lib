@@ -1,4 +1,7 @@
 
+// ref: https://stackoverflow.com/questions/36199072/how-to-get-the-script-name-in-groovy
+String scriptName = this.class.getName()
+
 // ***************************
 // ref: https://github.com/tomasbjerre/jenkins-configuration-as-code-sandbox/blob/master/jobs/applicationRepo.groovy
 

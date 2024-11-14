@@ -6,10 +6,12 @@ import com.dettonville.api.pipeline.utils.logging.LogLevel
 import com.dettonville.api.pipeline.utils.logging.Logger
 import groovy.json.JsonOutput
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+@Field Logger log = new Logger(this, LogLevel.INFO)
+
 timestamps {
 node ('DEVCLD-LIN7') {
-    Logger.init(this, LogLevel.DEBUG)
-    Logger log = new Logger(this)
 
     Map config = [:]
     Map currentState = [:]
@@ -61,7 +63,7 @@ node ('DEVCLD-LIN7') {
         runConfig.parallelRunNumber = 1
 
         node(agentLabelRunTests as String) {
-            runTest(log, runConfig, currentState)
+            runTest(runConfig, currentState)
         }
     }
     testRuns['checkBsAgent'] = {
@@ -70,7 +72,7 @@ node ('DEVCLD-LIN7') {
         runConfig.waitTime = 20
 
         node(agentLabelRunTests as String) {
-            runTest(log, runConfig, currentState)
+            runTest(runConfig, currentState)
         }
     }
 
@@ -111,7 +113,7 @@ def getResourceFile(String fileName) {
     writeFile file: "./${fileName}", text: file
 }
 
-String createBrowserstackLocalIdentifier(Logger log, Map config) {
+String createBrowserstackLocalIdentifier(Map config) {
     String logPrefix="[${config.testCaseLabel}-${config.nodeId}] createBrowserstackLocalIdentifier():"
     String browserstackLocalIdentifier
     if (config.runBsAgentMethod == "PER_RUN") {
@@ -134,7 +136,7 @@ String createBrowserstackLocalIdentifier(Logger log, Map config) {
     return browserstackLocalIdentifier
 }
 
-void runTest(Logger log, Map config, Map currentState) {
+void runTest(Map config, Map currentState) {
     config.nodeId=env.NODE_NAME.replaceAll('-', '')
     config.testCaseLabel=getTestCaseLabel(config)
 
@@ -147,7 +149,7 @@ void runTest(Logger log, Map config, Map currentState) {
     }
 
     if (config.useBrowserstackLocalAgent) {
-        config.browserstackLocalIdentifier=createBrowserstackLocalIdentifier(log, config)
+        config.browserstackLocalIdentifier=createBrowserstackLocalIdentifier(config)
         log.info("${logPrefix} *** ASSIGNED browserstackLocalIdentifier=${config.browserstackLocalIdentifier}")
     }
 
@@ -164,7 +166,7 @@ void runTest(Logger log, Map config, Map currentState) {
 
 // COPY AND PASTE FROM runATH
 
-def getBSAgent(Logger log, Map config) {
+def getBSAgent(Map config) {
     String logPrefix="getBSAgent():"
     if (config.runBsAgentMethod!='PER_RUN') {
         logPrefix="[${config.testCaseLabel}-${config.nodeId}] ${logPrefix}"
@@ -216,9 +218,9 @@ def getBSAgent(Logger log, Map config) {
 //
 // ref: https://janmolak.com/jenkins-2-0-pipelines-and-browserstack-bd5a4ed3010d
 //
-def withBsLocalAgent(Logger log, Map config, Map currentState, def actions) {
+def withBsLocalAgent(Map config, Map currentState, def actions) {
 
-    String logPrefix = "[${config.testCaseLabel}-${config.nodeId}] withBsLocalAgent():"
+    String logPrefix = "${scriptName}->[${config.testCaseLabel}-${config.nodeId}] withBsLocalAgent():"
     log.info("${logPrefix} config.browserstackLocalIdentifier=${config.browserstackLocalIdentifier}")
 
     config.bsPidFile = "${config.bsAgentLogDir}/bsagent-${config.browserstackLocalIdentifier}.pid"
@@ -261,9 +263,9 @@ def withBsLocalAgent(Logger log, Map config, Map currentState, def actions) {
 
         currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].runningRunCount = 1
 
-        getBSAgent(log, config)
+        getBSAgent(config)
 
-        startBSAgent(log, config, currentState)
+        startBSAgent(config, currentState)
 
 //        log.info("${logPrefix} starting -> currentState.nodes[${env.NODE_NAME}].bsLocalAgents[${config.browserstackLocalIdentifier}]=${currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier]}")
         log.debug("${logPrefix} started AGENT -> currentState=${printToJsonString(currentState)}")
@@ -294,7 +296,7 @@ def withBsLocalAgent(Logger log, Map config, Map currentState, def actions) {
             }
         }
         log.info("${logPrefix} checking Bs Agent process status for pid=[${currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].bsAgentPid}]")
-        runBsAgentPsCheck(log, config, currentState, false, true)
+        runBsAgentPsCheck(config, currentState, false, true)
         currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].runningRunCount += 1
     }
 
@@ -308,7 +310,7 @@ def withBsLocalAgent(Logger log, Map config, Map currentState, def actions) {
     } catch (Exception err) {
         log.error("${logPrefix} actions(): exception occurred [${err}]")
         log.info("${logPrefix} checking Bs Agent process status")
-        runBsAgentPsCheck(log, config, currentState, true, true)
+        runBsAgentPsCheck(config, currentState, true, true)
 
 //        sh "cat ${config.bsLogFile}"
         sh "tail -30 ${config.bsLogFile}"
@@ -320,23 +322,23 @@ def withBsLocalAgent(Logger log, Map config, Map currentState, def actions) {
         }
 
         if (config.runBSCurlTest || config.runBsDiagnostics) {
-            runBSCurlTest(log, config)
+            runBSCurlTest(config)
         }
 
         if (config.runBsDiagnostics) {
             log.info("${logPrefix} Including process info in diagnostics")
-            runBsAgentPsCheck(log, config, currentState, true, true)
+            runBsAgentPsCheck(config, currentState, true, true)
         }
 
         if (currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].runningRunCount == 1) {
             if (["PER_RUN", "PER_JOB_RUN"].contains(config.runBsAgentMethod)) {
                 log.info("${logPrefix} last run complete, stopping agent")
-                stopRunningBsAgent(log, config, currentState)
+                stopRunningBsAgent(config, currentState)
             } else if (config.forceShutdownBsAgent) {
                 log.info("${logPrefix} last run complete, forceably stopping agent")
-                stopRunningBsAgent(log, config, currentState)
+                stopRunningBsAgent(config, currentState)
             } else {
-                archiveBsAgentLogs(log, config, currentState)
+                archiveBsAgentLogs(config, currentState)
             }
         }
 
@@ -346,7 +348,7 @@ def withBsLocalAgent(Logger log, Map config, Map currentState, def actions) {
     }
 }
 
-boolean startBSAgent(Logger log, Map config, Map currentState) {
+boolean startBSAgent(Map config, Map currentState) {
     String logPrefix="[${config.testCaseLabel}-${config.nodeId}] startBSAgent():"
     log.info("${logPrefix} starting agent for config.browserstackLocalIdentifier=${config.browserstackLocalIdentifier}")
 
@@ -358,7 +360,7 @@ boolean startBSAgent(Logger log, Map config, Map currentState) {
     }
 
     if (config.cleanupOrphanedBsAgents) {
-        cleanupOrphanedBsAgents(log, config)
+        cleanupOrphanedBsAgents(config)
     }
 
     String pid
@@ -381,11 +383,11 @@ boolean startBSAgent(Logger log, Map config, Map currentState) {
         sh script: "touch ${config.bsDiagLogFile}"
 
         log.debug("${logPrefix} checking Bs Agent process status across all running agents")
-        runBsAgentPsCheck(log, config, currentState, true, true)
+        runBsAgentPsCheck(config, currentState, true, true)
     }
 
     if (pid!=null) {
-        runBsAgentPsCheck(log, config, currentState)
+        runBsAgentPsCheck(config, currentState)
         log.info("${logPrefix} pid file exists and already running -> setting pid on runningAgent map")
         currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].isBsAgentRunning == true
         return true
@@ -457,7 +459,7 @@ boolean startBSAgent(Logger log, Map config, Map currentState) {
             log.error("${logPrefix} checking if running BS process actually exists...")
 
             log.info("${logPrefix} checking Bs Agent process status across running agent for pid")
-            runBsAgentPsCheck(log, config, currentState, false, true)
+            runBsAgentPsCheck(config, currentState, false, true)
 
         }
     }
@@ -465,8 +467,8 @@ boolean startBSAgent(Logger log, Map config, Map currentState) {
 
 }
 
-def stopRunningBsAgent(Logger log, Map config, Map currentState) {
-    String logPrefix = "[${config.testCaseLabel}-${config.nodeId}] stopRunningBsAgent():"
+def stopRunningBsAgent(Map config, Map currentState) {
+    String logPrefix = "${scriptName}->[${config.testCaseLabel}-${config.nodeId}] stopRunningBsAgent():"
 
     log.info("${logPrefix} starting")
 
@@ -488,10 +490,10 @@ def stopRunningBsAgent(Logger log, Map config, Map currentState) {
     }
 
     log.info("${logPrefix} show all BS agent running processes")
-    runBsAgentPsCheck(log, config, currentState, true)
+    runBsAgentPsCheck(config, currentState, true)
 
 //    try {
-//        cleanupOrphanedBsAgents(log, config)
+//        cleanupOrphanedBsAgents(config)
 //    } catch (Exception err) {
 //        log.info("${logPrefix} exception when cleaning up orphaned BS agents [${err}]")
 //    }
@@ -507,7 +509,7 @@ def stopRunningBsAgent(Logger log, Map config, Map currentState) {
         sh "tail -30 ${config.bsLogFile}"
     }
 
-    archiveBsAgentLogs(log, config, currentState)
+    archiveBsAgentLogs(config, currentState)
 
     if (["PER_RUN", "PER_JOB_RUN"].contains(config.runBsAgentMethod)
             || config.forceShutdownBsAgent)
@@ -522,8 +524,8 @@ def stopRunningBsAgent(Logger log, Map config, Map currentState) {
     }
 }
 
-def runBsAgentPsCheck(Logger log, Map config, Map currentState, boolean showAllBsAgents = false, boolean writeToBsDiagLog = false) {
-    String logPrefix = "[${config.testCaseLabel}-${config.nodeId}] runBsAgentPsCheck():"
+def runBsAgentPsCheck(Map config, Map currentState, boolean showAllBsAgents = false, boolean writeToBsDiagLog = false) {
+    String logPrefix = "${scriptName}->[${config.testCaseLabel}-${config.nodeId}] runBsAgentPsCheck():"
     String processInfo
     String processCmd
 
@@ -585,8 +587,8 @@ def runBsAgentPsCheck(Logger log, Map config, Map currentState, boolean showAllB
 
 }
 
-def archiveBsAgentLogs(Logger log, Map config, Map currentState) {
-    String logPrefix = "[${config.testCaseLabel}-${config.nodeId}] archiveBsAgentLogs():"
+def archiveBsAgentLogs(Map config, Map currentState) {
+    String logPrefix = "${scriptName}->[${config.testCaseLabel}-${config.nodeId}] archiveBsAgentLogs():"
 
     log.info("${logPrefix} archiving agent log")
     dir(config.bsAgentLogDir) {
@@ -603,7 +605,7 @@ def archiveBsAgentLogs(Logger log, Map config, Map currentState) {
     }
 }
 
-def cleanupOrphanedBsAgents(Logger log, Map config) {
+def cleanupOrphanedBsAgents(Map config) {
     String logPrefix="[${config.testCaseLabel}-${config.nodeId}] cleanupOrphanedBsAgents():"
     log.info("${logPrefix} starting")
 
@@ -618,7 +620,7 @@ def cleanupOrphanedBsAgents(Logger log, Map config) {
 
 }
 
-def runBSCurlTest(Logger log, Map config) {
+def runBSCurlTest(Map config) {
     String logPrefix="[${config.testCaseLabel}-${config.nodeId}] runBSCurlTest():"
 //    String logFile = "${config.bsAgentLogDir}/bs-diagnostics-${config.testCaseLabel}-${config.nodeId}.log"
 

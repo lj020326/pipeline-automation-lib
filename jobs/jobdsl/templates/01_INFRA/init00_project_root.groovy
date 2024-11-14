@@ -1,5 +1,10 @@
 #!/usr/bin/env groovy
 
+// ref: https://stackoverflow.com/questions/36199072/how-to-get-the-script-name-in-groovy
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+@Field String scriptName = this.class.getName()
+
 // ref: https://github.com/sheehan/job-dsl-gradle-example/blob/master/src/jobs/example4Jobs.groovy
 String projectName = "INFRA"
 
@@ -14,13 +19,13 @@ String pipelineConfigYaml = "config.project-root.yml"
 
 // ref: https://stackoverflow.com/questions/47336502/get-absolute-path-of-the-script-directory-that-is-being-processed-by-job-dsl#47336735
 String configFilePath = "${new File(__FILE__).parent}"
-println("configFilePath: ${configFilePath}")
+println("${scriptName}: configFilePath: ${configFilePath}")
 
 Map seedJobConfigs = new Yaml().load(("${configFilePath}/${pipelineConfigYaml}" as File).text)
-// println("seedJobConfigs=${seedJobConfigs}")
+// println("${scriptName}: seedJobConfigs=${seedJobConfigs}")
 
 Map pipelineConfig = seedJobConfigs.pipelineConfig
-// println("pipelineConfig=${JsonUtils.printToJsonString(pipelineConfig)}")
+// println("${scriptName}: pipelineConfig=${JsonUtils.printToJsonString(pipelineConfig)}")
 
 String pipelineRepoUrl = pipelineConfig.pipelineRepoUrl
 String gitCredentialsId = pipelineConfig.gitCredentialsId
@@ -73,7 +78,7 @@ def jobFolder = folder(projectFolder) {
     }
 }
 
-println("JENKINS_ENV=${JENKINS_ENV}")
+println("${scriptName}: JENKINS_ENV=${JENKINS_ENV}")
 
 if (JENKINS_ENV) {
     Map pipelineEnvConfigs = envConfigs[JENKINS_ENV]

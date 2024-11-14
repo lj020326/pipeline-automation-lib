@@ -12,27 +12,32 @@ import com.dettonville.api.pipeline.utils.JsonUtils
 @Grab('org.yaml:snakeyaml:1.17')
 import org.yaml.snakeyaml.Yaml
 
+// ref: https://stackoverflow.com/questions/36199072/how-to-get-the-script-name-in-groovy
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+@Field String scriptName = this.class.getName()
+
 String pipelineConfigYaml = "config.vm-template-jobs.yml"
 
 // ref: https://stackoverflow.com/questions/47336502/get-absolute-path-of-the-script-directory-that-is-being-processed-by-job-dsl#47336735
 String configFilePath = "${new File(__FILE__).parent}"
-println("configFilePath: ${configFilePath}")
+println("${scriptName}: configFilePath: ${configFilePath}")
 
 Map seedJobConfigs = new Yaml().load(("${configFilePath}/${pipelineConfigYaml}" as File).text)
-// println("seedJobConfigs=${seedJobConfigs}")
+// println("${scriptName}: seedJobConfigs=${seedJobConfigs}")
 
 Map pipelineConfig = seedJobConfigs.pipelineConfig
-// println("pipelineConfig=${JsonUtils.printToJsonString(pipelineConfig)}")
+// println("${scriptName}: pipelineConfig=${JsonUtils.printToJsonString(pipelineConfig)}")
 
 createVmTemplateJobs(this, pipelineConfig)
 
-println("Finished creating vm-template jobs")
+println("${scriptName}: Finished creating vm-template jobs")
 
 //******************************************************
 //  Function definitions from this point forward
 //
 void createVmTemplateJobs(def dsl, Map pipelineConfig) {
-    String logPrefix = "createVmTemplateJobs():"
+    String logPrefix = "${scriptName}->createVmTemplateJobs():"
 
 //     println("${logPrefix} pipelineConfig=${JsonUtils.printToJsonString(pipelineConfig)}")
 
@@ -53,14 +58,14 @@ void createVmTemplateJobs(def dsl, Map pipelineConfig) {
                        getEnvVars()
 
     if (!envVars?.JENKINS_ENV) {
-        println("JENKINS_ENV not defined - skipping vm-templates project definition")
+        println("${scriptName}: JENKINS_ENV not defined - skipping vm-templates project definition")
         return
     }
 
     String jenkinsEnv = envVars.JENKINS_ENV
 
     if (!runEnvMap.containsKey(jenkinsEnv)) {
-        println("key for JENKINS_ENV=${jenkinsEnv} not found in `runEnvMap` project definition, skipping vm-template-jobs build")
+        println("${scriptName}: key for JENKINS_ENV=${jenkinsEnv} not found in `runEnvMap` project definition, skipping vm-template-jobs build")
         return
     }
 
@@ -204,7 +209,7 @@ void createVmTemplateJobs(def dsl, Map pipelineConfig) {
             }
             // ref: https://stackoverflow.com/questions/62760438/jenkins-job-dsl-trigger-is-deprecated
             if (templateConfigs?.cronSpecification) {
-                println("adding to job cronSpecification=[${templateConfigs?.cronSpecification}]")
+                println("${scriptName}: adding to job cronSpecification=[${templateConfigs?.cronSpecification}]")
                 jobObject.properties {
                     pipelineTriggers {
                         triggers {
@@ -252,7 +257,7 @@ void createVmTemplateJobs(def dsl, Map pipelineConfig) {
 
                 // ref: https://stackoverflow.com/questions/62760438/jenkins-job-dsl-trigger-is-deprecated
                 if (jobConfigs?.cronSpecification) {
-                    println("adding to job cronSpecification=[${jobConfigs?.cronSpecification}]")
+                    println("${scriptName}: adding to job cronSpecification=[${jobConfigs?.cronSpecification}]")
                     envJobsObject.properties {
                         pipelineTriggers {
                             triggers {

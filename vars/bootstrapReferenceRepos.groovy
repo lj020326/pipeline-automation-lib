@@ -9,13 +9,16 @@ import com.dettonville.api.pipeline.utils.logging.Logger
 import com.dettonville.api.pipeline.utils.Utilities
 import com.dettonville.api.pipeline.utils.JsonUtils
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+@Field Logger log = new Logger(this, LogLevel.INFO)
 
 def call(Map params=[:]) {
 
     Logger.init(this, LogLevel.INFO)
     Logger log = new Logger(this)
 
-    Map config = loadPipelineConfig(log, params)
+    Map config = loadPipelineConfig(params)
 
     String baseDir = "/var/jenkins_home/git_repo_references"
     String gitCredentialsId = "bitbucket-ssh-jenkins"
@@ -85,7 +88,7 @@ def call(Map params=[:]) {
 }
 
 //@NonCPS
-Map loadPipelineConfig(Logger log, Map params) {
+Map loadPipelineConfig(Map params) {
     String logPrefix="loadPipelineConfig():"
     Map config = [:]
 

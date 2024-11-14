@@ -12,10 +12,9 @@ import groovy.json.JsonOutput
 // ref: https://cd.dettonville.int/jenkins/job/DCAPI/job/DeploymentJobs/job/DeployFrontendStage/job/main/lastCompletedBuild/api/json?pretty=true
 // ref: https://cd.dettonville.int/jenkins/job/DCAPI/job/DeploymentJobs/job/DeployFrontendStage/job/main/721/api/json?pretty=true
 
-
-Logger.init(this, LogLevel.INFO)
-//Logger.init(this, LogLevel.DEBUG)
-Logger log = new Logger(this)
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+@Field Logger log = new Logger(this, LogLevel.INFO)
 
 BuildApiUtils buildApiUtils = new BuildApiUtils(this)
 JsonUtils jsonUtils = new JsonUtils(this)
@@ -125,7 +124,7 @@ node ('QA-LINUX || PROD-LINUX') {
         componentConfig.jobBaseUri += "/${componentConfig.deployJobName}/job/${componentConfig.branch}"
         componentConfig.buildResultsFileName=componentConfig.deployJobName
         log.debug("componentConfig=${JsonUtils.printToJsonString(componentConfig)}")
-        componentDiffResults.add(getBuildDiffs(log, buildApiUtils, jsonUtils, componentConfig))
+        componentDiffResults.add(getBuildDiffs(buildApiUtils, jsonUtils, componentConfig))
     }
 
     deployJobDiffResults.componentDiffResults = componentDiffResults
@@ -142,8 +141,8 @@ node ('QA-LINUX || PROD-LINUX') {
     cleanWs()
 }
 
-Map getBuildDiffs(Logger log, BuildApiUtils buildApiUtils, JsonUtils jsonUtils, Map config) {
-    String logPrefix = "getBuildDiffs():"
+Map getBuildDiffs(BuildApiUtils buildApiUtils, JsonUtils jsonUtils, Map config) {
+    String logPrefix = "${scriptName}->getBuildDiffs():"
     List diffs = []
 
 //    Map buildResults1 = buildApiUtils.getBuildResults(jobBaseUri, "721")

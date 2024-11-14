@@ -24,7 +24,7 @@ The jenkins environment is set-up using config-as-code.
 
 The jenkins controller is a docker container instance.
 
-The projects seedjob job definition for the controllers/agents for all jenkins projects_ is located in the [seedjobs.groovy](https://github.com/lj020326/ansible-datacenter/blob/main/roles/docker-stack/templates/jenkins_jcac/job_dsl/seedjob.groovy).  
+The projects seedjob job definition for the controllers/agents for all jenkins projects_ is located in the [seedjobs.groovy](https://github.com/lj020326/ansible-datacenter/blob/main/roles/bootstrap_docker_stack/templates/jenkins_jcac/job_dsl/seedjob.groovy).  
 
 As can be seen, the projects seedjob logic sources all of the project definitions from the [jenkins repo jobs/jobdsl/templates folder](https://github.com/lj020326/pipeline-automation-lib/tree/main/jobs/jobdsl/templates/). 
 
@@ -36,7 +36,7 @@ This allows for handling the configurations for use cases where prior job depend
 
 For example, the __01_INFRA__ team project configuration for the project root folder with name `jobs/jobdsl/templates/01_INFRA/init00_project_root.groovy` will run before any of the other DSL job definitions with higher numbering in the same folder.
 
-Each jenkins controller instance has a [project updates pipeline job](https://cicd01.dev.example.int/jenkins/job/ADMIN/job/bootstrap-projects/) that runs the [seedjobs.groovy](https://github.com/lj020326/ansible-datacenter/blob/main/roles/docker-stack/templates/jenkins_jcac/job_dsl/seedjob.groovy) __every 30 minutes__.
+Each jenkins controller instance has a [project updates pipeline job](https://cicd01.dev.example.int/jenkins/job/ADMIN/job/bootstrap-projects/) that runs the [seedjobs.groovy](https://github.com/lj020326/ansible-datacenter/blob/main/roles/bootstrap_docker_stack/templates/jenkins_jcac/job_dsl/seedjob.groovy) __every 30 minutes__.
 
 ### Initial project folder provisioning steps
 
@@ -160,7 +160,7 @@ The jenkins environment is set-up using config-as-code.
 
 The jenkins controller is a docker container instance.
 
-The ansible role [`docker-stack`](https://github.com/lj020326/ansible-datacenter/blob/main/roles/docker_stack/README.md) sets up the docker container and any configurations used by the container. 
+The ansible role [`bootstrap_docker_stack`](https://github.com/lj020326/ansible-datacenter/blob/main/roles/docker_stack/README.md) sets up the docker container and any configurations used by the container. 
 
 The credential settings are referenced in the following code locations:
 - [jenkins_casc.yml.j2](https://github.com/lj020326/ansible-datacenter/blob/main/roles/docker_stack/templates/jenkins_jcac/jenkins_casc.yml.j2)

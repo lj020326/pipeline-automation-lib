@@ -1,7 +1,16 @@
 
+// ref: https://stackoverflow.com/questions/36199072/how-to-get-the-script-name-in-groovy
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+@Field String scriptName = this.class.getName()
+
 String baseFolder = "INFRA"
 
+println("${scriptName}: JENKINS_ENV=${JENKINS_ENV}")
+
 jobFolder = "${baseFolder}/bootstrap-reference-repos"
+
+println("${scriptName}: Creating ${jobFolder} job")
 
 pipelineJob(jobFolder) {
     parameters {
@@ -21,7 +30,9 @@ pipelineJob(jobFolder) {
     }
 }
 
+
 jobFolder = "${baseFolder}/bootstrap-all-reference-repos"
+println("${scriptName}: Creating ${jobFolder} job")
 
 pipelineJob(jobFolder) {
     definition {
@@ -36,7 +47,9 @@ pipelineJob(jobFolder) {
             sandbox()
         }
     }
-    triggers {
-      cron('@midnight')
-    }
+//     triggers {
+//       cron('@midnight')
+//     }
 }
+
+println("${scriptName}: Finished creating reference repo jobs")

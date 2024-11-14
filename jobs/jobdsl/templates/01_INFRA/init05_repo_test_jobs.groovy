@@ -12,43 +12,48 @@ import com.dettonville.api.pipeline.utils.MapMerge
 @Grab('org.yaml:snakeyaml:1.17')
 import org.yaml.snakeyaml.Yaml
 
+// ref: https://stackoverflow.com/questions/36199072/how-to-get-the-script-name-in-groovy
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+@Field String scriptName = this.class.getName()
+
 String pipelineConfigYaml = "config.repo-test-jobs.yml"
 
 // ref: https://stackoverflow.com/questions/47336502/get-absolute-path-of-the-script-directory-that-is-being-processed-by-job-dsl#47336735
 String configFilePath = "${new File(__FILE__).parent}"
-println("configFilePath: ${configFilePath}")
+println("${scriptName}: configFilePath: ${configFilePath}")
 
 Map seedJobConfigs = new Yaml().load(("${configFilePath}/${pipelineConfigYaml}" as File).text)
-// println("seedJobConfigs=${seedJobConfigs}")
+// println("${scriptName}: seedJobConfigs=${seedJobConfigs}")
 
 Map basePipelineConfig = seedJobConfigs.pipelineConfig
-println("basePipelineConfig=${basePipelineConfig}")
+println("${scriptName}: basePipelineConfig=${basePipelineConfig}")
 
 String baseFolder = basePipelineConfig.baseFolder
 List yamlProjectConfigList = basePipelineConfig.yamlProjectConfigList
 
-println("yamlProjectConfigList=${yamlProjectConfigList}")
+println("${scriptName}: yamlProjectConfigList=${yamlProjectConfigList}")
 
 yamlProjectConfigList.each { Map projectConfig ->
     String projectConfigYamlFile = projectConfig.pipelineConfigYaml
-    println("Creating Repo Test Jobs for ${projectConfigYamlFile}")
+    println("${scriptName}: Creating Repo Test Jobs for ${projectConfigYamlFile}")
 
     Map repoTestJobConfigs = new Yaml().load(("${configFilePath}/${projectConfigYamlFile}" as File).text)
-    // println("seedJobConfigs=${repoTestJobConfigs}")
+    // println("${scriptName}: seedJobConfigs=${repoTestJobConfigs}")
 
     Map pipelineConfig = repoTestJobConfigs.pipelineConfig
-//     println("pipelineConfig=${JsonUtils.printToJsonString(pipelineConfig)}")
+//     println("${scriptName}: pipelineConfig=${JsonUtils.printToJsonString(pipelineConfig)}")
 
     createRepoTestJobs(this, pipelineConfig)
 
 }
-println("Finished creating repo test jobs")
+println("${scriptName}: Finished creating repo test jobs")
 
 //******************************************************
 //  Function definitions from this point forward
 //
 void createRepoTestJobs(def dsl, Map repoJobConfigs) {
-    String logPrefix = "createRepoTestJobs():"
+    String logPrefix = "${scriptName}->createRepoTestJobs():"
 
 //     println("${logPrefix} repoJobConfigs=${JsonUtils.printToJsonString(repoJobConfigs)}")
 
@@ -135,14 +140,14 @@ void createRepoTestJobs(def dsl, Map repoJobConfigs) {
             buildButton()
         }
     }
-    println("Finished creating repo test jobs")
+    println("${scriptName}: Finished creating repo test jobs")
 }
 
 void createTestJobs(dsl, Map testJobConfigs) {
 
     String jobFolder = testJobConfigs.jobFolder
 
-    String logPrefix = "createTestJobs(${jobFolder}):"
+    String logPrefix = "${scriptName}->createTestJobs(${jobFolder}):"
 
 //     println("${logPrefix} testJobConfigs=${JsonUtils.printToJsonString(testJobConfigs)}")
 
@@ -212,7 +217,7 @@ void createTestJobs(dsl, Map testJobConfigs) {
 }
 
 def createMultibranchPipelineJobNoAutoBuilds(def dsl, String jobFolder, Map jobConfigs) {
-    String logPrefix = "createMultibranchPipelineJobNoAutoBuilds(${jobConfigs.jobName}):"
+    String logPrefix = "${scriptName}->createMultibranchPipelineJobNoAutoBuilds(${jobConfigs.jobName}):"
 
     println("${logPrefix} jobConfigs=${JsonUtils.printToJsonString(jobConfigs)}")
 
@@ -363,7 +368,7 @@ def createMultibranchPipelineJobNoAutoBuilds(def dsl, String jobFolder, Map jobC
 }
 
 def createMultibranchPipelineJobAutoBuilds(def dsl, String jobFolder, Map jobConfigs) {
-    String logPrefix = "createMultibranchPipelineJobAutoBuilds(${jobConfigs.jobName}):"
+    String logPrefix = "${scriptName}->createMultibranchPipelineJobAutoBuilds(${jobConfigs.jobName}):"
 
     println("${logPrefix} jobConfigs=${JsonUtils.printToJsonString(jobConfigs)}")
 
@@ -452,7 +457,7 @@ def createMultibranchPipelineJobAutoBuilds(def dsl, String jobFolder, Map jobCon
 
 
 def createMultibranchPipelineJobBranchAutoBuilds(def dsl, String jobFolder, Map jobConfigs) {
-    String logPrefix = "createMultibranchPipelineJobBranchAutoBuilds(${jobConfigs.jobName}):"
+    String logPrefix = "${scriptName}->createMultibranchPipelineJobBranchAutoBuilds(${jobConfigs.jobName}):"
 
     println("${logPrefix} jobConfigs=${JsonUtils.printToJsonString(jobConfigs)}")
 
@@ -549,7 +554,7 @@ def createMultibranchPipelineJobBranchAutoBuilds(def dsl, String jobFolder, Map 
 
 void createTestJob(def dsl, Map jobConfigs) {
     String jobFolder = jobConfigs.jobFolder
-    String logPrefix = "createTestJob(${jobConfigs.jobFolder}, ${jobConfigs.jobName}):"
+    String logPrefix = "${scriptName}->createTestJob(${jobConfigs.jobFolder}, ${jobConfigs.jobName}):"
 
     println("${logPrefix} jobConfigs=${JsonUtils.printToJsonString(jobConfigs)}")
 
@@ -636,7 +641,7 @@ void createTestJob(def dsl, Map jobConfigs) {
 }
 
 void initTestJobs(def dsl, String jobFolder, Map jobConfigs) {
-    String logPrefix = "initTestJobs():"
+    String logPrefix = "${scriptName}->initTestJobs():"
 
     println("${logPrefix} jobConfigs=${JsonUtils.printToJsonString(jobConfigs)}")
 
