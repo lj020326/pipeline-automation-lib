@@ -10,6 +10,7 @@ import com.dettonville.api.pipeline.utils.logging.Logger
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field
 @Field Logger log = new Logger(this, LogLevel.INFO)
+@Field List jobResults = []
 
 // ref: https://blog.nimbleci.com/2016/08/31/how-to-build-docker-images-automatically-with-jenkins-pipeline/
 // ref: https://mike42.me/blog/2019-05-how-to-integrate-gitea-and-jenkins
@@ -32,7 +33,7 @@ def call(Map params=[:]) {
             label "docker"
         }
         options {
-            buildDiscarder(logRotator(numToKeepStr: '10'))
+            buildDiscarder(logRotator(numToKeepStr: '20'))
             disableConcurrentBuilds()
 //             skipDefaultCheckout()
             timestamps()
@@ -76,6 +77,8 @@ def call(Map params=[:]) {
                     } else {
                         sendEmail(currentBuild, env)
                     }
+                    log.info("Empty current workspace dir")
+                    cleanWs()
                 }
             }
             success {
@@ -128,9 +131,9 @@ Map loadPipelineConfig(Map params) {
     config.timeoutUnit = config.get('timeoutUnit', "HOURS")
     config.debugPipeline = config.get('debugPipeline', false)
     config.continueIfFailed = config.get('continueIfFailed', false)
-    config.failFast = config.get('failFast', true)
+    config.failFast = config.get('failFast', false)
 
-    config.childJobTimeout = config.get('childJobTimeout', "3")
+    config.childJobTimeout = config.get('childJobTimeout', "4")
     config.childJobTimeoutUnit = config.get('childJobTimeoutUnit', "HOURS")
 
 //     config.get("gitCredentialsId", "bitbucket-ssh-jenkins")
@@ -188,8 +191,23 @@ Map loadPipelineConfig(Map params) {
     return config
 }
 
-void buildAndPublishImages(Map config) {
+Map loadPipelineConfigFile(Map config) {
+    String logPrefix="loadPipelineConfigFile():"
+
+    Map dockerBuildConfigMap = readYaml file: config.buildConfigFile
+
+    Map buildConfigs=dockerBuildConfigMap.pipeline
+    log.info("${logPrefix} buildConfigs=${JsonUtils.printToJsonString(buildConfigs)}")
+
+    config = config + buildConfigs
+
+    log.info("${logPrefix} Merged config=${JsonUtils.printToJsonString(config)}")
+    return config
+}
+
+boolean buildAndPublishImages(Map config) {
     String logPrefix = "buildAndPublishImages():"
+
     boolean jobResult
     if (config?.buildImageGroups) {
         jobResult = buildAndPublishImageGroups(config)
@@ -199,15 +217,24 @@ void buildAndPublishImages(Map config) {
 //         List buildImageListDefault = [[ buildDir: config.buildDir, buildImageLabel: config.buildImageLabel]]
 //         config.get("buildImageList", buildImageListDefault)
 //         buildAndPublishImageList(config)
-        jobResult = buildAndPublishImage(config)
+        jobResult = runBuildAndPublishImageJob(config)
     }
+//     if (!jobResult && (config.failFast || !config.continueIfFailed)) {
+//         currentBuild.result = 'FAILURE'
+//         log.info("${logPrefix} config.continueIfFailed=${config.continueIfFailed}")
+//         log.info("${logPrefix} config.failFast=${config.failFast}")
+//         log.info("${logPrefix} results failed - not running any more jobs")
+//     }
+
     return jobResult
 }
 
 boolean buildAndPublishImageGroups(Map config) {
     String logPrefix = "buildAndPublishImageGroups():"
     Map parallelGroups = [:]
-    List jobResults = []
+//     List jobResults = []
+
+    boolean jobResult
     config.buildImageGroups.each { groupName, groupConfigRaw ->
 
         log.info("${logPrefix} groupName=${groupName} groupConfigRaw=${JsonUtils.printToJsonString(groupConfigRaw)}")
@@ -220,13 +247,11 @@ boolean buildAndPublishImageGroups(Map config) {
 
         if (config?.runGroupsInParallel && config.runGroupsInParallel.toBoolean()) {
             parallelGroups["split-${groupConfig.groupName}"] = {
-                boolean jobResult = buildAndPublishImages(groupConfig)
-                jobResults.add(jobResult)
+                jobResult = buildAndPublishImages(groupConfig)
             }
         } else {
             stage("${stageName}") {
-                boolean jobResult = buildAndPublishImages(groupConfig)
-                jobResults.add(jobResult)
+                jobResult = buildAndPublishImages(groupConfig)
             }
         }
     }
@@ -236,13 +261,15 @@ boolean buildAndPublishImageGroups(Map config) {
         parallel parallelGroups
     }
 
-    // ref: https://stackoverflow.com/questions/18380667/join-list-of-boolean-elements-groovy
-    //boolean jobResult = (false in jobResults) ? false : true
-    boolean jobResult = (jobResults.size()>0) ? jobResults.inject { a, b -> a && b } : true
-    if (!config.continueIfFailed && jobResults.size()>0 && !jobResult) {
-        currentBuild.result = 'FAILURE'
-        log.info("${logPrefix} continueIfFailed is false and results failed - not running any more jobs")
-    }
+//     // ref: https://stackoverflow.com/questions/18380667/join-list-of-boolean-elements-groovy
+// //     boolean jobResult = (false in jobResults) ? false : true
+// //     boolean jobResult = (jobResults.size()>0) ? jobResults.inject { a, b -> a && b } : true
+//     if (!jobResult && (config.failFast || !config.continueIfFailed)) {
+//         currentBuild.result = 'FAILURE'
+//         log.info("${logPrefix} config.continueIfFailed=${config.continueIfFailed}")
+//         log.info("${logPrefix} config.failFast=${config.failFast}")
+//         log.info("${logPrefix} results failed - not running any more jobs")
+//     }
 
     log.info("${logPrefix} finished: jobResult=${jobResult}")
     return jobResult
@@ -251,7 +278,7 @@ boolean buildAndPublishImageGroups(Map config) {
 boolean buildAndPublishImageList(Map config) {
     String logPrefix = "buildAndPublishImageList():"
     Map parallelJobs = [:]
-    List jobResults = []
+//     List jobResults = []
     config.buildImageList.each { Map buildConfigRaw ->
         log.debug("${logPrefix} buildConfigRaw=${JsonUtils.printToJsonString(buildConfigRaw)}")
 
@@ -261,23 +288,25 @@ boolean buildAndPublishImageList(Map config) {
 
         if (config?.runInParallel && config.runInParallel.toBoolean()) {
             parallelJobs["split-${buildConfig.buildImageLabel}"] = {
-                boolean jobResult = buildAndPublishImage(buildConfig)
-                jobResults.add(jobResult)
-                if (!jobResult && config?.failFast && config.failFast.toBoolean()) {
-                    currentBuild.result = 'FAILURE'
-                    log.info("${logPrefix} results failed and config.failFast is set - stopping immediately")
-                    return jobResult
-                }
+                jobResults.add(buildAndPublishImages(buildConfig))
+//                 boolean jobResult = runBuildAndPublishImageJob(buildConfig)
+//                 jobResults.add(jobResult)
+//                 if (!jobResult && config.failFast) {
+//                     currentBuild.result = 'FAILURE'
+//                     log.info("${logPrefix} results failed and config.failFast is set - stopping immediately")
+//                     return jobResult
+//                 }
             }
         } else {
             stage("build and publish ${buildConfig.buildImageLabel}") {
-                boolean jobResult = buildAndPublishImage(buildConfig)
-                jobResults.add(jobResult)
-                if (!jobResult && config?.failFast && config.failFast.toBoolean()) {
-                    currentBuild.result = 'FAILURE'
-                    log.info("${logPrefix} results failed and config.failFast is set - stopping immediately")
-                    return jobResult
-                }
+                jobResults.add(buildAndPublishImages(buildConfig))
+//                 boolean jobResult = runBuildAndPublishImageJob(buildConfig)
+//                 jobResults.add(jobResult)
+//                 if (!jobResult && config.failFast) {
+//                     currentBuild.result = 'FAILURE'
+//                     log.info("${logPrefix} results failed and config.failFast is set - stopping immediately")
+//                     return jobResult
+//                 }
             }
         }
     }
@@ -307,19 +336,30 @@ boolean buildAndPublishImageList(Map config) {
     // ref: https://stackoverflow.com/questions/18380667/join-list-of-boolean-elements-groovy
     //boolean jobResult = (false in jobResults) ? false : true
     boolean jobResult = (jobResults.size()>0) ? jobResults.inject { a, b -> a && b } : true
-    if (!config.continueIfFailed && jobResults.size()>0 && !jobResult) {
-        currentBuild.result = 'FAILURE'
-        log.info("${logPrefix} continueIfFailed is false and results failed - not running any more jobs")
-    }
+//     if (!jobResult && (config.failFast || !config.continueIfFailed)) {
+//         currentBuild.result = 'FAILURE'
+//         log.info("${logPrefix} config.continueIfFailed=${config.continueIfFailed}")
+//         log.info("${logPrefix} config.failFast=${config.failFast}")
+//         log.info("${logPrefix} results failed - not running any more jobs")
+//     }
     log.info("${logPrefix} finished: jobResult=${jobResult}")
     return jobResult
 }
 
-boolean buildAndPublishImage(Map config) {
-    String logPrefix="buildAndPublishImage(${config.buildImageLabel}):"
+boolean runBuildAndPublishImageJob(Map config) {
+    String logPrefix="runBuildAndPublishImageJob(${config.buildImageLabel}):"
     log.info("${logPrefix} started")
 
     log.debug("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+
+    boolean priorJobResults = (jobResults.size()>0) ? jobResults.inject { a, b -> a && b } : true
+    if (!priorJobResults && (config.failFast || !config.continueIfFailed)) {
+        currentBuild.result = 'FAILURE'
+        log.info("${logPrefix} config.continueIfFailed=${config.continueIfFailed}")
+        log.info("${logPrefix} config.failFast=${config.failFast}")
+        log.info("${logPrefix} current results are FAILED - not running any more jobs")
+        return priorJobResults
+    }
 
     String gitCommitId = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
 //     sh "git rev-parse HEAD > .git/commit-id"
@@ -407,20 +447,14 @@ boolean buildAndPublishImage(Map config) {
 
     log.info("${logPrefix} jobConfigs=${JsonUtils.printToJsonString(jobConfigs)}")
     boolean jobResult = runJob(jobConfigs)
+
+    if (!jobResult && (config.failFast || !config.continueIfFailed)) {
+        currentBuild.result = 'FAILURE'
+        log.info("${logPrefix} config.continueIfFailed=${config.continueIfFailed}")
+        log.info("${logPrefix} config.failFast=${config.failFast}")
+        log.info("${logPrefix} results failed - not running any more jobs")
+    }
+
     log.info("${logPrefix} runJob(): jobResult=${jobResult}")
     return jobResult
-}
-
-Map loadPipelineConfigFile(Map config) {
-    String logPrefix="loadPipelineConfigFile():"
-
-    Map dockerBuildConfigMap = readYaml file: config.buildConfigFile
-
-    Map buildConfigs=dockerBuildConfigMap.pipeline
-    log.info("${logPrefix} buildConfigs=${JsonUtils.printToJsonString(buildConfigs)}")
-
-    config = config + buildConfigs
-
-    log.info("${logPrefix} Merged config=${JsonUtils.printToJsonString(config)}")
-    return config
 }

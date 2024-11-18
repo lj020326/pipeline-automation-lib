@@ -54,7 +54,7 @@ void createDockerJobs(def dsl) {
         definition {
             logRotator {
                daysToKeep(-1)
-               numToKeep(10)
+               numToKeep(40)
                artifactNumToKeep(-1)
                artifactDaysToKeep(-1)
             }

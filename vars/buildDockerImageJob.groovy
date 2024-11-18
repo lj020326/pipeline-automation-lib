@@ -40,8 +40,8 @@ def call() {
         changedEmailList: string(defaultValue: "", description: "Specify the email recipients for job 'changed' status", name: 'ChangedEmailList'),
         alwaysEmailList: string(defaultValue: "", description: "Specify the email recipients for job 'always' status", name: 'AlwaysEmailList'),
         failedEmailList: string(defaultValue: "", description: "Specify the email recipients for job 'failed' status", name: 'FailedEmailList'),
-        timeout: string(defaultValue: "1", description: "Specify the job timeout", name: 'Timeout'),
-        timeoutUnit: string(defaultValue: "HOURS", description: "Specify the job timeout unit (HOURS, MINUTES, etc)", name: 'TimeoutUnit'),
+        timeout: string(defaultValue: "4", description: "Specify the job timeout", name: 'Timeout'),
+        timeoutUnit: string(defaultValue: "HOURS", description: "Specify the job timeout unit (HOURS, MINUTES, etc)", name: 'TimeoutUnit')
     ]
 
     paramMap.each { String key, def param ->
@@ -64,7 +64,7 @@ def call() {
         }
         options {
             skipDefaultCheckout()
-            buildDiscarder(logRotator(numToKeepStr: '20'))
+            buildDiscarder(logRotator(numToKeepStr: '40'))
             timestamps()
             timeout(time: config.timeout as Integer, unit: config.timeoutUnit)
             // depends on 'throttle-concurrents' plugin
@@ -103,26 +103,55 @@ def call() {
             always {
                 script {
                     List emailAdditionalDistList = []
-                    if (config?.gitRepoBranch) {
-                        if (config.gitRepoBranch in ['main','QA','PROD'] || config.gitRepoBranch.startsWith("release/")) {
-                            if (config?.deployEmailDistList) {
+                    if (config?.deployEmailDistList) {
+                        if (config?.gitRepoBranch) {
+                            if (config.gitRepoBranch in ['main','QA','PROD'] || config.gitRepoBranch.startsWith("release/")) {
                                 emailAdditionalDistList = config.deployEmailDistList
                                 log.info("post(${config?.gitRepoBranch}): sendEmail(${currentBuild.result})")
                                 sendEmail(currentBuild, env, emailAdditionalDistList=emailAdditionalDistList)
                             }
-                        } else if (config.gitRepoBranch in ['development']) {
-                            if (config?.alwaysEmailDistList) {
-                                emailAdditionalDistList = config.alwaysEmailDistList
-                                log.info("post(${config?.gitRepoBranch}): sendEmail(${currentBuild.result})")
-                                sendEmail(currentBuild, env, emailAdditionalDistList=emailAdditionalDistList)
-                            }
                         }
+                    } else if (config?.alwaysEmailList) {
+                        log.info("config.alwaysEmailList=${config.alwaysEmailList}")
+                        sendEmail(currentBuild, env, emailAdditionalDistList=[config.alwaysEmailList.split(",")])
                     } else {
-                        log.info("post(${config?.gitRepoBranch}): sendEmail(${currentBuild.result}, 'RequesterRecipientProvider')")
+                        log.info("sendEmail default")
                         sendEmail(currentBuild, env)
                     }
                     log.info("Empty current workspace dir")
                     cleanWs()
+                }
+            }
+            success {
+                script {
+                    if (config?.successEmailList) {
+                        log.info("config.successEmailList=${config.successEmailList}")
+                        sendEmail(currentBuild, env, emailAdditionalDistList=[config.successEmailList.split(",")])
+                    }
+                }
+            }
+            failure {
+                script {
+                    if (config?.failedEmailList) {
+                        log.info("config.failedEmailList=${config.failedEmailList}")
+                        sendEmail(currentBuild, env, emailAdditionalDistList=[config.failedEmailList.split(",")])
+                    }
+                }
+            }
+            aborted {
+                script {
+                    if (config?.failedEmailList) {
+                        log.info("config.failedEmailList=${config.failedEmailList}")
+                        sendEmail(currentBuild, env, emailAdditionalDistList=[config.failedEmailList.split(",")])
+                    }
+                }
+            }
+            changed {
+                script {
+                    if (config?.changedEmailList) {
+                        log.info("config.changedEmailList=${config.changedEmailList}")
+                        sendEmail(currentBuild, env, emailAdditionalDistList=[config.changedEmailList.split(",")])
+                    }
                 }
             }
         }
