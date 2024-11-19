@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<testsuites>
+    <testsuite errors="1835" failures="0" tests="1835" time="0">
+        <testcase name="roles/bootstrap_netbootxyz-280">
+            <failure file="roles/bootstrap_netbootxyz" line="1"
+                     message="internal-error: Unexpected error code 4 from execution of: ansible-playbook -i localhost, --syntax-check /tmp/play4j5dz855.yml"
+                     type="Ansible Lint">internal-error: Unexpected error code 4 from execution of: ansible-playbook -i
+                localhost, --syntax-check /tmp/play4j5dz855.yml
+            </failure>
+        </testcase>
+    </testsuite>
+</testsuites>

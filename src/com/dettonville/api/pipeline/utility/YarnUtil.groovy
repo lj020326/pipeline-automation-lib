@@ -3,7 +3,7 @@ package com.dettonville.api.pipeline.utility
 /**
  * Utility to install dependencies with Yarn
  * Re-Writes the lock file url's to work with artifacory
- * @Author brent.bevolo@dettonville.org
+ * @Author brent.bevolo@dettonville.com
  */
 class YarnUtil implements Serializable {
   def steps

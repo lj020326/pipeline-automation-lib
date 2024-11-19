@@ -2,7 +2,7 @@
  * #%L
  * dettonville.org
  * %%
- * Copyright (C) 2018 dettonville.org DevOps
+ * Copyright (C) 2024 dettonville.org DevOps
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,10 @@ import com.dettonville.api.pipeline.utils.logging.Logger
 import com.dettonville.api.pipeline.utils.resources.LibraryResource
 import org.jenkinsci.plugins.workflow.cps.DSL
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+@Field Logger log = new Logger(this, LogLevel.INFO)
+
 /**
  * Executes a managed shell script from the ConfigFileProvider Plugin
  *
@@ -34,7 +38,7 @@ import org.jenkinsci.plugins.workflow.cps.DSL
  * @return stdout, status code or sh step result, depending on the selection
  */
 Object execJenkinsShellScript(String scriptId, CommandBuilder commandBuilder = null, returnStdout = false, returnStatus = false) {
-  Logger log = new Logger('execJenkinsShellScript')
+//   Logger log = new Logger('execJenkinsShellScript')
   log.debug("scriptId", scriptId)
   String tmpScriptPath = '.jenkinsShellScript_' + scriptId
 
@@ -42,7 +46,7 @@ Object execJenkinsShellScript(String scriptId, CommandBuilder commandBuilder = n
 
   // get the managed file via the configFileProvider step
   configFileProvider([configFile(fileId: scriptId, targetLocation: tmpScriptPath)]) {
-    ret = _execShellScript(log, tmpScriptPath, commandBuilder, returnStdout, returnStatus)
+    ret = _execShellScript(tmpScriptPath, commandBuilder, returnStdout, returnStatus)
   }
   return ret
 }
@@ -63,7 +67,7 @@ Object execPipelineShellScript(String scriptPath, CommandBuilder commandBuilder 
   LibraryResource pipelineScriptResource = new LibraryResource(this.steps, scriptPath)
   String scriptContent = pipelineScriptResource.load()
   writeFile(encoding: 'UTF-8', file: tmpScriptPath, text: scriptContent)
-  return _execShellScript(log, tmpScriptPath, commandBuilder, returnStdout, returnStatus)
+  return _execShellScript(tmpScriptPath, commandBuilder, returnStdout, returnStatus)
 }
 
 /**
@@ -76,7 +80,7 @@ Object execPipelineShellScript(String scriptPath, CommandBuilder commandBuilder 
  * @param returnStatus When set to true the status code will be returned
  * @return stdout, status code or sh step result, depending on the selection
  */
-Object _execShellScript(Logger log, String scriptPath, CommandBuilder commandBuilder, returnStdout = false, returnStatus = false) {
+Object _execShellScript(String scriptPath, CommandBuilder commandBuilder, returnStdout = false, returnStatus = false) {
   log.debug("scriptPath: '$scriptPath', returnStdout: $returnStdout, returnStatus: $returnStatus")
   if (returnStatus == true && returnStdout == true) {
     log.warn("returnStatus and returnStdout are set to true, only one parameter is allowed to be true, using returnStdout")

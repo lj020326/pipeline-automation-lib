@@ -7,12 +7,16 @@ import com.dettonville.api.pipeline.utils.logging.LogLevel
 import com.dettonville.api.pipeline.utils.logging.Logger
 import com.dettonville.api.pipeline.versioning.ComparableSemanticVersion
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+@Field Logger log = new Logger(this, LogLevel.INFO)
+
 def call(Map params=[:]) {
 
-    Logger log = new Logger(this, LogLevel.INFO)
-//     log.setLevel(LogLevel.DEBUG)
+//     Logger log = new Logger(this, LogLevel.INFO)
+// //     log.setLevel(LogLevel.DEBUG)
 
-    Map config = loadPipelineConfig(log, params)
+    Map config = loadPipelineConfig(params)
 
     pipeline {
         agent {
@@ -42,10 +46,10 @@ def call(Map params=[:]) {
                         bitbucketStatusNotify(
                                 buildKey: config.buildTestName,
                                 buildName: config.buildTestName,
+                                buildState: 'INPROGRESS',
                                 repoSlug: 'ansible-datacenter',
                                 commitId: config.gitCommitHash
                             )
-
                     }
                 }
             }
@@ -55,7 +59,8 @@ def call(Map params=[:]) {
                     docker {
                         // ref: https://stackoverflow.com/questions/48226183/how-to-mount-jenkins-workspace-in-docker-container-using-jenkins-pipeline#48227560
                         image 'checkmarx/kics:latest'
-                        args "--entrypoint='' -v /etc/pki/tls/certs/ca-bundle.crt:/etc/ssl/certs/ca-certificates.crt:ro"
+//                        args "--entrypoint='' -v /etc/pki/tls/certs/ca-bundle.crt:/etc/ssl/certs/ca-certificates.crt:ro"
+                        args "--entrypoint='' -v /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro"
                         // Run the container on the node specified at the
                         // top-level of the Pipeline, in the same workspace,
                         // rather than on a new node entirely:
@@ -97,29 +102,38 @@ def call(Map params=[:]) {
                         }
 
                         String lintCmd = lintCmdList.join(' ')
-                        sh(lintCmd)
 
-                        sh("tree ${config.testResultsDir}")
+                        try {
+                            sh(lintCmd)
 
-                        String sedCmd = "sed -i 's/<testsuites \\(.*\\) failures=\"0\"><\\/testsuites>/<testsuites \\1><testcase name=\"no linting errors found\"\\/><\\/testsuites>/' ${config.testResultsDir}/${config.testResultsJunitFile}"
-                        sh(sedCmd)
+                            config.bitbucketResult = "SUCCESSFUL"
 
-                        junit(testResults: "${config.testResultsDir}/${config.testResultsJunitFile}",
-                                skipPublishingChecks: true,
-                                allowEmptyResults: true)
+                            sh("tree ${config.testResultsDir}")
 
-                        archiveArtifacts(
-                            allowEmptyArchive: true,
-                            artifacts: "${config.testResultsDir}/**",
-                            fingerprint: true)
+                            String sedCmd = "sed -i 's/<testsuites \\(.*\\) failures=\"0\"><\\/testsuites>/<testsuites \\1><testcase name=\"no linting errors found\"\\/><\\/testsuites>/' ${config.testResultsDir}/${config.testResultsJunitFile}"
+                            sh(sedCmd)
 
-                        publishHTML([allowMissing: true,
-                                   alwaysLinkToLastBuild: true,
-                                   keepAll: true,
-                                   reportDir: "${config.testResultsDir}/",
-                                   reportFiles: "${config.testResultsDir}/${config.testResultsHtmlFile}",
-                                   reportName: 'KICS Results',
-                                   reportTitles: ''])
+                            archiveArtifacts(
+                                allowEmptyArchive: true,
+                                artifacts: "${config.testResultsDir}/**",
+                                fingerprint: true)
+
+                            junit(testResults: "${config.testResultsDir}/${config.testResultsJunitFile}",
+                                    skipPublishingChecks: true,
+                                    allowEmptyResults: true)
+
+                            publishHTML([allowMissing: true,
+                                       alwaysLinkToLastBuild: true,
+                                       keepAll: true,
+                                       reportDir: "${config.testResultsDir}/",
+                                       reportFiles: "${config.testResultsDir}/${config.testResultsHtmlFile}",
+                                       reportName: 'KICS Results',
+                                       reportTitles: ''])
+                        } catch (Exception e) {
+                            config.bitbucketResult = "FAILED"
+                            log.error("lint error: " + e.getMessage())
+//                             throw e
+                        }
                     }
                 }
             }
@@ -130,23 +144,31 @@ def call(Map params=[:]) {
 
                     // ref: https://www.jenkins.io/doc/pipeline/steps/stashNotifier/
                     bitbucketStatusNotify(
-                                buildKey: config.buildTestName,
-                                buildName: config.buildTestName,
-                                repoSlug: 'ansible-datacenter',
-                                commitId: config.gitCommitHash
-                            )
+                        buildKey: config.buildTestName,
+                        buildName: config.buildTestName,
+                        buildState: config.bitbucketResult,
+                        repoSlug: 'ansible-datacenter',
+                        commitId: config.gitCommitHash
+                    )
 
                     List emailAdditionalDistList = []
-                    if (config.alwaysEmailDistList) {
-                        emailAdditionalDistList = config.alwaysEmailDistList
-                    }
-                    if (config.gitBranch in ['main','development'] || config.gitBranch.startsWith("release/")) {
-                        log.info("post(${env.BRANCH_NAME}): sendEmail(${currentBuild.result})")
-                        sendEmail(currentBuild, env, emailAdditionalDistList=emailAdditionalDistList)
+                    if (config.gitBranch in ['main','QA','PROD'] || config.gitBranch.startsWith("release/")) {
+                        if (config?.deployEmailDistList) {
+                            emailAdditionalDistList = config.deployEmailDistList
+                            log.info("post(${config.gitBranch}): sendEmail(${currentBuild.result})")
+                            sendEmail(currentBuild, env, emailAdditionalDistList=emailAdditionalDistList)
+                        }
+                    } else if (config.gitBranch in ['development']) {
+                        if (config?.alwaysEmailDistList) {
+                            emailAdditionalDistList = config.alwaysEmailDistList
+                            log.info("post(${config.gitBranch}): sendEmail(${currentBuild.result})")
+                            sendEmail(currentBuild, env, emailAdditionalDistList=emailAdditionalDistList)
+                        }
                     } else {
-                        log.info("post(${env.BRANCH_NAME}): sendEmail(${currentBuild.result}, 'RequesterRecipientProvider')")
-                        sendEmail(currentBuild, env, [[$class: 'RequesterRecipientProvider']])
+                        log.info("post(${config.gitBranch}): sendEmail(${currentBuild.result}, 'default')")
+                        sendEmail(currentBuild, env)
                     }
+
                     log.info("Empty current workspace dir")
                     cleanWs()
                 }
@@ -157,7 +179,7 @@ def call(Map params=[:]) {
 } // body
 
 //@NonCPS
-Map loadPipelineConfig(Logger log, Map params) {
+Map loadPipelineConfig(Map params) {
     String logPrefix="loadPipelineConfig():"
     Map config = [:]
 
@@ -185,9 +207,12 @@ Map loadPipelineConfig(Logger log, Map params) {
 
 //    config.emailDist = config.emailDist ?: "lee.james.johnson@gmail.com"
     config.emailDist = config.get('emailDist',"lee.james.johnson@gmail.com")
-    config.alwaysEmailDistList = ["ljohnson@dettonville.org"]
+    config.deployEmailDistList = [
+        'lee.johnson@dettonville.com',
+        'lee.james.johnson@gmail.com'
+    ]
+    config.alwaysEmailDistList = ["lee.johnson@dettonville.com"]
 
-    // config.alwaysEmailDist = config.alwaysEmailDist ?: "lee.james.johnson@gmail.com"
     config.emailFrom = config.emailFrom ?: "admin+ansible@dettonville.com"
 
     config.testResultsDir = config.get('testResultsDir', 'test-results')

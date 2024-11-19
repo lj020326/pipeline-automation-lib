@@ -6,7 +6,7 @@ package com.dettonville.api.pipeline.utility
 /**
  * Common Utilities.
  *
- * @Author grant.gortsema@dettonville.org
+ * @Author grant.gortsema@dettonville.com
  */
 class ParseUtil implements Serializable {
 

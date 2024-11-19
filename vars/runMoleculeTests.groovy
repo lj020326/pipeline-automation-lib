@@ -7,12 +7,16 @@ import com.dettonville.api.pipeline.utils.logging.LogLevel
 import com.dettonville.api.pipeline.utils.logging.Logger
 import com.dettonville.api.pipeline.versioning.ComparableSemanticVersion
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+@Field Logger log = new Logger(this, LogLevel.INFO)
+
 def call(Map params=[:]) {
 
-    Logger log = new Logger(this, LogLevel.INFO)
-//     log.setLevel(LogLevel.DEBUG)
+//     Logger log = new Logger(this, LogLevel.INFO)
+// //     log.setLevel(LogLevel.DEBUG)
 
-    Map config = loadPipelineConfig(log, params)
+    Map config = loadPipelineConfig(params)
 
     pipeline {
         agent {
@@ -92,8 +96,8 @@ def call(Map params=[:]) {
                         log.info("post(${env.BRANCH_NAME}): sendEmail(${currentBuild.result})")
                         sendEmail(currentBuild, env, emailAdditionalDistList=emailAdditionalDistList)
                     } else {
-                        log.info("post(${env.BRANCH_NAME}): sendEmail(${currentBuild.result}, 'RequesterRecipientProvider')")
-                        sendEmail(currentBuild, env, [[$class: 'RequesterRecipientProvider']])
+                        log.info("post(${env.BRANCH_NAME}): sendEmail(${currentBuild.result})")
+                        sendEmail(currentBuild, env)
                     }
                     log.info("Empty current workspace dir")
                     cleanWs()
@@ -105,7 +109,7 @@ def call(Map params=[:]) {
 } // body
 
 //@NonCPS
-Map loadPipelineConfig(Logger log, Map params) {
+Map loadPipelineConfig(Map params) {
     String logPrefix="loadPipelineConfig():"
     Map config = [:]
 
@@ -133,7 +137,7 @@ Map loadPipelineConfig(Logger log, Map params) {
 
 //    config.emailDist = config.emailDist ?: "lee.james.johnson@gmail.com"
     config.emailDist = config.get('emailDist',"lee.james.johnson@gmail.com")
-    config.alwaysEmailDistList = ["ljohnson@dettonville.org"]
+    config.alwaysEmailDistList = ["lee.johnson@dettonville.com"]
 
     // config.alwaysEmailDist = config.alwaysEmailDist ?: "lee.james.johnson@gmail.com"
     config.emailFrom = config.emailFrom ?: "admin+ansible@dettonville.com"

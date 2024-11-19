@@ -16,8 +16,8 @@ This file looks something like this:
 
 ```yaml
 pipeline:
-  emailList: "ljohnson@dettonville.org"
-  alwaysEmailList: "ljohnson@dettonville.org"
+  emailList: "lee.johnson@dettonville.com"
+  alwaysEmailList: "lee.johnson@dettonville.com"
   pcfAppName: swagger-validator-service
   pcfAppRoute: dcapi-swagger-validator
   pcfAppRouteBlue: dcapi-swagger-validator

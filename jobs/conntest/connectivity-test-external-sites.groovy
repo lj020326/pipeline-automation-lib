@@ -20,8 +20,8 @@ pipeline:
 #  logLevel: "DEBUG"
 #  useSimulationMode: true
 
-#  alwaysEmailDist: "SIT-engineer@dettonville.org, ljohnson@dettonville.org"
-  alwaysEmailDist: "ljohnson@dettonville.org"
+#  alwaysEmailDist: "SIT-engineer@dettonville.com, ljohnson@dettonville.com"
+  alwaysEmailDist: "ljohnson@dettonville.com"
 
   timeout: 4
   runcount: 20

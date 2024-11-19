@@ -6,7 +6,7 @@ package com.dettonville.api.pipeline.utility
 /**
  * Utility to interact with the CaaS service. Used to create certs and trust stores for the applications.
  *
- * @Author grant.gortsema@dettonville.org
+ * @Author grant.gortsema@dettonville.com
  */
 class CaaSUtil implements Serializable {
 

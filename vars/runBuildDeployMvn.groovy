@@ -9,13 +9,17 @@ import sendEmail
 import com.dettonville.api.pipeline.utils.logging.LogLevel
 import com.dettonville.api.pipeline.utils.logging.Logger
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+@Field Logger log = new Logger(this, LogLevel.INFO)
+
 def call(Map params=[:]) {
 
-//     Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this, LogLevel.INFO)
+// //     Logger.init(this, LogLevel.INFO)
+//     Logger log = new Logger(this, LogLevel.INFO)
 
     log.info("Loading Default Configs")
-    Map config=loadPipelineConfig(log, params)
+    Map config=loadPipelineConfig(params)
 
     pipeline {
 
@@ -164,7 +168,7 @@ String decapitalize(String string) {
     return string.substring(0, 1).toLowerCase() + string.substring(1);
 }
 
-Map loadPipelineConfig(Logger log, Map params, String configFile=null) {
+Map loadPipelineConfig(Map params, String configFile=null) {
     String logPrefix="loadPipelineConfig():"
     Map config = [:]
 
@@ -223,7 +227,7 @@ Map loadPipelineConfig(Logger log, Map params, String configFile=null) {
     log.debug("${logPrefix} env.BRANCH_NAME = ${env.BRANCH_NAME}")
     log.debug("${logPrefix} config.repoBranch = ${config.repoBranch}")
 
-    config.emailFrom=config.get('emailFrom',"DCAPI.deployAutomation@dettonville.org")
+    config.emailFrom=config.get('emailFrom',"DCAPI.deployAutomation@dettonville.com")
 
     //
     // main release inputs

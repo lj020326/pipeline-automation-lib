@@ -306,7 +306,7 @@ def call(body, Map pipelineParams) {
 								def remoteOrigin = it.gitrepo.replace('https://','')
 
 								withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: bitbucketCreds, usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD']]) {
-									sh('git config --global user.email "jenkins@dettonville.org"')
+									sh('git config --global user.email "jenkins@dettonville.com"')
 									sh('git config --global user.name "Jenkins Pipeline"')
 									sh("git remote set-url origin https://${GIT_USERNAME}:${GIT_PASSWORD}@${remoteOrigin}")
 									sh("git checkout -b ${versionNUmberToUpdate}")
@@ -498,7 +498,7 @@ def call(body, Map pipelineParams) {
 									def remoteOrigin = it.gitrepo.replace('https://','')
 
 									withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: bitbucketCreds, usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD']]) {
-										sh('git config --global user.email "jenkins@dettonville.org"')
+										sh('git config --global user.email "jenkins@dettonville.com"')
 										sh('git config --global user.name "Jenkins Pipeline"')
 										sh("git remote set-url origin https://${GIT_USERNAME}:${GIT_PASSWORD}@${remoteOrigin}")
 										//sh("git push --set-upstream origin ${it.branch}")
@@ -789,7 +789,7 @@ def call(body, Map pipelineParams) {
 							def remoteOrigin = it.gitrepo.replace('https://','')
 
 							withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: bitbucketCreds, usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD']]) {
-								sh('git config --global user.email "jenkins@dettonville.org"')
+								sh('git config --global user.email "jenkins@dettonville.com"')
 								sh('git config --global user.name "Jenkins Pipeline"')
 								sh("git remote set-url origin https://${GIT_USERNAME}:${GIT_PASSWORD}@${remoteOrigin}")
 
@@ -1246,7 +1246,7 @@ def notifyBuild(String buildStatus, String emailList,Boolean onSuccessEveryTime=
 
       Check console output at ${env.BUILD_URL}console"""
       def hostname = sh (returnStdout: true, script: 'hostname')
-      def emailFrom = "${hostname.trim()}@dettonville.org"
+      def emailFrom = "${hostname.trim()}@dettonville.com"
 
       mail bcc: '', body: details, cc: '', from: emailFrom, replyTo: '', subject: subject, to: emailList
     }

@@ -2,7 +2,7 @@
  * #%L
  * dettonville.org
  * %%
- * Copyright (C) 2018 dettonville.org DevOps
+ * Copyright (C) 2024 dettonville.org DevOps
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,10 @@ import com.dettonville.api.pipeline.utils.resources.JsonLibraryResource
 import net.sf.json.JSON
 import org.jenkinsci.plugins.workflow.cps.DSL
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+@Field Logger log = new Logger(this, LogLevel.INFO)
+
 /**
  * Executes maven with the given configuration options inside the "maven" element.
  * This step implements
@@ -43,7 +47,6 @@ import org.jenkinsci.plugins.workflow.cps.DSL
  */
 void call(Map config = null) {
     config = config ?: [:]
-    Logger log = new Logger(this)
 
     // retrieve the configuration and set defaults
 
@@ -88,11 +91,11 @@ void call(Map config = null) {
     }
 
     // add config file for NPM_CONFIG_USERCONFIG if defined
-    addManagedFile(log, scmUrl, ManagedFileConstants.NPM_CONFIG_USERCONFIG_PATH, ManagedFileConstants.NPM_CONFIG_USERCONFIG_ENV, configFiles)
+    addManagedFile(scmUrl, ManagedFileConstants.NPM_CONFIG_USERCONFIG_PATH, ManagedFileConstants.NPM_CONFIG_USERCONFIG_ENV, configFiles)
     // add config file for NPMRC if defined
-    addManagedFile(log, scmUrl, ManagedFileConstants.NPMRC_PATH, ManagedFileConstants.NPMRC_ENV, configFiles)
+    addManagedFile(scmUrl, ManagedFileConstants.NPMRC_PATH, ManagedFileConstants.NPMRC_ENV, configFiles)
     // add config file for ruby
-    addManagedFile(log, scmUrl, ManagedFileConstants.BUNDLE_CONFIG_PATH, ManagedFileConstants.BUNDLE_CONFIG_ENV, configFiles)
+    addManagedFile(scmUrl, ManagedFileConstants.BUNDLE_CONFIG_PATH, ManagedFileConstants.BUNDLE_CONFIG_ENV, configFiles)
 
     configFileProvider(configFiles) {
         // add global settingsId
@@ -152,7 +155,7 @@ ManagedFile autoLookupMavenSettings(String jsonPath, String scmUrl, Logger log) 
  * @param envVar The environment variable where the configFileProvider should store the path in
  * @param configFiles List of config files where the found file has to be added
  */
-void addManagedFile(Logger log, String scmUrl, String jsonPath, String envVar, List configFiles) {
+void addManagedFile(String scmUrl, String jsonPath, String envVar, List configFiles) {
     // load and parse the json
     JsonLibraryResource jsonLibraryResource = new JsonLibraryResource(steps, jsonPath)
     JSON managedFilesJson

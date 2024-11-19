@@ -132,8 +132,8 @@ config.browserstackAcceptSSLCerts = true
 config.browserstackProxyHost = "outboundproxy.dettonville.int"
 config.browserstackProxyPort = 15768
 
-config.emailList = "ljohnson@dettonville.org"
-config.alwaysEmailList = "ljohnson@dettonville.org"
+config.emailList = "lee.johnson@dettonville.com"
+config.alwaysEmailList = "lee.johnson@dettonville.com"
 config.sendEmail = false
 config.sendCDREmail = false
 config.sendInlineReport = true
@@ -151,7 +151,7 @@ config.browserstackProject = config.application
 config.bsAgentBinType = "linux-x64"
 config.bsAgentBinPath = "tmp/dcapi"
 
-config.emailFrom= "DCAPI.TestAutomation@dettonville.org"
+config.emailFrom= "DCAPI.TestAutomation@dettonville.com"
 
 ```
 
@@ -205,8 +205,8 @@ pipeline:
 
   metaFilterTags: +SimpleSignup
 
-  emailList: "ljohnson@dettonville.org"
-  alwaysEmailList: "ljohnson@dettonville.org"
+  emailList: "lee.johnson@dettonville.com"
+  alwaysEmailList: "lee.johnson@dettonville.com"
 
   batchCount: "3"
 

@@ -6,7 +6,7 @@ package com.dettonville.api.pipeline.utility
 /**
  * Utility to interact with the HashiCorp Vault.
  *
- * @Author grant.gortsema@dettonville.org
+ * @Author grant.gortsema@dettonville.com
  */
 class VaultUtil implements Serializable {
 

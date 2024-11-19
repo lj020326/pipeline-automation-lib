@@ -22,9 +22,9 @@ def call(Map params=[:]) {
     config.AddNodeList = (config.AddNodeList) ? config.AddNodeList : []
     config.SiteList = (config.SiteList) ? config.SiteList : ['www.google.com']
     config.Timeout = (config.Timeout) ? config.Timeout : 10
-    config.EmailDist = (config.EmailDist) ? config.EmailDist : "ljohnson@dettonville.org"
-    config.AlwaysEmailDist = (config.EmailDist) ? config.EmailDist : "ljohnson@dettonville.org"
-    config.EmailFrom="DCAPI.Jenkins.Connectivity.Check@dettonville.org"
+    config.EmailDist = (config.EmailDist) ? config.EmailDist : "lee.johnson@dettonville.com"
+    config.AlwaysEmailDist = (config.EmailDist) ? config.EmailDist : "lee.johnson@dettonville.com"
+    config.EmailFrom="DCAPI.Jenkins.Connectivity.Check@dettonville.com"
 
     config.each { key, value ->
         echo "config[${key}]=${value}"

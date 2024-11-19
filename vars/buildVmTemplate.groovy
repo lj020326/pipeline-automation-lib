@@ -1,8 +1,8 @@
 #!/usr/bin/env groovy
-import com.dettonville.api.pipeline.utils.Utilities
 
 // ref: https://github.com/jenkinsci/packer-plugin/issues/20#issuecomment-469681596
 
+import com.dettonville.api.pipeline.utils.Utilities
 import com.dettonville.api.pipeline.utils.logging.LogLevel
 import com.dettonville.api.pipeline.utils.logging.Logger
 import com.dettonville.api.pipeline.utils.MapMerge
@@ -11,18 +11,22 @@ import groovy.json.*
 //import groovy.json.JsonOutput
 // import groovy.json.JsonSlurper
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+@Field Logger log = new Logger(this, LogLevel.INFO)
+
 def call() {
 
-//     Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this, LogLevel.INFO)
+// //     Logger.init(this, LogLevel.INFO)
+//     Logger log = new Logger(this, LogLevel.INFO)
 
 //     String packerTool = "packer-1.6.2" // Name of Packer Installation
-// //     String packerTool = "packer-1.8.6" // Name of Packer Installation
+//     String packerTool = "packer-1.8.6" // Name of Packer Installation
 
     Map config=[:]
     boolean vmTemplateExists = false
 
-//    Map config=loadPipelineConfig(log, params)
+//    Map config=loadPipelineConfig(params)
 //    String agentLabel = getJenkinsAgentLabel(config.jenkinsNodeLabel)
 
     List paramList = []
@@ -36,8 +40,7 @@ def call() {
     }
 
     properties([
-        parameters(paramList),
-        disableConcurrentBuilds()
+        parameters(paramList)
     ])
 
     params.each { key, value ->
@@ -78,13 +81,14 @@ def call() {
                         // ref: https://stackoverflow.com/questions/60756020/print-environment-variables-sorted-by-name-including-variables-with-newlines
                         sh "export -p | sed 's/declare -x //' | sed 's/export //'"
 
-                        config=loadPipelineConfig(log, params)
+                        config=loadPipelineConfig(params)
                         log.info("config=${JsonUtils.printToJsonString(config)}")
 
                         // ref: https://stackoverflow.com/questions/25785/delete-all-but-the-most-recent-x-files-in-bash
                         // ref: https://stackoverflow.com/questions/22407480/command-to-list-all-files-except-dot-and-dot-dot
 //                         sh "cd /tmp/ && ls -Art1 | grep packer | tail -n +5 | xargs -I {} rm -fr -- {} || true"
-                        sh "cd /tmp/ && ls -Art1 | tail -n +${config.tmpDirMaxFileCount} | xargs -I {} rm -fr -- {} || true"
+//                         sh "cd /tmp/ && ls -Art1 | tail -n +${config.tmpDirMaxFileCount} | xargs -I {} rm -fr -- {} || true"
+                        sh "cd /tmp/ && find . -mtime ++${config.tmpDirMaxAge} -type d | xargs rm -f -r;"
 
                     }
                 }
@@ -201,7 +205,7 @@ def call() {
                 }
             }
 
-            stage("Run Packer to validate json settings") {
+            stage("Run Packer validate") {
                 when {
                     allOf {
                         expression { !vmTemplateExists || (config?.replaceExistingTemplate && config.replaceExistingTemplate.toBoolean()) }
@@ -227,7 +231,7 @@ def call() {
                             // ref: https://vsupalov.com/packer-ami/
                             // ref: https://blog.deimos.fr/2015/01/16/packer-build-multiple-images-easily/
                             // ref: https://github.com/hashicorp/packer/pull/7184
-                            List packerCmdArgList = getPackerCommandArgList(log, "validate", config)
+                            List packerCmdArgList = getPackerCommandArgList("validate", config)
                             packerCmdString = packerCmdArgList.join(" ")
                             log.debug("packerCmdString=${packerCmdString}")
 
@@ -265,7 +269,7 @@ def call() {
                             // ref: https://vsupalov.com/packer-ami/
                             // ref: https://blog.deimos.fr/2015/01/16/packer-build-multiple-images-easily/
                             // ref: https://github.com/hashicorp/packer/pull/7184
-                            List packerCmdArgList = getPackerCommandArgList(log, "build", config)
+                            List packerCmdArgList = getPackerCommandArgList("build", config)
                             String packerCmdString = packerCmdArgList.join(" ")
                             log.debug("packerCmdString=${packerCmdString}")
 
@@ -509,15 +513,23 @@ def call() {
             always {
                 script {
                     List emailAdditionalDistList = []
-                    if (config.alwaysEmailDistList) {
-                        emailAdditionalDistList = config.alwaysEmailDistList
-                    }
-                    if (config.gitBranch in ['origin/main','main']) {
-                        log.info("post(${config.gitBranch}): sendEmail(${currentBuild.result})")
-                        sendEmail(currentBuild, env, emailAdditionalDistList=emailAdditionalDistList)
+                    if (config?.gitBranch) {
+                        if (config.gitBranch in ['main','QA','PROD'] || config.gitBranch.startsWith("release/")) {
+                            if (config?.deployEmailDistList) {
+                                emailAdditionalDistList = config.deployEmailDistList
+                                log.info("post(${env.BRANCH_NAME}): sendEmail(${currentBuild.result})")
+                                sendEmail(currentBuild, env, emailAdditionalDistList=emailAdditionalDistList)
+                            }
+                        } else if (config.gitBranch in ['development']) {
+                            if (config?.alwaysEmailDistList) {
+                                emailAdditionalDistList = config.alwaysEmailDistList
+                                log.info("post(${env.BRANCH_NAME}): sendEmail(${currentBuild.result})")
+                                sendEmail(currentBuild, env, emailAdditionalDistList=emailAdditionalDistList)
+                            }
+                        }
                     } else {
-                        log.info("post(${config.gitBranch}): sendEmail(${currentBuild.result}, 'RequesterRecipientProvider')")
-                        sendEmail(currentBuild, env, [[$class: 'RequesterRecipientProvider']])
+                        log.info("post(${env.BRANCH_NAME}): sendEmail(${currentBuild.result}, 'RequesterRecipientProvider')")
+                        sendEmail(currentBuild, env)
                     }
                     log.info("Empty current workspace dir")
                     cleanWs()
@@ -529,7 +541,7 @@ def call() {
 }
 
 //@NonCPS
-Map loadPipelineConfig(Logger log, Map params) {
+Map loadPipelineConfig(Map params) {
     String logPrefix="loadPipelineConfig():"
     Map config = [:]
 
@@ -542,24 +554,26 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.timeoutUnit = config.get('timeoutUnit', 'HOURS')
     config.alwaysEmailList = config.get('alwaysEmailList', "lee.james.johnson@gmail.com")
     config.tmpDirMaxFileCount = config.get('tmpDirMaxFileCount', 100)
+    config.tmpDirMaxAge = config.get('tmpDirMaxFileCount', 7)
 
     // ref: https://blog.mrhaki.com/2011/09/groovy-goodness-take-and-drop-items.html
     jobParts = jobParts.drop(config.jobBaseFolderLevel)
     log.info("${logPrefix} jobParts[after drop]=${jobParts}")
 
     config.template_build_env = jobParts[0]
-    // ref: https://blog.mrhaki.com/2011/09/groovy-goodness-take-and-drop-items.html
-    jobParts = jobParts.drop(1)
+    config.build_platform = jobParts[1]
 
 //     config.build_release = jobParts[2]
 //     config.template_build_type = jobParts[3]
     config.build_release = jobParts[-2]
     config.template_build_type = jobParts[-1]
 
+    // ref: https://blog.mrhaki.com/2011/09/groovy-goodness-take-and-drop-items.html
+    jobParts = jobParts.drop(1)
     // ref: https://blog.mrhaki.com/2015/01/groovy-goodness-take-or-drop-last-items.html
     jobParts = jobParts.dropRight(2)
 
-    config.build_platform = jobParts[0]
+    log.info("${logPrefix} jobParts[after drop2]=${jobParts}")
     config.build_platform_type = 'server'
     if (jobParts.size() > 1) {
         platformTypeParts = jobParts.drop(1)
@@ -572,6 +586,7 @@ Map loadPipelineConfig(Logger log, Map params) {
 
     log.info("${logPrefix} template_build_env=${config.template_build_env}")
     log.info("${logPrefix} build_platform=${config.build_platform}")
+    log.info("${logPrefix} build_platform_type=${config.build_platform_type}")
     log.info("${logPrefix} build_distribution=${config.build_distribution}")
     log.info("${logPrefix} build_release=${config.build_release}")
     log.info("${logPrefix} template_build_type=${config.template_build_type}")
@@ -594,7 +609,12 @@ Map loadPipelineConfig(Logger log, Map params) {
 
 //     config.build_release_config_dir = jobParts[1..2].join("/") + "/server"
 //     config.build_release_config_dir = jobParts[1..2].join("/")
-    config.build_release_config_dir = "${config.build_distribution}/${config.build_release}"
+//     config.build_release_config_dir = "${config.build_distribution}/${config.build_release}"
+    if (config.build_platform_type) {
+        config.build_release_config_dir = "${config.build_distribution}/${config.build_release}/${config.build_platform_type}"
+    } else {
+        config.build_release_config_dir = "${config.build_distribution}/${config.build_release}"
+    }
     log.info("${logPrefix} build_release_config_dir=${config.build_release_config_dir}")
 
     config.replaceExistingTemplate = config.get('replaceExistingTemplate', false)
@@ -719,6 +739,7 @@ Map loadPipelineConfig(Logger log, Map params) {
         usernamePassword(credentialsId: 'infra-packer-cred', passwordVariable: 'PACKER_USER_PASSWORD', usernameVariable: 'PACKER_USER_USERNAME'),
         string(credentialsId: 'ansible-vault-password', variable: 'ANSIBLE_VAULT_PASSWORD'),
         string(credentialsId: 'bitbucket-ssh-jenkins-string', variable: 'ANSIBLE_BITBUCKET_SSH_KEY_STRING'),
+        string(credentialsId: 'packer-ssh-public-key', variable: 'PACKER_USER_SSH_PUBLIC_KEY'),
 //         string(credentialsId: config.ansibleGalaxyTokenCredId, variable: 'ANSIBLE_PAH_TOKEN'),
         sshUserPrivateKey(credentialsId: 'bitbucket-ssh-jenkins', keyFileVariable: 'ANSIBLE_BITBUCKET_SSH_KEY')
     ]
@@ -789,7 +810,7 @@ boolean doesVmTemplateExist(def dsl, Logger log, String vmTemplateName, boolean 
     return vmTemplateExists
 }
 
-List getPackerCommandArgList(Logger log, String packerCommand, Map config) {
+List getPackerCommandArgList(String packerCommand, Map config) {
     String logPrefix="getPackerCommandArgList():"
 
     List packerCmdArgList = []

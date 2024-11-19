@@ -3,7 +3,7 @@ package com.dettonville.api.pipeline.utility
 /**
  * Email Utility functions used to extend functionality of pipeline
  *
- * @Author neel.shah@dettonville.org
+ * @Author neel.shah@dettonville.com
  */
 class EmailUtil implements Serializable {
 

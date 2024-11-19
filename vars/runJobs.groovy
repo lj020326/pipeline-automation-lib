@@ -7,13 +7,17 @@ import com.dettonville.api.pipeline.utils.logging.Logger
 import com.dettonville.api.pipeline.utils.JsonUtils
 //import groovy.json.*
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+@Field Logger log = new Logger(this, LogLevel.INFO)
+
 def call(Map params=[:]) {
 
-//     Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this, LogLevel.INFO)
+// //     Logger.init(this, LogLevel.INFO)
+//     Logger log = new Logger(this, LogLevel.INFO)
 
     log.info("Loading Default Configs")
-    Map config=loadPipelineConfig(log, params)
+    Map config = loadPipelineConfig(params)
 
 //    def agentLabelJobNode = getJenkinsAgentLabel(config.jenkinsJobNodeNodeLabel)
     Map jobResults
@@ -36,28 +40,41 @@ def call(Map params=[:]) {
 
         stages {
 
+			stage('Load job config file') {
+				when {
+                    allOf {
+                        expression { config.jobConfigFile }
+                        expression { fileExists config.jobConfigFile }
+                    }
+				}
+				steps {
+					script {
+                        config = loadJobConfigFile(config)
+                        log.info("Merged config=${JsonUtils.printToJsonString(config)}")
+					}
+				}
+			}
+
             stage("Run Jobs") {
                 steps {
                     script {
-                        log.info("Running tests")
-                        jobResults = runJobList(log, config)
+                        log.info("Running jobs")
+                        jobResults = runJobStage(config)
                     }
                 }
             }
 
-            // ref: https://fusion.dettonville.int/confluence/display/CD/Clean+Your+Workspace+and+Discard+Old+Builds
             stage( "Clean WorkSpace" ) {
                 steps{
                     cleanWs()
                 }
-            }//End Clean WorkSpace
+            }
 
             stage('Set Pipeline Status') {
                 steps {
                     script {
                         log.info("**** final test results = [${JsonUtils.printToJsonString(jobResults)}]")
 
-//                        List resultList = jobResults.subMap(config.jobList).collect {it.value}
                         List resultList = jobResults.values()
                         boolean result = (resultList.size()>0) ? resultList.inject { a, b -> a && b } : true
 
@@ -71,7 +88,25 @@ def call(Map params=[:]) {
         }
         post {
             always {
-                sendEmail2(currentBuild, env)
+                script {
+                    List emailAdditionalDistList = []
+                    if (config.gitBranch in ['main','QA','PROD'] || config.gitBranch.startsWith("release/")) {
+                        if (config?.deployEmailDistList) {
+                            emailAdditionalDistList = config.deployEmailDistList
+                            log.info("post(${env.BRANCH_NAME}): sendEmail(${currentBuild.result})")
+                            sendEmail(currentBuild, env, emailAdditionalDistList=emailAdditionalDistList)
+                        }
+                    } else if (config.gitBranch in ['development']) {
+                        if (config?.alwaysEmailDistList) {
+                            emailAdditionalDistList = config.alwaysEmailDistList
+                            log.info("post(${env.BRANCH_NAME}): sendEmail(${currentBuild.result})")
+                            sendEmail(currentBuild, env, emailAdditionalDistList=emailAdditionalDistList)
+                        }
+                    } else {
+                        log.info("post(${env.BRANCH_NAME}): sendEmail(${currentBuild.result}, 'RequesterRecipientProvider')")
+                        sendEmail(currentBuild, env)
+                    }
+                }
             }
         }
 
@@ -101,10 +136,11 @@ def getYamlInt(Map config, String key) {
 }
 
 //@NonCPS
-Map loadPipelineConfig(Logger log, Map params, String configFile=null) {
+Map loadPipelineConfig(Map params, String configFile=null) {
     String logPrefix="loadPipelineConfig():"
     Map config = [:]
     config.supportedJobParams=['changedEmailList','alwaysEmailList','failedEmailList']
+    config.gitBranch = env.GIT_BRANCH
 
     if (configFile != null && fileExists(configFile)) {
         Map configSettings = readYaml file: "${configFile}"
@@ -133,6 +169,8 @@ Map loadPipelineConfig(Logger log, Map params, String configFile=null) {
     config.wait = config.get('wait', true)
     config.failFast = config.get('failFast', false)
 
+    config.stage = config.get('stage', 'runJobs-stage')
+
     log.setLevel(config.logLevel)
 
     if (config.debugPipeline) {
@@ -145,6 +183,19 @@ Map loadPipelineConfig(Logger log, Map params, String configFile=null) {
 
     return config
 }
+
+Map loadJobConfigFile(Map baseConfig) {
+    String logPrefix="loadJobConfigFile():"
+
+    Map jobConfigFileMap = readYaml file: config.ansiblePipelineConfigFile
+    log.debug("${logPrefix} jobConfigFileMap=${JsonUtils.printToJsonString(jobConfigFileMap)}")
+
+    Map config = MapMerge.merge(baseConfig, jobConfigFileMap)
+
+    log.info("${logPrefix} Merged config=${JsonUtils.printToJsonString(config)}")
+    return config
+}
+
 
 String getJenkinsAgentLabel(String jenkinsLabel) {
     // ref: https://stackoverflow.com/questions/46630168/in-a-declarative-jenkins-pipeline-can-i-set-the-agent-label-dynamically
@@ -159,52 +210,55 @@ String createJobId(Map config, i) {
     return (config?.jobId) ? "${config.jobId}.${i+1}" : "job-${i+1}"
 }
 
-Map runJobList(Logger log, Map config) {
-    String logPrefix="runJobList():"
-    log.info("${logPrefix} started")
+Map runJobStage(Map stageConfig) {
+    String logPrefix="runJobStage(${stageConfig.stage}):"
 
     Map jobResults = [:]
+    boolean result = false
 
-    config.jobList.eachWithIndex { it, i ->
+    log.info("${logPrefix} stageConfig=${JsonUtils.printToJsonString(stageConfig)}")
 
-        log.info("${logPrefix} i=${i} it=${it}")
+    stage(stageConfig.stage) {
+        log.info("${logPrefix} starting stage")
 
-        Map stageConfig = config.findAll { !["jobList"].contains(it.key) } + it
-        String jobStage = stageConfig.stage
+        List resultList = jobResults.values()
+        boolean result = (resultList.size()>0) ? resultList.inject { a, b -> a && b } : true
 
-        stage("Running ${jobStage} Test") {
-            log.info("${logPrefix} starting stage ${jobStage}")
+        log.debug("${logPrefix} jobResults=${jobResults}")
+        log.debug("${logPrefix} resultList=${resultList}")
+        log.debug("${logPrefix} prior stage results=${result}")
+        if (stageConfig?.jobList || stageConfig?.jobs) {
+            if (result || stageConfig.continueIfFailed) {
+                result = runJobList(stageConfig)
+                jobResults[stageConfig.stage] = result
 
-            List resultList = jobResults.values()
-            boolean result = (resultList.size()>0) ? resultList.inject { a, b -> a && b } : true
-
-            log.debug("${logPrefix} jobStage ${jobStage}: config.jobList=${config.jobList}")
-            log.debug("${logPrefix} jobStage ${jobStage}: jobResults=${jobResults}")
-            log.debug("${logPrefix} jobStage ${jobStage}: resultList=${resultList}")
-            log.debug("${logPrefix} jobStage ${jobStage}: prior stage results=${result}")
-            if (result || config.continueIfFailed) {
-                result = runJobs(log, stageConfig)
-                jobResults["${jobStage}"] = result
-
-                log.info("${logPrefix} finishing stage ${jobStage}: result=${result}")
+                if (!result && !stageConfig.continueIfFailed) {
+                    currentBuild.result = 'FAILURE'
+                }
+                log.info("${logPrefix} finishing stage: result=${result}")
             } else {
-                log.info("${logPrefix} skipped running stage ${jobStage} due to prior stage FAILURE results")
+                log.info("${logPrefix} skipping stage: prior stage FAILURE results")
             }
         }
     }
-
-    log.info("${logPrefix} jobResults=${JsonUtils.printToJsonString(jobResults)}")
+//     return result
     return jobResults
-
 }
 
-boolean runJobs(Logger log, Map config) {
+boolean runJobList(Map baseJobConfigs) {
 
-    String logPrefix="runJobs():"
+    String logPrefix="runJobList():"
     log.info("${logPrefix} started")
-    log.debug("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.debug("${logPrefix} baseJobConfigs=${JsonUtils.printToJsonString(baseJobConfigs)}")
 
-    if (config.jobs.size()==0) {
+    List jobList = []
+    if (baseJobConfigs?.jobList) {
+        jobList = baseJobConfigs.jobList
+    } else if (baseJobConfigs?.jobs) {
+        jobList = baseJobConfigs.jobs
+    }
+
+    if (jobList.size()==0) {
         log.error("${logPrefix} no jobs specified")
         return false
     }
@@ -212,27 +266,33 @@ boolean runJobs(Logger log, Map config) {
     Map parallelJobs = [:]
     List jobResults = []
 
-    config.jobs.eachWithIndex { it, i ->
+    jobList.eachWithIndex { jobConfigsRaw, i ->
 
-        log.info("${logPrefix} i=${i} it=${JsonUtils.printToJsonString(it)}")
+        log.info("${logPrefix} i=${i} jobConfigsRaw=${JsonUtils.printToJsonString(jobConfigsRaw)}")
 
         // job configs overlay parent settings
-        Map jobConfig = config.findAll { !["jobs","stage"].contains(it.key) } + it
-        jobConfig.jobId = createJobId(config, i)
+        Map jobConfigs = baseJobConfigs.findAll { !["jobList","jobs","stage"].contains(it.key) } + jobConfigsRaw
+        jobConfigs.jobId = createJobId(baseJobConfigs, i)
 
-        if (jobConfig?.jobs) {
-            jobResults.add(runJobs(log, jobConfig))
+        log.info("${logPrefix} i=${i} jobConfigs=${JsonUtils.printToJsonString(jobConfigs)}")
+
+        if (jobConfigs?.stage) {
+            runJobStage(jobConfigs)
+        } else {
+            if (jobConfigs?.jobList || jobConfigs?.jobs) {
+                jobResults.add(runJobList(jobConfigs))
+            }
         }
 
-        if (jobConfig?.job) {
-            log.debug("${logPrefix} i=${i} jobConfig=${JsonUtils.printToJsonString(jobConfig)}")
+        if (jobConfigs?.jobFolder || jobConfigs?.job) {
+            log.debug("${logPrefix} i=${i} jobConfigs=${JsonUtils.printToJsonString(jobConfigs)}")
 
-            if (jobConfig?.runInParallel) {
-                parallelJobs["split-${jobConfig.jobId}"] = {
-                    jobResults.add(runJob(log, jobConfig))
+            if (jobConfigs?.runInParallel) {
+                parallelJobs["split-${jobConfigs.jobId}"] = {
+                    jobResults.add(runJob(jobConfigs))
                 }
             } else {
-                jobResults.add(runJob(log, jobConfig))
+                jobResults.add(runJob(jobConfigs))
             }
         } else {
             jobResults.add(false)
@@ -243,7 +303,7 @@ boolean runJobs(Logger log, Map config) {
         // ref: https://stackoverflow.com/questions/18380667/join-list-of-boolean-elements-groovy
         //boolean result = (false in jobResults) ? false : true
         boolean result = (jobResults.size()>0) ? jobResults.inject { a, b -> a && b } : true
-        if (!jobConfig.continueIfFailed && jobResults.size()>0 && !result) {
+        if (!jobConfigs.continueIfFailed && jobResults.size()>0 && !result) {
             currentBuild.result = 'FAILURE'
             log.info("${logPrefix} i=${i} continueIfFailed is false and results failed - not running any more jobs")
 //            return result
@@ -257,7 +317,7 @@ boolean runJobs(Logger log, Map config) {
     }
 
     boolean result = (jobResults.size()>0) ? jobResults.inject { a, b -> a && b } : true
-    if (!config.continueIfFailed && jobResults.size()>0 && !result) {
+    if (!baseJobConfigs.continueIfFailed && jobResults.size()>0 && !result) {
         currentBuild.result = 'FAILURE'
         log.info("${logPrefix} continueIfFailed is false and results failed - not running any more jobs")
     }
@@ -266,65 +326,5 @@ boolean runJobs(Logger log, Map config) {
     // ref: https://stackoverflow.com/questions/18380667/join-list-of-boolean-elements-groovy
     //return (false in jobResults) ? false : true
     return result
+//     return jobResults
 }
-
-boolean runJob(Logger log, Map config) {
-
-    String logPrefix="runJob():"
-
-    // This will copy all files packaged in STASH_NAME to agent workspace root directory.
-    // To copy to another agent directory, see [https://github.com/jenkinsci/pipeline-examples]
-    log.info("${logPrefix} started")
-
-    boolean result = false
-    List paramList=[]
-
-    config.each { key, value ->
-        if (key in config.supportedJobParams) {
-            paramList.add([$class: 'StringParameterValue', name: key, value: value])
-        }
-    }
-
-    if (config.get('job',null)==null) {
-        log.error("${logPrefix} job not specified")
-        return result
-    }
-
-    try {
-        log.info("${logPrefix} starting job ${config.job}")
-//        build job: config.job, parameters: paramList, wait: config.wait, propagate: !config.continueIfFailed
-
-        // ref: http://jenkins-ci.361315.n4.nabble.com/How-to-get-build-results-from-a-build-job-in-a-pipeline-td4897887.html
-        def jobBuild = build job: config.job, parameters: paramList, wait: config.wait, propagate: false
-        def jobResult = jobBuild.getResult()
-
-        log.info("${logPrefix} Build ${config.job} returned result: ${jobResult}")
-
-        if (jobResult != 'SUCCESS') {
-            result = false
-            if (config.failFast) {
-                currentBuild.result = 'FAILURE'
-                log.error("${logPrefix}: test job failed with result: ${jobResult}")
-                error("${logPrefix}: test job failed with result: ${jobResult}")
-            }
-        } else {
-            result = true
-        }
-    } catch (Exception err) {
-        log.error("${logPrefix} job exception occurred [${err}]")
-        result = false
-        if (config.failFast) {
-            currentBuild.result = 'FAILURE'
-            throw err
-        }
-        if (!config.continueIfFailed) {
-            currentBuild.result = 'FAILURE'
-            return result
-        }
-    }
-
-    log.info("${logPrefix} finished with result = ${result}")
-
-    return result
-}
-

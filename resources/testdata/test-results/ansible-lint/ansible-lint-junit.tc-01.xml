@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+<testsuites>
+    <testsuite errors="1835" failures="0" tests="1835" time="0">
+        <testcase name="roles/bootstrap_dell_opscenter/tasks/main.yml-1">
+            <failure file="roles/bootstrap_dell_opscenter/tasks/main.yml" line="3"
+                     message="fqcn[action-core]: Use FQCN for builtin module actions (ansible.builtin.yum)."
+                     type="Ansible Lint">fqcn[action-core]: Use FQCN for builtin module actions (ansible.builtin.yum).
+            </failure>
+        </testcase>
+        <testcase name="roles/vmware_upgrade_esxi/tasks/main.yml-1835">
+            <failure file="roles/vmware_upgrade_esxi/tasks/main.yml" line="173"
+                     message="no-changed-when: Commands should not change things if nothing needs doing."
+                     type="Ansible Lint">no-changed-when: Commands should not change things if nothing needs doing.
+            </failure>
+        </testcase>
+    </testsuite>
+</testsuites>

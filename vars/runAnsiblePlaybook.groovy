@@ -10,12 +10,16 @@ import static com.dettonville.api.pipeline.utils.ConfigConstants.*
 // import jenkins.model.CauseOfInterruption.*
 import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+@Field Logger log = new Logger(this, LogLevel.INFO)
+
 def call(Map params=[:]) {
 
-    Logger log = new Logger(this, LogLevel.INFO)
-//     log.setLevel(LogLevel.DEBUG)
+//     Logger log = new Logger(this, LogLevel.INFO)
+// //     log.setLevel(LogLevel.DEBUG)
 
-    Map config = loadPipelineConfig(log, params)
+    Map config = loadPipelineConfig(params)
     String ansibleLogSummary = "No results"
 
     pipeline {
@@ -39,7 +43,7 @@ def call(Map params=[:]) {
 				}
 				steps {
 					script {
-                        config = loadPipelineConfigFile(log, config)
+                        config = loadPipelineConfigFile(config)
                         log.info("Merged config=${JsonUtils.printToJsonString(config)}")
 					}
 				}
@@ -147,7 +151,7 @@ def call(Map params=[:]) {
                             withCredentials(config.ansibleSecretVarsList) {
 
                                 sh "export -p | sed 's/declare -x //' | sed 's/export //'"
-                                Map ansibleConfig = getAnsibleCommandConfig(log, config)
+                                Map ansibleConfig = getAnsibleCommandConfig(config)
 
                                 config = MapMerge.merge(ansibleConfig, config)
                                 log.info("config.ansible=${JsonUtils.printToJsonString(config.ansible)}")
@@ -215,7 +219,7 @@ def call(Map params=[:]) {
                         )
                     }
                     List emailAdditionalDistList = []
-                    if (config.alwaysEmailDistList) {
+                    if (config?.alwaysEmailDistList) {
                         emailAdditionalDistList = config.alwaysEmailDistList
                     }
                     if (config.gitBranch in ['origin/main','main']) {
@@ -223,10 +227,42 @@ def call(Map params=[:]) {
                         sendEmail(currentBuild, env, emailAdditionalDistList=emailAdditionalDistList)
                     } else {
                         log.info("post(${config.gitBranch}): sendEmail(${currentBuild.result}, 'RequesterRecipientProvider')")
-                        sendEmail(currentBuild, env, [[$class: 'RequesterRecipientProvider']])
+                        sendEmail(currentBuild, env)
                     }
                     log.info("Empty current workspace dir")
                     cleanWs()
+                }
+            }
+            success {
+                script {
+                    if (config?.successEmailList) {
+                        log.info("config.successEmailList=${config.successEmailList}")
+                        sendEmail(currentBuild, env, emailAdditionalDistList=[config.successEmailList.split(",")])
+                    }
+                }
+            }
+            failure {
+                script {
+                    if (config?.failedEmailList) {
+                        log.info("config.failedEmailList=${config.failedEmailList}")
+                        sendEmail(currentBuild, env, emailAdditionalDistList=[config.failedEmailList.split(",")])
+                    }
+                }
+            }
+            aborted {
+                script {
+                    if (config?.failedEmailList) {
+                        log.info("config.failedEmailList=${config.failedEmailList}")
+                        sendEmail(currentBuild, env, emailAdditionalDistList=[config.failedEmailList.split(",")])
+                    }
+                }
+            }
+            changed {
+                script {
+                    if (config?.changedEmailList) {
+                        log.info("config.changedEmailList=${config.changedEmailList}")
+                        sendEmail(currentBuild, env, emailAdditionalDistList=[config.changedEmailList.split(",")])
+                    }
                 }
             }
         }
@@ -235,7 +271,7 @@ def call(Map params=[:]) {
 } // body
 
 //@NonCPS
-Map loadPipelineConfig(Logger log, Map params) {
+Map loadPipelineConfig(Map params) {
     String logPrefix="loadPipelineConfig():"
     Map config = [:]
 
@@ -262,9 +298,9 @@ Map loadPipelineConfig(Logger log, Map params) {
     config.timeoutUnit = config.get('timeoutUnit', 'HOURS')
     config.tmpDirMaxFileCount = config.get('tmpDirMaxFileCount', 100)
 
-//    config.emailDist = config.emailDist ?: "ljohnson@dettonville.org"
-    config.emailDist = config.get('emailDist',"ljohnson@dettonville.org")
-    // config.alwaysEmailDist = config.alwaysEmailDist ?: "ljohnson@dettonville.org"
+//    config.emailDist = config.emailDist ?: "lee.johnson@dettonville.com"
+    config.emailDist = config.get('emailDist',"lee.johnson@dettonville.com")
+    // config.alwaysEmailDist = config.alwaysEmailDist ?: "lee.johnson@dettonville.com"
     config.emailFrom = config.emailFrom ?: "admin+ansible@dettonville.com"
 
     config.skipDefaultCheckout = config.get('skipDefaultCheckout', false)
@@ -278,7 +314,7 @@ Map loadPipelineConfig(Logger log, Map params) {
 //     config.ansiblePlaybookDir = config.get('ansiblePlaybookDir',"ansible/${env.JOB_NAME.split('/')[-2]}")
 
     config.ansibleCollectionsRequirements = config.get('ansibleCollectionsRequirements', 'collections/requirements.yml')
-    if (config.requirementsPathsRelativeToPlaybookDir?.toBoolean() && config.ansiblePlaybookDir) {
+    if (config?.requirementsPathsRelativeToPlaybookDir && config.requirementsPathsRelativeToPlaybookDir.toBoolean() && config.ansiblePlaybookDir) {
         config.ansibleCollectionsRequirements = "${config.ansiblePlaybookDir}/${config.ansibleCollectionsRequirements}"
     }
 
@@ -362,7 +398,7 @@ Map loadPipelineConfig(Logger log, Map params) {
     return config
 }
 
-Map loadPipelineConfigFile(Logger log, Map config) {
+Map loadPipelineConfigFile(Map config) {
     String logPrefix="loadPipelineConfigFile():"
 
     Map ansiblePipelineConfigMap = readYaml file: config.ansiblePipelineConfigFile
@@ -412,7 +448,7 @@ Map loadPipelineConfigFile(Logger log, Map config) {
     return config
 }
 
-Map getAnsibleCommandConfig(Logger log, Map config) {
+Map getAnsibleCommandConfig(Map config) {
     String logPrefix="getAnsibleCommandConfig():"
 
     String ansiblePlaybook = "${config.ansiblePlaybook}"

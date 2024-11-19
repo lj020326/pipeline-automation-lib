@@ -4,7 +4,7 @@
 
 def pcfUtil = new com.dettonville.api.pipeline.utility.PCFUtil(this)
 def mvnUtil = new com.dettonville.api.pipeline.utility.MavenUtil(this)
-def emailList = 'ljohnson@dettonville.org esmyth@dettonville.org'
+def emailList = 'lee.johnson@dettonville.com joe.tester@dettonville.com'
 
 def appHostName = "polaris-documentation"
 def gitRepo = "https://gitrepository.dettonville.int/stash/scm/mcrefarch/polaris-documentation.git"

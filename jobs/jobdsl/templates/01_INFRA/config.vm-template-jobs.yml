@@ -12,106 +12,123 @@ pipelineConfig:
       - environment: DEV
         replaceExistingTemplate: true
         jobList:
-        - jobName: run-all-builds
-          jobScript: .jenkins/runAllBuilds.groovy
-          description: "Job to run all VM template builds for SANDBOX"
-#          ## run at 11 am and 7 pm
-#          cronSpecification: "H 11,19 * * *"
-#          ## run at 11 am
-#          cronSpecification: "H 11 * * *"
+          - jobName: run-all-builds
+            jobScript: .jenkins/runAllBuilds.groovy
+            description: "Job to run all VM template builds for SANDBOX"
+#            ## run at 11 am and 7 pm
+#            cronSpecification: "H 11,19 * * *"
+#            ## run at 11 am
+#            cronSpecification: "H 11 * * *"
       - environment: PROD
         replaceExistingTemplate: true
     QA:
       - environment: QA
         replaceExistingTemplate: true
         jobList:
-        - jobName: run-all-builds
-          jobScript: .jenkins/runAllBuilds.groovy
-          description: "Job to run all VM template builds for SANDBOX"
-#          ## run at 10 am
-#          cronSpecification: "H 10 * * *"
+          - jobName: run-all-builds
+            jobScript: .jenkins/runAllBuilds.groovy
+            description: "Job to run all VM template builds for SANDBOX"
+#            ## run at 10 am
+#            cronSpecification: "H 10 * * *"
       - environment: DEV
         replaceExistingTemplate: true
     PROD:
       - environment: PROD
         replaceExistingTemplate: true
         jobList:
-        - jobName: run-all-builds
-          jobScript: .jenkins/runAllBuilds.groovy
-          description: "Job to run all VM template builds for SANDBOX"
-#          ## run at 10 am
-#          cronSpecification: "H 10 * * *"
+          - jobName: run-all-builds
+            jobScript: .jenkins/runAllBuilds.groovy
+            description: "Job to run all VM template builds for SANDBOX"
+#            ## run at 10 am
+#            cronSpecification: "H 10 * * *"
       - environment: DEV
         replaceExistingTemplate: true
   vmTemplateList:
-  - buildDistribution: CentOS
-    buildRelease: '9'
-    buildType: small
-  - buildDistribution: CentOS
-    buildRelease: '9'
-    buildType: medium
-  - buildDistribution: CentOS
-    buildRelease: '8-stream'
-  - buildDistribution: CentOS
-    buildRelease: '8'
-  - buildDistribution: CentOS
-    buildRelease: '7'
-  - buildDistribution: Debian
-    buildRelease: '10'
-  - buildDistribution: Debian
-    buildRelease: '9'
-  - buildDistribution: RHEL
-    buildRelease: '9'
-    buildType: small
-#    cronSpecification: "H 10 * * *"
-  - buildDistribution: RHEL
-    buildRelease: '9'
-    buildType: medium
-#  - buildDistribution: RHEL
-#    buildRelease: '9'
-#    buildType: large
-  - buildDistribution: RHEL
-    buildRelease: '8'
-    buildType: small
-  - buildDistribution: RHEL
-    buildRelease: '8'
-    buildType: medium
-#  - buildDistribution: RHEL
-#    buildRelease: '8'
-#    buildType: large
-  - buildDistribution: Ubuntu
-    buildRelease: '22.04'
-  - buildDistribution: Ubuntu
-    buildRelease: '20.04'
-  - buildDistribution: Ubuntu
-    buildRelease: '18.04'
-  - buildDistribution: Windows/server
-    buildRelease: '2022'
-    buildType: standard
-  - buildDistribution: Windows/server
-    buildRelease: '2022'
-    buildType: dataserver
-  - buildDistribution: Windows/server
-    buildRelease: '2022'
-    buildType: sqlserver
-  - buildDistribution: Windows/server
-    buildRelease: '2019'
-    buildType: standard
-  - buildDistribution: Windows/server
-    buildRelease: '2019'
-    buildType: dataserver
-  - buildDistribution: Windows/server
-    buildRelease: '2019'
-    buildType: sqlserver
-#  - buildDistribution: Windows
-#    buildRelease: '2016'
-#    buildType: standard
-#  - buildDistribution: Windows
-#    buildRelease: '2016'
-#    buildType: dataserver
-#  - buildDistribution: Windows
-#    buildRelease: '2016'
-#    buildType: sqlserver
-  - buildDistribution: Windows/desktop
-    buildRelease: '11'
-    buildType: standard
+    - buildDistribution: CentOS
+      buildRelease: '9'
+      buildType: small
+    - buildDistribution: CentOS
+      buildRelease: '9'
+      buildType: medium
+    - buildDistribution: CentOS
+      buildRelease: '8-stream'
+      buildType: medium
+    - buildDistribution: CentOS
+      buildRelease: '8'
+      buildType: medium
+    - buildDistribution: CentOS
+      buildRelease: '7'
+      buildType: medium
+    - buildDistribution: Debian
+      buildRelease: '10'
+      buildType: medium
+    - buildDistribution: Debian
+      buildRelease: '9'
+      buildType: medium
+    - buildDistribution: RHEL
+      buildRelease: '9'
+      buildType: small
+  #    cronSpecification: "H 10 * * *"
+    - buildDistribution: RHEL
+      buildRelease: '9'
+      buildType: medium
+#    - buildDistribution: RHEL
+#      buildRelease: '9'
+#      buildType: large
+    - buildDistribution: RHEL
+      buildRelease: '8'
+      buildType: small
+    - buildDistribution: RHEL
+      buildRelease: '8'
+      buildType: medium
+#    - buildDistribution: RHEL
+#      buildRelease: '8'
+#      buildType: large
+    - buildDistribution: Ubuntu
+      buildRelease: '24.04'
+      buildType: small
+    - buildDistribution: Ubuntu
+      buildRelease: '24.04'
+      buildType: medium
+    - buildDistribution: Ubuntu
+      buildRelease: '22.04'
+      buildType: small
+    - buildDistribution: Ubuntu
+      buildRelease: '22.04'
+      buildType: medium
+    - buildDistribution: Ubuntu
+      buildRelease: '20.04'
+      buildType: medium
+    - buildDistribution: Ubuntu
+      buildRelease: '18.04'
+      buildType: medium
+    - buildDistribution: Windows/server
+      buildRelease: '2022'
+      buildType: standard
+    - buildDistribution: Windows/server
+      buildRelease: '2022'
+      buildType: dataserver
+    - buildDistribution: Windows/server
+      buildRelease: '2022'
+      buildType: sqlserver
+    - buildDistribution: Windows/server
+      buildRelease: '2019'
+      buildType: standard
+    - buildDistribution: Windows/server
+      buildRelease: '2019'
+      buildType: dataserver
+    - buildDistribution: Windows/server
+      buildRelease: '2019'
+      buildType: sqlserver
+#    - buildDistribution: Windows
+#      buildRelease: '2016'
+#      buildType: standard
+#    - buildDistribution: Windows
+#      buildRelease: '2016'
+#      buildType: dataserver
+#    - buildDistribution: Windows
+#      buildRelease: '2016'
+#      buildType: sqlserver
+    - buildDistribution: Windows/desktop
+      buildRelease: '11'
+      buildType: standard

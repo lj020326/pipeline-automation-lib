@@ -3,7 +3,6 @@
 // ref: https://fusion.dettonville.int/stash/projects/AA/repos/cardcase/raw/Jenkinsfile
 
 // Jenkins Declarative Pipeline for multi-branch project
-// @author Roman Slipchenko (Roman_Slipchenko@epam.com)
 // Conventions:
 // Upper-case variables - Jenkins default environment variables, e.g. env.JOB_NAME
 // Lower-case variables - custom environment variables, e.g. env.groupId
@@ -28,7 +27,7 @@ properties(
                           description: 'Release artifact version that will be used if Rollback parameter == true',
                           groupId: 'com.epam.macd', name: 'release_artifact', packaging: 'jar',
                           sortOrder: 'DESC',
-                          repoBaseUrl: 'http://ecsa00400590.epam.com:8081/repository/macd-plat-backend-releases/'
+                          repoBaseUrl: 'http://ecsa00400590.example.int:8081/repository/macd-plat-backend-releases/'
                          ]
                  ]
                 ]
@@ -65,7 +64,7 @@ pipeline {
                 parallel (
                         CheckoutApplicationCode: {
                             git credentialsId: 'macd-plat-gitlab',
-                                    url: 'git@git.epam.com:macd-plat/macd-plat.git',
+                                    url: 'git@git.example.int:macd-plat/macd-plat.git',
                                     branch: "${env.BRANCH_NAME}"
                         },
                         CheckoutAcceptanceTestsCode: {
@@ -74,7 +73,7 @@ pipeline {
                                 dir('api-testing') {
                                     writeFile file: 'empty.dummy', text: ''
                                     git credentialsId: 'macd-plat-gitlab',
-                                            url: 'git@git.epam.com:macd-plat/macd-api-testing.git',
+                                            url: 'git@git.example.int:macd-plat/macd-api-testing.git',
                                             branch: 'main'
                                 }
                             }
@@ -126,7 +125,7 @@ pipeline {
                     }
                     env.GitCommitAuthor      = sh script: '''
                                                     git --no-pager show -s --format="%ae" |\
-                                                    sed s/@epam.com//g | tr "[:upper:]" "[:lower:]" |\
+                                                    sed s/@example.int//g | tr "[:upper:]" "[:lower:]" |\
                                                     xargs echo -n
                                                     ''', returnStdout: true
                 }

@@ -6,14 +6,15 @@ import com.dettonville.api.pipeline.utils.logging.LogLevel
 import com.dettonville.api.pipeline.utils.logging.Logger
 import groovy.json.*
 
-Logger.init(this, LogLevel.INFO)
-Logger log = new Logger(this)
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+@Field Logger log = new Logger(this, LogLevel.INFO)
 
 Map config=[:]
 config.maxTestResultsHistory=3
 config.testResultsHistory="aggregateTestResults.json"
-config.emailList="ljohnson@dettonville.org"
-config.emailFrom="DCAPI.TestAutomation@dettonville.org"
+config.emailList="ljohnson@dettonville.com"
+config.emailFrom="DCAPI.TestAutomation@dettonville.com"
 
 
 pipeline {
@@ -43,7 +44,7 @@ pipeline {
                 script {
 
                     log.info("getting prior build testResults")
-                    updateAggregateTestResults(log, config)
+                    updateAggregateTestResults(config)
 
                 }
             }
@@ -56,7 +57,7 @@ pipeline {
     }
     post {
         always {
-            sendEmailNotification(log, config.emailList as String, config)
+            sendEmailNotification(config.emailList as String, config)
         }
     }
 }
@@ -90,7 +91,7 @@ def getResourceFile(String fileName) {
 }
 
 def getTestResultFiles(Logger log) {
-    String logPrefix = "getTestResultFiles():"
+    String logPrefix = "${scriptName}->getTestResultFiles():"
     log.info("${logPrefix} starting")
 
     LinkedList statusList = ["good","bad"]
@@ -123,8 +124,8 @@ def getTestResultFiles(Logger log) {
 
 }
 
-Map getTestResults(Logger log, Integer buildNumber) {
-    String logPrefix = "getTestResults():"
+Map getTestResults(Integer buildNumber) {
+    String logPrefix = "${scriptName}->getTestResults():"
 
     log.info("${logPrefix} starting")
 
@@ -167,8 +168,8 @@ Map getTestResults(Logger log, Integer buildNumber) {
 }
 
 
-Integer getJobArtifact(Logger log, String artifactPath, Integer buildNumber=null) {
-    String logPrefix = "getJobArtifact():"
+Integer getJobArtifact(String artifactPath, Integer buildNumber=null) {
+    String logPrefix = "${scriptName}->getJobArtifact():"
 
     log.info("${logPrefix} starting")
 
@@ -211,8 +212,8 @@ Integer getJobArtifact(Logger log, String artifactPath, Integer buildNumber=null
     return responseStatus
 }
 
-Map updateAggregateTestResults(Logger log, Map config) {
-    String logPrefix = "updateAggregateTestResults():"
+Map updateAggregateTestResults(Map config) {
+    String logPrefix = "${scriptName}->updateAggregateTestResults():"
     log.info("${logPrefix} starting")
 
     String testResultsFile = config.testResultsHistory
@@ -222,13 +223,13 @@ Map updateAggregateTestResults(Logger log, Map config) {
     Integer buildNumber = currentBuild.number
 
     log.info("${logPrefix} get current test results")
-    Map currentTestResults = getTestResults(log, buildNumber)
+    Map currentTestResults = getTestResults(buildNumber)
     log.debug("${logPrefix} currentTestResults=${printToJsonString(currentTestResults)}")
 
     log.info("${logPrefix} get prior results aggregate ${testResultsFile}")
     Map testResults
-//    if (getJobArtifact(log, testResultsFile, priorBuildNumber)==200) {
-    if (getJobArtifact(log, testResultsFile)==200) {
+//    if (getJobArtifact(testResultsFile, priorBuildNumber)==200) {
+    if (getJobArtifact(testResultsFile)==200) {
         log.info("${logPrefix} ${testResultsFile} retrieved")
         testResults = readJSON file: testResultsFile
         log.debug("${logPrefix} testResults=${printToJsonString(testResults)}")
@@ -276,7 +277,7 @@ Map updateAggregateTestResults(Logger log, Map config) {
 /**
  * Send Email Notification
  **/
-void sendEmailNotification(Logger log, String emailDist, Map config) {
+void sendEmailNotification(String emailDist, Map config) {
 
 //    getResourceFile("email-templates/myTemplateFile.jelly")
 

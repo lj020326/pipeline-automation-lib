@@ -7,7 +7,7 @@ package com.dettonville.api.pipeline.utility
  * Utility that performs various maven tasks as well as other tasks tied to it such as git.
  * peforms tasks such as build, interact with sonar, run integration tests, git pull, etc.
  *
- * @Author grant.gortsema@dettonville.org
+ * @Author grant.gortsema@dettonville.com
  */
 class MavenUtil implements Serializable {
 

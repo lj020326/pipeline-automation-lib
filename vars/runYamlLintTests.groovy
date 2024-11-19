@@ -7,12 +7,16 @@ import com.dettonville.api.pipeline.utils.logging.LogLevel
 import com.dettonville.api.pipeline.utils.logging.Logger
 import com.dettonville.api.pipeline.versioning.ComparableSemanticVersion
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+@Field Logger log = new Logger(this, LogLevel.INFO)
+
 def call(Map params=[:]) {
 
-    Logger log = new Logger(this, LogLevel.INFO)
-//     log.setLevel(LogLevel.DEBUG)
+//     Logger log = new Logger(this, LogLevel.INFO)
+// //     log.setLevel(LogLevel.DEBUG)
 
-    Map config = loadPipelineConfig(log, params)
+    Map config = loadPipelineConfig(params)
 
     pipeline {
         agent {
@@ -42,10 +46,10 @@ def call(Map params=[:]) {
                         bitbucketStatusNotify(
                                 buildKey: config.buildTestName,
                                 buildName: config.buildTestName,
+                                buildState: 'INPROGRESS',
                                 repoSlug: 'ansible-datacenter',
                                 commitId: config.gitCommitHash
                             )
-
                     }
                 }
             }
@@ -59,7 +63,8 @@ def call(Map params=[:]) {
                         sh("yamllint --version")
 
                         List lintCmdList = []
-                        lintCmdList.push("set -o pipefail &&")
+//                         lintCmdList.push("set -o pipefail &&")
+//                        lintCmdList.push("set -o pipefail;")
                         lintCmdList.push("yamllint")
                         lintCmdList.push("--no-warnings")
                         lintCmdList.push("-f parsable")
@@ -67,26 +72,36 @@ def call(Map params=[:]) {
                             lintCmdList.push("-c ${config.lintConfigFile}")
                         }
                         lintCmdList.push(".")
-                        lintCmdList.push("|& tee ${config.testResultsDir}/yamllint-results.txt")
+//                         lintCmdList.push("|& tee ${config.testResultsDir}/yamllint-results.txt")
+                        lintCmdList.push("| tee ${config.testResultsDir}/yamllint-results.txt")
                         lintCmdList.push("|| true")
 
                         String lintCmd = lintCmdList.join(' ')
-                        sh(lintCmd)
 
-                        sh("yaml-lint-to-junit-xml ${config.testResultsDir}/yamllint-results.txt > ${config.testResultsDir}/${config.testResultsJunitFile}")
+                        try {
+                            sh(lintCmd)
 
-//                         sh("tree ${config.testResultsDir}")
-//
-//                         sh("cat ${config.testResultsDir}/${config.testResultsJunitFile}")
+                            config.bitbucketResult = "SUCCESSFUL"
 
-                        junit(testResults: "${config.testResultsDir}/${config.testResultsJunitFile}",
-                              skipPublishingChecks: true,
-                              allowEmptyResults: true)
+                            sh("yaml-lint-to-junit-xml ${config.testResultsDir}/yamllint-results.txt > ${config.testResultsDir}/${config.testResultsJunitFile}")
 
-                        archiveArtifacts(
-                            allowEmptyArchive: true,
-                            artifacts: "${config.testResultsDir}/**",
-                            fingerprint: true)
+    //                         sh("tree ${config.testResultsDir}")
+    //
+    //                         sh("cat ${config.testResultsDir}/${config.testResultsJunitFile}")
+
+                            archiveArtifacts(
+                                allowEmptyArchive: true,
+                                artifacts: "${config.testResultsDir}/**",
+                                fingerprint: true)
+
+                            junit(testResults: "${config.testResultsDir}/${config.testResultsJunitFile}",
+                                  skipPublishingChecks: true,
+                                  allowEmptyResults: true)
+                        } catch (Exception e) {
+                            config.bitbucketResult = "FAILED"
+                            log.error("lint error: " + e.getMessage())
+//                             throw e
+                        }
                     }
                 }
             }
@@ -97,23 +112,31 @@ def call(Map params=[:]) {
 
                     // ref: https://www.jenkins.io/doc/pipeline/steps/stashNotifier/
                     bitbucketStatusNotify(
-                                buildKey: config.buildTestName,
-                                buildName: config.buildTestName,
-                                repoSlug: 'ansible-datacenter',
-                                commitId: config.gitCommitHash
-                            )
+                        buildKey: config.buildTestName,
+                        buildName: config.buildTestName,
+                        buildState: config.bitbucketResult,
+                        repoSlug: 'ansible-datacenter',
+                        commitId: config.gitCommitHash
+                    )
 
                     List emailAdditionalDistList = []
-                    if (config.alwaysEmailDistList) {
-                        emailAdditionalDistList = config.alwaysEmailDistList
-                    }
-                    if (config.gitBranch in ['main','development'] || config.gitBranch.startsWith("release/")) {
-                        log.info("post(${env.BRANCH_NAME}): sendEmail(${currentBuild.result})")
-                        sendEmail(currentBuild, env, emailAdditionalDistList=emailAdditionalDistList)
+                    if (config.gitBranch in ['main','QA','PROD'] || config.gitBranch.startsWith("release/")) {
+                        if (config?.deployEmailDistList) {
+                            emailAdditionalDistList = config.deployEmailDistList
+                            log.info("post(${config.gitBranch}): sendEmail(${currentBuild.result})")
+                            sendEmail(currentBuild, env, emailAdditionalDistList=emailAdditionalDistList)
+                        }
+                    } else if (config.gitBranch in ['development']) {
+                        if (config?.alwaysEmailDistList) {
+                            emailAdditionalDistList = config.alwaysEmailDistList
+                            log.info("post(${config.gitBranch}): sendEmail(${currentBuild.result})")
+                            sendEmail(currentBuild, env, emailAdditionalDistList=emailAdditionalDistList)
+                        }
                     } else {
-                        log.info("post(${env.BRANCH_NAME}): sendEmail(${currentBuild.result}, 'RequesterRecipientProvider')")
-                        sendEmail(currentBuild, env, [[$class: 'RequesterRecipientProvider']])
+                        log.info("post(${config.gitBranch}): sendEmail(${currentBuild.result}, 'default')")
+                        sendEmail(currentBuild, env)
                     }
+
                     log.info("Empty current workspace dir")
                     cleanWs()
                 }
@@ -124,7 +147,7 @@ def call(Map params=[:]) {
 } // body
 
 //@NonCPS
-Map loadPipelineConfig(Logger log, Map params) {
+Map loadPipelineConfig(Map params) {
     String logPrefix="loadPipelineConfig():"
     Map config = [:]
 
@@ -152,9 +175,12 @@ Map loadPipelineConfig(Logger log, Map params) {
 
 //    config.emailDist = config.emailDist ?: "lee.james.johnson@gmail.com"
     config.emailDist = config.get('emailDist',"lee.james.johnson@gmail.com")
-    config.alwaysEmailDistList = ["ljohnson@dettonville.org"]
+    config.deployEmailDistList = [
+        'lee.johnson@dettonville.com',
+        'lee.james.johnson@gmail.com'
+    ]
+    config.alwaysEmailDistList = ["lee.johnson@dettonville.com"]
 
-    // config.alwaysEmailDist = config.alwaysEmailDist ?: "lee.james.johnson@gmail.com"
     config.emailFrom = config.emailFrom ?: "admin+ansible@dettonville.com"
 
     config.testResultsDir = config.get('testResultsDir', 'test-results')

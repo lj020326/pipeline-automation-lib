@@ -1,0 +1,2047 @@
+<?xml version="1.0" ?>
+<testsuites>
+    <testsuite errors="1835" failures="0" tests="1835" time="0">
+        <testcase name="roles/bootstrap_dell_opscenter/tasks/main.yml-1">
+            <failure file="roles/bootstrap_dell_opscenter/tasks/main.yml" line="3"
+                     message="fqcn[action-core]: Use FQCN for builtin module actions (ansible.builtin.yum)."
+                     type="Ansible Lint">fqcn[action-core]: Use FQCN for builtin module actions (ansible.builtin.yum).
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_dell_racadm_host/tasks/racadm-setup-BIOS.yml-2">
+            <failure file="roles/bootstrap_dell_racadm_host/tasks/racadm-setup-BIOS.yml" line="28"
+                     message="fqcn[action-core]: Use FQCN for builtin module actions (ansible.builtin.yum)."
+                     type="Ansible Lint">fqcn[action-core]: Use FQCN for builtin module actions (ansible.builtin.yum).
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_dell_racadm_host/tasks/racadm-setup-BIOS.yml-3">
+            <failure file="roles/bootstrap_dell_racadm_host/tasks/racadm-setup-BIOS.yml" line="34"
+                     message="fqcn[action-core]: Use FQCN for builtin module actions (ansible.builtin.yum)."
+                     type="Ansible Lint">fqcn[action-core]: Use FQCN for builtin module actions (ansible.builtin.yum).
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_dell_racadm_host/tasks/setup_disks.yml-4">
+            <failure file="roles/bootstrap_dell_racadm_host/tasks/setup_disks.yml" line="3"
+                     message="fqcn[action-core]: Use FQCN for builtin module actions (ansible.builtin.yum)."
+                     type="Ansible Lint">fqcn[action-core]: Use FQCN for builtin module actions (ansible.builtin.yum).
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_docker/tasks/ce/yum.yml-5">
+            <failure file="roles/bootstrap_docker/tasks/ce/yum.yml" line="52"
+                     message="fqcn[action-core]: Use FQCN for builtin module actions (ansible.builtin.yum)."
+                     type="Ansible Lint">fqcn[action-core]: Use FQCN for builtin module actions (ansible.builtin.yum).
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_docker/tasks/ee/yum.yml-6">
+            <failure file="roles/bootstrap_docker/tasks/ee/yum.yml" line="9"
+                     message="fqcn[action-core]: Use FQCN for builtin module actions (ansible.builtin.yum)."
+                     type="Ansible Lint">fqcn[action-core]: Use FQCN for builtin module actions (ansible.builtin.yum).
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_docker/tasks/ee/yum.yml-7">
+            <failure file="roles/bootstrap_docker/tasks/ee/yum.yml" line="35"
+                     message="fqcn[action-core]: Use FQCN for builtin module actions (ansible.builtin.yum)."
+                     type="Ansible Lint">fqcn[action-core]: Use FQCN for builtin module actions (ansible.builtin.yum).
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_docker/tasks/ee/yum.yml-8">
+            <failure file="roles/bootstrap_docker/tasks/ee/yum.yml" line="51"
+                     message="fqcn[action-core]: Use FQCN for builtin module actions (ansible.builtin.yum)."
+                     type="Ansible Lint">fqcn[action-core]: Use FQCN for builtin module actions (ansible.builtin.yum).
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_docker_stack/vars/app-services/traefik/v2/dns/docker_stack_atlassian.yml-9">
+            <failure file="roles/bootstrap_docker_stack/vars/app-services/traefik/v2/dns/docker_stack_atlassian.yml"
+                     line="1"
+                     message="load-failure[runtimeerror]: Failed to load YAML file: roles/bootstrap_docker_stack/vars/app-services/traefik/v2/dns/docker_stack_atlassian.yml"
+                     type="Ansible Lint">load-failure[runtimeerror]: Failed to load YAML file:
+                roles/bootstrap_docker_stack/vars/app-services/traefik/v2/dns/docker_stack_atlassian.yml
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_docker_stack/vars/app-services/traefik/v2/dns/docker_stack_web.yml-10">
+            <failure file="roles/bootstrap_docker_stack/vars/app-services/traefik/v2/dns/docker_stack_web.yml" line="1"
+                     message="load-failure[runtimeerror]: Failed to load YAML file: roles/bootstrap_docker_stack/vars/app-services/traefik/v2/dns/docker_stack_web.yml"
+                     type="Ansible Lint">load-failure[runtimeerror]: Failed to load YAML file:
+                roles/bootstrap_docker_stack/vars/app-services/traefik/v2/dns/docker_stack_web.yml
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_docker_stack/vars/app-services/traefik/v3/dns/docker_stack_atlassian.yml-11">
+            <failure file="roles/bootstrap_docker_stack/vars/app-services/traefik/v3/dns/docker_stack_atlassian.yml"
+                     line="1"
+                     message="load-failure[runtimeerror]: Failed to load YAML file: roles/bootstrap_docker_stack/vars/app-services/traefik/v3/dns/docker_stack_atlassian.yml"
+                     type="Ansible Lint">load-failure[runtimeerror]: Failed to load YAML file:
+                roles/bootstrap_docker_stack/vars/app-services/traefik/v3/dns/docker_stack_atlassian.yml
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_epel_repo/tasks/main.yml-12">
+            <failure file="roles/bootstrap_epel_repo/tasks/main.yml" line="3"
+                     message="fqcn[action-core]: Use FQCN for builtin module actions (ansible.builtin.yum)."
+                     type="Ansible Lint">fqcn[action-core]: Use FQCN for builtin module actions (ansible.builtin.yum).
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_epel_repo/tasks/main.yml-13">
+            <failure file="roles/bootstrap_epel_repo/tasks/main.yml" line="91"
+                     message="fqcn[action-core]: Use FQCN for builtin module actions (ansible.builtin.yum)."
+                     type="Ansible Lint">fqcn[action-core]: Use FQCN for builtin module actions (ansible.builtin.yum).
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_git/tasks/install-from-source.yml-14">
+            <failure file="roles/bootstrap_git/tasks/install-from-source.yml" line="26"
+                     message="command-instead-of-module: git used in place of git module" type="Ansible Lint">
+                command-instead-of-module: git used in place of git module
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_git/tasks/install-from-source.yml-15">
+            <failure file="roles/bootstrap_git/tasks/install-from-source.yml" line="26"
+                     message="inline-env-var: Command module does not accept setting environment variables inline."
+                     type="Ansible Lint">inline-env-var: Command module does not accept setting environment variables
+                inline.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_git/tasks/install-from-source.yml-16">
+            <failure file="roles/bootstrap_git/tasks/install-from-source.yml" line="26"
+                     message="no-free-form: Avoid using free-form when calling module actions. (ansible.builtin.command)"
+                     type="Ansible Lint">no-free-form: Avoid using free-form when calling module actions.
+                (ansible.builtin.command)
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_git/tasks/install-from-source.yml-17">
+            <failure file="roles/bootstrap_git/tasks/install-from-source.yml" line="69"
+                     message="no-free-form: Avoid using free-form when calling module actions. (ansible.builtin.command)"
+                     type="Ansible Lint">no-free-form: Avoid using free-form when calling module actions.
+                (ansible.builtin.command)
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_govc/tasks/deploy_ova.yml-18">
+            <failure file="roles/bootstrap_govc/tasks/deploy_ova.yml" line="22"
+                     message="no-changed-when: Commands should not change things if nothing needs doing."
+                     type="Ansible Lint">no-changed-when: Commands should not change things if nothing needs doing.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_govc/tasks/deploy_ova.yml-19">
+            <failure file="roles/bootstrap_govc/tasks/deploy_ova.yml" line="46"
+                     message="fqcn[action-core]: Use FQCN for builtin module actions (debug)." type="Ansible Lint">
+                fqcn[action-core]: Use FQCN for builtin module actions (debug).
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_govc/tasks/deploy_ova.yml-20">
+            <failure file="roles/bootstrap_govc/tasks/deploy_ova.yml" line="46"
+                     message="name[missing]: All tasks should be named." type="Ansible Lint">name[missing]: All tasks
+                should be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_govc/tasks/deploy_ova.yml-21">
+            <failure file="roles/bootstrap_govc/tasks/deploy_ova.yml" line="46"
+                     message="no-free-form: Avoid using free-form when calling module actions. (debug)"
+                     type="Ansible Lint">no-free-form: Avoid using free-form when calling module actions. (debug)
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_govc/tasks/install.yml-22">
+            <failure file="roles/bootstrap_govc/tasks/install.yml" line="49"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_govc/tasks/install.yml-23">
+            <failure file="roles/bootstrap_govc/tasks/install.yml" line="49"
+                     message="yaml[indentation]: Wrong indentation: expected 4 but found 2" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 4 but found 2
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_govc/tasks/install.yml-24">
+            <failure file="roles/bootstrap_govc/tasks/install.yml" line="56"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_govc/tasks/install.yml-25">
+            <failure file="roles/bootstrap_govc/tasks/install.yml" line="68"
+                     message="no-changed-when: Commands should not change things if nothing needs doing."
+                     type="Ansible Lint">no-changed-when: Commands should not change things if nothing needs doing.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_hddtemp/handlers/main.yml-26">
+            <failure file="roles/bootstrap_hddtemp/handlers/main.yml" line="14"
+                     message="command-instead-of-module: service used in place of service module" type="Ansible Lint">
+                command-instead-of-module: service used in place of service module
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_hddtemp/handlers/main.yml-27">
+            <failure file="roles/bootstrap_hddtemp/handlers/main.yml" line="14"
+                     message="inline-env-var: Command module does not accept setting environment variables inline."
+                     type="Ansible Lint">inline-env-var: Command module does not accept setting environment variables
+                inline.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_inspec/meta/main.yml-28">
+            <failure file="roles/bootstrap_inspec/meta/main.yml" line="1"
+                     message="schema[meta]: $.galaxy_info 'author' is a required property. See https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_reuse_roles.html#using-role-dependencies"
+                     type="Ansible Lint">schema[meta]: $.galaxy_info 'author' is a required property. See
+                https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_reuse_roles.html#using-role-dependencies
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_inspec/tasks/install_el.yml-29">
+            <failure file="roles/bootstrap_inspec/tasks/install_el.yml" line="11"
+                     message="fqcn[action-core]: Use FQCN for builtin module actions (ansible.builtin.yum)."
+                     type="Ansible Lint">fqcn[action-core]: Use FQCN for builtin module actions (ansible.builtin.yum).
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_inspec/tasks/main.yml-30">
+            <failure file="roles/bootstrap_inspec/tasks/main.yml" line="40"
+                     message="command-instead-of-module: curl used in place of get_url or uri module"
+                     type="Ansible Lint">command-instead-of-module: curl used in place of get_url or uri module
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_inspec/tasks/main.yml-31">
+            <failure file="roles/bootstrap_inspec/tasks/main.yml" line="40"
+                     message="no-changed-when: Commands should not change things if nothing needs doing."
+                     type="Ansible Lint">no-changed-when: Commands should not change things if nothing needs doing.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_inspec/tasks/main.yml-32">
+            <failure file="roles/bootstrap_inspec/tasks/main.yml" line="40"
+                     message="risky-shell-pipe: Shells that use pipes should set the pipefail option."
+                     type="Ansible Lint">risky-shell-pipe: Shells that use pipes should set the pipefail option.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_ipa_krb5/tasks/main.yml-33">
+            <failure file="roles/bootstrap_ipa_krb5/tasks/main.yml" line="8"
+                     message="fqcn[action-core]: Use FQCN for builtin module actions (copy)." type="Ansible Lint">
+                fqcn[action-core]: Use FQCN for builtin module actions (copy).
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_iscsi_client/tasks/manage_iscsi_targets.yml-34">
+            <failure file="roles/bootstrap_iscsi_client/tasks/manage_iscsi_targets.yml" line="140"
+                     message="yaml[empty-lines]: Too many blank lines (1 &gt; 0)" type="Ansible Lint">yaml[empty-lines]:
+                Too many blank lines (1 &gt; 0)
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_java/meta/main.yml-35">
+            <failure file="roles/bootstrap_java/meta/main.yml" line="1"
+                     message="schema[meta]: $.galaxy_info 'author' is a required property. See https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_reuse_roles.html#using-role-dependencies"
+                     type="Ansible Lint">schema[meta]: $.galaxy_info 'author' is a required property. See
+                https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_reuse_roles.html#using-role-dependencies
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_java/tasks/setup-Debian.yml-36">
+            <failure file="roles/bootstrap_java/tasks/setup-Debian.yml" line="4"
+                     message="fqcn[action-core]: Use FQCN for builtin module actions (file)." type="Ansible Lint">
+                fqcn[action-core]: Use FQCN for builtin module actions (file).
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_java/tasks/setup-FreeBSD.yml-37">
+            <failure file="roles/bootstrap_java/tasks/setup-FreeBSD.yml" line="2"
+                     message="fqcn[action]: Use FQCN for module actions, such `community.general.pkgng`."
+                     type="Ansible Lint">fqcn[action]: Use FQCN for module actions, such `community.general.pkgng`.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_java/tasks/setup-RedHat.yml-38">
+            <failure file="roles/bootstrap_java/tasks/setup-RedHat.yml" line="15"
+                     message="command-instead-of-module: rpm used in place of yum or rpm_key module"
+                     type="Ansible Lint">command-instead-of-module: rpm used in place of yum or rpm_key module
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_java/tasks/setup-RedHat.yml-39">
+            <failure file="roles/bootstrap_java/tasks/setup-RedHat.yml" line="15"
+                     message="risky-shell-pipe: Shells that use pipes should set the pipefail option."
+                     type="Ansible Lint">risky-shell-pipe: Shells that use pipes should set the pipefail option.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_java/tasks/setup-RedHat.yml-40">
+            <failure file="roles/bootstrap_java/tasks/setup-RedHat.yml" line="15"
+                     message="yaml[indentation]: Wrong indentation: expected 4 but found 2" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 4 but found 2
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_java/tasks/setup-RedHat.yml-41">
+            <failure file="roles/bootstrap_java/tasks/setup-RedHat.yml" line="20"
+                     message="command-instead-of-module: rpm used in place of yum or rpm_key module"
+                     type="Ansible Lint">command-instead-of-module: rpm used in place of yum or rpm_key module
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_java/tasks/setup-RedHat.yml-42">
+            <failure file="roles/bootstrap_java/tasks/setup-RedHat.yml" line="20"
+                     message="risky-shell-pipe: Shells that use pipes should set the pipefail option."
+                     type="Ansible Lint">risky-shell-pipe: Shells that use pipes should set the pipefail option.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_java/tasks/setup-RedHat.yml-43">
+            <failure file="roles/bootstrap_java/tasks/setup-RedHat.yml" line="25"
+                     message="command-instead-of-module: rpm used in place of yum or rpm_key module"
+                     type="Ansible Lint">command-instead-of-module: rpm used in place of yum or rpm_key module
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_java/tasks/setup-RedHat.yml-44">
+            <failure file="roles/bootstrap_java/tasks/setup-RedHat.yml" line="25"
+                     message="risky-shell-pipe: Shells that use pipes should set the pipefail option."
+                     type="Ansible Lint">risky-shell-pipe: Shells that use pipes should set the pipefail option.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_jenkins/meta/main.yml-45">
+            <failure file="roles/bootstrap_jenkins/meta/main.yml" line="1"
+                     message="schema[meta]: $.galaxy_info 'author' is a required property. See https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_reuse_roles.html#using-role-dependencies"
+                     type="Ansible Lint">schema[meta]: $.galaxy_info 'author' is a required property. See
+                https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_reuse_roles.html#using-role-dependencies
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_jenkins/tasks/main.yml-46">
+            <failure file="roles/bootstrap_jenkins/tasks/main.yml" line="57"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_jenkins/tasks/plugins.yml-47">
+            <failure file="roles/bootstrap_jenkins/tasks/plugins.yml" line="38"
+                     message="fqcn[action-core]: Use FQCN for builtin module actions (replace)." type="Ansible Lint">
+                fqcn[action-core]: Use FQCN for builtin module actions (replace).
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_jenkins/tasks/settings.yml-48">
+            <failure file="roles/bootstrap_jenkins/tasks/settings.yml" line="26"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_jenkins/tasks/setup-Debian.yml-49">
+            <failure file="roles/bootstrap_jenkins/tasks/setup-Debian.yml" line="25"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_jenkins/tasks/setup-RedHat.yml-50">
+            <failure file="roles/bootstrap_jenkins/tasks/setup-RedHat.yml" line="10"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_jenkins/tasks/setup-RedHat.yml-51">
+            <failure file="roles/bootstrap_jenkins/tasks/setup-RedHat.yml" line="22"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_jenkins_agent/meta/main.yml-52">
+            <failure file="roles/bootstrap_jenkins_agent/meta/main.yml" line="1"
+                     message="schema[meta]: $.galaxy_info 'author' is a required property. See https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_reuse_roles.html#using-role-dependencies"
+                     type="Ansible Lint">schema[meta]: $.galaxy_info 'author' is a required property. See
+                https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_reuse_roles.html#using-role-dependencies
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_jenkins_agent/meta/main.yml-53">
+            <failure file="roles/bootstrap_jenkins_agent/meta/main.yml" line="8"
+                     message="yaml[indentation]: Wrong indentation: expected 8 but found 6" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 8 but found 6
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_jenkins_agent/meta/main.yml-54">
+            <failure file="roles/bootstrap_jenkins_agent/meta/main.yml" line="12"
+                     message="yaml[indentation]: Wrong indentation: expected 8 but found 6" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 8 but found 6
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_jenkins_agent/meta/main.yml-55">
+            <failure file="roles/bootstrap_jenkins_agent/meta/main.yml" line="16"
+                     message="yaml[indentation]: Wrong indentation: expected 8 but found 6" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 8 but found 6
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_jenkins_agent/meta/main.yml-56">
+            <failure file="roles/bootstrap_jenkins_agent/meta/main.yml" line="20"
+                     message="yaml[indentation]: Wrong indentation: expected 8 but found 6" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 8 but found 6
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_jenkins_agent/tasks/debian.yml-57">
+            <failure file="roles/bootstrap_jenkins_agent/tasks/debian.yml" line="38"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_jenkins_agent/tasks/redhat-7.yml-58">
+            <failure file="roles/bootstrap_jenkins_agent/tasks/redhat-7.yml" line="48"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_jenkins_agent/tasks/redhat.yml-59">
+            <failure file="roles/bootstrap_jenkins_agent/tasks/redhat.yml" line="38"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_jenkins_agent/tasks/windows.yml-60">
+            <failure file="roles/bootstrap_jenkins_agent/tasks/windows.yml" line="2"
+                     message="ignore-errors: Use failed_when and specify error conditions instead of using ignore_errors."
+                     type="Ansible Lint">ignore-errors: Use failed_when and specify error conditions instead of using
+                ignore_errors.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_jenkins_agent/tests/test.yml-61">
+            <failure file="roles/bootstrap_jenkins_agent/tests/test.yml" line="2"
+                     message="name[play]: All plays should be named." type="Ansible Lint">name[play]: All plays should
+                be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_jenkins_swarm_agent/meta/main.yml-62">
+            <failure file="roles/bootstrap_jenkins_swarm_agent/meta/main.yml" line="1"
+                     message="schema[meta]: $.galaxy_info 'author' is a required property. See https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_reuse_roles.html#using-role-dependencies"
+                     type="Ansible Lint">schema[meta]: $.galaxy_info 'author' is a required property. See
+                https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_reuse_roles.html#using-role-dependencies
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_jenkins_swarm_agent/meta/main.yml-63">
+            <failure file="roles/bootstrap_jenkins_swarm_agent/meta/main.yml" line="8"
+                     message="yaml[indentation]: Wrong indentation: expected 8 but found 6" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 8 but found 6
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_jenkins_swarm_agent/meta/main.yml-64">
+            <failure file="roles/bootstrap_jenkins_swarm_agent/meta/main.yml" line="12"
+                     message="yaml[indentation]: Wrong indentation: expected 8 but found 6" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 8 but found 6
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_jenkins_swarm_agent/meta/main.yml-65">
+            <failure file="roles/bootstrap_jenkins_swarm_agent/meta/main.yml" line="16"
+                     message="yaml[indentation]: Wrong indentation: expected 8 but found 6" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 8 but found 6
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_jenkins_swarm_agent/meta/main.yml-66">
+            <failure file="roles/bootstrap_jenkins_swarm_agent/meta/main.yml" line="20"
+                     message="yaml[indentation]: Wrong indentation: expected 8 but found 6" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 8 but found 6
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_jenkins_swarm_agent/tasks/debian.yml-67">
+            <failure file="roles/bootstrap_jenkins_swarm_agent/tasks/debian.yml" line="37"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_jenkins_swarm_agent/tasks/redhat-7.yml-68">
+            <failure file="roles/bootstrap_jenkins_swarm_agent/tasks/redhat-7.yml" line="37"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_jenkins_swarm_agent/tasks/redhat.yml-69">
+            <failure file="roles/bootstrap_jenkins_swarm_agent/tasks/redhat.yml" line="27"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_jenkins_swarm_agent/tasks/windows.yml-70">
+            <failure file="roles/bootstrap_jenkins_swarm_agent/tasks/windows.yml" line="2"
+                     message="ignore-errors: Use failed_when and specify error conditions instead of using ignore_errors."
+                     type="Ansible Lint">ignore-errors: Use failed_when and specify error conditions instead of using
+                ignore_errors.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_jenkins_swarm_agent/tests/test.yml-71">
+            <failure file="roles/bootstrap_jenkins_swarm_agent/tests/test.yml" line="2"
+                     message="name[play]: All plays should be named." type="Ansible Lint">name[play]: All plays should
+                be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm/meta/main.yml-72">
+            <failure file="roles/bootstrap_kvm/meta/main.yml" line="1"
+                     message="schema[meta]: $.galaxy_info 'author' is a required property. See https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_reuse_roles.html#using-role-dependencies"
+                     type="Ansible Lint">schema[meta]: $.galaxy_info 'author' is a required property. See
+                https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_reuse_roles.html#using-role-dependencies
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm/requirements.yml-73">
+            <failure file="roles/bootstrap_kvm/requirements.yml" line="1"
+                     message="schema[requirements]: $ None is not of type 'array'. See https://docs.ansible.com/ansible/latest/galaxy/user_guide.html#installing-roles-and-collections-from-the-same-requirements-yml-file"
+                     type="Ansible Lint">schema[requirements]: $ None is not of type 'array'. See
+                https://docs.ansible.com/ansible/latest/galaxy/user_guide.html#installing-roles-and-collections-from-the-same-requirements-yml-file
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm/tasks/config_storage_pools.yml-74">
+            <failure file="roles/bootstrap_kvm/tasks/config_storage_pools.yml" line="10"
+                     message="fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_pool`."
+                     type="Ansible Lint">fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_pool`.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm/tasks/config_storage_pools.yml-75">
+            <failure file="roles/bootstrap_kvm/tasks/config_storage_pools.yml" line="19"
+                     message="fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_pool`."
+                     type="Ansible Lint">fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_pool`.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm/tasks/config_storage_pools.yml-76">
+            <failure file="roles/bootstrap_kvm/tasks/config_storage_pools.yml" line="27"
+                     message="fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_pool`."
+                     type="Ansible Lint">fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_pool`.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm/tasks/config_storage_pools.yml-77">
+            <failure file="roles/bootstrap_kvm/tasks/config_storage_pools.yml" line="38"
+                     message="fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_pool`."
+                     type="Ansible Lint">fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_pool`.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm/tasks/config_virtual_networks.yml-78">
+            <failure file="roles/bootstrap_kvm/tasks/config_virtual_networks.yml" line="3"
+                     message="fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_net`."
+                     type="Ansible Lint">fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_net`.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm/tasks/config_virtual_networks.yml-79">
+            <failure file="roles/bootstrap_kvm/tasks/config_virtual_networks.yml" line="11"
+                     message="fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_net`."
+                     type="Ansible Lint">fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_net`.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm/tasks/config_virtual_networks.yml-80">
+            <failure file="roles/bootstrap_kvm/tasks/config_virtual_networks.yml" line="19"
+                     message="fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_net`."
+                     type="Ansible Lint">fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_net`.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm/tasks/config_virtual_networks.yml-81">
+            <failure file="roles/bootstrap_kvm/tasks/config_virtual_networks.yml" line="30"
+                     message="fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_net`."
+                     type="Ansible Lint">fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_net`.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm/tasks/config_vms.yml-82">
+            <failure file="roles/bootstrap_kvm/tasks/config_vms.yml" line="2"
+                     message="fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt`."
+                     type="Ansible Lint">fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt`.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm/tasks/config_vms.yml-83">
+            <failure file="roles/bootstrap_kvm/tasks/config_vms.yml" line="11"
+                     message="fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt`."
+                     type="Ansible Lint">fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt`.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm/tasks/config_vms.yml-84">
+            <failure file="roles/bootstrap_kvm/tasks/config_vms.yml" line="46"
+                     message="fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt`."
+                     type="Ansible Lint">fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt`.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm/tasks/config_vms.yml-85">
+            <failure file="roles/bootstrap_kvm/tasks/config_vms.yml" line="54"
+                     message="fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt`."
+                     type="Ansible Lint">fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt`.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm/tasks/config_vms.yml-86">
+            <failure file="roles/bootstrap_kvm/tasks/config_vms.yml" line="64"
+                     message="fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt`."
+                     type="Ansible Lint">fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt`.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm/tasks/config_vms.yml-87">
+            <failure file="roles/bootstrap_kvm/tasks/config_vms.yml" line="75"
+                     message="fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt`."
+                     type="Ansible Lint">fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt`.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm/tasks/install_packages_redhat.yml-88">
+            <failure file="roles/bootstrap_kvm/tasks/install_packages_redhat.yml" line="2"
+                     message="fqcn[action-core]: Use FQCN for builtin module actions (ansible.builtin.yum)."
+                     type="Ansible Lint">fqcn[action-core]: Use FQCN for builtin module actions (ansible.builtin.yum).
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm/tests/test.yml:6-89">
+            <failure file="roles/bootstrap_kvm/tests/test.yml:6" line="7"
+                     message="syntax-check[specific]: the role 'ansible-kvm' was not found in /home/jenkins/agent/workspace/ter_lint-tests_ansible-lint_main/roles/bootstrap_kvm/tests/roles:/root/.cache/ansible-compat/f915c3/roles:/home/jenkins/agent/workspace/ter_lint-tests_ansible-lint_main/roles:/home/jenkins/agent/workspace/ter_lint-tests_ansible-lint_main/roles:/home/jenkins/agent/workspace/ter_lint-tests_ansible-lint_main/roles/bootstrap_kvm/tests"
+                     type="Ansible Lint">syntax-check[specific]: the role 'ansible-kvm' was not found in
+                /home/jenkins/agent/workspace/ter_lint-tests_ansible-lint_main/roles/bootstrap_kvm/tests/roles:/root/.cache/ansible-compat/f915c3/roles:/home/jenkins/agent/workspace/ter_lint-tests_ansible-lint_main/roles:/home/jenkins/agent/workspace/ter_lint-tests_ansible-lint_main/roles:/home/jenkins/agent/workspace/ter_lint-tests_ansible-lint_main/roles/bootstrap_kvm/tests
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/meta/main.yml-90">
+            <failure file="roles/bootstrap_kvm_infra/meta/main.yml" line="1"
+                     message="schema[meta]: $.galaxy_info.platforms[0].versions[0] 8 is not one of ['6.1', '7.1', '7.2', 'all']. See https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_reuse_roles.html#using-role-dependencies"
+                     type="Ansible Lint">schema[meta]: $.galaxy_info.platforms[0].versions[0] 8 is not one of ['6.1',
+                '7.1', '7.2', 'all']. See
+                https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_reuse_roles.html#using-role-dependencies
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/tasks/defaults-get.yml-91">
+            <failure file="roles/bootstrap_kvm_infra/tasks/defaults-get.yml" line="38"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/tasks/disk-create.yml-92">
+            <failure file="roles/bootstrap_kvm_infra/tasks/disk-create.yml" line="127"
+                     message="no-changed-when: Commands should not change things if nothing needs doing."
+                     type="Ansible Lint">no-changed-when: Commands should not change things if nothing needs doing.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/tasks/disk-create.yml-93">
+            <failure file="roles/bootstrap_kvm_infra/tasks/disk-create.yml" line="150"
+                     message="no-changed-when: Commands should not change things if nothing needs doing."
+                     type="Ansible Lint">no-changed-when: Commands should not change things if nothing needs doing.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/tasks/disk-create.yml-94">
+            <failure file="roles/bootstrap_kvm_infra/tasks/disk-create.yml" line="171"
+                     message="no-changed-when: Commands should not change things if nothing needs doing."
+                     type="Ansible Lint">no-changed-when: Commands should not change things if nothing needs doing.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/tasks/hosts-remove.yml-95">
+            <failure file="roles/bootstrap_kvm_infra/tasks/hosts-remove.yml" line="8"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/tasks/net-create.yml-96">
+            <failure file="roles/bootstrap_kvm_infra/tasks/net-create.yml" line="3"
+                     message="fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_net`."
+                     type="Ansible Lint">fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_net`.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/tasks/net-create.yml-97">
+            <failure file="roles/bootstrap_kvm_infra/tasks/net-create.yml" line="18"
+                     message="fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_net`."
+                     type="Ansible Lint">fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_net`.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/tasks/net-create.yml-98">
+            <failure file="roles/bootstrap_kvm_infra/tasks/net-create.yml" line="31"
+                     message="fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_net`."
+                     type="Ansible Lint">fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_net`.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/tasks/net-list.yml-99">
+            <failure file="roles/bootstrap_kvm_infra/tasks/net-list.yml" line="24"
+                     message="fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_net`."
+                     type="Ansible Lint">fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_net`.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/tasks/net-list.yml-100">
+            <failure file="roles/bootstrap_kvm_infra/tasks/net-list.yml" line="34"
+                     message="fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_net`."
+                     type="Ansible Lint">fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_net`.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/tasks/net-remove.yml-101">
+            <failure file="roles/bootstrap_kvm_infra/tasks/net-remove.yml" line="3"
+                     message="fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_net`."
+                     type="Ansible Lint">fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_net`.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/tasks/net-remove.yml-102">
+            <failure file="roles/bootstrap_kvm_infra/tasks/net-remove.yml" line="15"
+                     message="fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_net`."
+                     type="Ansible Lint">fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_net`.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/tasks/pool-create.yml-103">
+            <failure file="roles/bootstrap_kvm_infra/tasks/pool-create.yml" line="6"
+                     message="fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_pool`."
+                     type="Ansible Lint">fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_pool`.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/tasks/pool-create.yml-104">
+            <failure file="roles/bootstrap_kvm_infra/tasks/pool-create.yml" line="14"
+                     message="fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_pool`."
+                     type="Ansible Lint">fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_pool`.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/tasks/pool-create.yml-105">
+            <failure file="roles/bootstrap_kvm_infra/tasks/pool-create.yml" line="22"
+                     message="fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_pool`."
+                     type="Ansible Lint">fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_pool`.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/tasks/pool-create.yml-106">
+            <failure file="roles/bootstrap_kvm_infra/tasks/pool-create.yml" line="33"
+                     message="fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_pool`."
+                     type="Ansible Lint">fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_pool`.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/tasks/pool-create.yml-107">
+            <failure file="roles/bootstrap_kvm_infra/tasks/pool-create.yml" line="45"
+                     message="fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_pool`."
+                     type="Ansible Lint">fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt_pool`.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/tasks/validations.yml-108">
+            <failure file="roles/bootstrap_kvm_infra/tasks/validations.yml" line="151"
+                     message="fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt`."
+                     type="Ansible Lint">fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt`.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/tasks/validations.yml-109">
+            <failure file="roles/bootstrap_kvm_infra/tasks/validations.yml" line="260"
+                     message="ignore-errors: Use failed_when and specify error conditions instead of using ignore_errors."
+                     type="Ansible Lint">ignore-errors: Use failed_when and specify error conditions instead of using
+                ignore_errors.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/tasks/validations.yml-110">
+            <failure file="roles/bootstrap_kvm_infra/tasks/validations.yml" line="271"
+                     message="ignore-errors: Use failed_when and specify error conditions instead of using ignore_errors."
+                     type="Ansible Lint">ignore-errors: Use failed_when and specify error conditions instead of using
+                ignore_errors.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/tasks/validations.yml-111">
+            <failure file="roles/bootstrap_kvm_infra/tasks/validations.yml" line="282"
+                     message="ignore-errors: Use failed_when and specify error conditions instead of using ignore_errors."
+                     type="Ansible Lint">ignore-errors: Use failed_when and specify error conditions instead of using
+                ignore_errors.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/tasks/validations.yml-112">
+            <failure file="roles/bootstrap_kvm_infra/tasks/validations.yml" line="315"
+                     message="risky-shell-pipe: Shells that use pipes should set the pipefail option."
+                     type="Ansible Lint">risky-shell-pipe: Shells that use pipes should set the pipefail option.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/tasks/validations.yml-113">
+            <failure file="roles/bootstrap_kvm_infra/tasks/validations.yml" line="486"
+                     message="name[missing]: All tasks should be named." type="Ansible Lint">name[missing]: All tasks
+                should be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/tasks/validations.yml-114">
+            <failure file="roles/bootstrap_kvm_infra/tasks/validations.yml" line="490"
+                     message="fqcn[action-core]: Use FQCN for builtin module actions (meta)." type="Ansible Lint">
+                fqcn[action-core]: Use FQCN for builtin module actions (meta).
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/tasks/validations.yml-115">
+            <failure file="roles/bootstrap_kvm_infra/tasks/validations.yml" line="490"
+                     message="name[missing]: All tasks should be named." type="Ansible Lint">name[missing]: All tasks
+                should be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/tasks/vbmc-create.yml-116">
+            <failure file="roles/bootstrap_kvm_infra/tasks/vbmc-create.yml" line="3"
+                     message="no-changed-when: Commands should not change things if nothing needs doing."
+                     type="Ansible Lint">no-changed-when: Commands should not change things if nothing needs doing.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/tasks/vbmc-create.yml-117">
+            <failure file="roles/bootstrap_kvm_infra/tasks/vbmc-create.yml" line="47"
+                     message="name[missing]: All tasks should be named." type="Ansible Lint">name[missing]: All tasks
+                should be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/tasks/vbmc-list.yml-118">
+            <failure file="roles/bootstrap_kvm_infra/tasks/vbmc-list.yml" line="3"
+                     message="risky-shell-pipe: Shells that use pipes should set the pipefail option."
+                     type="Ansible Lint">risky-shell-pipe: Shells that use pipes should set the pipefail option.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/tasks/vbmc-remove.yml-119">
+            <failure file="roles/bootstrap_kvm_infra/tasks/vbmc-remove.yml" line="2"
+                     message="no-changed-when: Commands should not change things if nothing needs doing."
+                     type="Ansible Lint">no-changed-when: Commands should not change things if nothing needs doing.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/tasks/vbmc-remove.yml-120">
+            <failure file="roles/bootstrap_kvm_infra/tasks/vbmc-remove.yml" line="23"
+                     message="name[missing]: All tasks should be named." type="Ansible Lint">name[missing]: All tasks
+                should be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/tasks/virt-create.yml-121">
+            <failure file="roles/bootstrap_kvm_infra/tasks/virt-create.yml" line="3"
+                     message="no-changed-when: Commands should not change things if nothing needs doing."
+                     type="Ansible Lint">no-changed-when: Commands should not change things if nothing needs doing.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/tasks/virt-create.yml-122">
+            <failure file="roles/bootstrap_kvm_infra/tasks/virt-create.yml" line="75"
+                     message="fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt`."
+                     type="Ansible Lint">fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt`.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/tasks/virt-list.yml-123">
+            <failure file="roles/bootstrap_kvm_infra/tasks/virt-list.yml" line="21"
+                     message="fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt`."
+                     type="Ansible Lint">fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt`.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/tasks/virt-list.yml-124">
+            <failure file="roles/bootstrap_kvm_infra/tasks/virt-list.yml" line="30"
+                     message="fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt`."
+                     type="Ansible Lint">fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt`.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/tasks/virt-list.yml-125">
+            <failure file="roles/bootstrap_kvm_infra/tasks/virt-list.yml" line="40"
+                     message="fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt`."
+                     type="Ansible Lint">fqcn[action]: Use FQCN for module actions, such `community.libvirt.virt`.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/tasks/virt-remove.yml-126">
+            <failure file="roles/bootstrap_kvm_infra/tasks/virt-remove.yml" line="2"
+                     message="no-changed-when: Commands should not change things if nothing needs doing."
+                     type="Ansible Lint">no-changed-when: Commands should not change things if nothing needs doing.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/tasks/wait.yml-127">
+            <failure file="roles/bootstrap_kvm_infra/tasks/wait.yml" line="22"
+                     message="risky-shell-pipe: Shells that use pipes should set the pipefail option."
+                     type="Ansible Lint">risky-shell-pipe: Shells that use pipes should set the pipefail option.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_kvm_infra/tests/virt-infra.yml:15-128">
+            <failure file="roles/bootstrap_kvm_infra/tests/virt-infra.yml:15" line="7"
+                     message="syntax-check[specific]: the role 'ansible-role-virt-infra' was not found in /home/jenkins/agent/workspace/ter_lint-tests_ansible-lint_main/roles/bootstrap_kvm_infra/tests/roles:/root/.cache/ansible-compat/f915c3/roles:/home/jenkins/agent/workspace/ter_lint-tests_ansible-lint_main/roles:/home/jenkins/agent/workspace/ter_lint-tests_ansible-lint_main/roles:/home/jenkins/agent/workspace/ter_lint-tests_ansible-lint_main/roles/bootstrap_kvm_infra/tests"
+                     type="Ansible Lint">syntax-check[specific]: the role 'ansible-role-virt-infra' was not found in
+                /home/jenkins/agent/workspace/ter_lint-tests_ansible-lint_main/roles/bootstrap_kvm_infra/tests/roles:/root/.cache/ansible-compat/f915c3/roles:/home/jenkins/agent/workspace/ter_lint-tests_ansible-lint_main/roles:/home/jenkins/agent/workspace/ter_lint-tests_ansible-lint_main/roles:/home/jenkins/agent/workspace/ter_lint-tests_ansible-lint_main/roles/bootstrap_kvm_infra/tests
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_ldap_client/defaults/main.yml-129">
+            <failure file="roles/bootstrap_ldap_client/defaults/main.yml" line="159"
+                     message="yaml[empty-lines]: Too many blank lines (1 &gt; 0)" type="Ansible Lint">yaml[empty-lines]:
+                Too many blank lines (1 &gt; 0)
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_ldap_client/handlers/main.yml-130">
+            <failure file="roles/bootstrap_ldap_client/handlers/main.yml" line="14"
+                     message="no-changed-when: Commands should not change things if nothing needs doing."
+                     type="Ansible Lint">no-changed-when: Commands should not change things if nothing needs doing.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_ldap_client/handlers/main.yml-131">
+            <failure file="roles/bootstrap_ldap_client/handlers/main.yml" line="23"
+                     message="no-changed-when: Commands should not change things if nothing needs doing."
+                     type="Ansible Lint">no-changed-when: Commands should not change things if nothing needs doing.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_ldap_client/tasks/configure_pam.Debian.yml-132">
+            <failure file="roles/bootstrap_ldap_client/tasks/configure_pam.Debian.yml" line="15"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_ldap_client/tasks/main.yml-133">
+            <failure file="roles/bootstrap_ldap_client/tasks/main.yml" line="10"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_ldap_client/tasks/main.yml-134">
+            <failure file="roles/bootstrap_ldap_client/tasks/main.yml" line="120"
+                     message="ignore-errors: Use failed_when and specify error conditions instead of using ignore_errors."
+                     type="Ansible Lint">ignore-errors: Use failed_when and specify error conditions instead of using
+                ignore_errors.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_ldap_client/tasks/main.yml-135">
+            <failure file="roles/bootstrap_ldap_client/tasks/main.yml" line="120"
+                     message="no-changed-when: Commands should not change things if nothing needs doing."
+                     type="Ansible Lint">no-changed-when: Commands should not change things if nothing needs doing.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_ldap_client/tests/test.yml:4-136">
+            <failure file="roles/bootstrap_ldap_client/tests/test.yml:4" line="9"
+                     message="syntax-check[specific]: the role 'ansible-role-ldap-client' was not found in /home/jenkins/agent/workspace/ter_lint-tests_ansible-lint_main/roles/bootstrap_ldap_client/tests/roles:/root/.cache/ansible-compat/f915c3/roles:/home/jenkins/agent/workspace/ter_lint-tests_ansible-lint_main/roles:/home/jenkins/agent/workspace/ter_lint-tests_ansible-lint_main/roles:/home/jenkins/agent/workspace/ter_lint-tests_ansible-lint_main/roles/bootstrap_ldap_client/tests"
+                     type="Ansible Lint">syntax-check[specific]: the role 'ansible-role-ldap-client' was not found in
+                /home/jenkins/agent/workspace/ter_lint-tests_ansible-lint_main/roles/bootstrap_ldap_client/tests/roles:/root/.cache/ansible-compat/f915c3/roles:/home/jenkins/agent/workspace/ter_lint-tests_ansible-lint_main/roles:/home/jenkins/agent/workspace/ter_lint-tests_ansible-lint_main/roles:/home/jenkins/agent/workspace/ter_lint-tests_ansible-lint_main/roles/bootstrap_ldap_client/tests
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_caroot/tasks/main.yml-137">
+            <failure file="roles/bootstrap_linux_caroot/tasks/main.yml" line="2"
+                     message="name[missing]: All tasks should be named." type="Ansible Lint">name[missing]: All tasks
+                should be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_caroot/tasks/main.yml-138">
+            <failure file="roles/bootstrap_linux_caroot/tasks/main.yml" line="61"
+                     message="command-instead-of-module: rsync used in place of synchronize module" type="Ansible Lint">
+                command-instead-of-module: rsync used in place of synchronize module
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_caroot/tasks/main.yml-139">
+            <failure file="roles/bootstrap_linux_caroot/tasks/main.yml" line="61"
+                     message="no-changed-when: Commands should not change things if nothing needs doing."
+                     type="Ansible Lint">no-changed-when: Commands should not change things if nothing needs doing.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_caroot/tasks/main.yml-140">
+            <failure file="roles/bootstrap_linux_caroot/tasks/main.yml" line="71"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_caroot/tasks/main.yml-141">
+            <failure file="roles/bootstrap_linux_caroot/tasks/main.yml" line="76"
+                     message="no-changed-when: Commands should not change things if nothing needs doing."
+                     type="Ansible Lint">no-changed-when: Commands should not change things if nothing needs doing.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_caroot/tasks/main.yml-142">
+            <failure file="roles/bootstrap_linux_caroot/tasks/main.yml" line="87"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_caroot/tasks/main.yml-143">
+            <failure file="roles/bootstrap_linux_caroot/tasks/main.yml" line="108"
+                     message="no-changed-when: Commands should not change things if nothing needs doing."
+                     type="Ansible Lint">no-changed-when: Commands should not change things if nothing needs doing.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_caroot/tasks/main.yml-144">
+            <failure file="roles/bootstrap_linux_caroot/tasks/main.yml" line="118"
+                     message="no-changed-when: Commands should not change things if nothing needs doing."
+                     type="Ansible Lint">no-changed-when: Commands should not change things if nothing needs doing.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_caroot/tasks/main.yml-145">
+            <failure file="roles/bootstrap_linux_caroot/tasks/main.yml" line="155"
+                     message="no-changed-when: Commands should not change things if nothing needs doing."
+                     type="Ansible Lint">no-changed-when: Commands should not change things if nothing needs doing.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_caroot/tasks/main.yml-146">
+            <failure file="roles/bootstrap_linux_caroot/tasks/main.yml" line="172"
+                     message="name[missing]: All tasks should be named." type="Ansible Lint">name[missing]: All tasks
+                should be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_core/defaults/main.yml-147">
+            <failure file="roles/bootstrap_linux_core/defaults/main.yml" line="93"
+                     message="yaml[braces]: Too many spaces inside braces" type="Ansible Lint">yaml[braces]: Too many
+                spaces inside braces
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_core/defaults/main.yml-148">
+            <failure file="roles/bootstrap_linux_core/defaults/main.yml" line="103"
+                     message="yaml[braces]: Too many spaces inside braces" type="Ansible Lint">yaml[braces]: Too many
+                spaces inside braces
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_core/tasks/dns.yml-149">
+            <failure file="roles/bootstrap_linux_core/tasks/dns.yml" line="3"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_core/tasks/env.yml-150">
+            <failure file="roles/bootstrap_linux_core/tasks/env.yml" line="7"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_core/tasks/env.yml-151">
+            <failure file="roles/bootstrap_linux_core/tasks/env.yml" line="13"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_core/tasks/env.yml-152">
+            <failure file="roles/bootstrap_linux_core/tasks/env.yml" line="24"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_core/tasks/figurine.yml-153">
+            <failure file="roles/bootstrap_linux_core/tasks/figurine.yml" line="38"
+                     message="yaml[empty-lines]: Too many blank lines (1 &gt; 0)" type="Ansible Lint">yaml[empty-lines]:
+                Too many blank lines (1 &gt; 0)
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_core/tasks/journald.yml-154">
+            <failure file="roles/bootstrap_linux_core/tasks/journald.yml" line="14"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_core/tasks/journald.yml-155">
+            <failure file="roles/bootstrap_linux_core/tasks/journald.yml" line="23"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_core/tasks/journald.yml-156">
+            <failure file="roles/bootstrap_linux_core/tasks/journald.yml" line="32"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_core/tasks/journald.yml-157">
+            <failure file="roles/bootstrap_linux_core/tasks/journald.yml" line="41"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_core/tasks/motd.yml-158">
+            <failure file="roles/bootstrap_linux_core/tasks/motd.yml" line="14"
+                     message="no-free-form: Avoid using free-form when calling module actions. (ansible.builtin.template)"
+                     type="Ansible Lint">no-free-form: Avoid using free-form when calling module actions.
+                (ansible.builtin.template)
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_core/tasks/motd.yml-159">
+            <failure file="roles/bootstrap_linux_core/tasks/motd.yml" line="14"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_core/tasks/setup-admin-scripts.yml-160">
+            <failure file="roles/bootstrap_linux_core/tasks/setup-admin-scripts.yml" line="3"
+                     message="name[missing]: All tasks should be named." type="Ansible Lint">name[missing]: All tasks
+                should be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_core/tasks/setup-admin-scripts.yml-161">
+            <failure file="roles/bootstrap_linux_core/tasks/setup-admin-scripts.yml" line="55"
+                     message="yaml[empty-lines]: Too many blank lines (1 &gt; 0)" type="Ansible Lint">yaml[empty-lines]:
+                Too many blank lines (1 &gt; 0)
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_core/tasks/setup-backup-scripts.yml-162">
+            <failure file="roles/bootstrap_linux_core/tasks/setup-backup-scripts.yml" line="3"
+                     message="name[missing]: All tasks should be named." type="Ansible Lint">name[missing]: All tasks
+                should be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_core/tasks/setup-backup-scripts.yml-163">
+            <failure file="roles/bootstrap_linux_core/tasks/setup-backup-scripts.yml" line="55"
+                     message="yaml[empty-lines]: Too many blank lines (1 &gt; 0)" type="Ansible Lint">yaml[empty-lines]:
+                Too many blank lines (1 &gt; 0)
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_core/tasks/sysctl.yml-164">
+            <failure file="roles/bootstrap_linux_core/tasks/sysctl.yml" line="3"
+                     message="command-instead-of-shell: Use shell only when shell functionality is required."
+                     type="Ansible Lint">command-instead-of-shell: Use shell only when shell functionality is required.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_core/tests/test.yml-165">
+            <failure file="roles/bootstrap_linux_core/tests/test.yml" line="2"
+                     message="name[play]: All plays should be named." type="Ansible Lint">name[play]: All plays should
+                be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_core/tests/test.yml-166">
+            <failure file="roles/bootstrap_linux_core/tests/test.yml" line="7"
+                     message="role-name[path]: Avoid using paths when importing roles. (../../.)" type="Ansible Lint">
+                role-name[path]: Avoid using paths when importing roles. (../../.)
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_firewalld/handlers/main.yml-167">
+            <failure file="roles/bootstrap_linux_firewalld/handlers/main.yml" line="3"
+                     message="ignore-errors: Use failed_when and specify error conditions instead of using ignore_errors."
+                     type="Ansible Lint">ignore-errors: Use failed_when and specify error conditions instead of using
+                ignore_errors.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_firewalld/tasks/configure.yml-168">
+            <failure file="roles/bootstrap_linux_firewalld/tasks/configure.yml" line="22"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_firewalld/tasks/configure.yml-169">
+            <failure file="roles/bootstrap_linux_firewalld/tasks/configure.yml" line="45"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_firewalld/tasks/configure.yml-170">
+            <failure file="roles/bootstrap_linux_firewalld/tasks/configure.yml" line="70"
+                     message="risky-shell-pipe: Shells that use pipes should set the pipefail option."
+                     type="Ansible Lint">risky-shell-pipe: Shells that use pipes should set the pipefail option.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_firewalld/tasks/configure.yml-171">
+            <failure file="roles/bootstrap_linux_firewalld/tasks/configure.yml" line="132"
+                     message="risky-shell-pipe: Shells that use pipes should set the pipefail option."
+                     type="Ansible Lint">risky-shell-pipe: Shells that use pipes should set the pipefail option.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_firewalld/tasks/configure.yml-172">
+            <failure file="roles/bootstrap_linux_firewalld/tasks/configure.yml" line="146"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_firewalld/tasks/configure.yml-173">
+            <failure file="roles/bootstrap_linux_firewalld/tasks/configure.yml" line="156"
+                     message="ignore-errors: Use failed_when and specify error conditions instead of using ignore_errors."
+                     type="Ansible Lint">ignore-errors: Use failed_when and specify error conditions instead of using
+                ignore_errors.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_firewalld/tasks/configure.yml-174">
+            <failure file="roles/bootstrap_linux_firewalld/tasks/configure.yml" line="234"
+                     message="risky-shell-pipe: Shells that use pipes should set the pipefail option."
+                     type="Ansible Lint">risky-shell-pipe: Shells that use pipes should set the pipefail option.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_firewalld/tasks/setup.yml-175">
+            <failure file="roles/bootstrap_linux_firewalld/tasks/setup.yml" line="23"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_firewalld/tasks/setup.yml-176">
+            <failure file="roles/bootstrap_linux_firewalld/tasks/setup.yml" line="30"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_firewalld/tasks/setup.yml-177">
+            <failure file="roles/bootstrap_linux_firewalld/tasks/setup.yml" line="138"
+                     message="yaml[empty-lines]: Too many blank lines (1 &gt; 0)" type="Ansible Lint">yaml[empty-lines]:
+                Too many blank lines (1 &gt; 0)
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_mount/vars/debian.yml-178">
+            <failure file="roles/bootstrap_linux_mount/vars/debian.yml" line="37"
+                     message="yaml[empty-lines]: Too many blank lines (1 &gt; 0)" type="Ansible Lint">yaml[empty-lines]:
+                Too many blank lines (1 &gt; 0)
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_networking/meta/main.yml-179">
+            <failure file="roles/bootstrap_linux_networking/meta/main.yml" line="1"
+                     message="schema[meta]: $.galaxy_info 'author' is a required property. See https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_reuse_roles.html#using-role-dependencies"
+                     type="Ansible Lint">schema[meta]: $.galaxy_info 'author' is a required property. See
+                https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_reuse_roles.html#using-role-dependencies
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_networking/tasks/main.yml-180">
+            <failure file="roles/bootstrap_linux_networking/tasks/main.yml" line="15"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_networking/tasks/main.yml-181">
+            <failure file="roles/bootstrap_linux_networking/tasks/main.yml" line="28"
+                     message="yaml[empty-lines]: Too many blank lines (1 &gt; 0)" type="Ansible Lint">yaml[empty-lines]:
+                Too many blank lines (1 &gt; 0)
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_networking/tasks/restartscript.yml-182">
+            <failure file="roles/bootstrap_linux_networking/tasks/restartscript.yml" line="15"
+                     message="no-changed-when: Commands should not change things if nothing needs doing."
+                     type="Ansible Lint">no-changed-when: Commands should not change things if nothing needs doing.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_networking/tasks/restartscript.yml-183">
+            <failure file="roles/bootstrap_linux_networking/tasks/restartscript.yml" line="15"
+                     message="risky-shell-pipe: Shells that use pipes should set the pipefail option."
+                     type="Ansible Lint">risky-shell-pipe: Shells that use pipes should set the pipefail option.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_networking/tasks/setup-Debian.yml-184">
+            <failure file="roles/bootstrap_linux_networking/tasks/setup-Debian.yml" line="25"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_networking/tasks/setup-Debian.yml-185">
+            <failure file="roles/bootstrap_linux_networking/tasks/setup-Debian.yml" line="35"
+                     message="yaml[empty-lines]: Too many blank lines (1 &gt; 0)" type="Ansible Lint">yaml[empty-lines]:
+                Too many blank lines (1 &gt; 0)
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_networking/tasks/setup-RedHat.yml-186">
+            <failure file="roles/bootstrap_linux_networking/tasks/setup-RedHat.yml" line="9"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_networking/tasks/setup-RedHat.yml-187">
+            <failure file="roles/bootstrap_linux_networking/tasks/setup-RedHat.yml" line="16"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_networking/tasks/setup-RedHat.yml-188">
+            <failure file="roles/bootstrap_linux_networking/tasks/setup-RedHat.yml" line="23"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_networking/tasks/setup-RedHat.yml-189">
+            <failure file="roles/bootstrap_linux_networking/tasks/setup-RedHat.yml" line="30"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_networking/tasks/setup-RedHat.yml-190">
+            <failure file="roles/bootstrap_linux_networking/tasks/setup-RedHat.yml" line="66"
+                     message="var-naming[pattern]: Variables names should match ^*$ regex. (NetworkManager_service) (register: NetworkManager_service)"
+                     type="Ansible Lint">var-naming[pattern]: Variables names should match ^*$ regex.
+                (NetworkManager_service) (register: NetworkManager_service)
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_networking/tasks/setup-RedHat.yml-191">
+            <failure file="roles/bootstrap_linux_networking/tasks/setup-RedHat.yml" line="78"
+                     message="var-naming[pattern]: Variables names should match ^*$ regex. (NetworkManager_service_enabled) (set_fact: NetworkManager_service_enabled)"
+                     type="Ansible Lint">var-naming[pattern]: Variables names should match ^*$ regex.
+                (NetworkManager_service_enabled) (set_fact: NetworkManager_service_enabled)
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_networking/tests/test.yml:24-192">
+            <failure file="roles/bootstrap_linux_networking/tests/test.yml:24" line="7"
+                     message="syntax-check[specific]: the role 'role_under_test' was not found in /home/jenkins/agent/workspace/ter_lint-tests_ansible-lint_main/roles/bootstrap_linux_networking/tests/roles:/root/.cache/ansible-compat/f915c3/roles:/home/jenkins/agent/workspace/ter_lint-tests_ansible-lint_main/roles:/home/jenkins/agent/workspace/ter_lint-tests_ansible-lint_main/roles:/home/jenkins/agent/workspace/ter_lint-tests_ansible-lint_main/roles/bootstrap_linux_networking/tests"
+                     type="Ansible Lint">syntax-check[specific]: the role 'role_under_test' was not found in
+                /home/jenkins/agent/workspace/ter_lint-tests_ansible-lint_main/roles/bootstrap_linux_networking/tests/roles:/root/.cache/ansible-compat/f915c3/roles:/home/jenkins/agent/workspace/ter_lint-tests_ansible-lint_main/roles:/home/jenkins/agent/workspace/ter_lint-tests_ansible-lint_main/roles:/home/jenkins/agent/workspace/ter_lint-tests_ansible-lint_main/roles/bootstrap_linux_networking/tests
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_package/handlers/main.yml-193">
+            <failure file="roles/bootstrap_linux_package/handlers/main.yml" line="3"
+                     message="inline-env-var: Command module does not accept setting environment variables inline."
+                     type="Ansible Lint">inline-env-var: Command module does not accept setting environment variables
+                inline.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_package/handlers/main.yml-194">
+            <failure file="roles/bootstrap_linux_package/handlers/main.yml" line="3"
+                     message="no-changed-when: Commands should not change things if nothing needs doing."
+                     type="Ansible Lint">no-changed-when: Commands should not change things if nothing needs doing.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_package/meta/main.yml-195">
+            <failure file="roles/bootstrap_linux_package/meta/main.yml" line="1"
+                     message="schema[meta]: $.galaxy_info 'author' is a required property. See https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_reuse_roles.html#using-role-dependencies"
+                     type="Ansible Lint">schema[meta]: $.galaxy_info 'author' is a required property. See
+                https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_reuse_roles.html#using-role-dependencies
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_package/meta/main.yml-196">
+            <failure file="roles/bootstrap_linux_package/meta/main.yml" line="6"
+                     message="yaml[indentation]: Wrong indentation: expected 4 but found 2" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 4 but found 2
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_package/meta/main.yml-197">
+            <failure file="roles/bootstrap_linux_package/meta/main.yml" line="8"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_package/meta/main.yml-198">
+            <failure file="roles/bootstrap_linux_package/meta/main.yml" line="18"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_package/meta/main.yml-199">
+            <failure file="roles/bootstrap_linux_package/meta/main.yml" line="36"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_package/meta/main.yml-200">
+            <failure file="roles/bootstrap_linux_package/meta/main.yml" line="65"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_package/meta/main.yml-201">
+            <failure file="roles/bootstrap_linux_package/meta/main.yml" line="79"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_package/meta/main.yml-202">
+            <failure file="roles/bootstrap_linux_package/meta/main.yml" line="92"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_package/meta/main.yml-203">
+            <failure file="roles/bootstrap_linux_package/meta/main.yml" line="99"
+                     message="yaml[indentation]: Wrong indentation: expected 4 but found 2" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 4 but found 2
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_package/tasks/init-vars.yml-204">
+            <failure file="roles/bootstrap_linux_package/tasks/init-vars.yml" line="11"
+                     message="yaml[indentation]: Wrong indentation: expected 8 but found 6" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 8 but found 6
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_package/tasks/init-vars.yml-205">
+            <failure file="roles/bootstrap_linux_package/tasks/init-vars.yml" line="27"
+                     message="yaml[indentation]: Wrong indentation: expected 8 but found 6" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 8 but found 6
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_package/tasks/install-npm-packages.yml-206">
+            <failure file="roles/bootstrap_linux_package/tasks/install-npm-packages.yml" line="14"
+                     message="yaml[empty-lines]: Too many blank lines (1 &gt; 0)" type="Ansible Lint">yaml[empty-lines]:
+                Too many blank lines (1 &gt; 0)
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_package/tasks/update-repo-apt.yml-207">
+            <failure file="roles/bootstrap_linux_package/tasks/update-repo-apt.yml" line="16"
+                     message="yaml[octal-values]: Forbidden implicit octal value &quot;0644&quot;" type="Ansible Lint">
+                yaml[octal-values]: Forbidden implicit octal value &quot;0644&quot;
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_package/tasks/update-repo-apt.yml-208">
+            <failure file="roles/bootstrap_linux_package/tasks/update-repo-apt.yml" line="29"
+                     message="yaml[octal-values]: Forbidden implicit octal value &quot;0644&quot;" type="Ansible Lint">
+                yaml[octal-values]: Forbidden implicit octal value &quot;0644&quot;
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_package/tasks/update-repo-apt.yml-209">
+            <failure file="roles/bootstrap_linux_package/tasks/update-repo-apt.yml" line="42"
+                     message="yaml[octal-values]: Forbidden implicit octal value &quot;0644&quot;" type="Ansible Lint">
+                yaml[octal-values]: Forbidden implicit octal value &quot;0644&quot;
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_package/tasks/update-repo-dnf.yml-210">
+            <failure file="roles/bootstrap_linux_package/tasks/update-repo-dnf.yml" line="6"
+                     message="yaml[indentation]: Wrong indentation: expected at least 3" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected at least 3
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_package/tasks/update-repo-dnf.yml-211">
+            <failure file="roles/bootstrap_linux_package/tasks/update-repo-dnf.yml" line="17"
+                     message="fqcn[action-core]: Use FQCN for builtin module actions (ansible.builtin.yum)."
+                     type="Ansible Lint">fqcn[action-core]: Use FQCN for builtin module actions (ansible.builtin.yum).
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_package/tasks/update-repo-yum-rhel-centos.yml-212">
+            <failure file="roles/bootstrap_linux_package/tasks/update-repo-yum-rhel-centos.yml" line="3"
+                     message="command-instead-of-shell: Use shell only when shell functionality is required."
+                     type="Ansible Lint">command-instead-of-shell: Use shell only when shell functionality is required.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_package/tasks/update-repo-yum-rhel-centos.yml-213">
+            <failure file="roles/bootstrap_linux_package/tasks/update-repo-yum-rhel-centos.yml" line="3"
+                     message="no-changed-when: Commands should not change things if nothing needs doing."
+                     type="Ansible Lint">no-changed-when: Commands should not change things if nothing needs doing.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_package/tasks/update-repo-yum-rhel-centos.yml-214">
+            <failure file="roles/bootstrap_linux_package/tasks/update-repo-yum-rhel-centos.yml" line="23"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_package/tasks/update-repo-yum-rhel-centos.yml-215">
+            <failure file="roles/bootstrap_linux_package/tasks/update-repo-yum-rhel-centos.yml" line="23"
+                     message="yaml[indentation]: Wrong indentation: expected 4 but found 2" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 4 but found 2
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_package/tasks/update-repo-yum-rhel-centos.yml-216">
+            <failure file="roles/bootstrap_linux_package/tasks/update-repo-yum-rhel-centos.yml" line="37"
+                     message="fqcn[action-core]: Use FQCN for builtin module actions (ansible.builtin.yum)."
+                     type="Ansible Lint">fqcn[action-core]: Use FQCN for builtin module actions (ansible.builtin.yum).
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_package/tasks/update-repo-yum.yml-217">
+            <failure file="roles/bootstrap_linux_package/tasks/update-repo-yum.yml" line="34"
+                     message="fqcn[action-core]: Use FQCN for builtin module actions (ansible.builtin.yum)."
+                     type="Ansible Lint">fqcn[action-core]: Use FQCN for builtin module actions (ansible.builtin.yum).
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_package/tests/test.yml-218">
+            <failure file="roles/bootstrap_linux_package/tests/test.yml" line="2"
+                     message="name[play]: All plays should be named." type="Ansible Lint">name[play]: All plays should
+                be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd/meta/main.yml-219">
+            <failure file="roles/bootstrap_linux_systemd/meta/main.yml" line="1"
+                     message="meta-no-tags: Use 'galaxy_tags' rather than 'categories'" type="Ansible Lint">
+                meta-no-tags: Use 'galaxy_tags' rather than 'categories'
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd/meta/main.yml-220">
+            <failure file="roles/bootstrap_linux_systemd/meta/main.yml" line="1"
+                     message="schema[meta]: $.galaxy_info Additional properties are not allowed ('categories' was unexpected). See https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_reuse_roles.html#using-role-dependencies"
+                     type="Ansible Lint">schema[meta]: $.galaxy_info Additional properties are not allowed ('categories'
+                was unexpected). See
+                https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_reuse_roles.html#using-role-dependencies
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd/tasks/deploy_resolved.yml-221">
+            <failure file="roles/bootstrap_linux_systemd/tasks/deploy_resolved.yml" line="14"
+                     message="name[missing]: All tasks should be named." type="Ansible Lint">name[missing]: All tasks
+                should be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd/tasks/deploy_udev.yml-222">
+            <failure file="roles/bootstrap_linux_systemd/tasks/deploy_udev.yml" line="1"
+                     message="schema[tasks]: $[0].diff 'false' is not of type 'boolean'" type="Ansible Lint">
+                schema[tasks]: $[0].diff 'false' is not of type 'boolean'
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd/tasks/main.yml-223">
+            <failure file="roles/bootstrap_linux_systemd/tasks/main.yml" line="3"
+                     message="name[missing]: All tasks should be named." type="Ansible Lint">name[missing]: All tasks
+                should be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd/tasks/main.yml-224">
+            <failure file="roles/bootstrap_linux_systemd/tasks/main.yml" line="6"
+                     message="name[missing]: All tasks should be named." type="Ansible Lint">name[missing]: All tasks
+                should be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd/tasks/main.yml-225">
+            <failure file="roles/bootstrap_linux_systemd/tasks/main.yml" line="12"
+                     message="name[missing]: All tasks should be named." type="Ansible Lint">name[missing]: All tasks
+                should be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd/tasks/main.yml-226">
+            <failure file="roles/bootstrap_linux_systemd/tasks/main.yml" line="18"
+                     message="name[missing]: All tasks should be named." type="Ansible Lint">name[missing]: All tasks
+                should be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd/tasks/main.yml-227">
+            <failure file="roles/bootstrap_linux_systemd/tasks/main.yml" line="24"
+                     message="name[missing]: All tasks should be named." type="Ansible Lint">name[missing]: All tasks
+                should be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd/tasks/main.yml-228">
+            <failure file="roles/bootstrap_linux_systemd/tasks/main.yml" line="30"
+                     message="name[missing]: All tasks should be named." type="Ansible Lint">name[missing]: All tasks
+                should be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd/tasks/main.yml-229">
+            <failure file="roles/bootstrap_linux_systemd/tasks/main.yml" line="33"
+                     message="name[missing]: All tasks should be named." type="Ansible Lint">name[missing]: All tasks
+                should be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd/tasks/main.yml-230">
+            <failure file="roles/bootstrap_linux_systemd/tasks/main.yml" line="39"
+                     message="name[missing]: All tasks should be named." type="Ansible Lint">name[missing]: All tasks
+                should be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd/tasks/main.yml-231">
+            <failure file="roles/bootstrap_linux_systemd/tasks/main.yml" line="44"
+                     message="name[missing]: All tasks should be named." type="Ansible Lint">name[missing]: All tasks
+                should be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd/tasks/main.yml-232">
+            <failure file="roles/bootstrap_linux_systemd/tasks/main.yml" line="50"
+                     message="name[missing]: All tasks should be named." type="Ansible Lint">name[missing]: All tasks
+                should be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd/tasks/modules_load_executor.yml-233">
+            <failure file="roles/bootstrap_linux_systemd/tasks/modules_load_executor.yml" line="2"
+                     message="name[missing]: All tasks should be named." type="Ansible Lint">name[missing]: All tasks
+                should be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd/tasks/networkd_executor.yml-234">
+            <failure file="roles/bootstrap_linux_systemd/tasks/networkd_executor.yml" line="3"
+                     message="name[missing]: All tasks should be named." type="Ansible Lint">name[missing]: All tasks
+                should be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd/tasks/pre_requisite.yml-235">
+            <failure file="roles/bootstrap_linux_systemd/tasks/pre_requisite.yml" line="22"
+                     message="name[missing]: All tasks should be named." type="Ansible Lint">name[missing]: All tasks
+                should be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd/tasks/pre_requisite.yml-236">
+            <failure file="roles/bootstrap_linux_systemd/tasks/pre_requisite.yml" line="28"
+                     message="name[missing]: All tasks should be named." type="Ansible Lint">name[missing]: All tasks
+                should be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd/tasks/pre_requisite.yml-237">
+            <failure file="roles/bootstrap_linux_systemd/tasks/pre_requisite.yml" line="34"
+                     message="name[missing]: All tasks should be named." type="Ansible Lint">name[missing]: All tasks
+                should be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd/tasks/pre_requisite.yml-238">
+            <failure file="roles/bootstrap_linux_systemd/tasks/pre_requisite.yml" line="40"
+                     message="name[missing]: All tasks should be named." type="Ansible Lint">name[missing]: All tasks
+                should be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd/tasks/pre_requisite.yml-239">
+            <failure file="roles/bootstrap_linux_systemd/tasks/pre_requisite.yml" line="46"
+                     message="name[missing]: All tasks should be named." type="Ansible Lint">name[missing]: All tasks
+                should be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd/tasks/pre_requisite.yml-240">
+            <failure file="roles/bootstrap_linux_systemd/tasks/pre_requisite.yml" line="58"
+                     message="name[missing]: All tasks should be named." type="Ansible Lint">name[missing]: All tasks
+                should be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd/tasks/prereq.d/prereq_systemd_networkd.yml-241">
+            <failure file="roles/bootstrap_linux_systemd/tasks/prereq.d/prereq_systemd_networkd.yml" line="52"
+                     message="literal-compare: Don't compare to literal True/False." type="Ansible Lint">
+                literal-compare: Don't compare to literal True/False.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd/tasks/prereq.d/prereq_systemd_resolved.yml-242">
+            <failure file="roles/bootstrap_linux_systemd/tasks/prereq.d/prereq_systemd_resolved.yml" line="8"
+                     message="literal-compare: Don't compare to literal True/False." type="Ansible Lint">
+                literal-compare: Don't compare to literal True/False.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd/tasks/prereq.d/prereq_systemd_resolved.yml-243">
+            <failure file="roles/bootstrap_linux_systemd/tasks/prereq.d/prereq_systemd_resolved.yml" line="17"
+                     message="literal-compare: Don't compare to literal True/False." type="Ansible Lint">
+                literal-compare: Don't compare to literal True/False.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd/tasks/tmpfiles_executor.yml-244">
+            <failure file="roles/bootstrap_linux_systemd/tasks/tmpfiles_executor.yml" line="3"
+                     message="name[missing]: All tasks should be named." type="Ansible Lint">name[missing]: All tasks
+                should be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd/tasks/tmpfiles_executor.yml-245">
+            <failure file="roles/bootstrap_linux_systemd/tasks/tmpfiles_executor.yml" line="13"
+                     message="name[missing]: All tasks should be named." type="Ansible Lint">name[missing]: All tasks
+                should be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd/tasks/tmpfiles_executor.yml-246">
+            <failure file="roles/bootstrap_linux_systemd/tasks/tmpfiles_executor.yml" line="23"
+                     message="name[missing]: All tasks should be named." type="Ansible Lint">name[missing]: All tasks
+                should be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd/tasks/udev_executor.yml-247">
+            <failure file="roles/bootstrap_linux_systemd/tasks/udev_executor.yml" line="2"
+                     message="name[missing]: All tasks should be named." type="Ansible Lint">name[missing]: All tasks
+                should be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd_mount/meta/main.yml-248">
+            <failure file="roles/bootstrap_linux_systemd_mount/meta/main.yml" line="1"
+                     message="meta-no-tags: Use 'galaxy_tags' rather than 'categories'" type="Ansible Lint">
+                meta-no-tags: Use 'galaxy_tags' rather than 'categories'
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd_mount/meta/main.yml-249">
+            <failure file="roles/bootstrap_linux_systemd_mount/meta/main.yml" line="1"
+                     message="schema[meta]: $.galaxy_info Additional properties are not allowed ('categories' was unexpected). See https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_reuse_roles.html#using-role-dependencies"
+                     type="Ansible Lint">schema[meta]: $.galaxy_info Additional properties are not allowed ('categories'
+                was unexpected). See
+                https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_reuse_roles.html#using-role-dependencies
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd_mount/tasks/systemd_install.yml-250">
+            <failure file="roles/bootstrap_linux_systemd_mount/tasks/systemd_install.yml" line="8"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd_mount/tasks/systemd_install.yml-251">
+            <failure file="roles/bootstrap_linux_systemd_mount/tasks/systemd_install.yml" line="52"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd_mount/tasks/systemd_install.yml-252">
+            <failure file="roles/bootstrap_linux_systemd_mount/tasks/systemd_install.yml" line="72"
+                     message="no-handler: Tasks that run when changed should likely be handlers." type="Ansible Lint">
+                no-handler: Tasks that run when changed should likely be handlers.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd_mount/tests/test-create-ext4-dev.yml-253">
+            <failure file="roles/bootstrap_linux_systemd_mount/tests/test-create-ext4-dev.yml" line="9"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd_mount/tests/test-create-ext4-dev.yml-254">
+            <failure file="roles/bootstrap_linux_systemd_mount/tests/test-create-ext4-dev.yml" line="20"
+                     message="no-handler: Tasks that run when changed should likely be handlers." type="Ansible Lint">
+                no-handler: Tasks that run when changed should likely be handlers.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd_mount/tests/test-create-nfs-dev.yml-255">
+            <failure file="roles/bootstrap_linux_systemd_mount/tests/test-create-nfs-dev.yml" line="32"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd_mount/tests/test-create-nfs-dev.yml-256">
+            <failure file="roles/bootstrap_linux_systemd_mount/tests/test-create-nfs-dev.yml" line="53"
+                     message="no-handler: Tasks that run when changed should likely be handlers." type="Ansible Lint">
+                no-handler: Tasks that run when changed should likely be handlers.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd_mount/tests/test-create-swap-dev.yml-257">
+            <failure file="roles/bootstrap_linux_systemd_mount/tests/test-create-swap-dev.yml" line="15"
+                     message="no-changed-when: Commands should not change things if nothing needs doing."
+                     type="Ansible Lint">no-changed-when: Commands should not change things if nothing needs doing.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd_mount/tests/test-create-swap-dev.yml-258">
+            <failure file="roles/bootstrap_linux_systemd_mount/tests/test-create-swap-dev.yml" line="15"
+                     message="no-handler: Tasks that run when changed should likely be handlers." type="Ansible Lint">
+                no-handler: Tasks that run when changed should likely be handlers.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd_mount/tests/test.yml-259">
+            <failure file="roles/bootstrap_linux_systemd_mount/tests/test.yml" line="3"
+                     message="name[play]: All plays should be named." type="Ansible Lint">name[play]: All plays should
+                be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd_mount/tests/test.yml-260">
+            <failure file="roles/bootstrap_linux_systemd_mount/tests/test.yml" line="5"
+                     message="name[play]: All plays should be named." type="Ansible Lint">name[play]: All plays should
+                be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_systemd_mount/tests/test.yml-261">
+            <failure file="roles/bootstrap_linux_systemd_mount/tests/test.yml" line="7"
+                     message="name[play]: All plays should be named." type="Ansible Lint">name[play]: All plays should
+                be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_user/tasks/main.yml-262">
+            <failure file="roles/bootstrap_linux_user/tasks/main.yml" line="18"
+                     message="ignore-errors: Use failed_when and specify error conditions instead of using ignore_errors."
+                     type="Ansible Lint">ignore-errors: Use failed_when and specify error conditions instead of using
+                ignore_errors.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_user/tasks/main.yml-263">
+            <failure file="roles/bootstrap_linux_user/tasks/main.yml" line="56"
+                     message="risky-shell-pipe: Shells that use pipes should set the pipefail option."
+                     type="Ansible Lint">risky-shell-pipe: Shells that use pipes should set the pipefail option.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_user/tasks/main.yml-264">
+            <failure file="roles/bootstrap_linux_user/tasks/main.yml" line="80"
+                     message="command-instead-of-shell: Use shell only when shell functionality is required."
+                     type="Ansible Lint">command-instead-of-shell: Use shell only when shell functionality is required.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_user/tasks/main.yml-265">
+            <failure file="roles/bootstrap_linux_user/tasks/main.yml" line="80"
+                     message="no-changed-when: Commands should not change things if nothing needs doing."
+                     type="Ansible Lint">no-changed-when: Commands should not change things if nothing needs doing.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_user/tasks/main.yml-266">
+            <failure file="roles/bootstrap_linux_user/tasks/main.yml" line="93"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_user/tasks/main.yml-267">
+            <failure file="roles/bootstrap_linux_user/tasks/main.yml" line="98"
+                     message="literal-compare: Don't compare to literal True/False." type="Ansible Lint">
+                literal-compare: Don't compare to literal True/False.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_user/tasks/stop-user-processes.yml-268">
+            <failure file="roles/bootstrap_linux_user/tasks/stop-user-processes.yml" line="20"
+                     message="no-changed-when: Commands should not change things if nothing needs doing."
+                     type="Ansible Lint">no-changed-when: Commands should not change things if nothing needs doing.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_user/tasks/stop-user-processes.yml-269">
+            <failure file="roles/bootstrap_linux_user/tasks/stop-user-processes.yml" line="46"
+                     message="command-instead-of-shell: Use shell only when shell functionality is required."
+                     type="Ansible Lint">command-instead-of-shell: Use shell only when shell functionality is required.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_user/tasks/stop-user-processes.yml-270">
+            <failure file="roles/bootstrap_linux_user/tasks/stop-user-processes.yml" line="46"
+                     message="no-changed-when: Commands should not change things if nothing needs doing."
+                     type="Ansible Lint">no-changed-when: Commands should not change things if nothing needs doing.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_user/tasks/stop-user-processes.yml-271">
+            <failure file="roles/bootstrap_linux_user/tasks/stop-user-processes.yml" line="53"
+                     message="name[missing]: All tasks should be named." type="Ansible Lint">name[missing]: All tasks
+                should be named.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_user/tasks/stop-user-processes.yml-272">
+            <failure file="roles/bootstrap_linux_user/tasks/stop-user-processes.yml" line="61"
+                     message="command-instead-of-shell: Use shell only when shell functionality is required."
+                     type="Ansible Lint">command-instead-of-shell: Use shell only when shell functionality is required.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_linux_user/tasks/stop-user-processes.yml-273">
+            <failure file="roles/bootstrap_linux_user/tasks/stop-user-processes.yml" line="61"
+                     message="no-changed-when: Commands should not change things if nothing needs doing."
+                     type="Ansible Lint">no-changed-when: Commands should not change things if nothing needs doing.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_maven/meta/main.yml-274">
+            <failure file="roles/bootstrap_maven/meta/main.yml" line="1"
+                     message="schema[meta]: $.galaxy_info 'author' is a required property. See https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_reuse_roles.html#using-role-dependencies"
+                     type="Ansible Lint">schema[meta]: $.galaxy_info 'author' is a required property. See
+                https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_reuse_roles.html#using-role-dependencies
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_mergerfs/handlers/main.yml-275">
+            <failure file="roles/bootstrap_mergerfs/handlers/main.yml" line="2"
+                     message="command-instead-of-module: systemctl used in place of systemd module" type="Ansible Lint">
+                command-instead-of-module: systemctl used in place of systemd module
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_mergerfs/tasks/file-sharing.yml-276">
+            <failure file="roles/bootstrap_mergerfs/tasks/file-sharing.yml" line="10"
+                     message="risky-file-permissions: File permissions unset or incorrect." type="Ansible Lint">
+                risky-file-permissions: File permissions unset or incorrect.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_mergerfs/tasks/install-mergerfs-tools.yml-277">
+            <failure file="roles/bootstrap_mergerfs/tasks/install-mergerfs-tools.yml" line="28"
+                     message="latest[git]: Result of the command may vary on subsequent runs." type="Ansible Lint">
+                latest[git]: Result of the command may vary on subsequent runs.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_mergerfs/tasks/install-mergerfs-tools.yml-278">
+            <failure file="roles/bootstrap_mergerfs/tasks/install-mergerfs-tools.yml" line="35"
+                     message="command-instead-of-shell: Use shell only when shell functionality is required."
+                     type="Ansible Lint">command-instead-of-shell: Use shell only when shell functionality is required.
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_mergerfs/tasks/install-mergerfs-tools.yml-279">
+            <failure file="roles/bootstrap_mergerfs/tasks/install-mergerfs-tools.yml" line="45"
+                     message="yaml[empty-lines]: Too many blank lines (2 &gt; 0)" type="Ansible Lint">yaml[empty-lines]:
+                Too many blank lines (2 &gt; 0)
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz-280">
+            <failure file="roles/bootstrap_netbootxyz" line="1"
+                     message="internal-error: Unexpected error code 4 from execution of: ansible-playbook -i localhost, --syntax-check /tmp/play4j5dz855.yml"
+                     type="Ansible Lint">internal-error: Unexpected error code 4 from execution of: ansible-playbook -i
+                localhost, --syntax-check /tmp/play4j5dz855.yml
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/defaults/main.yml-281">
+            <failure file="roles/bootstrap_netbootxyz/defaults/main.yml" line="1"
+                     message="load-failure[runtimeerror]: Failed to load YAML file: roles/bootstrap_netbootxyz/defaults/main.yml"
+                     type="Ansible Lint">load-failure[runtimeerror]: Failed to load YAML file:
+                roles/bootstrap_netbootxyz/defaults/main.yml
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-282">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="5"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-283">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="12"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-284">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="19"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-285">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="27"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-286">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="34"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-287">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="41"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-288">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="49"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-289">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="58"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-290">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="66"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-291">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="74"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-292">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="82"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-293">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="90"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-294">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="98"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-295">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="106"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-296">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="114"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-297">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="122"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-298">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="130"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-299">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="138"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-300">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="146"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-301">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="154"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-302">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="162"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-303">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="170"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-304">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="178"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-305">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="186"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-306">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="194"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-307">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="202"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-308">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="210"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-309">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="218"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-310">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="227"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-311">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="236"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-312">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="245"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-313">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="254"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-314">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="263"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-315">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="272"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-316">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="281"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-317">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="290"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-318">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="301"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-319">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="312"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-320">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="323"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-321">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="332"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-322">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="342"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-323">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="350"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-324">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="358"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-325">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="365"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-326">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="373"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-327">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="381"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-328">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="389"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-329">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="396"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-330">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="403"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-331">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="413"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/bootstrap_netbootxyz/endpoints.yml-332">
+            <failure file="roles/bootstrap_netbootxyz/endpoints.yml" line="423"
+                     message="yaml[indentation]: Wrong indentation: expected 6 but found 4" type="Ansible Lint">
+                yaml[indentation]: Wrong indentation: expected 6 but found 4
+            </failure>
+        </testcase>
+        <testcase name="roles/vmware_upgrade_esxi/tasks/main.yml-1835">
+            <failure file="roles/vmware_upgrade_esxi/tasks/main.yml" line="173"
+                     message="no-changed-when: Commands should not change things if nothing needs doing."
+                     type="Ansible Lint">no-changed-when: Commands should not change things if nothing needs doing.
+            </failure>
+        </testcase>
+    </testsuite>
+</testsuites>

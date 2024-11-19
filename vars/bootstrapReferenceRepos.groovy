@@ -6,57 +6,62 @@ import java.nio.file.Paths
 
 import com.dettonville.api.pipeline.utils.logging.LogLevel
 import com.dettonville.api.pipeline.utils.logging.Logger
+import com.dettonville.api.pipeline.utils.Utilities
 import com.dettonville.api.pipeline.utils.JsonUtils
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+@Field Logger log = new Logger(this, LogLevel.INFO)
 
-def call() {
+def call(Map params=[:]) {
 
     Logger.init(this, LogLevel.INFO)
     Logger log = new Logger(this)
 
-    //Specify the list of your git projects/repositories.
-    List repoList = [
-        [name: 'ansible-datacenter', url: "git@bitbucket.org:lj020326/ansible-datacenter.git"],
-        [name: 'vm-templates', url: "git@bitbucket.org:lj020326/vm-templates.git"]
-    ]
+    Map config = loadPipelineConfig(params)
 
     String baseDir = "/var/jenkins_home/git_repo_references"
     String gitCredentialsId = "bitbucket-ssh-jenkins"
 
-    // Cron job configurations – configured to run every day at 23:00 PM
-    cron_cfg="H 23 * * *"
-    properties([pipelineTriggers([cron("${cron_cfg}")])])
-
     pipeline {
 
-        agent { label 'controller' }
+//         agent { label 'controller' }
+        agent {
+            label config.jenkinsNodeLabel
+        }
+        options {
+            buildDiscarder(logRotator(numToKeepStr: '10'))
+            disableConcurrentBuilds()
+            timestamps()
+            timeout(time: 3, unit: 'HOURS')
+        }
 
         stages {
 
             stage("Pre-Checks") {
                 steps {
                     script {
-                        log.info("repoList=${JsonUtils.printToJsonString(repoList)}")
+                        log.info("repoList=${JsonUtils.printToJsonString(config.repoList)}")
+//                         sh("tree ${baseDir}")
 
-                        for (repoConfig in repoList) {
+                        for (repoConfig in config.repoList) {
 
                             String repoName = repoConfig.name
                             String repoUrl = repoConfig.url
                             String repoDir = "${baseDir}/${repoName}"
-                            if (!Paths.get(repoDir).toFile().isDirectory()) {
 
-                                File dir = new File(repoDir)
-                                if (dir.mkdirs()) {
-                                    println("New dir: ${repoDir} successfully created!")
-                                    println("Cloning relevant git repo...")
+                            // ref: https://stackoverflow.com/questions/46705569/how-to-check-if-directory-exists-outside-of-workspace-from-a-jenkins-pipeline-sc
+                            if (!fileExists(repoDir)) {
+
+                                dir(repoDir) {
+                                    log.info("New dir: ${repoDir} successfully created!")
+                                    log.info("Cloning relevant git repo...")
                                     gitInitialClone(this, gitCredentialsId, repoDir, repoConfig)
                                 }
-                                else {
-                                    error("Failed to create dir: ${repoDir}. Exiting...")
-                                }
+
                             }
                             else {
-                                println("Directory: ${repoDir} already exists!")
+                                log.info("Directory: ${repoDir} already exists!")
                             }
                         }
                     }
@@ -66,11 +71,11 @@ def call() {
             stage("Git update") {
                 steps {
                     script {
-                        for (repoConfig in repoList) {
+                        for (repoConfig in config.repoList) {
                             String repoName = repoConfig.name
                             String repoUrl = repoConfig.url
                             String repoDir = "${baseDir}/${repoName}"
-                            println("Updating the git repo: ${repoName}, located in ${repoDir}")
+                            log.info("Updating the git repo: ${repoName}, located in ${repoDir}")
                             gitFetchPrune(this, gitCredentialsId, repoDir, repoConfig)
                         }
                     }
@@ -80,6 +85,53 @@ def call() {
         }
 
     }
+}
+
+//@NonCPS
+Map loadPipelineConfig(Map params) {
+    String logPrefix="loadPipelineConfig():"
+    Map config = [:]
+
+    // copy immutable params maps to mutable config map
+    params.each { key, value ->
+        log.debug("${logPrefix} params[${key}]=${value}")
+        key=Utilities.decapitalize(key)
+        if (value!="") {
+            config[key]=value
+        }
+    }
+
+    log.setLevel(config.logLevel)
+
+    if (config.debugPipeline) {
+        log.setLevel(LogLevel.DEBUG)
+    }
+
+    config.jenkinsNodeLabel = config.get('jenkinsNodeLabel',"controller")
+//     config.logLevel = config.get('logLevel', "INFO")
+    config.logLevel = config.get('logLevel', "DEBUG")
+    config.debugPipeline = config.get('debugPipeline', false)
+    config.timeout = config.get('timeout', 3)
+    config.timeoutUnit = config.get('timeoutUnit', 'HOURS')
+
+//    config.emailDist = config.emailDist ?: "lee.johnson@dettonville.com"
+    config.emailDist = config.get('emailDist',"lee.johnson@dettonville.com")
+    // config.alwaysEmailDist = config.alwaysEmailDist ?: "lee.johnson@dettonville.com"
+    config.emailFrom = config.emailFrom ?: "admin+ansible@dettonville.com"
+
+    //Specify the list of your git projects/repositories.
+    List repoListDefault = [
+        [name: 'ansible-datacenter', url: "git@bitbucket.org:lj020326/ansible-datacenter.git"],
+        [name: 'vm-templates', url: "git@bitbucket.org:lj020326/vm-templates.git"]
+    ]
+    config.repoList = config.get('repoList',repoListDefault)
+
+    config.jenkinsNodeLabel = config.get('jenkinsNodeLabel',"controller")
+
+    log.debug("${logPrefix} params=${params}")
+    log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+
+    return config
 }
 
 def gitInitialClone(def dsl, String gitCredentialsId, String repoDir, Map repoConfig) {
@@ -104,7 +156,7 @@ def gitFetchPrune(def dsl, String gitCredentialsId, String repoDir, Map repoConf
     String repoGitName = repoUrl.substring(repoUrl.lastIndexOf('/') + 1, repoUrl.length())
     String repoGitDir = "${repoDir}/${repoGitName}"
     dsl.dir(repoGitDir) {
-        println("Git fetch repo: ${repoGitDir}...")
+        println("Git fetch repo: ${repoGitDir}")
         dsl.sshagent([gitCredentialsId]) {
             dsl.sh "git fetch --all --prune"
         }

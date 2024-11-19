@@ -12,10 +12,9 @@ import groovy.json.JsonOutput
 // ref: https://cd.dettonville.int/jenkins/job/DCAPI/job/DeploymentJobs/job/DeployFrontendStage/job/main/lastCompletedBuild/api/json?pretty=true
 // ref: https://cd.dettonville.int/jenkins/job/DCAPI/job/DeploymentJobs/job/DeployFrontendStage/job/main/721/api/json?pretty=true
 
-
-Logger.init(this, LogLevel.INFO)
-//Logger.init(this, LogLevel.DEBUG)
-Logger log = new Logger(this)
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+@Field Logger log = new Logger(this, LogLevel.INFO)
 
 BuildApiUtils buildApiUtils = new BuildApiUtils(this)
 JsonUtils jsonUtils = new JsonUtils(this)
@@ -33,8 +32,8 @@ appEnvironments:
         enableRallyProxy: false
         useBrowserstackProxy: true
         useBrowserstackLocalProxy: false
-#        changedEmailList: "dcapi_qa@dettonville.org"
-        alwaysEmailList: "dcapi_qa@dettonville.org"
+#        changedEmailList: "dcapi_qa@dettonville.com"
+        alwaysEmailList: "dcapi_qa@dettonville.com"
         deployJobEnvName: "Dev"
     
     DEV_CLOUD: 
@@ -46,9 +45,9 @@ appEnvironments:
 #        browserstackProxyPort: "1080"
 #        browserstackProxyHost: "ech-10-170-129-41.dettonville.int"
 #        browserstackProxyPort: "80"
-#        changedEmailList: "dcapi_qa@dettonville.org"
-#        alwaysEmailList: "dcapi_qa@dettonville.org"
-        alwaysEmailList: "dcapi_qa@dettonville.org, ljohnson@dettonville.org, SIT-engineer@dettonville.org, conor.dixon@dettonville.org, kedar.mohanty@dettonville.org, prashanth.krishnappa@dettonville.org, sandeep.singh@dettonville.org, jakub.kurtiak@dettonville.org"
+#        changedEmailList: "dcapi_qa@dettonville.com"
+#        alwaysEmailList: "dcapi_qa@dettonville.com"
+        alwaysEmailList: "dcapi_qa@dettonville.com, ljohnson@dettonville.com, SIT-engineer@dettonville.com, conor.dixon@dettonville.com, kedar.mohanty@dettonville.com, prashanth.krishnappa@dettonville.com, sandeep.singh@dettonville.com, jakub.kurtiak@dettonville.com"
         deployJobEnvName: "DevCloud"
     
     STAGE:
@@ -57,10 +56,10 @@ appEnvironments:
         useExecEnvJenkins: true
         useBrowserstackProxy: true
         useBrowserstackLocalProxy: false
-#        changedEmailList: "DST_Open_API_Development_Team@dettonville.org, infra-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com"
-#        changedEmailList: "dcapi_qa@dettonville.org"
-#        alwaysEmailList: "dcapi_qa@dettonville.org"
-        alwaysEmailList: "dcapi_qa@dettonville.org, ljohnson@dettonville.org, SIT-engineer@dettonville.org, conor.dixon@dettonville.org, kedar.mohanty@dettonville.org, prashanth.krishnappa@dettonville.org, sandeep.singh@dettonville.org, jakub.kurtiak@dettonville.org"
+#        changedEmailList: "DST_Open_API_Development_Team@dettonville.com, infra-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com"
+#        changedEmailList: "dcapi_qa@dettonville.com"
+#        alwaysEmailList: "dcapi_qa@dettonville.com"
+        alwaysEmailList: "dcapi_qa@dettonville.com, ljohnson@dettonville.com, SIT-engineer@dettonville.com, conor.dixon@dettonville.com, kedar.mohanty@dettonville.com, prashanth.krishnappa@dettonville.com, sandeep.singh@dettonville.com, jakub.kurtiak@dettonville.com"
         deployJobEnvName: "Stage"
     
     STAGE_EXTERNAL:
@@ -69,10 +68,10 @@ appEnvironments:
         useBrowserstackProxy: false
         useBrowserstackLocalProxy: false
         enableRallyProxy: false
-#        changedEmailList: "DST_Open_API_Development_Team@dettonville.org, infra-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com"
-#        changedEmailList: "dcapi_qa@dettonville.org"
-#        alwaysEmailList: "dcapi_qa@dettonville.org"
-        alwaysEmailList: "dcapi_qa@dettonville.org, ljohnson@dettonville.org, SIT-engineer@dettonville.org, conor.dixon@dettonville.org, kedar.mohanty@dettonville.org, prashanth.krishnappa@dettonville.org, sandeep.singh@dettonville.org, jakub.kurtiak@dettonville.org"
+#        changedEmailList: "DST_Open_API_Development_Team@dettonville.com, infra-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com"
+#        changedEmailList: "dcapi_qa@dettonville.com"
+#        alwaysEmailList: "dcapi_qa@dettonville.com"
+        alwaysEmailList: "dcapi_qa@dettonville.com, ljohnson@dettonville.com, SIT-engineer@dettonville.com, conor.dixon@dettonville.com, kedar.mohanty@dettonville.com, prashanth.krishnappa@dettonville.com, sandeep.singh@dettonville.com, jakub.kurtiak@dettonville.com"
         deployJobEnvName: "Stage"
 
 deployConfig:
@@ -125,7 +124,7 @@ node ('QA-LINUX || PROD-LINUX') {
         componentConfig.jobBaseUri += "/${componentConfig.deployJobName}/job/${componentConfig.branch}"
         componentConfig.buildResultsFileName=componentConfig.deployJobName
         log.debug("componentConfig=${JsonUtils.printToJsonString(componentConfig)}")
-        componentDiffResults.add(getBuildDiffs(log, buildApiUtils, jsonUtils, componentConfig))
+        componentDiffResults.add(getBuildDiffs(buildApiUtils, jsonUtils, componentConfig))
     }
 
     deployJobDiffResults.componentDiffResults = componentDiffResults
@@ -142,8 +141,8 @@ node ('QA-LINUX || PROD-LINUX') {
     cleanWs()
 }
 
-Map getBuildDiffs(Logger log, BuildApiUtils buildApiUtils, JsonUtils jsonUtils, Map config) {
-    String logPrefix = "getBuildDiffs():"
+Map getBuildDiffs(BuildApiUtils buildApiUtils, JsonUtils jsonUtils, Map config) {
+    String logPrefix = "${scriptName}->getBuildDiffs():"
     List diffs = []
 
 //    Map buildResults1 = buildApiUtils.getBuildResults(jobBaseUri, "721")

@@ -8,13 +8,17 @@ import com.dettonville.pipeline.utility.CaaSUtil
 
 import groovy.json.*
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+@Field Logger log = new Logger(this, LogLevel.INFO)
+
 def call(Map params=[:]) {
 
-//     Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this, LogLevel.INFO)
+// //     Logger.init(this, LogLevel.INFO)
+//     Logger log = new Logger(this, LogLevel.INFO)
 
     log.info("Loading Default Configs")
-    Map config=loadPipelineConfig(log, params)
+    Map config=loadPipelineConfig(params)
 
     VaultUtil vaultUtil = new VaultUtil(this)
     CaaSUtil caasUtil = new CaaSUtil(this)
@@ -44,7 +48,7 @@ def call(Map params=[:]) {
 
                         if (fileExists(config?.configFile)) {
                             String configFile = config.configFile
-                            config = loadPipelineConfig(log, params, configFile)
+                            config = loadPipelineConfig(params, configFile)
                             log.info("****Loaded Config File ${configFile}")
                             log.debug("config=${printToJsonString(config)}")
                         } else {
@@ -111,7 +115,7 @@ def call(Map params=[:]) {
                                 unstash "${it.pcfAppName}-pre-workspace"
                                 sh "mvn clean ${config.mvnLogOptions} org.jacoco:jacoco-maven-plugin:0.7.4.201502262128:prepare-agent install -Dmaven.test.failure.ignore=true -f ${pomFile}"
 
-                                runSonar(log, config)
+                                runSonar(config)
                             }
                         }
                     }
@@ -132,7 +136,7 @@ def call(Map params=[:]) {
                                 deleteDir()
                                 unstash "${appConfig.pcfAppName}-pre-workspace"
 
-                                mvnPackage(log, appConfig)
+                                mvnPackage(appConfig)
 
                                 stash includes: '**', name: "${appConfig.pcfAppName}-workspace"
                             }
@@ -161,7 +165,7 @@ def call(Map params=[:]) {
                             deleteDir()
                             unstash "${appConfig.pcfAppName}-pre-workspace"
 
-                            publishToArtifactory(log, appConfig)
+                            publishToArtifactory(appConfig)
                         }
                     }
                 }
@@ -186,7 +190,7 @@ def call(Map params=[:]) {
                             deleteDir()
                             git url: "${appConfig.gitRepo}", branch: "${appConfig.gitRepoBranch}"
 
-                            config.updatePOM = createSnapshot(log, appConfig)
+                            config.updatePOM = createSnapshot(appConfig)
                         }
 
                     }
@@ -208,7 +212,7 @@ def call(Map params=[:]) {
                             Map appEnvConfig = config.pcfEnvironments[pcfAppEnv] + config.findAll { !["pcfDeployEnvironmentList","pcfEnvironments"].contains(it.key) } + it
                             log.debug("appEnvConfig=${printToJsonString(appEnvConfig)}")
 
-                            deployPcfAppEnv(log, appEnvConfig, vaultUtil, caasUtil)
+                            deployPcfAppEnv(appEnvConfig, vaultUtil, caasUtil)
                         }
                     }
                 }
@@ -234,7 +238,7 @@ def call(Map params=[:]) {
                     def duration = "${currentBuild.durationString.replace(' and counting', '')}"
                     currentBuild.description = "Deploy Duration: ${duration}"
 
-                    postReleaseUpdatePom(log, config)
+                    postReleaseUpdatePom(config)
 
                     if(config.notifications?.always?.email?.address_list) {
 
@@ -263,7 +267,7 @@ String decapitalize(String string) {
 }
 
 
-Map loadPipelineConfig(Logger log, Map params, String configFile=null) {
+Map loadPipelineConfig(Map params, String configFile=null) {
     String logPrefix="loadPipelineConfig(configFile=${configFile}):"
     log.debug("${logPrefix} started")
 
@@ -353,7 +357,7 @@ Map loadPipelineConfig(Logger log, Map params, String configFile=null) {
 
     log.debug("${logPrefix} config.jenkinsJobName = ${config.jenkinsJobName}")
     config.buildNumber = currentBuild.number
-    config.emailFrom=config.get('emailFrom',"DCAPI.pcfDeployAutomation@dettonville.org")
+    config.emailFrom=config.get('emailFrom',"DCAPI.pcfDeployAutomation@dettonville.com")
 
     config.runTests = config.get('runTests', true)
     config.runJMeter = config.get('runJMeter', true)
@@ -439,7 +443,7 @@ List getSecretEnvVars(Map config) {
 }
 
 
-void mvnPackage(Logger log, Map config) {
+void mvnPackage(Map config) {
     String logPrefix = "mvnPackage():"
     log.debug("${logPrefix} started")
 
@@ -462,7 +466,7 @@ void mvnPackage(Logger log, Map config) {
     }
 }
 
-void publishToArtifactory(Logger log, Map config) {
+void publishToArtifactory(Map config) {
     String logPrefix = "publishToArtifactory():"
     log.debug("${logPrefix} started")
 
@@ -482,7 +486,7 @@ void publishToArtifactory(Logger log, Map config) {
 }
 
 
-boolean createSnapshot(Logger log, Map config) {
+boolean createSnapshot(Map config) {
     String logPrefix = "createSnapshot():"
     log.debug("${logPrefix} started")
 
@@ -508,7 +512,7 @@ boolean createSnapshot(Logger log, Map config) {
         log.debug("${logPrefix} remoteOrigin=${remoteOrigin}")
 
         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: config.jenkinsBitbucketCredId, usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD']]) {
-            sh('git config --global user.email "jenkins@dettonville.org"')
+            sh('git config --global user.email "jenkins@dettonville.com"')
             sh('git config --global user.name "Jenkins Pipeline"')
             String bitbucketCreds="${GIT_USERNAME}:${GIT_PASSWORD}"
             String remoteUrl = "https://${bitbucketCreds}@${remoteOrigin}"
@@ -517,14 +521,14 @@ boolean createSnapshot(Logger log, Map config) {
             sh("git checkout -b ${versionNUmberToUpdate}")
             sh("git push -u origin ${versionNUmberToUpdate}")
 
-            publishToArtifactory(log, config)
+            publishToArtifactory(config)
             updatePOM = true
         }
     }
     return updatePOM
 }
 
-def insertIntoVault(Logger log, Map config, VaultUtil vaultUtil) {
+def insertIntoVault(Map config, VaultUtil vaultUtil) {
     String logPrefix="insertIntoVault(${config.pcfAppEnv}):"
     log.debug("${logPrefix} starting")
 
@@ -559,7 +563,7 @@ def getJenkinsAgentLabel(String jenkinsLabel) {
     return "${-> println 'Right Now the Jenkins Agent Label Name is ' + jenkinsLabel; return jenkinsLabel}"
 }
 
-def deployPcfAppEnv(Logger log, Map config, VaultUtil vaultUtil, CaaSUtil caasUtil) {
+def deployPcfAppEnv(Map config, VaultUtil vaultUtil, CaaSUtil caasUtil) {
     String pcfAppEnv=config.pcfAppEnv
     String logPrefix = "deployPcfAppEnv(${pcfAppEnv}):"
     log.info("${logPrefix} started")
@@ -574,7 +578,7 @@ def deployPcfAppEnv(Logger log, Map config, VaultUtil vaultUtil, CaaSUtil caasUt
         stage("Write To Vault - ${pcfAppEnv}") {
             node(agentLabelM3 as String) {
                 script {
-                    insertIntoVault(log, config, vaultUtil)
+                    insertIntoVault(config, vaultUtil)
                 }
             }
         }
@@ -584,7 +588,7 @@ def deployPcfAppEnv(Logger log, Map config, VaultUtil vaultUtil, CaaSUtil caasUt
         stage("Create Services - ${pcfAppEnv}") {
             node(agentLabelDeploy as String) {
                 script {
-                    deployServicesToPCF(log, config)
+                    deployServicesToPCF(config)
                 }
             }
         }
@@ -593,7 +597,7 @@ def deployPcfAppEnv(Logger log, Map config, VaultUtil vaultUtil, CaaSUtil caasUt
     stage("Get Certs - ${pcfAppEnv}") {
         node(agentLabelCaaS as String) {
             script {
-                getCertsForPCF(log, config, caasUtil)
+                getCertsForPCF(config, caasUtil)
             }
         }
     }
@@ -608,7 +612,7 @@ def deployPcfAppEnv(Logger log, Map config, VaultUtil vaultUtil, CaaSUtil caasUt
 
                 log.info("${logPrefix} appConfig=${appConfig}")
 
-                deployPCFApp(log, appConfig)
+                deployPCFApp(appConfig)
             }
         }
     }
@@ -617,7 +621,7 @@ def deployPcfAppEnv(Logger log, Map config, VaultUtil vaultUtil, CaaSUtil caasUt
         stage("Run Spock Tests - ${pcfAppEnv}") {
             node(agentLabelM3 as String) {
                 script {
-                    runSpockTestsInPCF(log, config)
+                    runSpockTestsInPCF(config)
                 }
             }
         }
@@ -627,7 +631,7 @@ def deployPcfAppEnv(Logger log, Map config, VaultUtil vaultUtil, CaaSUtil caasUt
         stage("Run JMeter - ${pcfAppEnv}") {
             node(agentLabelM3 as String) {
                 script {
-                    runPerformanceTestsInPCF(log, config)
+                    runPerformanceTestsInPCF(config)
                 }
             }
         }
@@ -652,7 +656,7 @@ def deployPcfAppEnv(Logger log, Map config, VaultUtil vaultUtil, CaaSUtil caasUt
 
 }
 
-def deployPCFApp(Logger log, Map config) {
+def deployPCFApp(Map config) {
     String pcfAppEnv = config.pcfAppEnv
     String pcfAppName = config.pcfAppName
     String logPrefix="deployPCFApp(${pcfAppEnv}, ${pcfAppName}):"
@@ -772,11 +776,11 @@ def deployPCFApp(Logger log, Map config) {
             config.keyMap["vaultApplicationName"] = "${vaultApplicationName}"
         }
     }
-    deployToPCFGoRouter(log, config)
+    deployToPCFGoRouter(config)
 }
 
 
-void deployToPCFGoRouter(Logger log, Map config) {
+void deployToPCFGoRouter(Map config) {
     String logPrefix="deployToPCFGoRouter(${config.pcfAppEnv}, ${config.pcfAppName}):"
     log.debug("${logPrefix} starting")
 
@@ -919,7 +923,7 @@ void deployToPCFGoRouter(Logger log, Map config) {
 }
 
 
-def deployServicesToPCF(Logger log, Map config) {
+def deployServicesToPCF(Map config) {
     String logPrefix="deployServicesToPCF(${config.pcfAppEnv}):"
     log.debug("${logPrefix} starting")
 
@@ -1016,7 +1020,7 @@ def deployServicesToPCF(Logger log, Map config) {
 }
 
 
-def runSpockTestsInPCF(Logger log, Map config) {
+def runSpockTestsInPCF(Map config) {
     String logPrefix="runSpockTestsInPCF(${config.pcfAppEnv}, ${config.pcfAppName}):"
     log.debug("${logPrefix} starting")
 
@@ -1112,7 +1116,7 @@ void gitPullSharedAnsibleFiles(String branch = null) {
 }
 
 
-void setupPcfServices(Logger log, Map config) {
+void setupPcfServices(Map config) {
     String logPrefix="setupPcfServices():"
     log.info("${logPrefix} starting")
 
@@ -1122,7 +1126,7 @@ void setupPcfServices(Logger log, Map config) {
 
         switch (pcfServiceConfig.type) {
             case "postgres":
-                setupPostgresService(log, pcfServiceConfig)
+                setupPostgresService(pcfServiceConfig)
                 break
             default: log.warn("unknown/unhandled service type: ${pcfServiceConfig.type}")
         }
@@ -1132,7 +1136,7 @@ void setupPcfServices(Logger log, Map config) {
 
 }
 
-void setupPostgresService(Logger log, Map config) {
+void setupPostgresService(Map config) {
     String logPrefix="setupPostgresService():"
     log.info("${logPrefix} starting")
 
@@ -1173,7 +1177,7 @@ void setupPostgresService(Logger log, Map config) {
 
 
 
-def getCertsForPCF(Logger log, Map config, CaaSUtil caasUtil) {
+def getCertsForPCF(Map config, CaaSUtil caasUtil) {
     String logPrefix="getCertsForPCF(${config.pcfAppEnv}):"
     log.debug("${logPrefix} starting")
 
@@ -1195,7 +1199,7 @@ def getCertsForPCF(Logger log, Map config, CaaSUtil caasUtil) {
     }
 }
 
-def runPerformanceTestsInPCF(Logger log, Map config) {
+def runPerformanceTestsInPCF(Map config) {
     String logPrefix="runPerformanceTestsInPCF(${config.pcfAppEnv}, ${config.pcfAppName}):"
     log.debug("${logPrefix} starting")
 
@@ -1285,13 +1289,13 @@ def notifyBuild(String buildStatus, String emailList,Boolean onSuccessEveryTime=
 
       Check console output at ${env.BUILD_URL}console"""
         def hostname = sh (returnStdout: true, script: 'hostname')
-        def emailFrom = "${hostname.trim()}@dettonville.org"
+        def emailFrom = "${hostname.trim()}@dettonville.com"
 
         mail bcc: '', body: details, cc: '', from: emailFrom, replyTo: '', subject: subject, to: emailList
     }
 }
 
-def postReleaseUpdatePom(Logger log, Map config) {
+def postReleaseUpdatePom(Map config) {
     String logPrefix="postReleaseUpdatePom():"
     log.info("${logPrefix} starting")
 
@@ -1334,7 +1338,7 @@ def postReleaseUpdatePom(Logger log, Map config) {
             def remoteOrigin = appConfig.gitRepo.replace('https://','')
 
             withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: bitbucketCreds, usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD']]) {
-                sh('git config --global user.email "jenkins@dettonville.org"')
+                sh('git config --global user.email "jenkins@dettonville.com"')
                 sh('git config --global user.name "Jenkins Pipeline"')
                 sh("git remote set-url origin 'https://${GIT_USERNAME}:${GIT_PASSWORD}@${remoteOrigin}'")
 
@@ -1384,7 +1388,7 @@ def sendReports(Map config, String emailDist, def currentBuild, String notifyAct
  * @param cnForCert the CN name you want the cert to have. usually your appName + -client. like dcuser-switch-account-registry-services-client
  */
 //void getJKSFromCaaS(script, String appHostName, String env, Map returnMap, String cnForCert,String ouForCert=null) {
-void getJKSFromCaaS(Logger log, Map config) {
+void getJKSFromCaaS(Map config) {
     String logPrefix="getJKSFromCaaS(${config.pcfAppEnv}, ${config.pcfAppName}):"
     log.debug("${logPrefix} starting")
 

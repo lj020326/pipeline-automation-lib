@@ -114,7 +114,13 @@ def runPipeline(project, cookbook, checkoutClosure, cookbookDir='', dryRun=false
             }
         }
     }
-    return [cookbook: cookbook, version: version, env: uploadedToEnv, userNotificationEmail: userNotificationEmail, versionIntegrated: versionIntegrated]
+    return [
+        cookbook: cookbook,
+        version: version,
+        env: uploadedToEnv,
+        userNotificationEmail: userNotificationEmail,
+        versionIntegrated: versionIntegrated
+    ]
 }
 
 /* Pipeline Stages */

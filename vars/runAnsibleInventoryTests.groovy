@@ -7,12 +7,16 @@ import com.dettonville.api.pipeline.utils.logging.LogLevel
 import com.dettonville.api.pipeline.utils.logging.Logger
 import com.dettonville.api.pipeline.versioning.ComparableSemanticVersion
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+@Field Logger log = new Logger(this, LogLevel.INFO)
+
 def call(Map params=[:]) {
 
     Logger log = new Logger(this, LogLevel.INFO)
 //     log.setLevel(LogLevel.DEBUG)
 
-    Map config = loadPipelineConfig(log, params)
+    Map config = loadPipelineConfig(params)
     String ansibleLogSummary = "No results"
     int numTestsFailed = 0
     int exception_count = 0
@@ -67,29 +71,57 @@ def call(Map params=[:]) {
                         log.info("testScriptVersion=${testScriptVersion.toString()}")
                         log.info("minVersionPyTest=${minVersionPyTest.toString()}")
 
-                        if (testScriptVersion >= minVersionPyTest) {
-//                             sh(script: "bash ${config.testScript} -r ${config.junitXmlReport} -p", returnStdout: true)
-                            pytest_failed = sh(
-                                script: "bash ${config.testScript} -r ${config.junitXmlReport} -p  > /dev/null 2>&1",
-                                returnStatus: true) != 0
-                        }
+//                         sh(script: "bash ${config.testScript} -r ${config.junitXmlReport} -p", returnStdout: true)
+                        pytest_failed = sh(
+                            script: "bash ${config.testScript} -r ${config.junitXmlReport} -p  > /dev/null 2>&1",
+                            returnStatus: true) != 0
 
-                        exception_count = sh(script: "bash ${config.testScript}> /dev/null 2>&1", returnStatus: true)
-                        log.info("INVENTORY TEST exception_count=${exception_count}")
+                        junit(testResults: "${config.junitXmlReportDir}/*.xml",
+                            skipPublishingChecks: true,
+                            allowEmptyResults: true)
 
-                        if (exception_count>0) {
-                            sh(script: "bash ${config.testScript} 2>&1", returnStdout: true)
-                        }
+                        List testCmdList = []
+//                         testCmdList.push("set -eo pipefail;")
+                        testCmdList.push("bash")
+                        testCmdList.push("${config.testScript}")
+                        String testCmd = testCmdList.join(' ')
 
-                        numTestsFailed += exception_count
-                        Boolean failed = (exception_count>0) ? true : false
-                        if (failed) {
-                            currentBuild.result = 'FAILURE'
-                            log.error("INVENTORY TEST RESULTS: FAILED")
-                        } else {
-                            currentBuild.result = 'SUCCESS'
-                            log.info("INVENTORY TEST RESULTS: SUCCESS")
-                        }
+//                         testCmdList.push("|& tee ${config.junitXmlReportDir}/inventory-test-results.txt")
+                        testCmdList.push("2>&1 | tee ${config.junitXmlReportDir}/inventory-test-results.txt")
+                        testCmdList.push("|| true")
+                        testCmd = testCmdList.join(' ')
+
+                        log.info("testCmd => ${testCmd}")
+                        sh(testCmd)
+
+                        archiveArtifacts(
+                            allowEmptyArchive: true,
+                            artifacts: "${config.junitXmlReportDir}/**",
+                            fingerprint: true)
+
+//                         if (exception_count>0) {
+// //                             sh(script: "bash ${config.testScript} 2>&1", returnStdout: true)
+//                             testCmdList.push("|& tee ${config.junitXmlReportDir}/inventory-test-results.txt")
+//                             testCmdList.push("|| true")
+//                             testCmd = testCmdList.join(' ')
+//                             sh(testCmd)
+//
+//                             archiveArtifacts(
+//                                 allowEmptyArchive: true,
+//                                 artifacts: "${config.junitXmlReportDir}/inventory-test-results.txt",
+//                                 fingerprint: true)
+//                         }
+
+//                         numTestsFailed += exception_count
+//                         Boolean failed = (exception_count>0) ? true : false
+//                         if (failed) {
+//                             currentBuild.result = 'FAILURE'
+//                             log.error("INVENTORY TEST RESULTS: FAILED")
+//                         } else {
+//                             currentBuild.result = 'SUCCESS'
+//                             log.info("INVENTORY TEST RESULTS: SUCCESS")
+//                         }
+
                     }
                 }
             }
@@ -98,14 +130,17 @@ def call(Map params=[:]) {
                     script {
                         log.info("==> ************************************* ")
                         log.info("==> OVERALL INVENTORY TEST RESULTS")
-                        log.info("==> TOTAL totalNumFailed=${numTestsFailed}")
-                        if (numTestsFailed==0) {
-                          log.info("==> TEST SUCCEEDED!")
+                        log.info("==> TOTAL totalNumFailed=${pytest_failed}")
+                        log.info("==> pytest_failed=${pytest_failed}")
+
+                        if (pytest_failed) {
+                          log.error("==> TEST FAILED!")
                         } else {
-                          log.info("==> TEST FAILED!")
+                          log.info("==> TEST SUCCEEDED!")
                         }
-                        currentBuild.result = (numTestsFailed>0) ? "FAILURE" : "SUCCESS"
-                        config.bitbucketResult = (numTestsFailed>0) ? "FAILED" : "SUCCESSFUL"
+
+                        currentBuild.result = (pytest_failed) ? "FAILURE" : "SUCCESS"
+                        config.bitbucketResult = (pytest_failed) ? "FAILED" : "SUCCESSFUL"
                     }
                 }
             }
@@ -113,11 +148,11 @@ def call(Map params=[:]) {
         post {
             always {
                 script {
-//                     ComparableSemanticVersion testScriptVersion = new ComparableSemanticVersion(config.testScriptVersion)
-                    if (testScriptVersion && testScriptVersion >= minVersionPyTest) {
-//                         junit testResults: ".test-results/*.xml", skipPublishingChecks: true
-                        junit testResults: "${config.junitXmlReportDir}/*.xml", skipPublishingChecks: true
-                    }
+// //                     ComparableSemanticVersion testScriptVersion = new ComparableSemanticVersion(config.testScriptVersion)
+//                     if (testScriptVersion && testScriptVersion >= minVersionPyTest) {
+// //                         junit testResults: ".test-results/*.xml", skipPublishingChecks: true
+//                         junit testResults: "${config.junitXmlReportDir}/*.xml", skipPublishingChecks: true
+//                     }
 
                     bitbucketStatusNotify(
                         buildKey: 'test',
@@ -126,19 +161,25 @@ def call(Map params=[:]) {
                         repoSlug: 'ansible-datacenter',
                         commitId: config.gitCommitHash
                     )
-                    List emailAdditionalDistList = []
                     if (config.alwaysEmailDistList) {
-                        emailAdditionalDistList = config.alwaysEmailDistList
+                        sendEmail(currentBuild, env, emailAdditionalDistList=config.alwaysEmailDistList)
                     }
-                    if (config.gitBranch in ['origin/main','main']) {
-                        log.info("post(${env.BRANCH_NAME}): sendEmail(${currentBuild.result})")
-                        sendEmail(currentBuild, env, emailAdditionalDistList=emailAdditionalDistList)
+                    if (config.gitBranch in ['main','QA','PROD'] || config.gitBranch.startsWith("release/")) {
+                        if (config?.deployEmailDistList) {
+                            log.info("post(${config.gitBranch}): sendEmail(${currentBuild.result})")
+                            sendEmail(currentBuild, env, emailAdditionalDistList=config.deployEmailDistList)
+                        }
+                    } else if (config.gitBranch in ['development']) {
+                        if (config?.alwaysEmailDistList) {
+                            log.info("post(${config.gitBranch}): sendEmail(${currentBuild.result})")
+                            sendEmail(currentBuild, env, emailAdditionalDistList=config.alwaysEmailDistList)
+                        }
                     } else {
-                        log.info("post(${env.BRANCH_NAME}): sendEmail(${currentBuild.result}, 'RequesterRecipientProvider')")
-                        sendEmail(currentBuild, env, [[$class: 'RequesterRecipientProvider']])
+                        log.info("post(${config.gitBranch}): sendEmail(${currentBuild.result}, 'RequesterRecipientProvider')")
+                        sendEmail(currentBuild, env)
                     }
                     log.info("Empty current workspace dir")
-//                     cleanWs()
+                    cleanWs()
                 }
             }
         }
@@ -147,7 +188,7 @@ def call(Map params=[:]) {
 } // body
 
 //@NonCPS
-Map loadPipelineConfig(Logger log, Map params) {
+Map loadPipelineConfig(Map params) {
     String logPrefix="loadPipelineConfig():"
     Map config = [:]
 

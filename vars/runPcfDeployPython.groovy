@@ -5,13 +5,17 @@ import com.dettonville.api.pipeline.utils.logging.Logger
 
 import groovy.json.*
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+@Field Logger log = new Logger(this, LogLevel.INFO)
+
 def call(Map params=[:]) {
 
-//     Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this, LogLevel.INFO)
+// //     Logger.init(this, LogLevel.INFO)
+//     Logger log = new Logger(this, LogLevel.INFO)
 
     log.info("Loading Default Configs")
-    Map config=loadPipelineConfig(log, params)
+    Map config=loadPipelineConfig(params)
 
     pipeline {
 
@@ -38,7 +42,7 @@ def call(Map params=[:]) {
 
                         if (fileExists(config?.configFile)) {
                             String configFile = config.configFile
-                            config = loadPipelineConfig(log, params, configFile)
+                            config = loadPipelineConfig(params, configFile)
                             log.info("****Loaded Config File ${configFile}")
                             log.debug("config=${printToJsonString(config)}")
                         } else {
@@ -64,7 +68,7 @@ def call(Map params=[:]) {
                             Map appEnvConfig = config.pcfEnvironments[pcfAppEnv] + config.findAll { !["pcfDeployEnvironmentList","pcfEnvironments"].contains(it.key) } + it
                             log.debug("appEnvConfig=${printToJsonString(appEnvConfig)}")
 
-                            deployPcfAppEnv(log, appEnvConfig, vaultUtil, caasUtil)
+                            deployPcfAppEnv(appEnvConfig, vaultUtil, caasUtil)
                         }
                     }
                 }
@@ -90,7 +94,7 @@ def call(Map params=[:]) {
                     def duration = "${currentBuild.durationString.replace(' and counting', '')}"
                     currentBuild.description = "Deploy Duration: ${duration}"
 
-                    postReleaseUpdatePom(log, config)
+                    postReleaseUpdatePom(config)
 
                     if(config.notifications?.always?.email?.addressList) {
                         String addressList = config.notifications.always.email.addressList.join(",")
@@ -120,7 +124,7 @@ String decapitalize(String string) {
 }
 
 
-Map loadPipelineConfig(Logger log, Map params, String configFile=null) {
+Map loadPipelineConfig(Map params, String configFile=null) {
     String logPrefix="loadPipelineConfig(configFile=${configFile}):"
     log.debug("${logPrefix} started")
 
@@ -187,7 +191,7 @@ Map loadPipelineConfig(Logger log, Map params, String configFile=null) {
 
     log.debug("${logPrefix} config.jenkinsJobName = ${config.jenkinsJobName}")
     config.buildNumber = currentBuild.number
-    config.emailFrom=config.get('emailFrom',"DCAPI.pcfDeployAutomation@dettonville.org")
+    config.emailFrom=config.get('emailFrom',"DCAPI.pcfDeployAutomation@dettonville.com")
 
     config.runTests = config.get('runTests', true)
     config.runJMeter = config.get('runJMeter', true)
@@ -279,7 +283,7 @@ def getJenkinsAgentLabel(String jenkinsLabel) {
 
 
 
-def deployPcfAppEnv(Logger log, Map config, VaultUtil vaultUtil, CaaSUtil caasUtil) {
+def deployPcfAppEnv(Map config, VaultUtil vaultUtil, CaaSUtil caasUtil) {
     String pcfAppEnv=config.pcfAppEnv
     String logPrefix = "deployPcfAppEnv(${pcfAppEnv}):"
     log.info("${logPrefix} started")
@@ -294,7 +298,7 @@ def deployPcfAppEnv(Logger log, Map config, VaultUtil vaultUtil, CaaSUtil caasUt
         stage("Write To Vault - ${pcfAppEnv}") {
             node(agentLabelM3 as String) {
                 script {
-                    insertIntoVault(log, config, pcfAppEnv, vaultUtil)
+                    insertIntoVault(config, pcfAppEnv, vaultUtil)
                 }
             }
         }
@@ -304,7 +308,7 @@ def deployPcfAppEnv(Logger log, Map config, VaultUtil vaultUtil, CaaSUtil caasUt
         stage("Create Services - ${pcfAppEnv}") {
             node(agentLabelDeploy as String) {
                 script {
-                    deployServicesToPCF(log, config)
+                    deployServicesToPCF(config)
                 }
             }
         }
@@ -313,7 +317,7 @@ def deployPcfAppEnv(Logger log, Map config, VaultUtil vaultUtil, CaaSUtil caasUt
     stage("Get Certs - ${pcfAppEnv}") {
         node(agentLabelCaaS as String) {
             script {
-                getCertsForPCF(log, config, caasUtil)
+                getCertsForPCF(config, caasUtil)
             }
         }
     }
@@ -328,14 +332,14 @@ def deployPcfAppEnv(Logger log, Map config, VaultUtil vaultUtil, CaaSUtil caasUt
 
                 log.info("${logPrefix} appConfig=${appConfig}")
 
-                deployPCFApp(log, appConfig)
+                deployPCFApp(appConfig)
             }
         }
     }
 
 }
 
-def deployPCFApp(Logger log, Map config) {
+def deployPCFApp(Map config) {
     String pcfAppEnv = config.pcfAppEnv
     String pcfAppName = config.pcfAppName
     String logPrefix="deployPCFApp(${pcfAppEnv}, ${pcfAppName}):"
@@ -455,11 +459,11 @@ def deployPCFApp(Logger log, Map config) {
             config.keyMap["vaultApplicationName"] = "${vaultApplicationName}"
         }
     }
-    deployToPCFGoRouter(log, config)
+    deployToPCFGoRouter(config)
 }
 
 
-void deployToPCFGoRouter(Logger log, Map config) {
+void deployToPCFGoRouter(Map config) {
     String logPrefix="deployToPCFGoRouter(${config.pcfAppEnv}, ${config.pcfAppName}):"
     log.debug("${logPrefix} starting")
 
@@ -611,8 +615,7 @@ void setPCFEnvVarsFromMap(String appHostName, Map keyMap) {
     }
 }
 
-
-def deployServicesToPCF(Logger log, Map config) {
+def deployServicesToPCF(Map config) {
     String logPrefix="deployServicesToPCF(${config.pcfAppEnv}):"
     log.debug("${logPrefix} starting")
 
@@ -738,7 +741,7 @@ def notifyBuild(String buildStatus, String emailList,Boolean onSuccessEveryTime=
 
       Check console output at ${env.BUILD_URL}console"""
         def hostname = sh (returnStdout: true, script: 'hostname')
-        def emailFrom = "${hostname.trim()}@dettonville.org"
+        def emailFrom = "${hostname.trim()}@dettonville.com"
 
         mail bcc: '', body: details, cc: '', from: emailFrom, replyTo: '', subject: subject, to: emailList
     }

@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<testsuites>
+    <testsuite errors="1835" failures="0" tests="1835" time="0">
+        <testcase name="roles/bootstrap_docker_stack/vars/app-services/traefik/v2/dns/docker_stack_atlassian.yml-9">
+            <failure file="roles/bootstrap_docker_stack/vars/app-services/traefik/v2/dns/docker_stack_atlassian.yml"
+                     line="1"
+                     message="load-failure[runtimeerror]: Failed to load YAML file: roles/bootstrap_docker_stack/vars/app-services/traefik/v2/dns/docker_stack_atlassian.yml"
+                     type="Ansible Lint">load-failure[runtimeerror]: Failed to load YAML file:
+                roles/bootstrap_docker_stack/vars/app-services/traefik/v2/dns/docker_stack_atlassian.yml
+            </failure>
+        </testcase>
+    </testsuite>
+</testsuites>

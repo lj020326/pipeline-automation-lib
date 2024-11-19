@@ -1,0 +1,34 @@
+---
+
+pipelineConfig:
+  jobFolder: "INFRA/repo-test-automation/ansible-datacenter"
+  repoName: "ansible-datacenter"
+  repoUrl: "git@bitbucket.org:lj020326/ansible-datacenter.git"
+  mirrorRepoDir: "/var/jenkins_home/git_repo_references/ansible-datacenter/ansible-datacenter.git"
+  gitCredentialsId: "bitbucket-ssh-jenkins"
+  useSuppressionStrategy: false
+  initializeJobMode: false
+  periodicFolderTriggerInterval: "2m"
+  skipInitialBuildOnFirstBranchIndexing: false
+  runEnvMap:
+    DEV:
+      environment: DEV
+    PROD:
+      environment: PROD
+
+  jobList:
+    - jobName: run-inventory-tests
+      jobScript: ".jenkins/runInventoryTests.groovy"
+      description: "run aap-inventory test automation jobs"
+    - jobGroupName: lint-tests
+      description: "Lint Test jobs"
+      jobList:
+        - jobName: yamllint
+          jobScript: .jenkins/runYamlLintTests.groovy
+          description: "run yaml-lint tests job"
+        - jobName: ansible-lint
+          jobScript: .jenkins/runAnsibleLintTests.groovy
+          description: "run ansible-lint tests job"
+        - jobName: kics-lint
+          jobScript: .jenkins/runKicsLintTests.groovy
+          description: "run KICS lint tests job"

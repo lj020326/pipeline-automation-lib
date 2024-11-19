@@ -23,7 +23,7 @@ node ('DEVCLD-LIN7') {
                 mimeType: 'text/html',
                 attachmentsPattern: "**/${imgFile}",
                 subject: "Test",
-                to: "ljohnson@dettonville.org"
+                to: "ljohnson@dettonville.com"
 
     } catch (Exception err) {
         echo "exception: [${err}]"

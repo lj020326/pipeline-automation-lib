@@ -18,7 +18,7 @@ def call(Map config=[:]) {
 appDeployStrategies:
     DAILY_JOBS:
         cronCfg: "H 2 * * *"
-        alwaysEmailList: "ljohnson@dettonville.org, conor.dixon@dettonville.org"
+        alwaysEmailList: "lee.johnson@dettonville.com"
 
 appEnvironments:
 
