@@ -39,7 +39,7 @@ def notifyBuild(String buildStatus, String emailList) {
 
       Check console output at ${env.BUILD_URL}${env.JOB_NAME} [${env.BUILD_NUMBER}]"""
       def hostname = sh (returnStdout: true, script: 'hostname')
-      def emailFrom = "${hostname.trim()}@dettonville.org"
+      def emailFrom = "${hostname.trim()}@dettonville.com"
 
       mail bcc: '', body: details, cc: '', from: emailFrom, replyTo: '', subject: subject, to: emailList
     }

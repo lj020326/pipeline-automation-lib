@@ -156,7 +156,7 @@ Running on admin02 in /workspace/dettonville/infra/ansible-datacenter/dev/bootst
 11:46:59      "debugPipeline": false,
 11:46:59      "timeout": 3,
 11:46:59      "timeoutUnit": "HOURS",
-11:46:59      "emailDist": "ljohnson@dettonville.org",
+11:46:59      "emailDist": "ljohnson@dettonville.com",
 11:46:59      "emailFrom": "admin+ansible@dettonville.com",
 11:46:59      "skipDefaultCheckout": false,
 11:46:59      "gitPerformCheckout": true,
@@ -2274,7 +2274,7 @@ Running on admin02 in /workspace/dettonville/infra/ansible-datacenter/dev/bootst
 [Pipeline] emailextrecipients (hide)
 11:54:43  Not sending mail to unregistered user lj020326@gmail.com because your SCM claimed this was associated with a user ID ‘lj020326' which your security realm does not recognize; you may need changes in your SCM plugin
 [Pipeline] emailext (hide)
-11:54:43  Sending email to: admin@dettonville.org lee.james.johnson@gmail.com
+11:54:43  Sending email to: admin@dettonville.com lee.james.johnson@gmail.com
 [Pipeline] }
 [Pipeline] // script
 [Pipeline] echo (hide)

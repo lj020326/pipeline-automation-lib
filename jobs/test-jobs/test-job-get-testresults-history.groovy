@@ -13,8 +13,8 @@ import groovy.transform.Field
 Map config=[:]
 config.maxTestResultsHistory=3
 config.testResultsHistory="aggregateTestResults.json"
-config.emailList="ljohnson@dettonville.org"
-config.emailFrom="DCAPI.TestAutomation@dettonville.org"
+config.emailList="ljohnson@dettonville.com"
+config.emailFrom="DCAPI.TestAutomation@dettonville.com"
 
 
 pipeline {

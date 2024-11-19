@@ -20,7 +20,7 @@ def call(Map params=[:]) {
 
     pipeline {
         agent {
-            label "ansible"
+            label config.jenkinsNodeLabel
         }
         tools {
            ansible "ansible-venv"

@@ -38,8 +38,8 @@ Map config = [:]
 
 //config.debugPipeline = true
 
-config.emailFrom = "DCAPI.TestAutomation@dettonville.org"
-config.alwaysEmailList = "ljohnson@dettonville.org"
+config.emailFrom = "DCAPI.TestAutomation@dettonville.com"
+config.alwaysEmailList = "ljohnson@dettonville.com"
 
 // copy immutable params maps to mutable config map
 params.each { key, value ->

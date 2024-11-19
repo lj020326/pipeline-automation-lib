@@ -258,7 +258,7 @@ Map loadPipelineConfig(Map params, String configFile=null) {
 //    config.emailDist = config.emailDist ?: "lee.johnson@dettonville.com"
     config.emailDist = config.get('emailDist',"lee.johnson@dettonville.com")
     config.alwaysEmailDist = config.alwaysEmailDist ?: "lee.johnson@dettonville.com"
-    config.emailFrom = config.emailFrom ?: "DCAPI.TestAutomation@dettonville.org"
+    config.emailFrom = config.emailFrom ?: "DCAPI.TestAutomation@dettonville.com"
 
     config.sendEmail = config.sendEmail ?: false
     config.sendCDREmail = config.sendCDREmail ?: false

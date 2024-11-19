@@ -130,7 +130,7 @@ def call(Map params=[:]) {
 
                                     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: CREDENTIALS_ID, usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD']]) {
                                         git url: "${params.GITDEPURL}", branch: "main"
-                                        sh('git config --global user.email "jenkins@dettonville.org"')
+                                        sh('git config --global user.email "jenkins@dettonville.com"')
                                         sh('git config --global user.name "Jenkins Pipeline"')
                                         sh("git remote set-url origin https://${GIT_USERNAME}:${GIT_PASSWORD}@${remoteOrigin}")
                                         sh("git pull origin main")

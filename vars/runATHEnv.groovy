@@ -61,8 +61,8 @@ testCaseConfigs:
         metaFilterTags: "+locations"
         parallelRunCount: 4
         testSuiteName: "Location API Tests"
-        alwaysEmailList: "dcapi_qa@dettonville.org"
-        changedEmailList: "dcapi_qa@dettonville.org"
+        alwaysEmailList: "dcapi_qa@dettonville.com"
+        changedEmailList: "dcapi_qa@dettonville.com"
 
 appTestSuites:
     HEALTHCHECKS/HOURLY:
@@ -72,7 +72,7 @@ appTestSuites:
         collectTestResults: true
         maxTestResultsHistory: 24
         alwaysEmailList: "lee.johnson@dettonville.com"
-        changedEmailList: "dcapi_qa@dettonville.org, lee.johnson@dettonville.com, SIT-engineer@dettonville.org"
+        changedEmailList: "dcapi_qa@dettonville.com, lee.johnson@dettonville.com, SIT-engineer@dettonville.com"
 
     HEALTHCHECKS/DAILY/API-GRID:
         metaFilterTags: "+APIGridProduction"
@@ -81,53 +81,53 @@ appTestSuites:
         collectTestResults: true
         maxTestResultsHistory: 30
         alwaysEmailList: "lee.johnson@dettonville.com"
-        changedEmailList: "dcapi_qa@dettonville.org, lee.johnson@dettonville.com, SIT-engineer@dettonville.org"
+        changedEmailList: "dcapi_qa@dettonville.com, lee.johnson@dettonville.com, SIT-engineer@dettonville.com"
 
     SIMPLETEST: 
         metaFilterTags: "+TestId TC1025418"
         browserstackBrowser: "chrome"
         parallelRunCount: 1
-        alwaysEmailList: "dcapi_qa@dettonville.org, lee.johnson@dettonville.com, SIT-engineer@dettonville.org"
-        changedEmailList: "dcapi_qa@dettonville.org"
+        alwaysEmailList: "dcapi_qa@dettonville.com, lee.johnson@dettonville.com, SIT-engineer@dettonville.com"
+        changedEmailList: "dcapi_qa@dettonville.com"
 
     SMOKE: 
         metaFilterTags: "+smoke"
         parallelRunCount: 4
         waitingTime: 4
-        alwaysEmailList: "dcapi_qa@dettonville.org, lee.johnson@dettonville.com, SIT-engineer@dettonville.org"
-        changedEmailList: "dcapi_qa@dettonville.org"
+        alwaysEmailList: "dcapi_qa@dettonville.com, lee.johnson@dettonville.com, SIT-engineer@dettonville.com"
+        changedEmailList: "dcapi_qa@dettonville.com"
         
     SANITY: 
         metaFilterTags: "+sanity"
         parallelRunCount: 12
         waitingTime: 10
-        alwaysEmailList: "dcapi_qa@dettonville.org, lee.johnson@dettonville.com, SIT-engineer@dettonville.org"
-        changedEmailList: "dcapi_qa@dettonville.org"
+        alwaysEmailList: "dcapi_qa@dettonville.com, lee.johnson@dettonville.com, SIT-engineer@dettonville.com"
+        changedEmailList: "dcapi_qa@dettonville.com"
 
     API: 
         testSuiteName: "API Tests"
-        alwaysEmailList: "dcapi_qa@dettonville.org, lee.johnson@dettonville.com, SIT-engineer@dettonville.org"
-        changedEmailList: "dcapi_qa@dettonville.org"
+        alwaysEmailList: "dcapi_qa@dettonville.com, lee.johnson@dettonville.com, SIT-engineer@dettonville.com"
+        changedEmailList: "dcapi_qa@dettonville.com"
 
     REGRESSION:
         metaFilterTags: "+regression"
         parallelRunCount: 12
         waitingTime: 10
-        alwaysEmailList: "dcapi_qa@dettonville.org, lee.johnson@dettonville.com, SIT-engineer@dettonville.org"
-        changedEmailList: "dcapi_qa@dettonville.org"
+        alwaysEmailList: "dcapi_qa@dettonville.com, lee.johnson@dettonville.com, SIT-engineer@dettonville.com"
+        changedEmailList: "dcapi_qa@dettonville.com"
 
     GWCALLS: 
         testSuiteName: "GW Calls"
         metaFilterTags: "+gw"
         parallelRunCount: 1
-        alwaysEmailList: "dcapi_qa@dettonville.org, lee.johnson@dettonville.com, SIT-engineer@dettonville.org"
-        changedEmailList: "dcapi_qa@dettonville.org"
+        alwaysEmailList: "dcapi_qa@dettonville.com, lee.johnson@dettonville.com, SIT-engineer@dettonville.com"
+        changedEmailList: "dcapi_qa@dettonville.com"
                 
     LIVE-CHAT: 
         metaFilterTags: "+chat"
         parallelRunCount: 1
-        alwaysEmailList: "dcapi_qa@dettonville.org, lee.johnson@dettonville.com, SIT-engineer@dettonville.org"
-        changedEmailList: "dcapi_qa@dettonville.org"    
+        alwaysEmailList: "dcapi_qa@dettonville.com, lee.johnson@dettonville.com, SIT-engineer@dettonville.com"
+        changedEmailList: "dcapi_qa@dettonville.com"
 
     PRODUCT-OWNER: 
 
@@ -138,7 +138,7 @@ appEnvironments:
         athGitBranch: "develop"
         deployJobEnvName: "Dev"
         useBrowserstackLocalProxy: true
-        alwaysEmailList: "dcapi_qa@dettonville.org"
+        alwaysEmailList: "dcapi_qa@dettonville.com"
     
     DEV_CLOUD: 
         jenkinsRunTestsLabel: "DEVCLD-LIN7"
@@ -148,14 +148,14 @@ appEnvironments:
 #        browserstackProxyPort: "1080"
 #        browserstackProxyHost: "ech-10-170-129-41.dettonville.int"
 #        browserstackProxyPort: "80"
-        alwaysEmailList: "dcapi_qa@dettonville.org, lee.johnson@dettonville.com, SIT-engineer@dettonville.org"
+        alwaysEmailList: "dcapi_qa@dettonville.com, lee.johnson@dettonville.com, SIT-engineer@dettonville.com"
     
     STAGE:
         jenkinsRunTestsLabel: "QA-LINUX"
         athGitBranch: "develop"
         deployJobEnvName: "Stage"
         useBrowserstackLocalProxy: true
-        alwaysEmailList: "dcapi_qa@dettonville.org, lee.johnson@dettonville.com, SIT-engineer@dettonville.org"
+        alwaysEmailList: "dcapi_qa@dettonville.com, lee.johnson@dettonville.com, SIT-engineer@dettonville.com"
     
     STAGE_EXTERNAL:
         jenkinsRunTestsLabel: "DEVCLD-LIN7"
@@ -163,33 +163,33 @@ appEnvironments:
         deployJobEnvName: "Stage"
         useBrowserstackLocalProxy: false
         useExecEnvJenkins: false
-        alwaysEmailList: "dcapi_qa@dettonville.org, lee.johnson@dettonville.com, SIT-engineer@dettonville.org"
+        alwaysEmailList: "dcapi_qa@dettonville.com, lee.johnson@dettonville.com, SIT-engineer@dettonville.com"
     
     PROD_KSC:
         jenkinsRunTestsLabel: "PROD-LINUX"
         athGitBranch: "main"
         useBrowserstackLocalProxy: true
-        alwaysEmailList: "dcapi_qa@dettonville.org, lee.johnson@dettonville.com, SIT-engineer@dettonville.org"
+        alwaysEmailList: "dcapi_qa@dettonville.com, lee.johnson@dettonville.com, SIT-engineer@dettonville.com"
     
     PROD_STL:
         jenkinsRunTestsLabel: "PROD-LINUX"
         athGitBranch: "main"
         useBrowserstackLocalProxy: true
-        alwaysEmailList: "dcapi_qa@dettonville.org, lee.johnson@dettonville.com, SIT-engineer@dettonville.org"
+        alwaysEmailList: "dcapi_qa@dettonville.com, lee.johnson@dettonville.com, SIT-engineer@dettonville.com"
     
     PROD_COPRO:
         jenkinsRunTestsLabel: "PROD-LINUX"
         athGitBranch: "main"
         useBrowserstackLocalProxy: true
-        alwaysEmailList: "dcapi_qa@dettonville.org, lee.johnson@dettonville.com, SIT-engineer@dettonville.org"
+        alwaysEmailList: "dcapi_qa@dettonville.com, lee.johnson@dettonville.com, SIT-engineer@dettonville.com"
     
     PROD_EXTERNAL:
         jenkinsRunTestsLabel: "DEVCLD-LIN7"
         athGitBranch: "main"
         useExecEnvJenkins: false
         useBrowserstackLocalProxy: false
-#        changedEmailList: "DST_Open_API_Development_Team@dettonville.org, infra-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com"
-        alwaysEmailList: "dcapi_qa@dettonville.org, lee.johnson@dettonville.com, SIT-engineer@dettonville.org"
+#        changedEmailList: "DST_Open_API_Development_Team@dettonville.com, infra-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com"
+        alwaysEmailList: "dcapi_qa@dettonville.com, lee.johnson@dettonville.com, SIT-engineer@dettonville.com"
     
 """
 

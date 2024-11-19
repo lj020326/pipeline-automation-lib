@@ -308,7 +308,7 @@ String deployJobInfoAfterStr='''
             "absoluteUrl" : "https://cd.dettonville.int/jenkins/user/e083884",
             "fullName" : "Tulam, VenuGopal"
           },
-          "authorEmail" : "VenuGopal.Tulam@dettonville.org",
+          "authorEmail" : "VenuGopal.Tulam@dettonville.com",
           "comment" : "Updated custom release spec for all component work flow for testing ARA\\nin MTF\\n",
           "date" : "2019-08-22 14:40:03 -0500",
           "id" : "7b1275353e5bcf24bdbad2927bed682a158a5e95",
@@ -331,7 +331,7 @@ String deployJobInfoAfterStr='''
             "absoluteUrl" : "https://cd.dettonville.int/jenkins/user/e083884",
             "fullName" : "Tulam, VenuGopal"
           },
-          "authorEmail" : "VenuGopal.Tulam@dettonville.org",
+          "authorEmail" : "VenuGopal.Tulam@dettonville.com",
           "comment" : "testing the ara workflow dcaid\\n",
           "date" : "2019-08-22 14:42:21 -0500",
           "id" : "fb06593f1f34b73460d82e370b6f6fbdb946b7f4",
@@ -354,7 +354,7 @@ String deployJobInfoAfterStr='''
             "absoluteUrl" : "https://cd.dettonville.int/jenkins/user/venugopal.tulam",
             "fullName" : "VenuGopal.Tulam"
           },
-          "authorEmail" : "VenuGopal.Tulam@dettonville.org",
+          "authorEmail" : "VenuGopal.Tulam@dettonville.com",
           "comment" : "remove MTF test spec\\n",
           "date" : "2019-08-23 10:26:58 -0500",
           "id" : "2770de79550681f45a3d8f9ed6c5542cfdc850e2",

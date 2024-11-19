@@ -4,7 +4,7 @@ package com.dettonville.api.pipeline.utility
  * Utility to set the dot-env config file on the Jenkins workspace
  * This is necessary for all frontend builds
  *
- * @Author brent.bevolo@dettonville.org
+ * @Author brent.bevolo@dettonville.com
  */
 class DotEnvUtil implements Serializable {
   def steps

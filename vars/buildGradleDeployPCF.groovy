@@ -33,7 +33,7 @@ def call() {
     def pcfAgentName = envConfigs.pcfJenkinsNodeLabel
     pcfAgentLabel = "${-> println 'Right Now the Agent Label Name is ' + pcfAgentName; return pcfAgentName}"
 
-    def email_from="DCAPI.pcfDeployAutomation@dettonville.org"
+    def email_from="DCAPI.pcfDeployAutomation@dettonville.com"
 
     pipeline {
         agent { label "GRADLE" }

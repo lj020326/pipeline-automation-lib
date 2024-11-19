@@ -8,7 +8,7 @@ config.jobBaseFolderLevel = 3
 
 config.runPostDeployTests = false
 config.useSimulationMode = true
-config.alwaysEmailList="ljohnson@dettonville.org"
+config.alwaysEmailList="ljohnson@dettonville.com"
 
 config.enabledParamList = ['artifactVersion','runPostDeployTests','useSimulationMode','debugReleaseScript']
 

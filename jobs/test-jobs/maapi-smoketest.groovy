@@ -21,9 +21,9 @@ config.batchCount = 11
 
 //config.debugPipeline = true
 
-//config.changedEmailList = "DST_Open_API_Development_Team@dettonville.org, infra-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com"
-config.changedEmailList = "ljohnson@dettonville.org"
-config.alwaysEmailList = "ljohnson@dettonville.org"
+//config.changedEmailList = "DST_Open_API_Development_Team@dettonville.com, infra-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com"
+config.changedEmailList = "ljohnson@dettonville.com"
+config.alwaysEmailList = "ljohnson@dettonville.com"
 
 params.each { key, value ->
     config[key]=value

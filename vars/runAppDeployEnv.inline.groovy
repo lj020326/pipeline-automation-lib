@@ -35,19 +35,19 @@ appEnvironments:
     STAGE:
         artifactVersion: "1.63.0-SNAPSHOT"
         appTestEnvironment: STAGE_EXTERNAL
-        alwaysEmailList: "DST_Open_API_Development_Team@dettonville.org, infra-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com, dcapi_qa@dettonville.org"
+        alwaysEmailList: "DST_Open_API_Development_Team@dettonville.com, infra-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com, dcapi_qa@dettonville.com"
         araEnvSpecFile: "DCAPI/env_specs/stage_env_spec.json"
     
     PROD_STL:
         artifactVersion: "1.62.0"
         appTestEnvironment: PROD_STL
-        alwaysEmailList: "DST_Open_API_Development_Team@dettonville.org, infra-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com, dcapi_qa@dettonville.org"
+        alwaysEmailList: "DST_Open_API_Development_Team@dettonville.com, infra-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com, dcapi_qa@dettonville.com"
         araEnvSpecFile: "DCAPI/env_specs/prod_nyc_env_spec.json"
     
     PROD_KSC:
         artifactVersion: "1.62.0"
         appTestEnvironment: PROD_KSC
-        alwaysEmailList: "DST_Open_API_Development_Team@dettonville.org, infra-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com, dcapi_qa@dettonville.org"
+        alwaysEmailList: "DST_Open_API_Development_Team@dettonville.com, infra-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com, dcapi_qa@dettonville.com"
         araEnvSpecFile: "DCAPI/env_specs/prod_jpn_env_spec.json"
 
 

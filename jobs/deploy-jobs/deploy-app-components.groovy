@@ -4,6 +4,6 @@
 
 Map config = [:]
 config.enableBranchParam=true
-config.alwaysEmailList="ljohnson@dettonville.org, conor.dixon@dettonville.org"
+config.alwaysEmailList="ljohnson@dettonville.com, conor.dixon@dettonville.com"
 
 runAppDeployEnvJob(config)

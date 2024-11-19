@@ -26,7 +26,7 @@ config.appEnvironment=JOB_NAME.split("/")[config.jobBaseFolderLevel].toUpperCase
 //    config.useExecEnvJenkins=false
 //}
 
-config.alwaysEmailList="ljohnson@dettonville.org"
+config.alwaysEmailList="ljohnson@dettonville.com"
 
 log.info("config=${JsonUtils.printToJsonString(config)}")
 

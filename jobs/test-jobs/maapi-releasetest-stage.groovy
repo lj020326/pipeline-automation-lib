@@ -57,7 +57,7 @@ pipeline {
             config.sanityJobName = SANITY_TEST
 
             List recipientList = (config.alwaysEmailList.contains(",")) ? config.alwaysEmailList.tokenize(',') : [config.alwaysEmailList]
-            recipientList.add("ljohnson@dettonville.org")
+            recipientList.add("ljohnson@dettonville.com")
             config.alwaysEmailList = recipientList.join(",")
 
             echo "config=${config}"

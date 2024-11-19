@@ -643,7 +643,7 @@ release:
     notifications:
       email:
         address_list:
-          - 'ljohnson@dettonville.org'
+          - 'ljohnson@dettonville.com'
           - 'consumer-shared-components@dettonville.flowdock.com'
 ```
 

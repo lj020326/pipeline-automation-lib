@@ -70,7 +70,7 @@ def call(Map config=[:]) {
 
     //config.debugPipeline = true
 
-    //    config.changedEmailList = "DST_Open_API_Development_Team@dettonville.org, infra-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com"
+    //    config.changedEmailList = "DST_Open_API_Development_Team@dettonville.com, infra-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com"
 
     params.each { key, value ->
         if (value != "") {
@@ -80,7 +80,7 @@ def call(Map config=[:]) {
 
     List recipientList = (config?.alwaysEmailList && config.alwaysEmailList != "") ? (config.alwaysEmailList.contains(",")) ? config.alwaysEmailList.tokenize(',') : [config.alwaysEmailList] : []
     recipientList.add("lee.johnson@dettonville.com")
-    //    recipientList.add("SIT-engineer@dettonville.org")
+    //    recipientList.add("SIT-engineer@dettonville.com")
     config.alwaysEmailList = recipientList.join(",")
 
     //echo "config=${config}"

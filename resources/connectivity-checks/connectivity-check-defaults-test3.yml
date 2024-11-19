@@ -7,9 +7,9 @@ pipeline:
   logLevel: "INFO"
 #  logLevel: "DEBUG"
 
-#  emailDist: "ljohnson@dettonville.org"
-#  alwaysEmailDist: "ljohnson@dettonville.org"
-#  emailFrom: "DCAPI.TestAutomation@dettonville.org"
+#  emailDist: "ljohnson@dettonville.com"
+#  alwaysEmailDist: "ljohnson@dettonville.com"
+#  emailFrom: "DCAPI.TestAutomation@dettonville.com"
 
   timeout: 10
   runcount: 10

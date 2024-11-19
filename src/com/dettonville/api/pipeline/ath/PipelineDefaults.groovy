@@ -124,12 +124,12 @@ pipeline:
     waitingTime: 1
 
     ## EMAIL NOTIFICATION DISTRIBUTIONS
-    changedEmailList: "ljohnson@dettonville.org, conor.dixon@dettonville.org"
-    alwaysEmailList: "ljohnson@dettonville.org, conor.dixon@dettonville.org"
+    changedEmailList: "ljohnson@dettonville.com, conor.dixon@dettonville.com"
+    alwaysEmailList: "ljohnson@dettonville.com, conor.dixon@dettonville.com"
     failedEmailList: ""
     abortedEmailList: ""
     successEmailList: ""
-    emailFrom: "DCAPI.TestAutomation@dettonville.org"
+    emailFrom: "DCAPI.TestAutomation@dettonville.com"
 
     sendEmail: false
     sendCDREmail: false

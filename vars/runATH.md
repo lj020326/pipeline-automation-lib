@@ -151,7 +151,7 @@ config.browserstackProject = config.application
 config.bsAgentBinType = "linux-x64"
 config.bsAgentBinPath = "tmp/dcapi"
 
-config.emailFrom= "DCAPI.TestAutomation@dettonville.org"
+config.emailFrom= "DCAPI.TestAutomation@dettonville.com"
 
 ```
 

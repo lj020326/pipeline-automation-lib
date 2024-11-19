@@ -122,8 +122,11 @@ Map loadPipelineConfig(Map params) {
     String logPrefix = "loadPipelineConfig():"
     Map config = [:]
 
-    log.info("${logPrefix} copy immutable params map to mutable config map")
-    config = MapMerge.merge(config, params)
+    if (params) {
+        log.info("${logPrefix} copy immutable params map to mutable config map")
+        log.info("${logPrefix} params=${JsonUtils.printToJsonString(params)}")
+        config = MapMerge.merge(config, params)
+    }
 
 //    config.logLevel = config.get('logLevel', "INFO")
     config.logLevel = config.get('logLevel', "DEBUG")
@@ -181,9 +184,6 @@ Map loadPipelineConfig(Map params) {
     ]
     config.dockerEnvVarsList = config.get('dockerEnvVarsList', dockerEnvVarsListDefault)
 
-    if (params) {
-        log.debug("${logPrefix} params=${JsonUtils.printToJsonString(params)}")
-    }
     log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
 
     config.buildConfigFile = config.get('buildConfigFile', ".jenkins/docker-build-config.yml")

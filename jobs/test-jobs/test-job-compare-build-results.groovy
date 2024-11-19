@@ -32,8 +32,8 @@ appEnvironments:
         enableRallyProxy: false
         useBrowserstackProxy: true
         useBrowserstackLocalProxy: false
-#        changedEmailList: "dcapi_qa@dettonville.org"
-        alwaysEmailList: "dcapi_qa@dettonville.org"
+#        changedEmailList: "dcapi_qa@dettonville.com"
+        alwaysEmailList: "dcapi_qa@dettonville.com"
         deployJobEnvName: "Dev"
     
     DEV_CLOUD: 
@@ -45,9 +45,9 @@ appEnvironments:
 #        browserstackProxyPort: "1080"
 #        browserstackProxyHost: "ech-10-170-129-41.dettonville.int"
 #        browserstackProxyPort: "80"
-#        changedEmailList: "dcapi_qa@dettonville.org"
-#        alwaysEmailList: "dcapi_qa@dettonville.org"
-        alwaysEmailList: "dcapi_qa@dettonville.org, ljohnson@dettonville.org, SIT-engineer@dettonville.org, conor.dixon@dettonville.org, kedar.mohanty@dettonville.org, prashanth.krishnappa@dettonville.org, sandeep.singh@dettonville.org, jakub.kurtiak@dettonville.org"
+#        changedEmailList: "dcapi_qa@dettonville.com"
+#        alwaysEmailList: "dcapi_qa@dettonville.com"
+        alwaysEmailList: "dcapi_qa@dettonville.com, ljohnson@dettonville.com, SIT-engineer@dettonville.com, conor.dixon@dettonville.com, kedar.mohanty@dettonville.com, prashanth.krishnappa@dettonville.com, sandeep.singh@dettonville.com, jakub.kurtiak@dettonville.com"
         deployJobEnvName: "DevCloud"
     
     STAGE:
@@ -56,10 +56,10 @@ appEnvironments:
         useExecEnvJenkins: true
         useBrowserstackProxy: true
         useBrowserstackLocalProxy: false
-#        changedEmailList: "DST_Open_API_Development_Team@dettonville.org, infra-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com"
-#        changedEmailList: "dcapi_qa@dettonville.org"
-#        alwaysEmailList: "dcapi_qa@dettonville.org"
-        alwaysEmailList: "dcapi_qa@dettonville.org, ljohnson@dettonville.org, SIT-engineer@dettonville.org, conor.dixon@dettonville.org, kedar.mohanty@dettonville.org, prashanth.krishnappa@dettonville.org, sandeep.singh@dettonville.org, jakub.kurtiak@dettonville.org"
+#        changedEmailList: "DST_Open_API_Development_Team@dettonville.com, infra-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com"
+#        changedEmailList: "dcapi_qa@dettonville.com"
+#        alwaysEmailList: "dcapi_qa@dettonville.com"
+        alwaysEmailList: "dcapi_qa@dettonville.com, ljohnson@dettonville.com, SIT-engineer@dettonville.com, conor.dixon@dettonville.com, kedar.mohanty@dettonville.com, prashanth.krishnappa@dettonville.com, sandeep.singh@dettonville.com, jakub.kurtiak@dettonville.com"
         deployJobEnvName: "Stage"
     
     STAGE_EXTERNAL:
@@ -68,10 +68,10 @@ appEnvironments:
         useBrowserstackProxy: false
         useBrowserstackLocalProxy: false
         enableRallyProxy: false
-#        changedEmailList: "DST_Open_API_Development_Team@dettonville.org, infra-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com"
-#        changedEmailList: "dcapi_qa@dettonville.org"
-#        alwaysEmailList: "dcapi_qa@dettonville.org"
-        alwaysEmailList: "dcapi_qa@dettonville.org, ljohnson@dettonville.org, SIT-engineer@dettonville.org, conor.dixon@dettonville.org, kedar.mohanty@dettonville.org, prashanth.krishnappa@dettonville.org, sandeep.singh@dettonville.org, jakub.kurtiak@dettonville.org"
+#        changedEmailList: "DST_Open_API_Development_Team@dettonville.com, infra-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com"
+#        changedEmailList: "dcapi_qa@dettonville.com"
+#        alwaysEmailList: "dcapi_qa@dettonville.com"
+        alwaysEmailList: "dcapi_qa@dettonville.com, ljohnson@dettonville.com, SIT-engineer@dettonville.com, conor.dixon@dettonville.com, kedar.mohanty@dettonville.com, prashanth.krishnappa@dettonville.com, sandeep.singh@dettonville.com, jakub.kurtiak@dettonville.com"
         deployJobEnvName: "Stage"
 
 deployConfig:

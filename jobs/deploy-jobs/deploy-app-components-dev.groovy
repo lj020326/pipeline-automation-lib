@@ -7,7 +7,7 @@ config.enableBranchParam=true
 
 config.runPostDeployTests = false
 config.useSimulationMode = true
-config.alwaysEmailList="ljohnson@dettonville.org, conor.dixon@dettonville.org"
+config.alwaysEmailList="ljohnson@dettonville.com, conor.dixon@dettonville.com"
 
 runAppDeployEnvJob(config)
 

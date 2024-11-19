@@ -60,7 +60,7 @@ def call(Map config=[:]) {
 jobSettings:
     STAGE:
         SMOKE:
-            alwaysEmailList: "DST_Open_API_Development_Team@dettonville.org, infra-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com, dcapi_qa@dettonville.org"
+            alwaysEmailList: "DST_Open_API_Development_Team@dettonville.com, infra-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com, dcapi_qa@dettonville.com"
         SANITY:
             testCases:
                 chrome:
@@ -68,7 +68,7 @@ jobSettings:
 
     STAGE_EXTERNAL:
         SMOKE:
-            alwaysEmailList: "DST_Open_API_Development_Team@dettonville.org, infra-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com, dcapi_qa@dettonville.org"
+            alwaysEmailList: "DST_Open_API_Development_Team@dettonville.com, infra-team@dettonville.flowdock.com, api-tech-talk@dettonville.flowdock.com, dcapi_qa@dettonville.com"
 
         SANITY:
             testCases:

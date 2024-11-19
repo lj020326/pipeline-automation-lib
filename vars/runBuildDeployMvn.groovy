@@ -227,7 +227,7 @@ Map loadPipelineConfig(Map params, String configFile=null) {
     log.debug("${logPrefix} env.BRANCH_NAME = ${env.BRANCH_NAME}")
     log.debug("${logPrefix} config.repoBranch = ${config.repoBranch}")
 
-    config.emailFrom=config.get('emailFrom',"DCAPI.deployAutomation@dettonville.org")
+    config.emailFrom=config.get('emailFrom',"DCAPI.deployAutomation@dettonville.com")
 
     //
     // main release inputs

@@ -58,7 +58,7 @@ pipeline:
 #  logLevel: "DEBUG"
 #  useSimulationMode: true
 
-  alwaysEmailDist: "SIT-engineer@dettonville.org, lee.johnson@dettonville.com"
+  alwaysEmailDist: "SIT-engineer@dettonville.com, lee.johnson@dettonville.com"
 #  alwaysEmailDist: "lee.johnson@dettonville.com"
 
   timeout: 4
@@ -134,7 +134,7 @@ config.failFast = false
 // pipeline debugging/diagnostics
 config.debugPipeline = false
 config.logLevel = "INFO"
-config.emailFrom= "DCAPI.TestAutomation@dettonville.org"
+config.emailFrom= "DCAPI.TestAutomation@dettonville.com"
 
 ```
 
@@ -172,7 +172,7 @@ pipeline:
 
 #  emailDist: "lee.johnson@dettonville.com"
 #  alwaysEmailDist: "lee.johnson@dettonville.com"
-#  emailFrom: "DCAPI.TestAutomation@dettonville.org"
+#  emailFrom: "DCAPI.TestAutomation@dettonville.com"
 
   timeout: 10
   runcount: 2

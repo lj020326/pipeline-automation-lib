@@ -191,7 +191,7 @@ Map loadPipelineConfig(Map params, String configFile=null) {
 
     log.debug("${logPrefix} config.jenkinsJobName = ${config.jenkinsJobName}")
     config.buildNumber = currentBuild.number
-    config.emailFrom=config.get('emailFrom',"DCAPI.pcfDeployAutomation@dettonville.org")
+    config.emailFrom=config.get('emailFrom',"DCAPI.pcfDeployAutomation@dettonville.com")
 
     config.runTests = config.get('runTests', true)
     config.runJMeter = config.get('runJMeter', true)
@@ -741,7 +741,7 @@ def notifyBuild(String buildStatus, String emailList,Boolean onSuccessEveryTime=
 
       Check console output at ${env.BUILD_URL}console"""
         def hostname = sh (returnStdout: true, script: 'hostname')
-        def emailFrom = "${hostname.trim()}@dettonville.org"
+        def emailFrom = "${hostname.trim()}@dettonville.com"
 
         mail bcc: '', body: details, cc: '', from: emailFrom, replyTo: '', subject: subject, to: emailList
     }

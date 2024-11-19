@@ -28,7 +28,7 @@ athGitBranch: "develop"
 #useBrowserstackProxy: true
 #useBrowserstackLocalProxy: false
 
-alwaysEmailList: "ljohnson@dettonville.org"
+alwaysEmailList: "ljohnson@dettonville.com"
 
 #checkIfDeployJobsRan: false
 

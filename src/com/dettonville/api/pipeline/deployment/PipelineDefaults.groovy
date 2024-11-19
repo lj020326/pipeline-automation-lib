@@ -33,13 +33,13 @@ pipeline:
     continueIfFailed: false
 
     ## EMAIL NOTIFICATION DISTRIBUTIONS
-    changedEmailList: "ljohnson@dettonville.org"
-    alwaysEmailList: "ljohnson@dettonville.org"
+    changedEmailList: "ljohnson@dettonville.com"
+    alwaysEmailList: "ljohnson@dettonville.com"
     failedEmailList: ""
     abortedEmailList: ""
     successEmailList: ""
     
-    emailFrom: "DCAPI.DeployAutomation@dettonville.org"
+    emailFrom: "DCAPI.DeployAutomation@dettonville.com"
 
     getDeployResultsFile: true
     jobResultsFile: "runAppDeployment-results.json"

@@ -49,7 +49,7 @@ node ("QA-LINUX || PROD-LINUX") {
                     string(defaultValue: "5", description: "Specify the Connection Timeout\nE.g., '5', '10', '30', etc ", name: 'ConnTimeout'),
                     string(defaultValue: "", description: "Http Proxy Host:\nE.g. 'outboundproxy.dettonville.int'", name: 'HttpProxyHost'),
                     string(defaultValue: "", description: "Http Proxy Port:\nE.g. '15768'", name: 'HttpProxyPort'),
-                    string(defaultValue: "", description: "Send email report to (comma delimited if list):\nE.g. 'ljohnson@dettonville.org, someelse@dettonville.org'", name: 'AlwaysEmailList'),
+                    string(defaultValue: "", description: "Send email report to (comma delimited if list):\nE.g. 'ljohnson@dettonville.com, someelse@dettonville.com'", name: 'AlwaysEmailList'),
                     booleanParam(defaultValue: false, description: "Run Simulated Mode?", name: 'UseSimulationMode'),
                     booleanParam(defaultValue: false, description: "Debug Pipeline?", name: 'DebugPipeline'),
                     booleanParam(defaultValue: true, description: "Run nslookup?", name: 'RunNslookup'),
@@ -133,7 +133,7 @@ node ("QA-LINUX || PROD-LINUX") {
     config.httpProxyPort = params.HttpProxyPort
 
     List recipientList = (config.alwaysEmailList != "") ? (config.alwaysEmailList.contains(",")) ? config.alwaysEmailList.tokenize(',') : [config.alwaysEmailList] : []
-    recipientList.add("ljohnson@dettonville.org")
+    recipientList.add("ljohnson@dettonville.com")
     config.alwaysEmailList = recipientList.join(",")
 
     //echo "config=${config}"
