@@ -35,6 +35,7 @@ void call(def currentBuild,
 //         emailDistList = emailextrecipients(recipientProvidersDefault)
         recipientProvidersList = recipientProvidersDefault
     }
+    echo("${logPrefix} recipientProvidersList=${JsonUtils.printToJsonString(recipientProvidersList)}")
 
     String emailSubject = "Job '${env.JOB_NAME.replaceAll('%2F', '/')}' (${currentBuild.displayName}) has finished with ${currentBuild.result ? currentBuild.result : "SUCCESS"}"
 
