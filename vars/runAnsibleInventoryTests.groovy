@@ -161,18 +161,13 @@ def call(Map params=[:]) {
                         repoSlug: 'ansible-datacenter',
                         commitId: config.gitCommitHash
                     )
-                    if (config.alwaysEmailDistList) {
+                    if (config?.alwaysEmailDistList) {
                         sendEmail(currentBuild, env, emailAdditionalDistList=config.alwaysEmailDistList)
                     }
                     if (config.gitBranch in ['main','QA','PROD'] || config.gitBranch.startsWith("release/")) {
                         if (config?.deployEmailDistList) {
                             log.info("post(${config.gitBranch}): sendEmail(${currentBuild.result})")
                             sendEmail(currentBuild, env, emailAdditionalDistList=config.deployEmailDistList)
-                        }
-                    } else if (config.gitBranch in ['development']) {
-                        if (config?.alwaysEmailDistList) {
-                            log.info("post(${config.gitBranch}): sendEmail(${currentBuild.result})")
-                            sendEmail(currentBuild, env, emailAdditionalDistList=config.alwaysEmailDistList)
                         }
                     } else {
                         log.info("post(${config.gitBranch}): sendEmail(${currentBuild.result}, 'RequesterRecipientProvider')")

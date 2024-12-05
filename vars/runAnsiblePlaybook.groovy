@@ -26,6 +26,11 @@ def call(Map params=[:]) {
         agent {
             label config.jenkinsNodeLabel
         }
+        tools {
+            // ref: https://webapp.chatgpt4google.com/s/MzY5MjYw
+            // ref: https://stackoverflow.com/questions/47895668/how-to-select-multiple-jdk-version-in-declarative-pipeline-jenkins#48368506
+            ansible "${config.ansibleInstallation}"
+        }
         options {
             disableConcurrentBuilds()
             timestamps()
@@ -52,11 +57,11 @@ def call(Map params=[:]) {
                 when {
                     expression { config.ansibleCollectionsRequirements || config.ansibleRolesRequirements }
                 }
-                tools {
-                    // ref: https://webapp.chatgpt4google.com/s/MzY5MjYw
-                    // ref: https://stackoverflow.com/questions/47895668/how-to-select-multiple-jdk-version-in-declarative-pipeline-jenkins#48368506
-                    ansible "${config.ansibleInstallation}"
-                }
+//                 tools {
+//                     // ref: https://webapp.chatgpt4google.com/s/MzY5MjYw
+//                     // ref: https://stackoverflow.com/questions/47895668/how-to-select-multiple-jdk-version-in-declarative-pipeline-jenkins#48368506
+//                     ansible "${config.ansibleInstallation}"
+//                 }
                 steps {
                     script {
                         // ref: https://stackoverflow.com/questions/25785/delete-all-but-the-most-recent-x-files-in-bash
@@ -108,11 +113,11 @@ def call(Map params=[:]) {
             }
 
             stage('Run Ansible Playbook') {
-                tools {
-                    // ref: https://webapp.chatgpt4google.com/s/MzY5MjYw
-                    // ref: https://stackoverflow.com/questions/47895668/how-to-select-multiple-jdk-version-in-declarative-pipeline-jenkins#48368506
-                    ansible "${config.ansibleInstallation}"
-                }
+//                 tools {
+//                     // ref: https://webapp.chatgpt4google.com/s/MzY5MjYw
+//                     // ref: https://stackoverflow.com/questions/47895668/how-to-select-multiple-jdk-version-in-declarative-pipeline-jenkins#48368506
+//                     ansible "${config.ansibleInstallation}"
+//                 }
                 steps {
                     script {
 
