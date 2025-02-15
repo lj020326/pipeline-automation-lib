@@ -386,6 +386,7 @@ boolean runBuildAndPublishImageJob(Map config) {
     log.info("${logPrefix} buildArgs=${JsonUtils.printToJsonString(buildArgs)}")
 
     Map jobConfigs = [:]
+    // source for 'build-docker-image' job referenced in following 'jobFolder' located in buildDockerImageJob.groovy
     jobConfigs.jobFolder = "INFRA/build-docker-image"
     jobConfigs.wait = true
     jobConfigs.supportedJobParams = [
