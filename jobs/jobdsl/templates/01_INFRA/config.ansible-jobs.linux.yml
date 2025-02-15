@@ -34,6 +34,8 @@ pipelineConfig:
       ansible_limit: dell_idrac_hosts
       skip_untagged: 'true'
     - ansible_tag: bootstrap-jenkins-agent
+    - ansible_tag: bootstrap-ldap
+    - ansible_tag: bootstrap-ldap-client
     - ansible_tag: bootstrap-linux
     - ansible_tag: bootstrap-linux-core
     - ansible_tag: bootstrap-linux-firewall
