@@ -246,7 +246,7 @@ boolean buildAndPublishImageGroups(Map config) {
         log.info("${logPrefix} groupName=${groupName} groupConfig=${JsonUtils.printToJsonString(groupConfig)}")
 
         if (config?.runGroupsInParallel && config.runGroupsInParallel.toBoolean()) {
-            parallelGroups["split-${groupConfig.groupName}"] = {
+            parallelGroups["group-${groupConfig.groupName}"] = {
                 jobResult = buildAndPublishImages(groupConfig)
             }
         } else {
