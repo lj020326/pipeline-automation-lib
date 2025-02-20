@@ -21,7 +21,7 @@ def call(Map config=[:]) {
             name: 'AnsibleLimitHosts'),
         ansibleDebugFlag : choice(choices: "\n-v\n-vv\n-vvv\n-vvvv", description: "Choose Ansible Debug Level", name: 'AnsibleDebugFlag'),
         ansibleGalaxyForceOpt : booleanParam(defaultValue: false, description: "Use Ansible Galaxy Force Mode?", name: 'AnsibleGalaxyForceOpt'),
-        ansibleGalaxyUpgradeOpt : booleanParam(defaultValue: true, description: "Use Ansible Galaxy Upgrade?", name: 'AnsibleGalaxyUpgradeOpt'),
+        ansibleGalaxyUpgradeOpt : booleanParam(defaultValue: false, description: "Use Ansible Galaxy Upgrade?", name: 'AnsibleGalaxyUpgradeOpt'),
         useCheckDiffMode : booleanParam(defaultValue: false, description: "Use Check+Diff Mode (Dry Run with Diffs)?", name: 'UseCheckDiffMode'),
         skipUntagged : booleanParam(defaultValue: false, description: "Skip Untagged plays?", name: 'SkipUntagged')
     ]

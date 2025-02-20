@@ -335,7 +335,8 @@ Map loadPipelineConfig(Map params) {
 
     config.ansibleGalaxyIgnoreCerts = config.get('ansibleGalaxyIgnoreCerts', false)
     config.ansibleGalaxyForceOpt = config.get('ansibleGalaxyForceOpt', false)
-    config.ansibleGalaxyUpgradeOpt = config.get('ansibleGalaxyUpgradeOpt', true)
+//     config.ansibleGalaxyUpgradeOpt = config.get('ansibleGalaxyUpgradeOpt', true)
+    config.ansibleGalaxyUpgradeOpt = config.get('ansibleGalaxyUpgradeOpt', false)
 
     config.ansibleSshCredId = config.get('ansibleSshCredId', 'jenkins-ansible-ssh')
     config.ansibleVaultCredId = config.get('ansibleVaultCredId', 'ansible-vault-password-file')

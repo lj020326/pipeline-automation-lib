@@ -246,7 +246,7 @@ boolean buildAndPublishImageGroups(Map config) {
         log.info("${logPrefix} groupName=${groupName} groupConfig=${JsonUtils.printToJsonString(groupConfig)}")
 
         if (config?.runGroupsInParallel && config.runGroupsInParallel.toBoolean()) {
-            parallelGroups["split-${groupConfig.groupName}"] = {
+            parallelGroups["group-${groupConfig.groupName}"] = {
                 jobResult = buildAndPublishImages(groupConfig)
             }
         } else {
@@ -386,6 +386,7 @@ boolean runBuildAndPublishImageJob(Map config) {
     log.info("${logPrefix} buildArgs=${JsonUtils.printToJsonString(buildArgs)}")
 
     Map jobConfigs = [:]
+    // source for 'build-docker-image' job referenced in following 'jobFolder' located in buildDockerImageJob.groovy
     jobConfigs.jobFolder = "INFRA/build-docker-image"
     jobConfigs.wait = true
     jobConfigs.supportedJobParams = [
