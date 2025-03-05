@@ -45,26 +45,38 @@ pipelineConfig:
         replaceExistingTemplate: true
   vmTemplateList:
     - buildDistribution: CentOS
+      buildRelease: '10'
+      buildType: small
+    - buildDistribution: CentOS
+      buildRelease: '10'
+      buildType: medium
+    - buildDistribution: CentOS
       buildRelease: '9'
       buildType: small
     - buildDistribution: CentOS
       buildRelease: '9'
       buildType: medium
     - buildDistribution: CentOS
-      buildRelease: '8-stream'
-      buildType: medium
+      buildRelease: '8'
+      buildType: small
     - buildDistribution: CentOS
       buildRelease: '8'
       buildType: medium
     - buildDistribution: CentOS
       buildRelease: '7'
+      buildType: small
+    - buildDistribution: Debian
+      buildRelease: '12'
+      buildType: small
+    - buildDistribution: Debian
+      buildRelease: '12'
       buildType: medium
+    - buildDistribution: Debian
+      buildRelease: '11'
+      buildType: small
     - buildDistribution: Debian
       buildRelease: '10'
-      buildType: medium
-    - buildDistribution: Debian
-      buildRelease: '9'
-      buildType: medium
+      buildType: small
     - buildDistribution: RHEL
       buildRelease: '9'
       buildType: small
@@ -91,6 +103,9 @@ pipelineConfig:
       buildRelease: '24.04'
       buildType: medium
     - buildDistribution: Ubuntu
+      buildRelease: '24.04'
+      buildType: large
+    - buildDistribution: Ubuntu
       buildRelease: '22.04'
       buildType: small
     - buildDistribution: Ubuntu
@@ -98,10 +113,7 @@ pipelineConfig:
       buildType: medium
     - buildDistribution: Ubuntu
       buildRelease: '20.04'
-      buildType: medium
-    - buildDistribution: Ubuntu
-      buildRelease: '18.04'
-      buildType: medium
+      buildType: small
     - buildDistribution: Windows/server
       buildRelease: '2022'
       buildType: standard
