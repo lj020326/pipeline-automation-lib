@@ -50,11 +50,9 @@ def call(Map config=[:]) {
     config.environment = config.get('environment',"${env.JOB_NAME.split('/')[-3]}")
     config.ansibleInstallation = config.get('ansibleInstallation',"ansible-venv")
 
+    def ansibleTagsDefault = "untagged,${env.JOB_BASE_NAME}"
     if (config.skipUntagged) {
         ansibleTagsDefault = "${env.JOB_BASE_NAME}"
-    } else {
-        // ref: https://stackoverflow.com/questions/62213910/run-only-tasks-with-a-certain-tag-or-untagged
-        ansibleTagsDefault = "untagged,${env.JOB_BASE_NAME}"
     }
     config.ansibleTags = config.get('ansibleTags',"${ansibleTagsDefault}")
 

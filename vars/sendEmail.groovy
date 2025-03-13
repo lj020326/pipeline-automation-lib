@@ -24,13 +24,13 @@ void call(def currentBuild,
     echo("${logPrefix} recipientProviders=${JsonUtils.printToJsonString(recipientProviders)}")
     echo("${logPrefix} emailAdditionalDistList=${JsonUtils.printToJsonString(emailAdditionalDistList)}")
 
-    emailDistList = []
+    List emailDistList = []
     if (!emailAdditionalDistList.isEmpty()) {
         emailDistList.addAll(emailAdditionalDistList)
     }
     echo("${logPrefix} emailDistList=${JsonUtils.printToJsonString(emailDistList)}")
 
-    recipientProvidersList = recipientProviders
+    List recipientProvidersList = recipientProviders
     if (recipientProvidersList.isEmpty()) {
 //         emailDistList = emailextrecipients(recipientProvidersDefault)
         recipientProvidersList = recipientProvidersDefault
