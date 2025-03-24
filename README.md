@@ -91,6 +91,9 @@ Some of the most often used pipelines in this library include:
     See [here](https://github.com/lj020326/vm-templates/blob/main/README.md) for document explaining example setup and usage of this pipeline.
 * Build Docker Image
   * [buildDockerImage](./vars/buildDockerImage.groovy) - pipeline used to build docker images<br>
+  * This build job supports using a build manifest to specify a hierarchical set of image build dependencies.
+  * The job then leverages [a build job to build each single image individually](./vars/buildDockerImageJob.groovy)
+  * The single 'build-docker-image' pipeline job definition referenced in the code is located at [buildDockerImageJob.groovy](./vars/buildDockerImageJob.groovy)
     See [Jenkinsfile here for advanced example with multiple-image dependencies](https://github.com/lj020326/jenkins-docker-agent/blob/master/Jenkinsfile).
 * Run Connectivity Test 
   * [runConnectivityTest](./vars/runConnectivityTest.groovy) - pipeline used run connectivity tests from the specified jenkins nodes.<br>
