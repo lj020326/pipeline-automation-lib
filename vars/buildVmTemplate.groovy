@@ -187,7 +187,7 @@ def call() {
                                  ${config.iso_base_dir}/${config.iso_dir}/${config.iso_file} \
                                  | grep "${config.iso_file}"
                             """
-                            vmIsoExists = sh(script: "${datastoreLsCmd}", returnStatus: true) == 0
+                            Boolean vmIsoExists = sh(script: "${datastoreLsCmd}", returnStatus: true) == 0
                             log.info("vmIsoExists=${vmIsoExists}")
 
                             if (!vmIsoExists) {

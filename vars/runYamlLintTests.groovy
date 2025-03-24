@@ -119,7 +119,6 @@ def call(Map params=[:]) {
                         commitId: config.gitCommitHash
                     )
 
-                    List emailAdditionalDistList = []
                     if (config.gitBranch in ['main','QA','PROD'] || config.gitBranch.startsWith("release/")) {
                         if (config?.deployEmailDistList) {
                             emailAdditionalDistList = config.deployEmailDistList

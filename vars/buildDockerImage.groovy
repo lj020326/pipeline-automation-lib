@@ -73,7 +73,7 @@ def call(Map params=[:]) {
                 script {
                     if (config?.alwaysEmailList) {
                         log.info("config.alwaysEmailList=${config.alwaysEmailList}")
-                        sendEmail(currentBuild, env, emailAdditionalDistList=[config.alwaysEmailList.split(",")])
+                        sendEmail(currentBuild, env, List emailAdditionalDistList=[config.alwaysEmailList.split(",")])
                     } else {
                         sendEmail(currentBuild, env)
                     }
@@ -85,7 +85,7 @@ def call(Map params=[:]) {
                 script {
                     if (config?.successEmailList) {
                         log.info("config.successEmailList=${config.successEmailList}")
-                        sendEmail(currentBuild, env, emailAdditionalDistList=[config.successEmailList.split(",")])
+                        sendEmail(currentBuild, env, List emailAdditionalDistList=[config.successEmailList.split(",")])
                     }
                 }
             }
@@ -93,7 +93,7 @@ def call(Map params=[:]) {
                 script {
                     if (config?.failedEmailList) {
                         log.info("config.failedEmailList=${config.failedEmailList}")
-                        sendEmail(currentBuild, env, emailAdditionalDistList=[config.failedEmailList.split(",")])
+                        sendEmail(currentBuild, env, List emailAdditionalDistList=[config.failedEmailList.split(",")])
                     }
                 }
             }
@@ -101,7 +101,7 @@ def call(Map params=[:]) {
                 script {
                     if (config?.failedEmailList) {
                         log.info("config.failedEmailList=${config.failedEmailList}")
-                        sendEmail(currentBuild, env, emailAdditionalDistList=[config.failedEmailList.split(",")])
+                        sendEmail(currentBuild, env, List emailAdditionalDistList=[config.failedEmailList.split(",")])
                     }
                 }
             }
@@ -109,7 +109,7 @@ def call(Map params=[:]) {
                 script {
                     if (config?.changedEmailList) {
                         log.info("config.changedEmailList=${config.changedEmailList}")
-                        sendEmail(currentBuild, env, emailAdditionalDistList=[config.changedEmailList.split(",")])
+                        sendEmail(currentBuild, env, List emailAdditionalDistList=[config.changedEmailList.split(",")])
                     }
                 }
             }
