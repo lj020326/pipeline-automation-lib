@@ -4,12 +4,11 @@ pipelineConfig:
   baseFolder: "INFRA/gitea-orgs"
   serverUrl: "https://gitea.admin.dettonville.int"
   gitCredentialsId: "infra-jenkins-git-user"
-#  gitSshCredentialsId: "bitbucket-ssh-jenkins"
   scriptPath: "Jenkinsfile"
 
   ## top level org scan
   periodicInterval: "60m"
-  ## child org folder level scan interval (in milliseconds) = 2 mins
+  ## child org folder level scan interval in milliseconds (e.g., 120000 = 2 mins)
   childTriggerInterval: 120000
   numToKeep: 40
 

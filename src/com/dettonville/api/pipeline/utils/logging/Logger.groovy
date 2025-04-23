@@ -429,7 +429,12 @@ class Logger implements Serializable {
       }
 
       def objectString = object.toString()
+      def functionName = getCurrentMethodName()
+
       String msg = "$name : $message -> $objectName$objectString"
+      if (functionName != null) {
+        msg = "$name.$functionName : $message -> $objectName$objectString"
+      }
       writeLogMsg(logLevel, msg)
     }
   }
@@ -517,6 +522,13 @@ class Logger implements Serializable {
     return false
   }
 
+  // ref: https://stackoverflow.com/questions/9540678/groovy-get-enclosing-functions-name
+  @NonCPS
+  private static String getCurrentMethodName() {
+    def marker = new Throwable()
+    return StackTraceUtils.sanitize(marker).stackTrace[1].methodName
+  }
+
   /**
    * Helper function to get the name of the object
    * @param object
@@ -527,11 +539,11 @@ class Logger implements Serializable {
     String objectName = null
     // try to retrieve as much information as possible about the class
     try {
-      Class objectClass = object.getClass()
-      objectName = objectClass.getName().toString()
-//      objectName = objectClass.getCanonicalName().toString()
+        Class objectClass = object.getClass()
+        objectName = objectClass.getName().toString()
+        objectName = objectClass.getCanonicalName().toString()
     } catch (RejectedAccessException e) {
-      // do nothing
+        // do nothing
     }
 
     return objectName

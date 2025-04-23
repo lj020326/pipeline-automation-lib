@@ -4,22 +4,9 @@
 import groovy.transform.Field
 @Field String scriptName = this.class.getName()
 
-String baseFolder = "INFRA"
+String baseFolder = "INFRA/repo-test-automation"
 
-jobFolder = "${baseFolder}/build-docker-image"
-
-// // ref: https://stackoverflow.com/questions/40215394/how-to-get-environment-variable-in-jenkins-groovy-script-console
-// def envVars = Jenkins.instance.
-//                    getGlobalNodeProperties().
-//                    get(hudson.slaves.EnvironmentVariablesNodeProperty).
-//                    getEnvVars()
-//
-// if (!envVars?.JENKINS_ENV) {
-//     println("JENKINS_ENV not defined - skipping vm-templates project definition")
-//     return
-// }
-//
-// String jenkinsEnv = envVars.JENKINS_ENV
+jobFolder = "${baseFolder}/run-molecule-test"
 
 println("${scriptName}: JENKINS_ENV=${JENKINS_ENV}")
 if (JENKINS_ENV=='PROD') {
@@ -35,7 +22,7 @@ void createDockerJobs(def dsl) {
 
     dsl.pipelineJob(jobFolder) {
         parameters {
-            stringParam('GitRepoUrl', "ssh://git@gitea.admin.dettonville.int:2222/infra/docker-jenkins.git", "Specify the git repo image URL")
+            stringParam('GitRepoUrl', "ssh://git@gitea.admin.dettonville.int:2222/infra/ansible-datacenter.git", "Specify the git repo image URL")
             stringParam('GitRepoBranch', "main", "Specify the git repo branch")
             stringParam('GitCredentialsId', "bitbucket-ssh-jenkins", "Specify the git repo credential ID")
             stringParam('RegistryUrl', "https://media.johnson.int:5000", "Specify the RegistryUrl")
@@ -59,7 +46,7 @@ void createDockerJobs(def dsl) {
                artifactDaysToKeep(-1)
             }
             cps {
-                script("buildDockerImage()")
+                script("runMoleculeTest()")
                 sandbox()
             }
         }

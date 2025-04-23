@@ -162,7 +162,7 @@ def call(Map params=[:]) {
                     }
                     if (config.gitBranch in ['origin/main','main']) {
                         log.info("post(${env.BRANCH_NAME}): sendEmail(${currentBuild.result})")
-                        sendEmail(currentBuild, env, emailAdditionalDistList=emailAdditionalDistList)
+                        sendEmail(currentBuild, env, emailAdditionalDistList: emailAdditionalDistList)
                     } else {
                         log.info("post(${env.BRANCH_NAME}): sendEmail(${currentBuild.result})")
                         sendEmail(currentBuild, env)
