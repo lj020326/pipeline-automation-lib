@@ -150,7 +150,6 @@ def call(Map params=[:]) {
                 script {
 // //                     ComparableSemanticVersion testScriptVersion = new ComparableSemanticVersion(config.testScriptVersion)
 //                     if (testScriptVersion && testScriptVersion >= minVersionPyTest) {
-// //                         junit testResults: ".test-results/*.xml", skipPublishingChecks: true
 //                         junit testResults: "${config.junitXmlReportDir}/*.xml", skipPublishingChecks: true
 //                     }
 
@@ -208,7 +207,7 @@ Map loadPipelineConfig(Map params) {
     config.timeout = config.get('timeout', 3)
     config.timeoutUnit = config.get('timeoutUnit', 'HOURS')
     config.skipDefaultCheckout = config.get('skipDefaultCheckout', false)
-    config.junitXmlReportDir = ".test-results"
+    config.junitXmlReportDir = "test-results"
     config.junitXmlReport = "${config.junitXmlReportDir}/junit-report.xml"
 
     config.emailDist = config.get('emailDist',"lee.james.johnson@gmail.com")
