@@ -50,6 +50,7 @@ pipelineConfig:
     - ansible_tag: bootstrap-ntp
     - ansible_tag: bootstrap-ntp-client
     - ansible_tag: bootstrap-ntp-server
+    - ansible_tag: bootstrap-plexupdate
     - ansible_tag: bootstrap-pip
     - ansible_tag: bootstrap-postfix
     - ansible_tag: bootstrap-postfix-client
