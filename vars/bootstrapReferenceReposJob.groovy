@@ -24,9 +24,9 @@ def call(Map config=[:]) {
     }
 
 //     // Cron job configurations – configured to run every 5 minutes
-//     cron_cfg="H/5 * * * *"
+//     String cron_cfg="H/5 * * * *"
     // Cron job configurations – configured to run every day at 23:00 PM
-    cron_cfg="H 23 * * *"
+    String cron_cfg="H 23 * * *"
 
     properties([
         parameters(paramList),

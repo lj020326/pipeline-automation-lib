@@ -18,11 +18,11 @@ def call() {
     String jobFolder = "${JOB_NAME.substring(0, JOB_NAME.lastIndexOf("/"))}"
     echo "jobFolder=${jobFolder}"
 
-//     // Cron job configurations – configured to run every day at 23:00 PM
-//     cron_cfg="H 23 * * *"
+//    // Cron job configurations – configured to run every day at 23:00 PM
+//     String cron_cfg="H 23 * * *"
     // Cron job configurations – configured to run every 30 minutes
-//     cron_cfg="H/30 * * * *"
-    cron_cfg="@midnight"
+//     String cron_cfg="H/30 * * * *"
+    String cron_cfg="@midnight"
 
     properties([
         disableConcurrentBuilds(),

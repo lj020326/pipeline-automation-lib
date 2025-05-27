@@ -94,13 +94,13 @@ def call(Map params=[:]) {
                         if (config?.deployEmailDistList) {
                             emailAdditionalDistList = config.deployEmailDistList
                             log.info("post(${env.BRANCH_NAME}): sendEmail(${currentBuild.result})")
-                            sendEmail(currentBuild, env, emailAdditionalDistList=emailAdditionalDistList)
+                            sendEmail(currentBuild, env, emailAdditionalDistList: emailAdditionalDistList)
                         }
                     } else if (config.gitBranch in ['development']) {
                         if (config?.alwaysEmailDistList) {
                             emailAdditionalDistList = config.alwaysEmailDistList
                             log.info("post(${env.BRANCH_NAME}): sendEmail(${currentBuild.result})")
-                            sendEmail(currentBuild, env, emailAdditionalDistList=emailAdditionalDistList)
+                            sendEmail(currentBuild, env, emailAdditionalDistList: emailAdditionalDistList)
                         }
                     } else {
                         log.info("post(${env.BRANCH_NAME}): sendEmail(${currentBuild.result}, 'RequesterRecipientProvider')")

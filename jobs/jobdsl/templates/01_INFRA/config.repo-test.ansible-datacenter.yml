@@ -4,8 +4,8 @@ pipelineConfig:
   jobFolder: "INFRA/repo-test-automation/ansible-datacenter"
   repoName: "ansible-datacenter"
   repoUrl: "git@bitbucket.org:lj020326/ansible-datacenter.git"
-  mirrorRepoDir: "/var/jenkins_home/git_repo_references/ansible-datacenter/ansible-datacenter.git"
   gitCredentialsId: "bitbucket-ssh-jenkins"
+  mirrorRepoDir: "/var/jenkins_home/git_repo_references/ansible-datacenter/ansible-datacenter.git"
   useSuppressionStrategy: false
   initializeJobMode: false
   periodicFolderTriggerInterval: "2m"

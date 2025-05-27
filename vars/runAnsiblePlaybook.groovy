@@ -229,7 +229,7 @@ def call(Map params=[:]) {
                     }
                     if (config.gitBranch in ['origin/main','main']) {
                         log.info("post(${config.gitBranch}): sendEmail(${currentBuild.result})")
-                        sendEmail(currentBuild, env, emailAdditionalDistList=emailAdditionalDistList)
+                        sendEmail(currentBuild, env, emailAdditionalDistList: emailAdditionalDistList)
                     } else {
                         log.info("post(${config.gitBranch}): sendEmail(${currentBuild.result}, 'RequesterRecipientProvider')")
                         sendEmail(currentBuild, env)
@@ -242,7 +242,7 @@ def call(Map params=[:]) {
                 script {
                     if (config?.successEmailList) {
                         log.info("config.successEmailList=${config.successEmailList}")
-                        sendEmail(currentBuild, env, List emailAdditionalDistList=[config.successEmailList.split(",")])
+                        sendEmail(currentBuild, env, emailAdditionalDistList: [config.successEmailList.split(",")])
                     }
                 }
             }
@@ -250,7 +250,7 @@ def call(Map params=[:]) {
                 script {
                     if (config?.failedEmailList) {
                         log.info("config.failedEmailList=${config.failedEmailList}")
-                        sendEmail(currentBuild, env, List emailAdditionalDistList=[config.failedEmailList.split(",")])
+                        sendEmail(currentBuild, env, emailAdditionalDistList: [config.failedEmailList.split(",")])
                     }
                 }
             }
@@ -258,7 +258,7 @@ def call(Map params=[:]) {
                 script {
                     if (config?.failedEmailList) {
                         log.info("config.failedEmailList=${config.failedEmailList}")
-                        sendEmail(currentBuild, env, List emailAdditionalDistList=[config.failedEmailList.split(",")])
+                        sendEmail(currentBuild, env, emailAdditionalDistList: [config.failedEmailList.split(",")])
                     }
                 }
             }
@@ -266,7 +266,7 @@ def call(Map params=[:]) {
                 script {
                     if (config?.changedEmailList) {
                         log.info("config.changedEmailList=${config.changedEmailList}")
-                        sendEmail(currentBuild, env, List emailAdditionalDistList=[config.changedEmailList.split(",")])
+                        sendEmail(currentBuild, env, emailAdditionalDistList: [config.changedEmailList.split(",")])
                     }
                 }
             }
@@ -335,7 +335,6 @@ Map loadPipelineConfig(Map params) {
 
     config.ansibleGalaxyIgnoreCerts = config.get('ansibleGalaxyIgnoreCerts', false)
     config.ansibleGalaxyForceOpt = config.get('ansibleGalaxyForceOpt', false)
-//     config.ansibleGalaxyUpgradeOpt = config.get('ansibleGalaxyUpgradeOpt', true)
     config.ansibleGalaxyUpgradeOpt = config.get('ansibleGalaxyUpgradeOpt', false)
 
     config.ansibleSshCredId = config.get('ansibleSshCredId', 'jenkins-ansible-ssh')
