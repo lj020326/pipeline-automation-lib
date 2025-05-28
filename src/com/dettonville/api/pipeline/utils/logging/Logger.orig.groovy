@@ -29,7 +29,7 @@ import java.text.SimpleDateFormat
 /**
  * Logging functionality for pipeline scripts.
  */
-class StaticLogger implements Serializable {
+class Logger implements Serializable {
 
   private static final long serialVersionUID = 1L
 
@@ -67,14 +67,14 @@ class StaticLogger implements Serializable {
   /**
    * @param name The name of the logger
    */
-  StaticLogger(String name = "") {
+  Logger(String name = "") {
     this.name = name
   }
 
   /**
    * @param logScope The object the logger is for. The name of the logger is autodetected.
    */
-  StaticLogger(Object logScope) {
+  Logger(Object logScope) {
     if (logScope instanceof Object) {
       this.name = getClassName(logScope)
       if (this.name == null) {
@@ -86,12 +86,12 @@ class StaticLogger implements Serializable {
   /**
    * @param logScope The object the logger is for. The name of the logger is autodetected.
    */
-  StaticLogger(Object logScope, SimpleDateFormat dateFormat) {
+  Logger(Object logScope, SimpleDateFormat dateFormat) {
     this(logScope)
     this.dateFormat = dateFormat
   }
 
-  StaticLogger(Object logScope, LogLevel logLvl) {
+  Logger(Object logScope, LogLevel logLvl) {
     this(logScope)
     this.init(logScope, logLvl)
   }
@@ -106,13 +106,13 @@ class StaticLogger implements Serializable {
   static void init(DSL dsl, LogLevel logLvl = LogLevel.INFO) {
     if (logLvl == null) logLvl = LogLevel.INFO
     level = logLvl
-    if (StaticLogger.initialized == true) {
+    if (Logger.initialized == true) {
       return
     }
     this.dsl = dsl
     initialized = true
-    StaticLogger tmpLogger = new StaticLogger('StaticLogger')
-    tmpLogger.deprecated('StaticLogger.init(DSL dsl, logLevel)','StaticLogger.init(Script script, logLevel)')
+    Logger tmpLogger = new Logger('Logger')
+    tmpLogger.deprecated('Logger.init(DSL dsl, logLevel)','Logger.init(Script script, logLevel)')
   }
 
   /**
@@ -170,7 +170,7 @@ class StaticLogger implements Serializable {
   static void init(Script script, LogLevel logLvl = LogLevel.INFO) {
     if (logLvl == null) logLvl = LogLevel.INFO
     level = logLvl
-    if (StaticLogger.initialized == true) {
+    if (Logger.initialized == true) {
       return
     }
     this.script = script
@@ -262,7 +262,7 @@ class StaticLogger implements Serializable {
    * @param object The object to be dumped
    */
   @NonCPS
-  static void trace(String message, Object object) {
+  void trace(String message, Object object) {
     log(LogLevel.TRACE, message, object)
   }
 
@@ -273,7 +273,7 @@ class StaticLogger implements Serializable {
    * @param object The object to be dumped
    */
   @NonCPS
-  static void info(String message, Object object) {
+  void info(String message, Object object) {
     log(LogLevel.INFO, message, object)
   }
 
@@ -284,7 +284,7 @@ class StaticLogger implements Serializable {
    * @param object The object to be dumped
    */
   @NonCPS
-  static void debug(String message, Object object) {
+  void debug(String message, Object object) {
     log(LogLevel.DEBUG, message, object)
   }
 
@@ -295,7 +295,7 @@ class StaticLogger implements Serializable {
    * @param object The object to be dumped
    */
   @NonCPS
-  static void warn(String message, Object object) {
+  void warn(String message, Object object) {
     log(LogLevel.WARN, message, object)
   }
 
@@ -306,7 +306,7 @@ class StaticLogger implements Serializable {
    * @param object The object to be dumped
    */
   @NonCPS
-  static void error(String message, Object object) {
+  void error(String message, Object object) {
     log(LogLevel.ERROR, message, object)
   }
 
@@ -317,7 +317,7 @@ class StaticLogger implements Serializable {
    * @param object The object to be dumped
    */
   @NonCPS
-  static void fatal(String message, Object object) {
+  void fatal(String message, Object object) {
     log(LogLevel.FATAL, message, object)
   }
 
@@ -327,7 +327,7 @@ class StaticLogger implements Serializable {
    * @param message The message to be logged
    */
   @NonCPS
-  static void trace(String message) {
+  void trace(String message) {
     log(LogLevel.TRACE, message)
   }
 
@@ -337,7 +337,7 @@ class StaticLogger implements Serializable {
    * @param message The message to be logged
    */
   @NonCPS
-  static void info(String message) {
+  void info(String message) {
     log(LogLevel.INFO, message)
   }
 
@@ -347,7 +347,7 @@ class StaticLogger implements Serializable {
    * @param message The message to be logged
    */
   @NonCPS
-  static void debug(String message) {
+  void debug(String message) {
     log(LogLevel.DEBUG, message)
   }
 
@@ -357,7 +357,7 @@ class StaticLogger implements Serializable {
    * @param message The message to be logged
    */
   @NonCPS
-  static void warn(String message) {
+  void warn(String message) {
     log(LogLevel.WARN, message)
   }
 
@@ -368,7 +368,7 @@ class StaticLogger implements Serializable {
    * @param object The object to be dumped
    */
   @NonCPS
-  static void error(String message) {
+  void error(String message) {
     log(LogLevel.ERROR, message)
   }
 
@@ -378,9 +378,9 @@ class StaticLogger implements Serializable {
    * @param message The message to be logged
    */
   @NonCPS
-  static void deprecated(String message) {
+  void deprecated(String message) {
     try {
-      StaticLogger.dsl.addWarningBadge(message)
+      Logger.dsl.addWarningBadge(message)
     } catch (Exception ex) {
       // no badge plugin available
     }
@@ -394,8 +394,8 @@ class StaticLogger implements Serializable {
    * @param newItem The replacement (if exist)
    */
   @NonCPS
-  static void deprecated(String deprecatedItem, String newItem) {
-    String message = "The step/function/class '$deprecatedItem' is marked as deprecated and will be removed in future releases. " +
+  void deprecated(String deprecatedItem, String newItem) {
+    String message = "The step/function/class '$deprecatedItem' is marked as depecreated and will be removed in future releases. " +
       "Please use '$newItem' instead."
     deprecated(message)
   }
@@ -407,7 +407,7 @@ class StaticLogger implements Serializable {
    * @param object The object to be dumped
    */
   @NonCPS
-  static void fatal(String message) {
+  void fatal(String message) {
     log(LogLevel.FATAL, message)
   }
 
@@ -419,17 +419,17 @@ class StaticLogger implements Serializable {
    * @param object The object to be dumped
    */
   @NonCPS
-  static void log(LogLevel logLevel, String message, Object object) {
+  void log(LogLevel logLevel, String message, Object object) {
     if (doLog(logLevel)) {
-      String objectName = getClassName(object)
+      def objectName = getClassName(object)
       if (objectName != null) {
         objectName = "($objectName) "
       } else {
         objectName = ""
       }
 
-      String objectString = object.toString()
-      String functionName = getInvokingFunctionName()
+      def objectString = object.toString()
+      def functionName = getCurrentMethodName()
 
       String msg = "$name : $message -> $objectName$objectString"
       if (functionName != null) {
@@ -446,7 +446,7 @@ class StaticLogger implements Serializable {
    * @param message The message to be logged
    */
   @NonCPS
-  static void log(LogLevel logLevel, String message) {
+  void log(LogLevel logLevel, String message) {
     if (doLog(logLevel)) {
       String msg = "$name : $message"
       writeLogMsg(logLevel, msg)
@@ -522,13 +522,20 @@ class StaticLogger implements Serializable {
     return false
   }
 
+  // ref: https://stackoverflow.com/questions/9540678/groovy-get-enclosing-functions-name
+  @NonCPS
+  private static String getCurrentMethodName() {
+    def marker = new Throwable()
+    return StackTraceUtils.sanitize(marker).stackTrace[1].methodName
+  }
+
   /**
    * Helper function to get the name of the object
    * @param object
    * @return
    */
   @NonCPS
-  public static String getClassName(Object object) {
+  private static String getClassName(Object object) {
     String objectName = null
     // try to retrieve as much information as possible about the class
     try {

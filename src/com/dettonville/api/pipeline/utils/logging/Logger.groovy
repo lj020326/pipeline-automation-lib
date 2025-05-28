@@ -77,7 +77,14 @@ class Logger implements Serializable {
    * @param logScope The object the logger is for. The name of the logger is autodetected.
    */
   Logger(Object logScope) {
-    init(logScope)
+    if (logScope instanceof Script) {
+        init(logScope)
+    } else if (logScope instanceof Object) {
+      this.name = getClassName(logScope)
+      if (this.name == null) {
+        this.name = "$logScope"
+      }
+    }
   }
 
   /**
@@ -174,18 +181,21 @@ class Logger implements Serializable {
    * @param script CpsScript object of the current pipeline script (available via this in pipeline scripts)
    */
   @NonCPS
-  static void init(Script script) {
+//   static void init(Script script) {
+  static void init(Object logScope) {
     if (Logger.initialized == true) {
       return
     }
-    if (script instanceof Object) {
-      this.name = getClassName(script)
+    if (logScope instanceof Object) {
+      this.name = getClassName(logScope)
       if (this.name == null) {
-        this.name = "${script}"
+        this.name = "${logScope}"
       }
     }
-    this.script = script
-    this.dsl = (DSL) script.steps
+    if (logScope instanceof Script) {
+        this.script = logScope
+        this.dsl = (DSL) logScope.steps
+    }
     this.initialized = true
   }
 
@@ -197,9 +207,9 @@ class Logger implements Serializable {
    */
   @NonCPS
   static void init(Script script, LogLevel logLvl) {
+    init(script)
     if (logLvl == null) logLvl = LogLevel.INFO
     this.level = logLvl
-    init(script)
   }
 
   /**
@@ -438,8 +448,8 @@ class Logger implements Serializable {
         objectName = ""
       }
 
-      def objectString = object.toString()
-      def functionName = getInvokingFunctionName()
+      String objectString = object.toString()
+      String functionName = getInvokingFunctionName()
 
       String msg = "$name : $message -> $objectName$objectString"
       if (functionName != null) {

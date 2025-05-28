@@ -22,7 +22,9 @@ package com.dettonville.api.pipeline.utils.maps
 import com.cloudbees.groovy.cps.NonCPS
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import com.dettonville.api.pipeline.utils.TypeUtils
+
 import com.dettonville.api.pipeline.utils.logging.Logger
+// import com.dettonville.api.pipeline.utils.logging.StaticLogger
 
 /**
  * Utility functions for Map objects
@@ -32,7 +34,8 @@ class MapUtils implements Serializable {
 
   private static final long serialVersionUID = 1L
 
-  static com.dettonville.api.pipeline.utils.logging.Logger log = new com.dettonville.api.pipeline.utils.logging.Logger(this)
+  static Logger log = new Logger(this)
+//   static StaticLogger log = new StaticLogger(this)
 
   static typeUtils = new TypeUtils()
 
