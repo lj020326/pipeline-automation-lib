@@ -114,7 +114,6 @@ def call(Map params=[:]) {
 
 //@NonCPS
 Map loadPipelineConfig(Map params) {
-//     String logPrefix = "loadPipelineConfig():"
 
     Map config = [:]
 
@@ -188,8 +187,6 @@ Map loadPipelineConfig(Map params) {
 }
 
 Map loadPipelineConfigFile(Map config) {
-//     String logPrefix = "loadPipelineConfigFile():"
-
 
     Map dockerBuildConfigMap = readYaml file: config.configFile
 
@@ -203,8 +200,6 @@ Map loadPipelineConfigFile(Map config) {
 }
 
 Map runDockerBuildManifest(Map config) {
-//     String logPrefix = "runDockerBuildManifest():"
-
 
     Map jobResults
     if (config?.buildImageGroups) {
@@ -226,8 +221,6 @@ Map runDockerBuildManifest(Map config) {
 }
 
 Map buildAndPublishImageGroups(Map config) {
-//     String logPrefix = "buildAndPublishImageGroups():"
-
 
     Map parallelGroups = [:]
 
@@ -272,7 +265,6 @@ Map buildAndPublishImageGroups(Map config) {
 
 // boolean buildAndPublishImageList(Map config) {
 Map buildAndPublishImageList(Map config) {
-//     String logPrefix = "buildAndPublishImageList():"
 
     Map parallelJobs = [:]
     Map jobResults = [:]

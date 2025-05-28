@@ -115,7 +115,7 @@ class SiteUtils {
 
         } catch (Exception err) {
             log.error("exception occurred [${err}]")
-            throw new Exception("${logPrefix} exception occurred: [${err}] ")
+            throw new Exception("exception occurred: [${err}] ")
         }
 
         return hostInfo
