@@ -4,6 +4,9 @@ import com.dettonville.api.pipeline.utils.logging.LogLevel
 import com.dettonville.api.pipeline.utils.logging.Logger
 
 import com.dettonville.api.pipeline.ath.AcceptanceTestHarness
+
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
 @Field Logger log = new Logger(this, LogLevel.INFO)
 
 def call(Map params=[:]) {
