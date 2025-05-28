@@ -11,8 +11,6 @@ def call(Map config=[:]) {
 //     Logger.init(this, LogLevel.INFO)
     Logger log = new Logger(this, LogLevel.INFO)
 
-    String logPrefix="runATHParamWrapper():"
-
     config.enabledParamList = config.get('enabledParamList', [])
     config.enableDevParams = config.get('enableDevParams', (config.enabledParamList.isEmpty()) ? true : false)
     config.enableBranchParam = config.enabledParamList.contains("athGitBranch") ? true : config.get('enableBranchParam', false)
@@ -86,7 +84,7 @@ def call(Map config=[:]) {
         config.remove("enabledParamList")
     }
 
-    log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.info("config=${JsonUtils.printToJsonString(config)}")
 
     runATHEnv(config)
 

@@ -108,7 +108,6 @@ def getYamlInt(Map config, String key) {
 
 //@NonCPS
 Map loadPipelineConfig(Map params, String configFile=null) {
-    String logPrefix="loadPipelineConfig():"
     Map config = [:]
 //    config.testJobList = ['SMOKE','SANITY','REGRESSION']
     config.supportedJobParams=['changedEmailList','alwaysEmailList','failedEmailList']
@@ -118,14 +117,14 @@ Map loadPipelineConfig(Map params, String configFile=null) {
         config=config + configSettings.pipeline
     }
     else if (configFile != null) {
-        log.info("${logPrefix} pipeline config file ${configFile} not present, using defaults...")
+        log.info("pipeline config file ${configFile} not present, using defaults...")
     } else {
-        log.info("${logPrefix} pipeline config file not specified, using defaults...")
+        log.info("pipeline config file not specified, using defaults...")
     }
 
     // copy immutable params maps to mutable config map
     params.each { key, value ->
-        log.debug("${logPrefix} params[${key}]=${value}")
+        log.debug("params[${key}]=${value}")
         key=decapitalize(key)
         if (value!="") {
             config[key]=value
@@ -145,8 +144,8 @@ Map loadPipelineConfig(Map params, String configFile=null) {
         log.setLevel(LogLevel.DEBUG)
     }
 
-    log.debug("${logPrefix} params=${JsonUtils.printToJsonString(params)}")
-    log.debug("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.debug("params=${JsonUtils.printToJsonString(params)}")
+    log.debug("config=${JsonUtils.printToJsonString(config)}")
 
     return config
 }
@@ -165,52 +164,49 @@ String createJobId(Map config, i) {
 }
 
 Map runTestJobs(Map config) {
-    String logPrefix="runTestJobs():"
-    log.info("${logPrefix} started")
+    log.info("started")
 
     Map testResults = [:]
 
     config.testJobList.eachWithIndex { it, i ->
 
-        log.info("${logPrefix} i=${i} it=${it}")
+        log.info("i=${i} it=${it}")
 
         Map stageConfig = config.findAll { !["testJobList"].contains(it.key) } + it
         String testStage = stageConfig.testStage
 
         stage("Running ${testStage} Test") {
-            log.info("${logPrefix} starting stage ${testStage}")
+            log.info("starting stage ${testStage}")
 
             List resultList = testResults.values()
             boolean result = (resultList.size()>0) ? resultList.inject { a, b -> a && b } : true
 
-            log.debug("${logPrefix} testStage ${testStage}: config.testJobList=${config.testJobList}")
-            log.debug("${logPrefix} testStage ${testStage}: testResults=${testResults}")
-            log.debug("${logPrefix} testStage ${testStage}: resultList=${resultList}")
-            log.debug("${logPrefix} testStage ${testStage}: prior stage results=${result}")
+            log.debug("testStage ${testStage}: config.testJobList=${config.testJobList}")
+            log.debug("testStage ${testStage}: testResults=${testResults}")
+            log.debug("testStage ${testStage}: resultList=${resultList}")
+            log.debug("testStage ${testStage}: prior stage results=${result}")
             if (result || config.continueIfFailed) {
                 result = runJobs(stageConfig)
                 testResults["${testStage}"] = result
 
-                log.info("${logPrefix} finishing stage ${testStage}: result=${result}")
+                log.info("finishing stage ${testStage}: result=${result}")
             } else {
-                log.info("${logPrefix} skipped running stage ${testStage} due to prior stage FAILURE results")
+                log.info("skipped running stage ${testStage} due to prior stage FAILURE results")
             }
         }
     }
 
-    log.info("${logPrefix} jobResults=${JsonUtils.printToJsonString(jobResults)}")
+    log.info("jobResults=${JsonUtils.printToJsonString(jobResults)}")
     return jobResults
 
 }
 
 boolean runJobs(Map config) {
-
-    String logPrefix="runJobs():"
-    log.info("${logPrefix} started")
-    log.debug("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.info("started")
+    log.debug("config=${JsonUtils.printToJsonString(config)}")
 
     if (config.jobs.size()==0) {
-        log.error("${logPrefix} no jobs specified")
+        log.error("no jobs specified")
         return false
     }
 
@@ -219,7 +215,7 @@ boolean runJobs(Map config) {
 
     config.jobs.eachWithIndex { it, i ->
 
-        log.info("${logPrefix} i=${i} it=${JsonUtils.printToJsonString(it)}")
+        log.info("i=${i} it=${JsonUtils.printToJsonString(it)}")
 
         // job configs overlay parent settings
         Map jobConfig = config.findAll { !["jobs","stage"].contains(it.key) } + it
@@ -230,7 +226,7 @@ boolean runJobs(Map config) {
         }
 
         if (jobConfig?.job) {
-            log.debug("${logPrefix} i=${i} jobConfig=${JsonUtils.printToJsonString(jobConfig)}")
+            log.debug("i=${i} jobConfig=${JsonUtils.printToJsonString(jobConfig)}")
 
             if (jobConfig?.runInParallel) {
                 parallelJobs["split-${jobConfig.jobId}"] = {
@@ -241,7 +237,7 @@ boolean runJobs(Map config) {
             }
         } else {
             jobResults.add(false)
-            log.error("${logPrefix} job not specified")
+            log.error("job not specified")
 //            return result
         }
 
@@ -250,23 +246,23 @@ boolean runJobs(Map config) {
         boolean result = (jobResults.size()>0) ? jobResults.inject { a, b -> a && b } : true
 //        if (!jobConfig.continueIfFailed && jobResults.size()>0 && !result) {
 //            currentBuild.result = 'FAILURE'
-//            log.info("${logPrefix} i=${i} continueIfFailed is false and results failed")
+//            log.info("i=${i} continueIfFailed is false and results failed")
 //            return result
 //        }
     }
 
     if (parallelJobs.size()>0) {
-        log.info("${logPrefix} parallelJobs=${parallelJobs}")
+        log.info("parallelJobs=${parallelJobs}")
         parallel parallelJobs
     }
 
     boolean result = (jobResults.size()>0) ? jobResults.inject { a, b -> a && b } : true
 //    if (!config.continueIfFailed && jobResults.size()>0 && !result) {
 //        currentBuild.result = 'FAILURE'
-//        log.info("${logPrefix} i=${i} continueIfFailed is false and results failed - not running any more jobs")
+//        log.info("i=${i} continueIfFailed is false and results failed - not running any more jobs")
 //    }
 
-    log.info("${logPrefix} finished: result = ${result}")
+    log.info("finished: result = ${result}")
     // ref: https://stackoverflow.com/questions/18380667/join-list-of-boolean-elements-groovy
     //return (false in jobResults) ? false : true
     return result
@@ -274,11 +270,9 @@ boolean runJobs(Map config) {
 
 boolean runJob(Map config) {
 
-    String logPrefix="runJob():"
-
     // This will copy all files packaged in STASH_NAME to agent workspace root directory.
     // To copy to another agent directory, see [https://github.com/jenkinsci/pipeline-examples]
-    log.info("${logPrefix} started")
+    log.info("started")
 
     boolean result = false
     List paramList=[]
@@ -290,19 +284,19 @@ boolean runJob(Map config) {
     }
 
     if (config.get('job',null)==null) {
-        log.error("${logPrefix} job not specified")
+        log.error("job not specified")
         return result
     }
 
     try {
-        log.info("${logPrefix} starting job ${config.job}")
+        log.info("starting job ${config.job}")
 //        build job: config.job, parameters: paramList, wait: config.wait, propagate: !config.continueIfFailed
 
         // ref: http://jenkins-ci.361315.n4.nabble.com/How-to-get-build-results-from-a-build-job-in-a-pipeline-td4897887.html
         def jobBuild = build job: config.job, parameters: paramList, wait: config.wait, propagate: false
         def jobResult = jobBuild.getResult()
 
-        log.info("${logPrefix} Build ${config.job} returned result: ${jobResult}")
+        log.info("Build ${config.job} returned result: ${jobResult}")
 
         if (jobResult != 'SUCCESS') {
             result = false
@@ -315,7 +309,7 @@ boolean runJob(Map config) {
             result = true
         }
     } catch (Exception err) {
-        log.error("${logPrefix} job exception occurred [${err}]")
+        log.error("job exception occurred [${err}]")
         result = false
         if (config.failFast) {
             currentBuild.result = 'FAILURE'
@@ -323,7 +317,7 @@ boolean runJob(Map config) {
         }
     }
 
-    log.info("${logPrefix} finished with result = ${result}")
+    log.info("finished with result = ${result}")
 
     return result
 }

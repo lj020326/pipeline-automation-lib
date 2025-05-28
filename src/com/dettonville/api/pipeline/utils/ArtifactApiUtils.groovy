@@ -32,17 +32,16 @@ class ArtifactApiUtils implements Serializable {
 
     // ref: https://stackoverflow.com/questions/36194316/how-to-get-the-build-user-in-artifactory-when-job-triggered-by-timer
     Map getLatestArtifactVersion(Map componentConfig) {
-        String logPrefix = "getLatestArtifactVersion():"
         String groupId = componentConfig.artifactGroupId
         String artifactId = componentConfig.artifactId
         String artifactVersion = componentConfig.componentVersion ?: componentConfig.version
 
-        log.debug("${logPrefix} starting")
+        log.debug("starting")
 
         Map artifactVersonInfo = [:]
         artifactVersonInfo.componentVersion = artifactVersion
 
-        log.debug("${logPrefix} artifactVersonInfo.componentVersion=${artifactVersonInfo.componentVersion}")
+        log.debug("artifactVersonInfo.componentVersion=${artifactVersonInfo.componentVersion}")
         String repos = artifactVersion.contains('SNAPSHOT') ? 'snapshots' : 'releases'
 
         dsl.withCredentials([[$class : 'UsernamePasswordMultiBinding', credentialsId: this.artifactoryApiCredId,
@@ -56,34 +55,34 @@ class ArtifactApiUtils implements Serializable {
                 classifierSearchUrl += "*"
             }
 
-            log.debug("${logPrefix} Determine if artiface info exists")
+            log.debug("Determine if artiface info exists")
             Integer responseStatus=dsl.sh(script: "curl -s -o /dev/null -w %{http_code} -u ${ARTIFACTORY_CREDS} '${classifierSearchUrl}'", returnStdout: true).toInteger()
 
-            log.debug("${logPrefix} responseStatus: ${responseStatus}")
+            log.debug("responseStatus: ${responseStatus}")
 
             if (responseStatus!=200) {
-                log.warn("${logPrefix} artifact info results not found for [${classifierSearchUrl}], returned responseStatus=${responseStatus}")
+                log.warn("artifact info results not found for [${classifierSearchUrl}], returned responseStatus=${responseStatus}")
                 return artifactVersonInfo
             }
 
-            log.debug("${logPrefix} artifact info exists, retrieving")
+            log.debug("artifact info exists, retrieving")
 
             artifactVersonInfo.fileVersion = dsl.sh(script: "curl -sSL -u ${ARTIFACTORY_CREDS} '${classifierSearchUrl}'", returnStdout: true)
-            log.debug("${logPrefix} artifactVersonInfo.fileVersion=${artifactVersonInfo.fileVersion}")
+            log.debug("artifactVersonInfo.fileVersion=${artifactVersonInfo.fileVersion}")
 
             String artifactSearchUrl = "${this.artifactoryBaseUrl}/artifactory/api/search/gavc?g=${groupId}&a=${artifactId}&v=${artifactVersion}&c=${artifactVersonInfo.fileVersion}&repos=${repos}"
             String artifactInfoJson = dsl.sh(script: "curl -sSL -u ${ARTIFACTORY_CREDS} '${artifactSearchUrl}'", returnStdout: true)
 
-            log.debug("${logPrefix} artifactInfoJson=${artifactInfoJson}")
+            log.debug("artifactInfoJson=${artifactInfoJson}")
 
             Map artifactInfoMap = dsl.readJSON text: artifactInfoJson
 
-            log.debug("${logPrefix} artifactInfoMap=${JsonUtils.printToJsonString(artifactInfoMap)}")
+            log.debug("artifactInfoMap=${JsonUtils.printToJsonString(artifactInfoMap)}")
 
             artifactVersonInfo.artifactUrl = artifactInfoMap.results.findAll { it.uri.contains(".war") || it.uri.contains(".zip") }[0].uri
-            log.debug("${logPrefix} artifactVersonInfo.artifactUrl=${artifactVersonInfo.artifactUrl}")
+            log.debug("artifactVersonInfo.artifactUrl=${artifactVersonInfo.artifactUrl}")
 
-            log.info("${logPrefix} artifactVersonInfo=${JsonUtils.printToJsonString(artifactVersonInfo)}")
+            log.info("artifactVersonInfo=${JsonUtils.printToJsonString(artifactVersonInfo)}")
         }
         return artifactVersonInfo
     }

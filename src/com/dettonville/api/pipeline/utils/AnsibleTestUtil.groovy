@@ -31,8 +31,6 @@ class AnsibleTestUtil implements Serializable {
 
     def withTestConfigVault(String ansibleVaultCredId="ansible-vault-password", def actions) {
 
-        String logPrefix = "withTestVaultConfig():"
-
         dsl.withCredentials([string(credentialsId: ansibleVaultCredId, variable: 'VAULT_PASSWORD')]) {
 
             String ansibleDecryptCmd = """

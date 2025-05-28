@@ -268,8 +268,7 @@ String decapitalize(String string) {
 
 
 Map loadPipelineConfig(Map params, String configFile=null) {
-    String logPrefix="loadPipelineConfig(configFile=${configFile}):"
-    log.debug("${logPrefix} started")
+    log.debug("started")
 
     Map config = [:]
 
@@ -278,18 +277,18 @@ Map loadPipelineConfig(Map params, String configFile=null) {
     config=defaultSettings.pipeline
 
     if (configFile != null && fileExists(configFile)) {
-        log.info("${logPrefix} pipeline config file ${configFile} present, loading ...")
+        log.info("pipeline config file ${configFile} present, loading ...")
         Map configSettings = readYaml file: "${configFile}"
         config=config + configSettings.pipeline
     }
     else {
-        log.info("${logPrefix} pipeline config file ${configFile} not present, using defaults...")
+        log.info("pipeline config file ${configFile} not present, using defaults...")
     }
-    log.debug("${logPrefix} config1=${printToJsonString(config)}")
+    log.debug("config1=${printToJsonString(config)}")
 
     // copy immutable params maps to mutable config map
     params.each { key, value ->
-        log.debug("${logPrefix} params[${key}]=${value}")
+        log.debug("params[${key}]=${value}")
         key=decapitalize(key)
         if (value!="") {
             config[key]=value
@@ -325,8 +324,8 @@ Map loadPipelineConfig(Map params, String configFile=null) {
 
     config.gitRepoBranch = config.gitRepoBranch ?: env.BRANCH_NAME ?: "develop"
 
-    log.debug("${logPrefix} env.BRANCH_NAME = ${env.BRANCH_NAME}")
-    log.debug("${logPrefix} config.gitRepoBranch = ${config.gitRepoBranch}")
+    log.debug("env.BRANCH_NAME = ${env.BRANCH_NAME}")
+    log.debug("config.gitRepoBranch = ${config.gitRepoBranch}")
 
 //    config.useConfigFile = config.get('useConfigFile', false)
     config.useConfigFile = config.get('useConfigFile', true)
@@ -338,7 +337,7 @@ Map loadPipelineConfig(Map params, String configFile=null) {
     config.jenkinsBitbucketCredId = config.get('jenkinsBitbucketCredId', null)
 
     config.deleteBeforePush = config.get('deleteBeforePush', false)
-    log.info("${logPrefix} params=${params}")
+    log.info("params=${params}")
 
 //    config.useSimulationMode = config.get('useSimulationMode', true)
     config.useSimulationMode = config.get('useSimulationMode', false)
@@ -352,10 +351,10 @@ Map loadPipelineConfig(Map params, String configFile=null) {
     //
     // essential/minimal params
     //
-//    log.debug("${logPrefix} env.JOB_NAME = ${env.JOB_NAME}")
+//    log.debug("env.JOB_NAME = ${env.JOB_NAME}")
     config.jenkinsJobName = config.get('jenkinsJobName', env.JOB_NAME.replaceAll('%2F', '/').replaceAll('/', '-').replaceAll(' ', '-').toUpperCase())
 
-    log.debug("${logPrefix} config.jenkinsJobName = ${config.jenkinsJobName}")
+    log.debug("config.jenkinsJobName = ${config.jenkinsJobName}")
     config.buildNumber = currentBuild.number
     config.emailFrom=config.get('emailFrom',"DCAPI.pcfDeployAutomation@dettonville.com")
 
@@ -369,7 +368,7 @@ Map loadPipelineConfig(Map params, String configFile=null) {
     config.useLocal = config.get('useLocal', false)
 
     if(config.useLocal && config.gitRepoBranch!=env.BRANCH_NAME) {
-        log.warn("${logPrefix} useLocal is true: the gitRepoBranch set as ${config.gitRepoBranch} will be set to local branch ${env.BRANCH_NAME}")
+        log.warn("useLocal is true: the gitRepoBranch set as ${config.gitRepoBranch} will be set to local branch ${env.BRANCH_NAME}")
         config.gitRepoBranch=env.BRANCH_NAME
     }
 
@@ -428,7 +427,7 @@ Map loadPipelineConfig(Map params, String configFile=null) {
         stash includes: '**', name: "${appConfig.pcfAppName}-workspace"
     }
 
-    log.debug("${logPrefix} config=${printToJsonString(config)}")
+    log.debug("config=${printToJsonString(config)}")
 
     return config
 }
@@ -444,8 +443,8 @@ List getSecretEnvVars(Map config) {
 
 
 void mvnPackage(Map config) {
-    String logPrefix = "mvnPackage():"
-    log.debug("${logPrefix} started")
+
+    log.debug("started")
 
     String buildCmd = "mvn clean package ${config.mvnLogOptions}"
 
@@ -455,7 +454,7 @@ void mvnPackage(Map config) {
         buildCmd += " -DskipTests=true"
     }
 
-    log.debug("${logPrefix} BUILD CMD: ${buildCmd}")
+    log.debug("BUILD CMD: ${buildCmd}")
 
     if (config.useSimulationMode) {
         log.info("**** USING SIMULATION MODE - following command not actually run *****")
@@ -467,8 +466,8 @@ void mvnPackage(Map config) {
 }
 
 void publishToArtifactory(Map config) {
-    String logPrefix = "publishToArtifactory():"
-    log.debug("${logPrefix} started")
+
+    log.debug("started")
 
     String jenkinsArtifactoryCredId = config.jenkinsArtifactoryCredId
     String pomLoc = config.pomLoc
@@ -487,8 +486,8 @@ void publishToArtifactory(Map config) {
 
 
 boolean createSnapshot(Map config) {
-    String logPrefix = "createSnapshot():"
-    log.debug("${logPrefix} started")
+
+    log.debug("started")
 
     boolean updatePOM = false
 
@@ -497,26 +496,26 @@ boolean createSnapshot(Map config) {
     def pom = readMavenPom file: pomFile
 
     if(pom.version.contains('RELEASE')) {
-        log.error("${logPrefix} You can not create a snapshot from a release version")
+        log.error("You can not create a snapshot from a release version")
     }
 
     def versionNUmberToUpdate = pom.version
 
     def result = sh (returnStdout: true, script: "git ls-remote --heads ${config.gitRepo} ${versionNUmberToUpdate} | wc -l")
-    log.debug("${logPrefix} # of git branches matching [${versionNUmberToUpdate}] is ${result}")
+    log.debug("# of git branches matching [${versionNUmberToUpdate}] is ${result}")
 
     if (result.contains('1') && !config.forceSnapshot) {
-        log.error("${logPrefix} There is already a snapshot branch created for ${versionNUmberToUpdate}.")
+        log.error("There is already a snapshot branch created for ${versionNUmberToUpdate}.")
     }else {
         String remoteOrigin = config.gitRepo.replace('https://','')
-        log.debug("${logPrefix} remoteOrigin=${remoteOrigin}")
+        log.debug("remoteOrigin=${remoteOrigin}")
 
         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: config.jenkinsBitbucketCredId, usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD']]) {
             sh('git config --global user.email "jenkins@dettonville.com"')
             sh('git config --global user.name "Jenkins Pipeline"')
             String bitbucketCreds="${GIT_USERNAME}:${GIT_PASSWORD}"
             String remoteUrl = "https://${bitbucketCreds}@${remoteOrigin}"
-            log.debug("${logPrefix} remoteUrl=${remoteUrl}")
+            log.debug("remoteUrl=${remoteUrl}")
             sh("git remote set-url origin '${remoteUrl}'")
             sh("git checkout -b ${versionNUmberToUpdate}")
             sh("git push -u origin ${versionNUmberToUpdate}")
@@ -529,7 +528,7 @@ boolean createSnapshot(Map config) {
 }
 
 def insertIntoVault(Map config, VaultUtil vaultUtil) {
-    String logPrefix="insertIntoVault(${config.pcfAppEnv}):"
+    String logPrefix = "[${config.pcfAppEnv}]:"
     log.debug("${logPrefix} starting")
 
     String env=config.pcfAppEnv
@@ -565,7 +564,7 @@ def getJenkinsAgentLabel(String jenkinsLabel) {
 
 def deployPcfAppEnv(Map config, VaultUtil vaultUtil, CaaSUtil caasUtil) {
     String pcfAppEnv=config.pcfAppEnv
-    String logPrefix = "deployPcfAppEnv(${pcfAppEnv}):"
+    String logPrefix = "[${pcfAppEnv}]:"
     log.info("${logPrefix} started")
 
     if (config.debugPipeline) log.debug("${logPrefix} config=${printToJsonString(config)}")
@@ -659,7 +658,7 @@ def deployPcfAppEnv(Map config, VaultUtil vaultUtil, CaaSUtil caasUtil) {
 def deployPCFApp(Map config) {
     String pcfAppEnv = config.pcfAppEnv
     String pcfAppName = config.pcfAppName
-    String logPrefix="deployPCFApp(${pcfAppEnv}, ${pcfAppName}):"
+    String logPrefix = "[${pcfAppEnv}, ${pcfAppName}]:"
     log.debug("${logPrefix} starting")
 
     config.keyMap = config.keyMaps[config.pcfAppName]
@@ -781,7 +780,7 @@ def deployPCFApp(Map config) {
 
 
 void deployToPCFGoRouter(Map config) {
-    String logPrefix="deployToPCFGoRouter(${config.pcfAppEnv}, ${config.pcfAppName}):"
+    String logPrefix = "[${config.pcfAppEnv}, ${config.pcfAppName}]:"
     log.debug("${logPrefix} starting")
 
     if (config.debugPipeline) log.debug("${logPrefix} config=${printToJsonString(config)}")
@@ -924,7 +923,7 @@ void deployToPCFGoRouter(Map config) {
 
 
 def deployServicesToPCF(Map config) {
-    String logPrefix="deployServicesToPCF(${config.pcfAppEnv}):"
+    String logPrefix = "[${config.pcfAppEnv}]:"
     log.debug("${logPrefix} starting")
 
     String env=config.pcfAppEnv
@@ -1021,7 +1020,7 @@ def deployServicesToPCF(Map config) {
 
 
 def runSpockTestsInPCF(Map config) {
-    String logPrefix="runSpockTestsInPCF(${config.pcfAppEnv}, ${config.pcfAppName}):"
+    String logPrefix = "[${config.pcfAppEnv}, ${config.pcfAppName}]:"
     log.debug("${logPrefix} starting")
 
     String env=config.pcfAppEnv
@@ -1117,12 +1116,11 @@ void gitPullSharedAnsibleFiles(String branch = null) {
 
 
 void setupPcfServices(Map config) {
-    String logPrefix="setupPcfServices():"
-    log.info("${logPrefix} starting")
+    log.info("starting")
 
     config.pcfServices.each { Map pcfServiceConfig ->
 
-        log.info("${logPrefix} adding/updating pcfServiceConfig=${pcfServiceConfig}")
+        log.info("adding/updating pcfServiceConfig=${pcfServiceConfig}")
 
         switch (pcfServiceConfig.type) {
             case "postgres":
@@ -1132,13 +1130,12 @@ void setupPcfServices(Map config) {
         }
     }
 
-    log.info("${logPrefix} all services setup and ready")
+    log.info("all services setup and ready")
 
 }
 
 void setupPostgresService(Map config) {
-    String logPrefix="setupPostgresService():"
-    log.info("${logPrefix} starting")
+    log.info("starting")
 
     withCredentials([usernamePassword(credentialsId: pcfServiceConfig.jenkinsCredId, passwordVariable: 'DB_PWD', usernameVariable: 'DB_USER')]) {
 
@@ -1147,23 +1144,23 @@ void setupPostgresService(Map config) {
         config.uri = "postgres://${DB_USER}:${DB_PWD}@${config.serviceUrl}"
 
         String dbServiceJson = JsonOutput.toJson(config)
-        log.info("${logPrefix} dbServiceJson = [${dbServiceJson}]")
-        log.info("${logPrefix} service config=${printToJsonString(config)}")
+        log.info("dbServiceJson = [${dbServiceJson}]")
+        log.info("service config=${printToJsonString(config)}")
 
         int serviceExists = sh(script: "cf service ${config.pcfServiceName}", returnStatus: true)
-        log.info("${logPrefix} cf services status = [${serviceExists}]")
+        log.info("cf services status = [${serviceExists}]")
         if (!serviceExists) {
-            log.info("${logPrefix} service already exists so updating existing service")
+            log.info("service already exists so updating existing service")
             sh("cf uups ${config.pcfServiceName} -p '${dbServiceJson}'")
         } else {
-            log.info("${logPrefix} creating user provided service [${config.dbServiceName}]")
+            log.info("creating user provided service [${config.dbServiceName}]")
             sh("cf cups ${config.pcfServiceName} -p '${dbServiceJson}'")
         }
 
     }
 
     // ref: https://artifacts.dettonville.int/stash/projects/MRS_RFRSH/repos/zeus-pipelines/browse/ls-security/services/Jenkinsfile
-    log.info("${logPrefix} wait until service is ready...")
+    log.info("wait until service is ready...")
     int x = 0
     while(true) {
         x++
@@ -1171,14 +1168,14 @@ void setupPostgresService(Map config) {
         sleep 20
         if(!update_output.contains('create in progress') || x >= 20) break
     }
-    log.info("${logPrefix} service is ready")
+    log.info("service is ready")
 
 }
 
 
 
 def getCertsForPCF(Map config, CaaSUtil caasUtil) {
-    String logPrefix="getCertsForPCF(${config.pcfAppEnv}):"
+    String logPrefix = "[${config.pcfAppEnv}]:"
     log.debug("${logPrefix} starting")
 
     String env=config.pcfAppEnv
@@ -1200,7 +1197,7 @@ def getCertsForPCF(Map config, CaaSUtil caasUtil) {
 }
 
 def runPerformanceTestsInPCF(Map config) {
-    String logPrefix="runPerformanceTestsInPCF(${config.pcfAppEnv}, ${config.pcfAppName}):"
+    String logPrefix = "[(${config.pcfAppEnv}, ${config.pcfAppName}]:"
     log.debug("${logPrefix} starting")
 
     String env=config.pcfAppEnv
@@ -1296,10 +1293,10 @@ def notifyBuild(String buildStatus, String emailList,Boolean onSuccessEveryTime=
 }
 
 def postReleaseUpdatePom(Map config) {
-    String logPrefix="postReleaseUpdatePom():"
+
     log.info("${logPrefix} starting")
 
-    if (config.debugPipeline) log.debug("${logPrefix} config=${printToJsonString(config)}")
+    if (config.debugPipeline) log.debug("config=${printToJsonString(config)}")
 
     if (config.updatePOM) {
         config.pcfSpringAppList.each {
@@ -1389,7 +1386,7 @@ def sendReports(Map config, String emailDist, def currentBuild, String notifyAct
  */
 //void getJKSFromCaaS(script, String appHostName, String env, Map returnMap, String cnForCert,String ouForCert=null) {
 void getJKSFromCaaS(Map config) {
-    String logPrefix="getJKSFromCaaS(${config.pcfAppEnv}, ${config.pcfAppName}):"
+    String logPrefix = "[${config.pcfAppEnv}, ${config.pcfAppName}]:"
     log.debug("${logPrefix} starting")
 
     String appHostName=config.pcfAppName

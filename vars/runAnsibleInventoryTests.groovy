@@ -183,12 +183,11 @@ def call(Map params=[:]) {
 
 //@NonCPS
 Map loadPipelineConfig(Map params) {
-    String logPrefix="loadPipelineConfig():"
     Map config = [:]
 
     // copy immutable params maps to mutable config map
     params.each { key, value ->
-        log.debug("${logPrefix} params[${key}]=${value}")
+        log.debug("params[${key}]=${value}")
         key=Utilities.decapitalize(key)
         if (value!="") {
             config[key]=value
@@ -229,18 +228,17 @@ Map loadPipelineConfig(Map params) {
 
     config.yamlLintCmd = "yamllint"
 
-    log.debug("${logPrefix} params=${params}")
-    log.debug("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.debug("params=${params}")
+    log.debug("config=${JsonUtils.printToJsonString(config)}")
 
     return config
 }
 
 String getTestScriptVersion(dsl, log, script) {
-    String logPrefix = "getTestScriptVersion():"
     String version = dsl.sh(script: "${script} -v", returnStdout: true).trim()
     if (version == "1.0") {
         version = "1.0.0"
     }
-    log.debug("${logPrefix} version=${version}")
+    log.debug("version=${version}")
     return version
 }

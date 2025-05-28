@@ -11,8 +11,6 @@ def call(Map config=[:]) {
 //     Logger.init(this, LogLevel.INFO)
     Logger log = new Logger(this, LogLevel.INFO)
 
-    String logPrefix="runAnsibleDevJob():"
-
     List paramList = []
 
     Map paramMap = [
@@ -43,9 +41,9 @@ def call(Map config=[:]) {
     config.ansiblePlaybook = config.get('ansiblePlaybook','site.yml')
     config.gitPerformCheckout = false
 
-    log.info("${logPrefix} env.BRANCH_NAME=${env.BRANCH_NAME}")
+    log.info("env.BRANCH_NAME=${env.BRANCH_NAME}")
 
-    log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.info("config=${JsonUtils.printToJsonString(config)}")
 
     runAnsiblePlaybook(config)
 

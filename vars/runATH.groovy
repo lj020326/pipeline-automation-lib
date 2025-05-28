@@ -4,11 +4,12 @@ import com.dettonville.api.pipeline.utils.logging.LogLevel
 import com.dettonville.api.pipeline.utils.logging.Logger
 
 import com.dettonville.api.pipeline.ath.AcceptanceTestHarness
+@Field Logger log = new Logger(this, LogLevel.INFO)
 
 def call(Map params=[:]) {
 
 //     Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this, LogLevel.INFO)
+//     Logger log = new Logger(this, LogLevel.INFO)
     AcceptanceTestHarness ath = new AcceptanceTestHarness(this)
 
     pipeline {
@@ -95,4 +96,3 @@ def call(Map params=[:]) {
     }
 
 } // body
-

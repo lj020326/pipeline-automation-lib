@@ -100,7 +100,6 @@ def getYamlInt(Map config, String key) {
 
 //@NonCPS
 Map loadPipelineConfig(Map params, String configFile=null) {
-    String logPrefix="loadPipelineConfig():"
     Map config = [:]
 
     if (configFile != null && fileExists(configFile)) {
@@ -108,14 +107,14 @@ Map loadPipelineConfig(Map params, String configFile=null) {
         config=config + configSettings.pipeline
     }
     else if (configFile != null) {
-        log.info("${logPrefix} pipeline config file ${configFile} not present, using defaults...")
+        log.info("pipeline config file ${configFile} not present, using defaults...")
     } else {
-        log.info("${logPrefix} pipeline config file not specified, using defaults...")
+        log.info("pipeline config file not specified, using defaults...")
     }
 
     // copy immutable params maps to mutable config map
     params.each { key, value ->
-        log.debug("${logPrefix} params[${key}]=${value}")
+        log.debug("params[${key}]=${value}")
         key=decapitalize(key)
         if (value!="") {
             config[key]=value
@@ -134,8 +133,8 @@ Map loadPipelineConfig(Map params, String configFile=null) {
         log.setLevel(LogLevel.DEBUG)
     }
 
-    log.info("${logPrefix} params=${params}")
-    log.debug("${logPrefix} config=${config}")
+    log.info("params=${params}")
+    log.debug("config=${config}")
 
     return config
 }
@@ -154,22 +153,21 @@ String createJobId(Map config, i) {
 }
 
 boolean runJobList(Map config) {
-    String logPrefix="runJobList():"
-    log.info("${logPrefix} started")
+    log.info("started")
 
     String stageName = config.get('stage',null)
     boolean result
     if (stageName!=null) {
         stage (stageName) {
-            log.info("${logPrefix} starting stage ${stageName}")
+            log.info("starting stage ${stageName}")
             result = runJobs(config)
 
-            log.info("${logPrefix} finishing stage ${stageName}")
+            log.info("finishing stage ${stageName}")
             if (!config.continueIfFailed && !result) {
                 currentBuild.result = 'FAILURE'
                 // ref: https://issues.jenkins-ci.org/browse/JENKINS-36087
                 //currentStage.result =  'FAILURE'
-                log.info("${logPrefix} continueIfFailed is false and results failed - not running any more jobs")
+                log.info("continueIfFailed is false and results failed - not running any more jobs")
                 return result
             }
 
@@ -183,15 +181,13 @@ boolean runJobList(Map config) {
 }
 
 boolean runJobs(Map config) {
-
-    String logPrefix="runJobs():"
-    log.debug("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.debug("config=${JsonUtils.printToJsonString(config)}")
 
     Map parallelJobs = [:]
     List jobResults = []
     config.jobs.eachWithIndex { it, i ->
 
-        log.info("${logPrefix} i=${i} it=${JsonUtils.printToJsonString(it)}")
+        log.info("i=${i} it=${JsonUtils.printToJsonString(it)}")
 
         // job configs overlay parent settings
         Map jobConfig = config.findAll { !["jobs","stage"].contains(it.key) } + it
@@ -202,7 +198,7 @@ boolean runJobs(Map config) {
         }
 
         if (jobConfig?.job) {
-            log.debug("${logPrefix} i=${i} jobConfig=${JsonUtils.printToJsonString(jobConfig)}")
+            log.debug("i=${i} jobConfig=${JsonUtils.printToJsonString(jobConfig)}")
 
             if (jobConfig?.runInParallel) {
                 parallelJobs["split-${jobConfig.jobId}"] = {
@@ -219,21 +215,21 @@ boolean runJobs(Map config) {
         boolean result = (jobResults.size()>0) ? jobResults.inject { a, b -> a && b } : true
         if (!jobConfig.continueIfFailed && jobResults.size()>0 && !result) {
             currentBuild.result = 'FAILURE'
-            log.info("${logPrefix} i=${i} continueIfFailed is false and results failed - not running any more jobs")
+            log.info("i=${i} continueIfFailed is false and results failed - not running any more jobs")
             return result
         }
 
     }
 
     if (parallelJobs.size()>0) {
-        log.info("${logPrefix} parallelJobs=${parallelJobs}")
+        log.info("parallelJobs=${parallelJobs}")
         parallel parallelJobs
     }
 
     boolean result = (jobResults.size()>0) ? jobResults.inject { a, b -> a && b } : true
     if (!config.continueIfFailed && jobResults.size()>0 && !result) {
         currentBuild.result = 'FAILURE'
-        log.info("${logPrefix} i=${i} continueIfFailed is false and results failed - not running any more jobs")
+        log.info("i=${i} continueIfFailed is false and results failed - not running any more jobs")
     }
 
     // ref: https://stackoverflow.com/questions/18380667/join-list-of-boolean-elements-groovy
@@ -243,11 +239,9 @@ boolean runJobs(Map config) {
 
 boolean runJob(Map config) {
 
-    String logPrefix="runJob():"
-
     // This will copy all files packaged in STASH_NAME to agent workspace root directory.
     // To copy to another agent directory, see [https://github.com/jenkinsci/pipeline-examples]
-    log.debug("${logPrefix} started")
+    log.debug("started")
 
     boolean result = false
     List paramList=[]
@@ -259,15 +253,15 @@ boolean runJob(Map config) {
     }
 
     if (config.get('job',null)==null) {
-        log.error("${logPrefix} job not specified")
+        log.error("job not specified")
         return result
     }
 
     try {
-        log.info("${logPrefix} starting job ${config.job}")
+        log.info("starting job ${config.job}")
         build job: config.job, parameters: paramList, wait: config.wait, propagate: !config.continueIfFailed
     } catch (Exception err) {
-        log.error("${logPrefix} job exception occurred [${err}]")
+        log.error("job exception occurred [${err}]")
         if (config.failFast) {
             currentBuild.result = 'FAILURE'
             throw err

@@ -277,12 +277,11 @@ def call(Map params=[:]) {
 
 //@NonCPS
 Map loadPipelineConfig(Map params) {
-    String logPrefix="loadPipelineConfig():"
     Map config = [:]
 
     // copy immutable params maps to mutable config map
     params.each { key, value ->
-        log.debug("${logPrefix} params[${key}]=${value}")
+        log.debug("params[${key}]=${value}")
         key=Utilities.decapitalize(key)
         if (value!="") {
             config[key]=value
@@ -397,27 +396,26 @@ Map loadPipelineConfig(Map params) {
 
     config.ansibleSecretVarsList = config.get('ansibleSecretVarsList', secretVarsListDefault)
 
-    log.debug("${logPrefix} params=${params}")
-    log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.debug("params=${params}")
+    log.info("config=${JsonUtils.printToJsonString(config)}")
 
     return config
 }
 
 Map loadPipelineConfigFile(Map config) {
-    String logPrefix="loadPipelineConfigFile():"
 
     Map ansiblePipelineConfigMap = readYaml file: config.ansiblePipelineConfigFile
-    log.debug("${logPrefix} ansiblePipelineConfigMap=${JsonUtils.printToJsonString(ansiblePipelineConfigMap)}")
+    log.debug("ansiblePipelineConfigMap=${JsonUtils.printToJsonString(ansiblePipelineConfigMap)}")
 
     ansibleRootConfigMap=ansiblePipelineConfigMap.findAll { !['repoList'].contains(it.key) }
 
-    log.debug("${logPrefix} config.ansibleRootConfigMap=${ansibleRootConfigMap}")
+    log.debug("config.ansibleRootConfigMap=${ansibleRootConfigMap}")
     config = MapMerge.merge(config, ansibleRootConfigMap)
 
     if (!config.ansiblePlaybookRepo) {
         return config
     }
-    log.info("${logPrefix} config.ansiblePlaybookRepo=${config.ansiblePlaybookRepo}")
+    log.info("config.ansiblePlaybookRepo=${config.ansiblePlaybookRepo}")
 
     if (!ansiblePipelineConfigMap.repoList) {
         return config
@@ -425,36 +423,35 @@ Map loadPipelineConfigFile(Map config) {
 
     if (ansiblePipelineConfigMap.repoList["${config.ansiblePlaybookRepo}"]) {
         Map ansibleRepoConfigMap = ansiblePipelineConfigMap.repoList[config.ansiblePlaybookRepo]
-        log.debug("${logPrefix} ansibleRepoConfigMap=${JsonUtils.printToJsonString(ansibleRepoConfigMap)}")
+        log.debug("ansibleRepoConfigMap=${JsonUtils.printToJsonString(ansibleRepoConfigMap)}")
 
         ansibleRepoConfigMap=ansibleRepoConfigMap.findAll { !['SANDBOX','DEV','QA','PROD'].contains(it.key) }
 
         if (ansiblePipelineConfigMap.repoList["${config.ansiblePlaybookRepo}"]["${config.environment}"]) {
             Map ansibleEnvConfigMap = ansiblePipelineConfigMap.repoList["${config.ansiblePlaybookRepo}"]["${config.environment}"]
-            log.info("${logPrefix} ansibleEnvConfigMap=${JsonUtils.printToJsonString(ansibleEnvConfigMap)}")
+            log.info("ansibleEnvConfigMap=${JsonUtils.printToJsonString(ansibleEnvConfigMap)}")
 
-            log.info("${logPrefix} Merge ansibleEnvConfigMap to ansibleRepoConfigMap")
+            log.info("Merge ansibleEnvConfigMap to ansibleRepoConfigMap")
             ansibleRepoConfigMap = MapMerge.merge(ansibleRepoConfigMap, ansibleEnvConfigMap)
         }
-        log.info("${logPrefix} ansibleRepoConfigMap=${JsonUtils.printToJsonString(ansibleRepoConfigMap)}")
+        log.info("ansibleRepoConfigMap=${JsonUtils.printToJsonString(ansibleRepoConfigMap)}")
 
-        log.info("${logPrefix} Merge ansibleRepoConfigMap to config map")
+        log.info("Merge ansibleRepoConfigMap to config map")
         config = MapMerge.merge(config, ansibleRepoConfigMap)
     }
 //     if (config.requirementsPathsRelativeToPlaybookDir.toBoolean() && config.ansiblePlaybookDir
 //         && !config.ansibleCollectionsRequirements.startsWith(config.ansiblePlaybookDir))
     if (config.requirementsPathsRelativeToPlaybookDir.toBoolean() && config?.ansiblePlaybookDir) {
-        log.info("${logPrefix} Prepend ansiblePlaybookDir to config.ansibleCollectionsRequirements")
+        log.info("Prepend ansiblePlaybookDir to config.ansibleCollectionsRequirements")
         config.ansibleCollectionsRequirements = "${config.ansiblePlaybookDir}/${config.ansibleCollectionsRequirements}"
-        log.info("${logPrefix} Modified config.ansibleCollectionsRequirements=${config.ansibleCollectionsRequirements}")
+        log.info("Modified config.ansibleCollectionsRequirements=${config.ansibleCollectionsRequirements}")
     }
 
-    log.info("${logPrefix} Merged config=${JsonUtils.printToJsonString(config)}")
+    log.info("Merged config=${JsonUtils.printToJsonString(config)}")
     return config
 }
 
 Map getAnsibleCommandConfig(Map config) {
-    String logPrefix="getAnsibleCommandConfig():"
 
     String ansiblePlaybook = "${config.ansiblePlaybook}"
     if (config.ansiblePlaybookDir) {

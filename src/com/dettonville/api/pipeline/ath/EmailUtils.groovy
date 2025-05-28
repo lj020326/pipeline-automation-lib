@@ -22,10 +22,9 @@ class EmailUtils implements Serializable {
      * Send Email Notification
      **/
     void sendEmailNotification(Map config, String notifyAction) {
-        String logPrefix = "sendEmailNotification():"
 
         if (!config) {
-            log.error("${logPrefix} **** config not found to derive email recipients")
+            log.error("**** config not found to derive email recipients")
             return
         }
         Map emailInfoMap = [
@@ -37,14 +36,14 @@ class EmailUtils implements Serializable {
         ]
 
         if (!emailInfoMap.containsKey(notifyAction)) {
-            log.warn("${logPrefix} **** unknown post notify result = [${notifyAction}]")
+            log.warn("**** unknown post notify result = [${notifyAction}]")
             return
         }
 
         String jobNotifyResult = emailInfoMap[notifyAction].subjectPrefix
         String emailListString = emailInfoMap[notifyAction].list
 
-        log.info("${logPrefix} emailListString=[${emailListString}]")
+        log.info("emailListString=[${emailListString}]")
 
         String recipients = ""
 
@@ -98,10 +97,9 @@ class EmailUtils implements Serializable {
      * ref: https://stackoverflow.com/questions/43473159/jenkins-pipeline-emailext-emailextrecipients-can-i-also-add-specific-individua
      */
     void sendEmailTestReport(Map config, String fileName=null, String reportName="Test", String postJobEventType, Map currentState=null) {
-        String logPrefix = "sendEmailTestReport(${postJobEventType}):"
 
         if (!config) {
-            log.error("${logPrefix} **** config not found to derive email recipients")
+            log.error("**** config not found to derive email recipients")
             return
         }
 
@@ -114,7 +112,7 @@ class EmailUtils implements Serializable {
         ]
 
         if (!emailInfoMap.containsKey(postJobEventType)) {
-            log.warn("${logPrefix} **** unknown post event type = [${postJobEventType}]")
+            log.warn("**** unknown post event type = [${postJobEventType}]")
             return
         }
 
@@ -122,11 +120,11 @@ class EmailUtils implements Serializable {
         String emailListString = emailInfoMap[postJobEventType].list
 
         if (!emailListString || emailListString=="") {
-            log.info("${logPrefix} no notification subscription recipients found for event")
+            log.info("no notification subscription recipients found for event")
             return
         }
 
-        log.info("${logPrefix} emailListString=[${emailListString}]")
+        log.info("emailListString=[${emailListString}]")
 
 //        String buildStatus = currentBuild.result
         String buildStatus = "${dsl.currentBuild.result ? dsl.currentBuild.result : 'SUCCESS'}"
@@ -311,8 +309,7 @@ class EmailUtils implements Serializable {
     }
 
     String getDeployJobConfigInfo(Map config, Map currentState, String styleColor) {
-        String logPrefix = "getDeployJobConfigInfo():"
-        log.debug("${logPrefix} started")
+        log.debug("started")
 
         Map deployJobInfo = currentState.componentDeployJobSnapshots.before
 
@@ -328,7 +325,7 @@ class EmailUtils implements Serializable {
         }
 
         deployJobInfo.each { String componentName, Map deployInfo ->
-            log.info("${logPrefix} componentName=${componentName}")
+            log.info("componentName=${componentName}")
 
 //            String componentBuildVersion = deployInfo.actions.findResult { it.parameters }.findResult { it.name==componentConfig.jobVersionParamName ? it.value : null }
             String componentBuildVersion = deployInfo.componentVersion
@@ -343,15 +340,15 @@ class EmailUtils implements Serializable {
 //            String fileVersion = ""
 //            String artifactUrl = ""
 //            if (deployInfo?.deployResults) {
-//                log.debug("${logPrefix} deployInfo.deployResults=${JsonUtils.printToJsonString(deployInfo.deployResults)}")
+//                log.debug("deployInfo.deployResults=${JsonUtils.printToJsonString(deployInfo.deployResults)}")
 //                fileVersion = deployInfo.deployResults.fileVersion
 //                artifactUrl = deployInfo.deployResults.artifactUrl
 //            } else if (config.getLatestArtifactVersion) {
-//                log.debug("${logPrefix} deployInfo.latestArtifactVersionInfo=${JsonUtils.printToJsonString(deployInfo.latestArtifactVersionInfo)}")
+//                log.debug("deployInfo.latestArtifactVersionInfo=${JsonUtils.printToJsonString(deployInfo.latestArtifactVersionInfo)}")
 //                fileVersion = deployInfo.latestArtifactVersionInfo.fileVersion
 //                artifactUrl = deployInfo.latestArtifactVersionInfo.artifactUrl
 //            }
-//            log.info("${logPrefix} fileVersion=${fileVersion} artifactUrl=${artifactUrl}")
+//            log.info("fileVersion=${fileVersion} artifactUrl=${artifactUrl}")
 //            emailBody += " <a href=\"${artifactUrl}\">[${fileVersion}]</a>"
             emailBody += "</div>\n"
         }
@@ -360,8 +357,7 @@ class EmailUtils implements Serializable {
     }
 
     String getDeployVersionAndCauseLinks(Map config, Map buildResults) {
-        String logPrefix = "getDeployVersionAndCauseLinks():"
-        log.debug("${logPrefix} started")
+        log.debug("started")
 
         Map buildCause = buildResults.actions.findResult { it.causes }[0]
 
@@ -375,15 +371,15 @@ class EmailUtils implements Serializable {
         String fileVersion = ""
         String artifactUrl = ""
         if (buildResults?.deployResults) {
-            log.debug("${logPrefix} buildResults.deployResults=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(buildResults.deployResults)}")
+            log.debug("buildResults.deployResults=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(buildResults.deployResults)}")
             fileVersion = buildResults.deployResults.fileVersion
             artifactUrl = buildResults.deployResults.artifactUrl
         } else if (config.getLatestArtifactVersion) {
-            log.debug("${logPrefix} buildResults.latestArtifactVersionInfo=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(buildResults.latestArtifactVersionInfo)}")
+            log.debug("buildResults.latestArtifactVersionInfo=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(buildResults.latestArtifactVersionInfo)}")
             fileVersion = buildResults.latestArtifactVersionInfo.fileVersion
             artifactUrl = buildResults.latestArtifactVersionInfo.artifactUrl
         }
-        log.info("${logPrefix} fileVersion=${fileVersion} artifactUrl=${artifactUrl}")
+        log.info("fileVersion=${fileVersion} artifactUrl=${artifactUrl}")
         componentBuildVersionAndCauseLink += " <a href=\"${artifactUrl}\">[${fileVersion}]</a>"
 
         if (buildCause?.upstreamProject) {
@@ -400,13 +396,12 @@ class EmailUtils implements Serializable {
 //            componentBuildVersionAndCauseLink += " (${componentBuildCause})"
         }
 
-        log.debug("${logPrefix} componentBuildVersionAndCauseLink=${componentBuildVersionAndCauseLink}")
+        log.debug("componentBuildVersionAndCauseLink=${componentBuildVersionAndCauseLink}")
         return componentBuildVersionAndCauseLink
     }
 
     String getDeployJobRunInfo(Map config, Map currentState, String styleColor) {
-        String logPrefix = "getDeployJobRunInfo():"
-        log.debug("${logPrefix} started")
+        log.debug("started")
 
         String emailBody = ""
         emailBody += """
@@ -421,8 +416,8 @@ class EmailUtils implements Serializable {
             Map componentBuildCauseBefore = deployJobInfoBefore.actions.findResult { it.causes }[0]
             Map componentBuildCauseAfter = deployJobInfoAfter.actions.findResult { it.causes }[0]
 
-            log.debug("${logPrefix} componentBuildCauseBefore=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(componentBuildCauseBefore)}")
-            log.debug("${logPrefix} componentBuildCauseAfter=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(componentBuildCauseAfter)}")
+            log.debug("componentBuildCauseBefore=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(componentBuildCauseBefore)}")
+            log.debug("componentBuildCauseAfter=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(componentBuildCauseAfter)}")
 
 //            String cvbLinkBefore = getDeployCauseLink(deployJobInfoBefore)
             String cvbLinkAfter = getDeployVersionAndCauseLinks(config, deployJobInfoAfter)

@@ -542,11 +542,10 @@ def call() {
 
 //@NonCPS
 Map loadPipelineConfig(Map params) {
-    String logPrefix="loadPipelineConfig():"
     Map config = [:]
 
     List jobParts = JOB_NAME.split("/")
-    log.info("${logPrefix} jobParts=${jobParts}")
+    log.info("jobParts=${jobParts}")
 //     config.jobBaseFolderLevel = (jobParts.size() - 4)
     config.jobBaseFolderLevel = 2
     config.build_dir="templates"
@@ -558,7 +557,7 @@ Map loadPipelineConfig(Map params) {
 
     // ref: https://blog.mrhaki.com/2011/09/groovy-goodness-take-and-drop-items.html
     jobParts = jobParts.drop(config.jobBaseFolderLevel)
-    log.info("${logPrefix} jobParts[after drop]=${jobParts}")
+    log.info("jobParts[after drop]=${jobParts}")
 
     config.template_build_env = jobParts[0]
     config.build_platform = jobParts[1]
@@ -573,7 +572,7 @@ Map loadPipelineConfig(Map params) {
     // ref: https://blog.mrhaki.com/2015/01/groovy-goodness-take-or-drop-last-items.html
     jobParts = jobParts.dropRight(2)
 
-    log.info("${logPrefix} jobParts[after drop2]=${jobParts}")
+    log.info("jobParts[after drop2]=${jobParts}")
     config.build_platform_type = 'server'
     if (jobParts.size() > 1) {
         platformTypeParts = jobParts.drop(1)
@@ -584,12 +583,12 @@ Map loadPipelineConfig(Map params) {
     config.builder_type = "vsphere-iso"
     config.gitBranch = env.GIT_BRANCH
 
-    log.info("${logPrefix} template_build_env=${config.template_build_env}")
-    log.info("${logPrefix} build_platform=${config.build_platform}")
-    log.info("${logPrefix} build_platform_type=${config.build_platform_type}")
-    log.info("${logPrefix} build_distribution=${config.build_distribution}")
-    log.info("${logPrefix} build_release=${config.build_release}")
-    log.info("${logPrefix} template_build_type=${config.template_build_type}")
+    log.info("template_build_env=${config.template_build_env}")
+    log.info("build_platform=${config.build_platform}")
+    log.info("build_platform_type=${config.build_platform_type}")
+    log.info("build_distribution=${config.build_distribution}")
+    log.info("build_release=${config.build_release}")
+    log.info("template_build_type=${config.template_build_type}")
 
     String vm_template_name = "vm-template"
 //     vm_template_name += "-${config.build_distribution.toLowerCase()}${config.build_release}"
@@ -602,10 +601,10 @@ Map loadPipelineConfig(Map params) {
     config.template_build_name = "${config.template_name}-${config.build_id_left_padded}"
 
     config.build_platform_config_dir = config.build_platform
-    log.info("${logPrefix} build_platform_config_dir=${config.build_platform_config_dir}")
+    log.info("build_platform_config_dir=${config.build_platform_config_dir}")
 
     config.build_distribution_config_dir = config.build_distribution
-    log.info("${logPrefix} build_distribution_config_dir=${config.build_distribution_config_dir}")
+    log.info("build_distribution_config_dir=${config.build_distribution_config_dir}")
 
 //     config.build_release_config_dir = jobParts[1..2].join("/") + "/server"
 //     config.build_release_config_dir = jobParts[1..2].join("/")
@@ -615,13 +614,13 @@ Map loadPipelineConfig(Map params) {
     } else {
         config.build_release_config_dir = "${config.build_distribution}/${config.build_release}"
     }
-    log.info("${logPrefix} build_release_config_dir=${config.build_release_config_dir}")
+    log.info("build_release_config_dir=${config.build_release_config_dir}")
 
     config.replaceExistingTemplate = config.get('replaceExistingTemplate', false)
     config.vmware_iso_nfs_local_mounted = config.get('vmware_iso_nfs_local_mounted', false)
     config.import_ovf_to_dc2 = config.get('import_ovf_to_dc2', false)
 
-    log.info("${logPrefix} loading build config")
+    log.info("loading build config")
 
     String buildConfigFile = "./${config.build_dir}/${config.build_distribution_config_dir}/build-config.json"
     if (fileExists(buildConfigFile)) {
@@ -633,13 +632,13 @@ Map loadPipelineConfig(Map params) {
         throw new RuntimeException(message)
     }
 
-    log.info("${logPrefix} loading common and build vars")
+    log.info("loading common and build vars")
     Map commonVars = readJSON file: "./${config.build_dir}/common-vars.json"
-    log.info("${logPrefix} commonVars=${JsonUtils.printToJsonString(commonVars)}")
+    log.info("commonVars=${JsonUtils.printToJsonString(commonVars)}")
     config = MapMerge.merge(config, commonVars.variables)
 
     Map envVars = readJSON file: "./${config.build_dir}/env-vars.${config.template_build_env}.json"
-    log.info("${logPrefix} envVars=${JsonUtils.printToJsonString(envVars)}")
+    log.info("envVars=${JsonUtils.printToJsonString(envVars)}")
     config = MapMerge.merge(config, envVars)
 
     Map distributionVars = readJSON file: "./${config.build_dir}/${config.build_distribution_config_dir}/distribution-vars.json"
@@ -668,13 +667,13 @@ Map loadPipelineConfig(Map params) {
     }
     config.os_image_dir = config.get('os_image_dir', "/data/datacenter/jenkins/osimages")
 
-    log.info("${logPrefix} build_distribution_config_dir=${config.build_distribution_config_dir}")
-    log.info("${logPrefix} build_release_config_dir=${config.build_release_config_dir}")
+    log.info("build_distribution_config_dir=${config.build_distribution_config_dir}")
+    log.info("build_release_config_dir=${config.build_release_config_dir}")
 
     // copy immutable params maps to mutable config map
     // config = MapMerge.merge(config, params)
     params.each { key, value ->
-        log.debug("${logPrefix} params[${key}]=${value}")
+        log.debug("params[${key}]=${value}")
         key= Utilities.decapitalize(key)
         if (value!="") {
             config[key]=value
@@ -745,8 +744,8 @@ Map loadPipelineConfig(Map params) {
     ]
     config.secret_vars = secretVars
 
-    log.debug("${logPrefix} params=${JsonUtils.printToJsonString(params)}")
-    log.debug("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.debug("params=${JsonUtils.printToJsonString(params)}")
+    log.debug("config=${JsonUtils.printToJsonString(config)}")
 
     return config
 }
@@ -757,20 +756,19 @@ String getJenkinsAgentLabel(String jenkinsLabel) {
 }
 
 boolean doesVmTemplateExist(def dsl, Logger log, String vmTemplateName, boolean onlyIfTypeTemplate=true) {
-    String logPrefix="doesVmTemplateExist():"
     boolean vmTemplateExists = false
 
     dsl.sh "govc vm.info ${vmTemplateName}"
 //     boolean vmTemplateExists = dsl.sh(script: "govc vm.info -json ${vmTemplateName} | jq -er '.VirtualMachines[] | select(.Config.Template == true)'", returnStatus: true) == 0
     String vmInfoResultJson = dsl.sh(script: "govc vm.info -json ${vmTemplateName}", returnStdout: true)
-    log.debug("${logPrefix} vmInfoResultJson=${vmInfoResultJson}")
+    log.debug("vmInfoResultJson=${vmInfoResultJson}")
 
     def slurper = new JsonSlurper()
     Map vmInfoResult = slurper.parseText(vmInfoResultJson)
 
 //     def vmInfoResult = dsl.readJSON(text: vmInfoResultJson)
-    log.debug("${logPrefix} vmInfoResult: ${JsonUtils.printToJsonString(vmInfoResult)}")
-//     log.info("${logPrefix} vmInfoResult: ${vmInfoResult}")
+    log.debug("vmInfoResult: ${JsonUtils.printToJsonString(vmInfoResult)}")
+//     log.info("vmInfoResult: ${vmInfoResult}")
 //     vmTemplateExists = (vmInfoResult.containsKey('VirtualMachines') && vmInfoResult.VirtualMachines.size() > 0)
 
     Map templateKeysLookup = [
@@ -793,9 +791,9 @@ boolean doesVmTemplateExist(def dsl, Logger log, String vmTemplateName, boolean 
 
     List virtualMachines=vmInfoResult[templateKeys.virtualMachines]
 
-    log.debug("${logPrefix} virtualMachines=${virtualMachines}")
+    log.debug("virtualMachines=${virtualMachines}")
     boolean resultsFound = (virtualMachines != null)
-    log.info("${logPrefix} resultsFound=${resultsFound}")
+    log.info("resultsFound=${resultsFound}")
     if (resultsFound && virtualMachines.size() == 1) {
         if (onlyIfTypeTemplate) {
             vmTemplateExists = (virtualMachines[0].containsKey(templateKeys.config)
@@ -806,12 +804,11 @@ boolean doesVmTemplateExist(def dsl, Logger log, String vmTemplateName, boolean 
         }
     }
 
-    log.info("${logPrefix} vmTemplateExists=${vmTemplateExists}")
+    log.info("vmTemplateExists=${vmTemplateExists}")
     return vmTemplateExists
 }
 
 List getPackerCommandArgList(String packerCommand, Map config) {
-    String logPrefix="getPackerCommandArgList():"
 
     List packerCmdArgList = []
     packerCmdArgList.push("packer")
@@ -837,12 +834,11 @@ List getPackerCommandArgList(String packerCommand, Map config) {
     packerCmdArgList.push("-var iso_file=${config.iso_file}")
     packerCmdArgList.push("${config.build_config}")
 
-    log.debug("${logPrefix} packerCmdArgList=${JsonUtils.printToJsonString(packerCmdArgList)}")
+    log.debug("packerCmdArgList=${JsonUtils.printToJsonString(packerCmdArgList)}")
     return packerCmdArgList
 }
 
 void moveTemplate(def dsl, Logger log, Map deployConfig) {
-    String logPrefix="moveTemplate(${deployConfig.vcenter_shortname}):"
 
     String vm_template_name = deployConfig.vm_template_name
     String vm_template_datastore = deployConfig.vm_template_datastore
@@ -851,12 +847,12 @@ void moveTemplate(def dsl, Logger log, Map deployConfig) {
     String vm_template_host = deployConfig.vm_template_host
     String vcenter_host = deployConfig.vcenter_host
 
-    log.info("${logPrefix} vm_template_name=${vm_template_name}")
-    log.info("${logPrefix} vm_template_datastore=${vm_template_datastore}")
-    log.info("${logPrefix} vm_template_deploy_folder=${vm_template_deploy_folder}")
-    log.info("${logPrefix} vm_deploy_folder=${vm_deploy_folder}")
-    log.info("${logPrefix} vm_template_host=${vm_template_host}")
-    log.info("${logPrefix} vcenter_host=${vcenter_host}")
+    log.info("vm_template_name=${vm_template_name}")
+    log.info("vm_template_datastore=${vm_template_datastore}")
+    log.info("vm_template_deploy_folder=${vm_template_deploy_folder}")
+    log.info("vm_deploy_folder=${vm_deploy_folder}")
+    log.info("vm_template_host=${vm_template_host}")
+    log.info("vcenter_host=${vcenter_host}")
 
     dsl.withEnv(["GOVC_URL=${vcenter_host}"]) {
         dsl.withCredentials(deployConfig.secret_vars) {
@@ -874,22 +870,22 @@ void moveTemplate(def dsl, Logger log, Map deployConfig) {
             dsl.sh "govc datastore.mkdir -p -ds=${vm_template_datastore} ${vm_deploy_folder}"
 
             String targetPath = "[${vm_template_datastore}] ${vm_deploy_folder}"
-            log.info("${logPrefix} targetPath='${targetPath}'")
+            log.info("targetPath='${targetPath}'")
 
             String getVmPathCmd = "govc vm.info -json ${vm_template_name} | jq '.. |.Config?.VmPathName? | select(. != null)'"
             dsl.sh "${getVmPathCmd}"
             String vmPath = dsl.sh(script: "${getVmPathCmd}", returnStdout: true).replaceAll('"',"")
-            log.info("${logPrefix} vmPath='${vmPath}'")
+            log.info("vmPath='${vmPath}'")
 //     //        String vmDatastore = vmPath.split("/")[-1].replaceAll('([|])+','')
 //     //        String vmDatastore = vmPath.split(" ")[-1].replaceAll('([|])+','')
 //             String vmDatastore = vmPath.split(" ")[0].replaceAll('([|])+','')
 //             vmPath = vmPath.substring(0, vmPath.lastIndexOf("/"))
 //             String vmFolder = vmPath.split(" ")[1].split("/${vm_template_name}/")[0]
             String vmFolderPath = vmPath.split("/${vm_template_name}/")[0]
-            log.info("${logPrefix} vmFolderPath='${vmFolderPath}'")
+            log.info("vmFolderPath='${vmFolderPath}'")
 
             if (vmFolderPath != targetPath) {
-                log.info("${logPrefix} moving VM from '${vmFolderPath}' to '${targetPath}'")
+                log.info("moving VM from '${vmFolderPath}' to '${targetPath}'")
                 // ref: https://github.com/vmware/govmomi/blob/main/govc/USAGE.md
                 dsl.sh "govc vm.unregister ${vm_template_name}"
                 dsl.sh "govc datastore.rm -f -ds=${vm_template_datastore} ${vm_deploy_folder}/${vm_template_name}"
@@ -902,7 +898,7 @@ void moveTemplate(def dsl, Logger log, Map deployConfig) {
                     ${vm_deploy_folder}/${vm_template_name}/${vm_template_name}.vmtx
                 """
             }
-            log.info("${logPrefix} templates/VMs in [${vm_template_datastore}] ${vm_template_deploy_folder}:")
+            log.info("templates/VMs in [${vm_template_datastore}] ${vm_template_deploy_folder}:")
             dsl.sh "govc datastore.ls -ds=${vm_template_datastore} ${vm_deploy_folder}"
         }
     }

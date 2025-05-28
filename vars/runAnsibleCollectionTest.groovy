@@ -11,8 +11,6 @@ def call(Map config=[:]) {
     Logger.init(this, LogLevel.INFO)
     Logger log = new Logger(this)
 
-    String logPrefix="runAnsibleCollectionTest():"
-
     config.testTagsParam = config.get('testTagsParam',[])
     config.testType = config.get('testType','module')
 
@@ -76,13 +74,13 @@ def call(Map config=[:]) {
     config.ansibleExtraVars = ansibleExtraVars
     config.isTestPipeline = true
 
-    log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.info("config=${JsonUtils.printToJsonString(config)}")
 
     if (!config.initializeJobMode) {
         runAnsiblePlaybook(config)
     }
 
-    log.info("${logPrefix} finished")
+    log.info("finished")
 
 }
 

@@ -105,12 +105,11 @@ def call(Map params=[:]) {
 
 //@NonCPS
 Map loadPipelineConfig(Map params) {
-    String logPrefix = "loadPipelineConfig():"
     Map config = [:]
 
     if (params) {
-        log.info("${logPrefix} copy immutable params map to mutable config map")
-        log.info("${logPrefix} params=${JsonUtils.printToJsonString(params)}")
+        log.info("copy immutable params map to mutable config map")
+        log.info("params=${JsonUtils.printToJsonString(params)}")
         config = MapMerge.merge(config, params)
     }
 
@@ -157,7 +156,7 @@ Map loadPipelineConfig(Map params) {
     if (config.debugPipeline) {
         log.setLevel(LogLevel.DEBUG)
     }
-    log.info("${logPrefix} log.level=${log.level}")
+    log.info("log.level=${log.level}")
 
     config.runGroupsInParallel = config.get('runGroupsInParallel', false)
     config.runInParallel = config.get('runInParallel', false)
@@ -169,7 +168,7 @@ Map loadPipelineConfig(Map params) {
     ]
     config.dockerEnvVarsList = config.get('dockerEnvVarsList', dockerEnvVarsListDefault)
 
-    log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.info("config=${JsonUtils.printToJsonString(config)}")
 
     config.configFile = config.get('configFile', ".jenkins/molecule-test-config.yml")
 
@@ -177,21 +176,19 @@ Map loadPipelineConfig(Map params) {
 }
 
 Map loadPipelineConfigFile(Map config) {
-    String logPrefix="loadPipelineConfigFile():"
 
     Map moleculeRunConfigMap = readYaml file: config.configFile
 
     Map moleculeConfigs=moleculeRunConfigMap.pipeline
-    log.info("${logPrefix} moleculeConfigs=${JsonUtils.printToJsonString(moleculeConfigs)}")
+    log.info("moleculeConfigs=${JsonUtils.printToJsonString(moleculeConfigs)}")
 
     config = config + moleculeConfigs
 
-    log.info("${logPrefix} Merged config=${JsonUtils.printToJsonString(config)}")
+    log.info("Merged config=${JsonUtils.printToJsonString(config)}")
     return config
 }
 
 boolean runMoleculeManifest(Map config) {
-    String logPrefix = "runMoleculeManifest():"
 
     boolean jobResult
     if (config?.moleculeImageGroups) {
@@ -206,20 +203,19 @@ boolean runMoleculeManifest(Map config) {
 }
 
 boolean runMoleculeImageGroups(Map config) {
-    String logPrefix = "runMoleculeImageGroups():"
     Map parallelGroups = [:]
 //     List jobResults = []
 
     boolean jobResult
     config.moleculeImageGroups.each { groupName, groupConfigRaw ->
 
-        log.info("${logPrefix} groupName=${groupName} groupConfigRaw=${JsonUtils.printToJsonString(groupConfigRaw)}")
+        log.info("groupName=${groupName} groupConfigRaw=${JsonUtils.printToJsonString(groupConfigRaw)}")
 
         // job configs overlay parent settings
         Map groupConfig = config.findAll { !["moleculeImageGroups","groups"].contains(it.key) } + groupConfigRaw
         groupConfig.groupName = groupName
         String stageName = "build group ${groupName}"
-        log.info("${logPrefix} groupName=${groupName} groupConfig=${JsonUtils.printToJsonString(groupConfig)}")
+        log.info("groupName=${groupName} groupConfig=${JsonUtils.printToJsonString(groupConfig)}")
 
         if (config?.runGroupsInParallel && config.runGroupsInParallel.toBoolean()) {
             parallelGroups["group-${groupConfig.groupName}"] = {
@@ -233,23 +229,22 @@ boolean runMoleculeImageGroups(Map config) {
     }
 
     if (parallelGroups.size()>0) {
-        log.info("${logPrefix} parallelGroups=${parallelGroups}")
+        log.info("parallelGroups=${parallelGroups}")
         parallel parallelGroups
     }
 
-    log.info("${logPrefix} finished: jobResult=${jobResult}")
+    log.info("finished: jobResult=${jobResult}")
     return jobResult
 }
 
 boolean runMoleculeImageList(Map config) {
-    String logPrefix = "buildAndPublishImageList():"
     Map parallelJobs = [:]
     config.moleculeImageList.each { Map buildConfigRaw ->
-        log.debug("${logPrefix} buildConfigRaw=${JsonUtils.printToJsonString(buildConfigRaw)}")
+        log.debug("buildConfigRaw=${JsonUtils.printToJsonString(buildConfigRaw)}")
 
         Map buildConfig = config.findAll { !["moleculeImageList"].contains(it.key) } + buildConfigRaw
 
-        log.info("${logPrefix} buildConfig=${JsonUtils.printToJsonString(buildConfig)}")
+        log.info("buildConfig=${JsonUtils.printToJsonString(buildConfig)}")
 
         if (config?.runInParallel && config.runInParallel.toBoolean()) {
             parallelJobs["split-${buildConfig.moleculeImageLabel}"] = {
@@ -263,9 +258,9 @@ boolean runMoleculeImageList(Map config) {
     }
 
     if (parallelJobs.size()>0) {
-        log.info("${logPrefix} parallelJobs=${parallelJobs}")
+        log.info("parallelJobs=${parallelJobs}")
         if (config?.parallelJobsBatchSize && config.parallelJobsBatchSize>0) {
-            log.info("${logPrefix} config.parallelJobsBatchSize=${config.parallelJobsBatchSize}")
+            log.info("config.parallelJobsBatchSize=${config.parallelJobsBatchSize}")
             Integer batchSize = config.parallelJobsBatchSize
             Map parallelJobsBatch = [:]
             for (String key : parallelJobs.keySet()) {
@@ -279,29 +274,29 @@ boolean runMoleculeImageList(Map config) {
                 parallel parallelJobsBatch
             }
         } else {
-            log.info("${logPrefix} parallelJobs=${parallelJobs}")
+            log.info("parallelJobs=${parallelJobs}")
             parallel parallelJobs
         }
     }
 
     // ref: https://stackoverflow.com/questions/18380667/join-list-of-boolean-elements-groovy
     boolean jobResult = (jobResults.size()>0) ? jobResults.inject { a, b -> a && b } : true
-    log.info("${logPrefix} finished: jobResult=${jobResult}")
+    log.info("finished: jobResult=${jobResult}")
     return jobResult
 }
 
 boolean runMoleculeJob(Map config) {
     String logPrefix="runMoleculeJob(${config.moleculeImageLabel}):"
-    log.info("${logPrefix} started")
+    log.info("started")
 
-    log.debug("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.debug("config=${JsonUtils.printToJsonString(config)}")
 
     boolean priorJobResults = (jobResults.size()>0) ? jobResults.inject { a, b -> a && b } : true
     if (!priorJobResults && (config.failFast || !config.continueIfFailed)) {
         currentBuild.result = 'FAILURE'
-        log.info("${logPrefix} config.continueIfFailed=${config.continueIfFailed}")
-        log.info("${logPrefix} config.failFast=${config.failFast}")
-        log.info("${logPrefix} current results are FAILED - not running any more jobs")
+        log.info("config.continueIfFailed=${config.continueIfFailed}")
+        log.info("config.failFast=${config.failFast}")
+        log.info("current results are FAILED - not running any more jobs")
         return priorJobResults
     }
 
@@ -309,7 +304,7 @@ boolean runMoleculeJob(Map config) {
 //     sh "git rev-parse HEAD > .git/commit-id"
 //     String gitCommitId = readFile('.git/commit-id').trim()
 
-    log.info("${logPrefix} gitCommitId=${gitCommitId}")
+    log.info("gitCommitId=${gitCommitId}")
 
 //    DockerUtil dockerUtil = new DockerUtil(this)
     Map buildArgs = [:]
@@ -327,7 +322,7 @@ boolean runMoleculeJob(Map config) {
         buildArgs['BUILD_ID'] = config.buildId
         buildArgs['BUILD_DATE'] = config.buildDate
     }
-    log.info("${logPrefix} buildArgs=${JsonUtils.printToJsonString(buildArgs)}")
+    log.info("buildArgs=${JsonUtils.printToJsonString(buildArgs)}")
 
     Map jobConfigs = [:]
     // source for 'build-docker-image' job referenced in following 'jobFolder' located in buildDockerImage.groovy
@@ -351,8 +346,8 @@ boolean runMoleculeJob(Map config) {
         "TimeoutUnits"
     ]
 
-    log.info("${logPrefix} GIT_URL=${GIT_URL}")
-    log.info("${logPrefix} GIT_BRANCH=${GIT_BRANCH}")
+    log.info("GIT_URL=${GIT_URL}")
+    log.info("GIT_BRANCH=${GIT_BRANCH}")
 
     Map jobParameters = [:]
     jobParameters.Timeout = config.childJobTimeout
@@ -376,16 +371,16 @@ boolean runMoleculeJob(Map config) {
     }
     jobConfigs.jobParameters = jobParameters
 
-    log.info("${logPrefix} jobConfigs=${JsonUtils.printToJsonString(jobConfigs)}")
+    log.info("jobConfigs=${JsonUtils.printToJsonString(jobConfigs)}")
     boolean jobResult = runJob(jobConfigs)
 
     if (!jobResult && (config.failFast || !config.continueIfFailed)) {
         currentBuild.result = 'FAILURE'
-        log.info("${logPrefix} config.continueIfFailed=${config.continueIfFailed}")
-        log.info("${logPrefix} config.failFast=${config.failFast}")
-        log.info("${logPrefix} results failed - not running any more jobs")
+        log.info("config.continueIfFailed=${config.continueIfFailed}")
+        log.info("config.failFast=${config.failFast}")
+        log.info("results failed - not running any more jobs")
     }
 
-    log.info("${logPrefix} runJob(): jobResult=${jobResult}")
+    log.info("runJob(): jobResult=${jobResult}")
     return jobResult
 }

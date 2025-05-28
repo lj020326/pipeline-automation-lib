@@ -10,8 +10,6 @@ def call(Map config=[:]) {
 
     Logger log = new Logger(this, LogLevel.INFO)
 
-    String logPrefix="runAnsibleParamWrapper():"
-
     List paramList = []
 
     Map paramMap = [
@@ -84,11 +82,11 @@ def call(Map config=[:]) {
 //         string(credentialsId: 'awx-oauth-token', variable: 'TOWER_OAUTH_TOKEN')
 //     ]
 
-    log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.info("config=${JsonUtils.printToJsonString(config)}")
 
     runAnsiblePlaybook(config)
 
-    log.info("${logPrefix} finished")
+    log.info("finished")
 
 }
 

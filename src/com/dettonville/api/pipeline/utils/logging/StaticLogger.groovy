@@ -31,7 +31,7 @@ import java.text.SimpleDateFormat
 /**
  * Logging functionality for pipeline scripts.
  */
-class Logger implements Serializable {
+class StaticLogger implements Serializable {
 
   private static final long serialVersionUID = 1L
 
@@ -48,7 +48,7 @@ class Logger implements Serializable {
   /**
    * The log level
    */
-  public static LogLevel level = LogLevel.TRACE
+  static LogLevel level = LogLevel.TRACE
 
   /**
    * The name of the logger
@@ -69,45 +69,33 @@ class Logger implements Serializable {
   /**
    * @param name The name of the logger
    */
-  Logger(String name = "") {
+  StaticLogger(String name = "") {
     this.name = name
   }
 
   /**
    * @param logScope The object the logger is for. The name of the logger is autodetected.
    */
-  Logger(Object logScope) {
-    init(logScope)
+  StaticLogger(Object logScope) {
+    if (logScope instanceof Object) {
+      this.name = getClassName(logScope)
+      if (this.name == null) {
+        this.name = "$logScope"
+      }
+    }
   }
 
   /**
    * @param logScope The object the logger is for. The name of the logger is autodetected.
    */
-  Logger(Object logScope, SimpleDateFormat dateFormat) {
+  StaticLogger(Object logScope, SimpleDateFormat dateFormat) {
     this(logScope)
     this.dateFormat = dateFormat
   }
 
-  Logger(Object logScope, LogLevel logLvl) {
-//     this(logScope)
-//     setLevel(logLvl)
-     init(logScope, logLvl)
-  }
-
-  /**
-   * Initializes the logger with DSL/steps object
-   *
-   * @param dsl The DSL object of the current pipeline script (available via this.steps in pipeline scripts)
-   */
-  @NonCPS
-  static void init(DSL dsl) {
-    if (Logger.initialized == true) {
-      return
-    }
-    this.dsl = dsl
-    this.initialized = true
-    Logger tmpLogger = new Logger('Logger')
-    tmpLogger.deprecated('Logger.init(DSL dsl, logLevel)','Logger.init(Script script, logLevel)')
+  StaticLogger(Object logScope, LogLevel logLvl) {
+    this(logScope)
+    this.init(logScope, logLvl)
   }
 
   /**
@@ -117,10 +105,16 @@ class Logger implements Serializable {
    * @param logLvl The log level to use during execution of the pipeline script
    */
   @NonCPS
-  static void init(DSL dsl, LogLevel logLvl) {
-    init(dsl)
+  static void init(DSL dsl, LogLevel logLvl = LogLevel.INFO) {
     if (logLvl == null) logLvl = LogLevel.INFO
     level = logLvl
+    if (StaticLogger.initialized == true) {
+      return
+    }
+    this.dsl = dsl
+    initialized = true
+    StaticLogger tmpLogger = new StaticLogger('StaticLogger')
+    tmpLogger.deprecated('StaticLogger.init(DSL dsl, logLevel)','StaticLogger.init(Script script, logLevel)')
   }
 
   /**
@@ -169,37 +163,21 @@ class Logger implements Serializable {
   }
 
   /**
-   * Initializes the logger with CpsScript object
-   *
-   * @param script CpsScript object of the current pipeline script (available via this in pipeline scripts)
-   */
-  @NonCPS
-  static void init(Script script) {
-    if (Logger.initialized == true) {
-      return
-    }
-    if (script instanceof Object) {
-      this.name = getClassName(script)
-      if (this.name == null) {
-        this.name = "${script}"
-      }
-    }
-    this.script = script
-    this.dsl = (DSL) script.steps
-    this.initialized = true
-  }
-
-  /**
    * Initializes the logger with CpsScript object and LogLevel
    *
    * @param script CpsScript object of the current pipeline script (available via this in pipeline scripts)
-   * @param logLvl The log level of the logger
+   * @param map The configuration object of the pipeline
    */
   @NonCPS
-  static void init(Script script, LogLevel logLvl) {
+  static void init(Script script, LogLevel logLvl = LogLevel.INFO) {
     if (logLvl == null) logLvl = LogLevel.INFO
-    this.level = logLvl
-    init(script)
+    level = logLvl
+    if (StaticLogger.initialized == true) {
+      return
+    }
+    this.script = script
+    this.dsl = (DSL) script.steps
+    initialized = true
   }
 
   /**
@@ -252,8 +230,8 @@ class Logger implements Serializable {
    */
   @NonCPS
   static void setLevel(LogLevel logLvl = LogLevel.INFO) {
-//     if (logLvl == null) logLvl = LogLevel.INFO
-    this.level = logLvl
+    if (logLvl == null) logLvl = LogLevel.INFO
+    level = logLvl
   }
 
   /**
@@ -285,7 +263,8 @@ class Logger implements Serializable {
    * @param message The message to be logged
    * @param object The object to be dumped
    */
-  void trace(String message, Object object) {
+  @NonCPS
+  static void trace(String message, Object object) {
     log(LogLevel.TRACE, message, object)
   }
 
@@ -295,8 +274,8 @@ class Logger implements Serializable {
    * @param message The message to be logged
    * @param object The object to be dumped
    */
-//  @NonCPS
-  void info(String message, Object object) {
+  @NonCPS
+  static void info(String message, Object object) {
     log(LogLevel.INFO, message, object)
   }
 
@@ -306,7 +285,8 @@ class Logger implements Serializable {
    * @param message The message to be logged
    * @param object The object to be dumped
    */
-  void debug(String message, Object object) {
+  @NonCPS
+  static void debug(String message, Object object) {
     log(LogLevel.DEBUG, message, object)
   }
 
@@ -316,7 +296,8 @@ class Logger implements Serializable {
    * @param message The message to be logged
    * @param object The object to be dumped
    */
-  void warn(String message, Object object) {
+  @NonCPS
+  static void warn(String message, Object object) {
     log(LogLevel.WARN, message, object)
   }
 
@@ -326,7 +307,8 @@ class Logger implements Serializable {
    * @param message The message to be logged
    * @param object The object to be dumped
    */
-  void error(String message, Object object) {
+  @NonCPS
+  static void error(String message, Object object) {
     log(LogLevel.ERROR, message, object)
   }
 
@@ -336,7 +318,8 @@ class Logger implements Serializable {
    * @param message The message to be logged
    * @param object The object to be dumped
    */
-  void fatal(String message, Object object) {
+  @NonCPS
+  static void fatal(String message, Object object) {
     log(LogLevel.FATAL, message, object)
   }
 
@@ -345,7 +328,8 @@ class Logger implements Serializable {
    *
    * @param message The message to be logged
    */
-  void trace(String message) {
+  @NonCPS
+  static void trace(String message) {
     log(LogLevel.TRACE, message)
   }
 
@@ -354,7 +338,8 @@ class Logger implements Serializable {
    *
    * @param message The message to be logged
    */
-  void info(String message) {
+  @NonCPS
+  static void info(String message) {
     log(LogLevel.INFO, message)
   }
 
@@ -363,7 +348,8 @@ class Logger implements Serializable {
    *
    * @param message The message to be logged
    */
-  void debug(String message) {
+  @NonCPS
+  static void debug(String message) {
     log(LogLevel.DEBUG, message)
   }
 
@@ -372,7 +358,8 @@ class Logger implements Serializable {
    *
    * @param message The message to be logged
    */
-  void warn(String message) {
+  @NonCPS
+  static void warn(String message) {
     log(LogLevel.WARN, message)
   }
 
@@ -382,7 +369,8 @@ class Logger implements Serializable {
    * @param message The message to be logged
    * @param object The object to be dumped
    */
-  void error(String message) {
+  @NonCPS
+  static void error(String message) {
     log(LogLevel.ERROR, message)
   }
 
@@ -391,9 +379,10 @@ class Logger implements Serializable {
    *
    * @param message The message to be logged
    */
-  void deprecated(String message) {
+  @NonCPS
+  static void deprecated(String message) {
     try {
-      Logger.dsl.addWarningBadge(message)
+      StaticLogger.dsl.addWarningBadge(message)
     } catch (Exception ex) {
       // no badge plugin available
     }
@@ -403,10 +392,11 @@ class Logger implements Serializable {
   /**
    * Logs a deprecation message with deprecated and replacement
    *
-   * @param deprecatedItem The item that is deprecated
+   * @param deprecatedItem The item that is depcrecated
    * @param newItem The replacement (if exist)
    */
-  void deprecated(String deprecatedItem, String newItem) {
+  @NonCPS
+  static void deprecated(String deprecatedItem, String newItem) {
     String message = "The step/function/class '$deprecatedItem' is marked as depecreated and will be removed in future releases. " +
       "Please use '$newItem' instead."
     deprecated(message)
@@ -418,7 +408,8 @@ class Logger implements Serializable {
    * @param message The message to be logged
    * @param object The object to be dumped
    */
-  void fatal(String message) {
+  @NonCPS
+  static void fatal(String message) {
     log(LogLevel.FATAL, message)
   }
 
@@ -429,7 +420,8 @@ class Logger implements Serializable {
    * @param message The message to be logged
    * @param object The object to be dumped
    */
-  void log(LogLevel logLevel, String message, Object object) {
+  @NonCPS
+  static void log(LogLevel logLevel, String message, Object object) {
     if (doLog(logLevel)) {
       String objectName = getClassName(object)
       if (objectName != null) {
@@ -443,7 +435,7 @@ class Logger implements Serializable {
 
       String msg = "$name : $message -> $objectName$objectString"
       if (functionName != null) {
-        msg = "$name.$functionName(): $message -> $objectName$objectString"
+        msg = "$name.$functionName : $message -> $objectName$objectString"
       }
       writeLogMsg(logLevel, msg)
     }
@@ -455,15 +447,10 @@ class Logger implements Serializable {
    * @param logLevel the loglevel to be used
    * @param message The message to be logged
    */
-  void log(LogLevel logLevel, String message) {
+  @NonCPS
+  static void log(LogLevel logLevel, String message) {
     if (doLog(logLevel)) {
       String msg = "$name : $message"
-      String functionName = getInvokingFunctionName()
-//       dsl.echo("*** functionName="+functionName)
-
-      if (functionName != null) {
-        msg = "$name.$functionName(): $message"
-      }
       writeLogMsg(logLevel, msg)
     }
   }
@@ -535,114 +522,6 @@ class Logger implements Serializable {
       return true
     }
     return false
-  }
-
-  // Returns the method name from the java fully qualified class name
-  public static String extractMethodName(String className) {
-    // Match $methodName($ or end)
-    java.util.regex.Matcher m = java.util.regex.Pattern.compile('\\$(\\w+?)(\\$|$)').matcher(className);
-    if (m.find()) {
-        return m.group(1);
-    }
-    return null;
-  }
-
-  // Returns the name of the invoking method (the caller of this method)
-  public static String getInvokingFunctionName() {
-      def marker = new Throwable()
-      StackTraceElement[] stackTrace = StackTraceUtils.sanitize(marker).stackTrace
-
-      boolean foundLogger = false
-
-      for (StackTraceElement element : stackTrace) {
-          String className = element.getClassName()
-          // Skip internal Groovy/Jenkins frames
-          // First match is the logger itself, so skip it
-//               if (!foundLogger && className == Logger.class.getName()) {
-          if (className.startsWith(Logger.class.getName())) {
-              foundLogger = true
-              continue
-          }
-          // The next match is the true invoker
-          if (foundLogger) {
-              // Optionally log for debugging
-//               dsl.echo("Enclosing className="+className)
-//               dsl.echo("Enclosing methodName="+element.getMethodName())
-              return element.getMethodName()
-          }
-      }
-      return null
-  }
-
-  // Returns the name of the invoking method (the caller of this method)
-  public static String getInvokingFunctionName1() {
-//       StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-      def marker = new Throwable()
-      StackTraceElement[] stackTrace = StackTraceUtils.sanitize(marker).stackTrace
-
-      boolean foundLogger = false
-
-      for (StackTraceElement element : stackTrace) {
-          String className = element.getClassName()
-          // Skip internal Groovy/Jenkins frames
-          if (
-              !className.startsWith("java.") &&
-              !className.startsWith("jdk.") &&
-              !className.startsWith("sun.") &&
-              !className.startsWith("groovy.") &&
-              !className.startsWith("hudson.") &&
-              !className.startsWith("jenkins.") &&
-              !className.startsWith("com.cloudbees.") &&
-              !className.startsWith("org.codehaus.groovy.") &&
-              !className.startsWith("org.kohsuke.groovy.") &&
-              !className.startsWith("org.jenkinsci.")
-          ) {
-              // First match is the logger itself, so skip it
-//               if (!foundLogger && className == Logger.class.getName()) {
-              if (className.startsWith(Logger.class.getName())) {
-                  foundLogger = true
-                  continue
-              }
-              // The next match is the true invoker
-              if (foundLogger) {
-                  // Optionally log for debugging
-//                   dsl.echo("Enclosing className="+className)
-//                   dsl.echo("Enclosing methodName="+element.getMethodName())
-                  return element.getMethodName()
-              }
-          }
-      }
-      return null
-  }
-
-  // ref: https://stackoverflow.com/questions/9540678/groovy-get-enclosing-functions-name
-  public static String getInvokingFunctionName2() {
-
-      def marker = new Throwable()
-      int enclosingFunctionStackTraceFrameLevel = 3
-      String methodName = StackTraceUtils.sanitize(marker).stackTrace[enclosingFunctionStackTraceFrameLevel].methodName
-//       dsl.echo("Enclosing functionName="+methodName)
-      return methodName
-  }
-
-  // ref: https://stackoverflow.com/a/5891326
-  public static String getInvokingFunctionName3() {
-
-    String methodName = new Object(){}.getClass().getEnclosingMethod().getName()
-//     dsl.echo("methodName="+methodName)
-
-    return methodName
-  }
-
-  // Returns the name of the invoking method (the caller of this method)
-  private static String getInvokingFunctionName4() {
-      // [0] is Thread.getStackTrace, [1] is getInvokingFunctionName, [2] is the caller
-      StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-      if (stackTrace.length > 2) {
-          return stackTrace[2].getMethodName();
-      } else {
-          return null; // or throw an exception if desired
-      }
   }
 
   /**

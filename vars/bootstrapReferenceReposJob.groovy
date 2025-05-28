@@ -6,12 +6,12 @@ import com.dettonville.api.pipeline.utils.logging.Logger
 import com.dettonville.api.pipeline.utils.JsonUtils
 import com.dettonville.api.pipeline.utils.Utilities
 
+@Field Logger log = new Logger(this, LogLevel.INFO)
+
 def call(Map config=[:]) {
 
-    Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this)
-
-    String logPrefix="bootstrapReferenceReposJob():"
+//     Logger.init(this, LogLevel.INFO)
+//     Logger log = new Logger(this)
 
     List paramList = []
 
@@ -41,11 +41,11 @@ def call(Map config=[:]) {
         }
     }
 
-    log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.info("config=${JsonUtils.printToJsonString(config)}")
 
     bootstrapReferenceRepos(config)
 
-    log.info("${logPrefix} finished")
+    log.info("finished")
 
 }
 

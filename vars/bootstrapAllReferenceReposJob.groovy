@@ -6,17 +6,17 @@ import com.dettonville.api.pipeline.utils.logging.Logger
 import com.dettonville.api.pipeline.utils.JsonUtils
 import com.dettonville.api.pipeline.utils.Utilities
 
+@Field Logger log = new Logger(this, LogLevel.INFO)
+
 // ref: https://www.jenkins.io/doc/pipeline/examples/#trigger-job-on-all-nodes
 
 def call() {
 
-    Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this)
-
-    String logPrefix="bootstrapAllReferenceReposJob():"
+//     Logger.init(this, LogLevel.INFO)
+//     Logger log = new Logger(this)
 
     String jobFolder = "${JOB_NAME.substring(0, JOB_NAME.lastIndexOf("/"))}"
-    echo "jobFolder=${jobFolder}"
+    log.info("jobFolder=${jobFolder}")
 
 //    // Cron job configurations – configured to run every day at 23:00 PM
 //     String cron_cfg="H 23 * * *"
@@ -36,7 +36,7 @@ def call() {
         // Into each branch we put the pipeline code we want to execute
         branches["node_" + nodeName] = {
             node(nodeName) {
-                echo "Triggering on " + nodeName
+                log.info("Triggering on " + nodeName)
                 build job: "${jobFolder}/bootstrap-reference-repos",
                         parameters: [
                             string(name: 'JenkinsNodeLabel', value: nodeName)
@@ -53,7 +53,7 @@ def call() {
     // Now we trigger all branches
     parallel branches
 
-    log.info("${logPrefix} finished")
+    log.info("finished")
 }
 
 // This method collects a list of Node names from the current Jenkins instance

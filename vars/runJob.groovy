@@ -12,20 +12,18 @@ import groovy.transform.Field
 @Field Logger log = new Logger(this, LogLevel.INFO)
 
 boolean call(Map jobConfigs) {
-
-    String logPrefix="runJob():"
-    log.debug("${logPrefix} jobConfigs=${JsonUtils.printToJsonString(jobConfigs)}")
+    log.debug("jobConfigs=${JsonUtils.printToJsonString(jobConfigs)}")
 
     if (!jobConfigs?.jobFolder && !jobConfigs?.job) {
-        log.error("${logPrefix} 'jobConfigs.jobFolder' or 'jobConfigs.job' must be specified")
+        log.error("'jobConfigs.jobFolder' or 'jobConfigs.job' must be specified")
         return false
     }
     if (!jobConfigs?.wait) {
-        log.error("${logPrefix} jobConfigs.wait must be specified")
+        log.error("jobConfigs.wait must be specified")
         return false
     }
     if (!jobConfigs?.jobParameters) {
-        log.error("${logPrefix} jobConfigs.jobParameters must be specified")
+        log.error("jobConfigs.jobParameters must be specified")
         return false
     }
 
@@ -38,7 +36,7 @@ boolean call(Map jobConfigs) {
 
     // This will copy all files packaged in STASH_NAME to agent workspace root directory.
     // To copy to another agent directory, see [https://github.com/jenkinsci/pipeline-examples]
-    log.info("${logPrefix} started")
+    log.info("started")
 
     boolean result = false
     List paramList=[]
@@ -52,17 +50,17 @@ boolean call(Map jobConfigs) {
             paramList.add([$class: 'StringParameterValue', name: key, value: value])
         }
     }
-    log.info("${logPrefix} paramList=${JsonUtils.printToJsonString(paramList)}")
+    log.info("paramList=${JsonUtils.printToJsonString(paramList)}")
 
     try {
-        log.info("${logPrefix} starting job ${jobConfigs.jobFolder}")
+        log.info("starting job ${jobConfigs.jobFolder}")
 //        build job: jobConfigs.job, parameters: paramList, wait: jobConfigs.wait, propagate: !jobConfigs.continueIfFailed
 
         // ref: http://jenkins-ci.361315.n4.nabble.com/How-to-get-build-results-from-a-build-job-in-a-pipeline-td4897887.html
         def jobBuild = build job: jobFolder, parameters: paramList, wait: jobConfigs.wait, propagate: false
         def jobResult = jobBuild.getResult()
 
-        log.info("${logPrefix} Build returned result: ${jobResult}")
+        log.info("Build returned result: ${jobResult}")
 
         if (jobResult != 'SUCCESS') {
             result = false
@@ -75,7 +73,7 @@ boolean call(Map jobConfigs) {
             result = true
         }
     } catch (Exception err) {
-        log.error("${logPrefix} job exception occurred [${err}]")
+        log.error("job exception occurred [${err}]")
         result = false
         if (jobConfigs.failFast) {
             currentBuild.result = 'FAILURE'
@@ -87,7 +85,7 @@ boolean call(Map jobConfigs) {
         }
     }
 
-    log.info("${logPrefix} finished with result = ${result}")
+    log.info("finished with result = ${result}")
 
     return result
 }

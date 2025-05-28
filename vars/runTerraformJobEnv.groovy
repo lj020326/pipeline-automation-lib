@@ -11,9 +11,7 @@ def call(Map inConfig=[:]) {
 //     Logger.init(this, LogLevel.INFO)
     Logger log = new Logger(this, LogLevel.INFO)
 
-    String logPrefix="runTerraformJob():"
-
-    log.info("${logPrefix} Loading Default Configs")
+    log.info("Loading Default Configs")
 
     List paramList = [
         booleanParam(name: 'ACTION_PLAN', defaultValue: true, description: 'Run terraform plan action'),
@@ -31,7 +29,7 @@ def call(Map inConfig=[:]) {
     Map config = MapMerge.merge(inConfig, params)
 
     List jobParts = JOB_NAME.split("/")
-    log.info("${logPrefix} jobParts=${jobParts}")
+    log.info("jobParts=${jobParts}")
 
     config.jobBaseFolderLevel = config.jobBaseFolderLevel ?: 3
 
@@ -40,7 +38,7 @@ def call(Map inConfig=[:]) {
 
     config.environment=jobParts[config.jobBaseFolderLevel].toUpperCase()
 
-    log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.info("config=${JsonUtils.printToJsonString(config)}")
 
     runTerraform(config)
 }

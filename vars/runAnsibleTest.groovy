@@ -179,12 +179,11 @@ static Result getResultFromException(Throwable e) {
 
 //@NonCPS
 Map loadPipelineConfig(Map params) {
-    String logPrefix="loadPipelineConfig():"
     Map config = [:]
 
     // copy immutable params maps to mutable config map
     params.each { key, value ->
-        log.debug("${logPrefix} params[${key}]=${value}")
+        log.debug("params[${key}]=${value}")
         key=Utilities.decapitalize(key)
         if (value!="") {
             config[key]=value
@@ -257,8 +256,8 @@ Map loadPipelineConfig(Map params) {
     
     config.collectionDir=config.get('collectionDir', 'ansible_collections')
 
-    log.debug("${logPrefix} params=${params}")
-    log.debug("${logPrefix} config=${config}")
+    log.debug("params=${params}")
+    log.debug("config=${config}")
 
     return config
 }

@@ -10,8 +10,6 @@ def call(Map config=[:]) {
 
     Logger log = new Logger(this, LogLevel.INFO)
 
-    String logPrefix="resetSshHostKeys():"
-
     List paramList = []
 
     Map paramMap = [
@@ -42,21 +40,21 @@ def call(Map config=[:]) {
             stage('reset SSH host keys') {
                 steps {
                     script {
-                        log.info("${logPrefix} Display env info")
+                        log.info("Display env info")
                         sh "export -p | sed 's/declare -x //'"
-                        log.info("${logPrefix} Resetting SSH host keys")
-                        log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+                        log.info("Resetting SSH host keys")
+                        log.info("config=${JsonUtils.printToJsonString(config)}")
                         List sshHostList = config.sshHosts.split(',')
-                        log.info("${logPrefix} sshHostList=${JsonUtils.printToJsonString(sshHostList)}")
+                        log.info("sshHostList=${JsonUtils.printToJsonString(sshHostList)}")
                         sshHostList.each { String sshHost ->
                             sh "mkdir -p ~/.ssh && chmod 700 ~/.ssh"
-                            log.info("${logPrefix} clear existing ssh host key for ${sshHost}")
+                            log.info("clear existing ssh host key for ${sshHost}")
                             sh "ssh-keygen -R ${sshHost} || true"
-                            log.info("${logPrefix} scanning new ssh host key for ${sshHost}")
+                            log.info("scanning new ssh host key for ${sshHost}")
                             sh "ssh-keyscan -t rsa ${sshHost} >> ~/.ssh/known_hosts"
-                            log.info("${logPrefix} Finished resetting host key for ${sshHost}")
+                            log.info("Finished resetting host key for ${sshHost}")
                         }
-                        log.info("${logPrefix} Finished resetting host keys")
+                        log.info("Finished resetting host keys")
                     }
                 }
             }

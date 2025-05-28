@@ -165,12 +165,11 @@ def call(Map params=[:]) {
 
 //@NonCPS
 Map loadPipelineConfig(Map params) {
-    String logPrefix="loadPipelineConfig():"
     Map config = [:]
 
     // copy immutable params maps to mutable config map
     params.each { key, value ->
-        log.debug("${logPrefix} params[${key}]=${value}")
+        log.debug("params[${key}]=${value}")
 //        key= Utilities.decapitalize(key)
         if (value!="") {
             config[key]=value
@@ -181,10 +180,10 @@ Map loadPipelineConfig(Map params) {
 
     log.setLevel(config.logLevel)
 
-    log.info("${logPrefix} log.level=${log.level}")
+    log.info("log.level=${log.level}")
 
-    log.info("${logPrefix} params=${JsonUtils.printToJsonString(params)}")
-    log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.info("params=${JsonUtils.printToJsonString(params)}")
+    log.info("config=${JsonUtils.printToJsonString(config)}")
 
     return config
 }
