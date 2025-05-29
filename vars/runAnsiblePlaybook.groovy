@@ -191,9 +191,9 @@ def call(Map params=[:]) {
 
                                     if (config.isTestPipeline) {
                                         if (fileExists(config.testComponentDir)) {
-    //                                         sh "tree ${config.testBasePath}/"
-    //                                          archiveArtifacts allowEmptyArchive: true, artifacts: "${config.testBaseDir}/**"
-    //                                         sh "tree ${config.testComponentDir}/"
+//                                             sh "tree ${config.testBasePath}/"
+//                                              archiveArtifacts allowEmptyArchive: true, artifacts: "${config.testBaseDir}/**"
+//                                             sh "tree ${config.testComponentDir}/"
                                             archiveArtifacts allowEmptyArchive: true, artifacts: "${config.testComponentDir}/**"
                                             publishHTML([allowMissing         : true,
                                                          alwaysLinkToLastBuild: true,
