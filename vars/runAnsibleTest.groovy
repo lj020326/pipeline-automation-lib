@@ -16,9 +16,6 @@ import groovy.transform.Field
 
 def call(Map params=[:]) {
 
-//     Logger log = new Logger(this, LogLevel.INFO)
-// //     log.setLevel(LogLevel.DEBUG)
-
     Map config=loadPipelineConfig(params)
     String agentLabel = getJenkinsAgentLabel(config.jenkinsNodeLabel)
 //     def agentLabel = getJenkinsAgentLabel(config.jenkinsNodeLabel)

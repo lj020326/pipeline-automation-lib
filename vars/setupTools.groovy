@@ -3,6 +3,11 @@ import com.dettonville.api.pipeline.model.Tool
 import com.dettonville.api.pipeline.utils.ConfigConstants
 import com.dettonville.api.pipeline.utils.logging.Logger
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+//@Field Logger log = new Logger(this, LogLevel.INFO)
+@Field Logger log = new Logger(this)
+
 /**
  * Main function to setup tools. Takes a list of
  *
@@ -13,7 +18,6 @@ import com.dettonville.api.pipeline.utils.logging.Logger
  * @param config The config containing the tools to be setup inside tools node
  */
 void call(Map config) {
-    Logger log = new Logger(this)
     List<Map> toolsConfig = (List<Map>) config[ConfigConstants.TOOLS] ? config[ConfigConstants.TOOLS] : []
 
     for (Map toolConfig in toolsConfig) {

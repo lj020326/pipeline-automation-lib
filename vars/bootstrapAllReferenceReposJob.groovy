@@ -14,9 +14,6 @@ import groovy.transform.Field
 
 def call() {
 
-//     Logger.init(this, LogLevel.INFO)
-//     Logger log = new Logger(this)
-
     String jobFolder = "${JOB_NAME.substring(0, JOB_NAME.lastIndexOf("/"))}"
     log.info("jobFolder=${jobFolder}")
 

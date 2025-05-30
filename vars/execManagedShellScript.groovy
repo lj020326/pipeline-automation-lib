@@ -3,6 +3,11 @@ import com.dettonville.api.pipeline.shell.CommandBuilderImpl
 import com.dettonville.api.pipeline.utils.logging.Logger
 import org.jenkinsci.plugins.workflow.cps.DSL
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+//@Field Logger log = new Logger(this, LogLevel.INFO)
+@Field Logger log = new Logger(this)
+
 /**
  * Adapter when called with list of arguments
  *
@@ -25,7 +30,6 @@ String call(String fileId, List<String> args) {
  * @deprecated
  */
 String call(String fileId, String argLine) {
-    Logger log = new Logger(this)
     log.info("Executing managed script with id: '$fileId' and argLine: '$argLine'")
     log.deprecated('execManagedShellScript', 'managedScripts.execJenkinsShellScript')
 

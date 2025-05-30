@@ -19,7 +19,6 @@ import groovy.transform.Field
  * @return stdout, status code or sh step result, depending on the selection
  */
 Object execJenkinsShellScript(String scriptId, CommandBuilder commandBuilder = null, returnStdout = false, returnStatus = false) {
-//   Logger log = new Logger('execJenkinsShellScript')
   log.debug("scriptId", scriptId)
   String tmpScriptPath = '.jenkinsShellScript_' + scriptId
 

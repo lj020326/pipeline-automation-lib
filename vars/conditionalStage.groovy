@@ -3,6 +3,11 @@ import com.dettonville.api.pipeline.utils.logging.Logger
 import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
 import org.jenkinsci.plugins.scriptsecurity.sandbox.RejectedAccessException
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+//@Field Logger log = new Logger(this, LogLevel.INFO)
+@Field Logger log = new Logger(this)
+
 /**
  * Conditionally executes a stage and marks it as skipped if supported
  *
@@ -12,7 +17,6 @@ import org.jenkinsci.plugins.scriptsecurity.sandbox.RejectedAccessException
  * @param body The stage body
  */
 void call(String stageName, Boolean condition, Boolean throwException = true, Closure body) {
-  Logger log = new Logger("conditionalStage")
   stage(stageName) {
     def config = [:]
     body.resolveStrategy = Closure.OWNER_FIRST

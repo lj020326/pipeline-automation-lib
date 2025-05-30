@@ -2,6 +2,11 @@
 import com.dettonville.api.pipeline.utils.IntegrationTestHelper
 import com.dettonville.api.pipeline.utils.logging.Logger
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+//@Field Logger log = new Logger(this, LogLevel.INFO)
+@Field Logger log = new Logger(this)
+
 /**
  * Assert utitlity function
  *
@@ -20,7 +25,6 @@ void assertEquals(expected, actual) {
  * @param results The test results as map
  */
 void logTestResults(Map results) {
-    Logger log = new Logger(this)
     List lines = []
     String separator = "##############################################################"
 

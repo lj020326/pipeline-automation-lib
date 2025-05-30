@@ -3,6 +3,10 @@ import com.dettonville.api.pipeline.environment.EnvironmentConstants
 import com.dettonville.api.pipeline.utils.ConfigConstants
 import com.dettonville.api.pipeline.utils.logging.Logger
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+@Field Logger log = new Logger(this, LogLevel.INFO)
+
 /**
  * Utility step to retrieve scm url when checkout was done via default scm variable (e.g. checkout scm)
  *
@@ -10,7 +14,6 @@ import com.dettonville.api.pipeline.utils.logging.Logger
  */
 void call(Map config = [:]) {
     // set default versions
-    Logger log = new Logger(this)
     Map scmConfig = config[ConfigConstants.SCM] ?: [:]
     String scmUrl = scmConfig[ConfigConstants.SCM_URL] ?: null
     if (!scmUrl) {

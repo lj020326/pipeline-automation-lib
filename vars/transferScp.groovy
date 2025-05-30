@@ -12,6 +12,11 @@ import org.jenkinsci.plugins.workflow.cps.DSL
 
 import static com.dettonville.api.pipeline.utils.ConfigConstants.SCP
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+//@Field Logger log = new Logger(this, LogLevel.INFO)
+@Field Logger log = new Logger(this)
+
 /**
  * Utility step to transfer files via scp.
  * This step uses the sshAgentWrapper for ssh credential auto lookup
@@ -20,7 +25,6 @@ import static com.dettonville.api.pipeline.utils.ConfigConstants.SCP
  */
 void call(Map config = null) {
     config = config ?: [:]
-    Logger log = new Logger(this)
 
     // retrieve the configuration and set defaults
     Map scpConfig = (Map) config[SCP] ?: [:]

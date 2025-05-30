@@ -7,6 +7,11 @@ import com.dettonville.api.pipeline.utils.logging.Logger
 
 import java.util.regex.Matcher
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+//@Field Logger log = new Logger(this, LogLevel.INFO)
+@Field Logger log = new Logger(this)
+
 /**
  * Mirrors a GIT repository from src to remote.
  * This step only supports SSH connections.
@@ -17,7 +22,6 @@ import java.util.regex.Matcher
  * @param targetCredentialIds List of credential ids for the ssh agent during push (optional)
  */
 void mirrorRepository(String srcUrl, String targetUrl, List<String> srcCredentialIds = null, List<String> targetCredentialIds = null) {
-  Logger log = new Logger("mirrorRepository")
   log.info("Mirror repo from '$srcUrl' to '$targetUrl'")
   GitRepository srcRepo = new GitRepository(this, srcUrl)
   GitRepository targetRepo = new GitRepository(this, targetUrl)
@@ -95,7 +99,6 @@ void mirrorRepositoryToWorkspace(GitRepository srcRepo, List<String> srcCredenti
  * @param targetCredentialIds List of credential ids for the ssh agent during push (optional)
  */
 void mirrorRepositoryToRemote(String srcRepoPath, GitRepository targetRepo, List<String> targetCredentialIds = null) {
-  Logger log = new Logger("mirrorRepositoryToRemote")
   if (!targetRepo.isValid()) {
     log.fatal("The provided target repository is invalid!")
     error("The provided target repository is invalid!")

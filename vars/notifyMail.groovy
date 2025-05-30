@@ -4,6 +4,11 @@ import com.dettonville.api.pipeline.utils.logging.Logger
 
 import static com.dettonville.api.pipeline.utils.ConfigConstants.*
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+//@Field Logger log = new Logger(this, LogLevel.INFO)
+@Field Logger log = new Logger(this)
+
 /**
  * Used to send notifications at the end of a build.
  * This step brings back the "still failing", "still unstable" and "fixed"
@@ -13,7 +18,6 @@ import static com.dettonville.api.pipeline.utils.ConfigConstants.*
  * @see <a href="https://jenkins.io/doc/pipeline/steps/email-ext/">email-ext step</href>
  */
 void call(Map config = [:]) {
-    Logger log = new Logger(this)
     // retrieve the configuration and set defaults
     Map notifyConfig = (Map) config[NOTIFY] ?: [:]
 

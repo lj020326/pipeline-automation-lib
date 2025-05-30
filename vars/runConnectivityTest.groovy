@@ -16,9 +16,6 @@ import groovy.transform.Field
 // https://support.cloudbees.com/hc/en-us/articles/217309497-Test-a-SSL-connection-from-Jenkins
 def call(Map params=[:]) {
 
-//    Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this, LogLevel.INFO)
-
     log.info("Loading Default Configs")
     Map config=loadPipelineConfig(params)
 

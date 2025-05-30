@@ -36,11 +36,6 @@ class Logger implements Serializable {
   private static final long serialVersionUID = 1L
 
   /**
-   * Flag set when logger debugging is enabled
-   */
-  private static Boolean enableDebug = false
-
-  /**
    * Reference to the dsl/script object
    */
   static DSL dsl
@@ -187,9 +182,9 @@ class Logger implements Serializable {
    */
   @NonCPS
   static void init(Object logScope) {
-//     if (Logger.initialized == true) {
-//       return
-//     }
+    if (Logger.initialized == true) {
+      return
+    }
     if (logScope instanceof Script) {
         this.script = logScope
         this.dsl = (DSL) logScope.steps
@@ -259,22 +254,6 @@ class Logger implements Serializable {
   }
 
   /**
-   * Enable logger debugging
-   */
-  @NonCPS
-  static void enableDebug() {
-    this.enableDebug = true
-  }
-
-  /**
-   * Disable logger debugging
-   */
-  @NonCPS
-  static void disableDebug() {
-    this.enableDebug = false
-  }
-
-  /**
    * Set logger level with loglevel
    *
    * @param logLvl The log level to use during execution of the pipeline script
@@ -307,21 +286,6 @@ class Logger implements Serializable {
   static void setLevel(Integer iLevel) {
     if (iLevel == null) iLevel = LogLevel.INFO.getLevel()
     setLevel(LogLevel.fromInteger(iLevel))
-  }
-
-  /**
-   * Logs messages for debugging the Logger
-   *
-   * @param message The message to be logged
-   * @param object The object to be dumped
-   */
-  @NonCPS
-  private static void loggerDebug(String message) {
-    if (this.enableDebug) {
-        if (this.dsl) {
-            this.dsl.echo("Logger[DEBUG]: " + message)
-        }
-    }
   }
 
   /**
@@ -504,7 +468,7 @@ class Logger implements Serializable {
     if (doLog(logLevel)) {
       String msg = "${scopeName} : ${message}"
       String functionName = getEnclosingFunctionName()
-      loggerDebug("*** functionName="+functionName)
+//       dsl.echo("*** functionName="+functionName)
 
       if (functionName != null) {
         msg = "${scopeName}.${functionName}(): ${message}"
@@ -530,7 +494,10 @@ class Logger implements Serializable {
     }
 
     lvlString = wrapColor(logLevel.getColorCode(), lvlString)
-    this.dsl.echo("$lvlString $msg")
+
+    if (dsl != null) {
+      dsl.echo("$lvlString $msg")
+    }
   }
 
   /**
@@ -603,38 +570,33 @@ class Logger implements Serializable {
           StackTraceElement ste = stackTrace[enclosingFunctionStackTraceFrameLevel]
           String className = ste.getClassName()
           methodName = ste.getMethodName()
-          loggerDebug("*** Enclosing className="+className)
-          loggerDebug("*** *Enclosing methodName="+methodName)
+//           methodName = ste.methodName
+          dsl.echo("*** Enclosing className="+className)
+          dsl.echo("*** *Enclosing methodName="+methodName)
           if (className != null) {
               try {
                   // ref: https://stackoverflow.com/a/54521730
                   String simpleClassName = Class.forName(className).getSimpleName();
-                  loggerDebug("*** Enclosing simpleClassName="+simpleClassName)
-                  if (!simpleClassName.equals(this.scopeName)) {
-                      methodName = simpleClassName + "." + methodName
-                  }
+                  dsl.echo("*** Enclosing simpleClassName="+simpleClassName)
+                  methodName = simpleClassName + "." + methodName
               } catch (java.lang.ClassNotFoundException ex) {
-                  if (!className.equals(this.scopeName)) {
-                      methodName = className + "." + methodName
-                  }
+                  methodName = className + "." + methodName
               }
           }
       }
-      loggerDebug("*** Enclosing methodName="+methodName)
+      dsl.echo("*** Enclosing methodName="+methodName)
       return methodName
   }
 
   // Returns the name of the invoking method (the caller of this method)
   public static String getEnclosingFunctionName1() {
-      String className = null
-      String methodName = null
       def marker = new Throwable()
       StackTraceElement[] stackTrace = StackTraceUtils.sanitize(marker).stackTrace
 
       boolean foundLogger = false
 
       for (StackTraceElement element : stackTrace) {
-          className = element.getClassName()
+          String className = element.getClassName()
           // Skip internal Groovy/Jenkins frames
           // First match is the logger itself, so skip it
 //               if (!foundLogger && className == Logger.class.getName()) {
@@ -644,20 +606,17 @@ class Logger implements Serializable {
           }
           // The next match is the true invoker
           if (foundLogger) {
-              methodName = element.getMethodName()
+              // Optionally log for debugging
+              dsl.echo("*** Enclosing className="+className)
+              dsl.echo("*** *Enclosing methodName="+methodName)
+              return element.getMethodName()
           }
       }
-      // Optionally log for debugging
-      loggerDebug("*** Enclosing className="+className)
-      loggerDebug("*** Enclosing methodName="+methodName)
-      return methodName
+      return null
   }
 
   // Returns the name of the invoking method (the caller of this method)
   public static String getEnclosingFunctionName2() {
-      String className = null
-      String methodName = null
-
 //       StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
       def marker = new Throwable()
       StackTraceElement[] stackTrace = StackTraceUtils.sanitize(marker).stackTrace
@@ -665,7 +624,7 @@ class Logger implements Serializable {
       boolean foundLogger = false
 
       for (StackTraceElement element : stackTrace) {
-          className = element.getClassName()
+          String className = element.getClassName()
           // Skip internal Groovy/Jenkins frames
           if (
               !className.startsWith("java.") &&
@@ -687,13 +646,13 @@ class Logger implements Serializable {
               }
               // The next match is the true invoker
               if (foundLogger) {
-                  methodName = element.getMethodName()
+                  // Optionally log for debugging
+//                   dsl.echo("Enclosing className="+className)
+//                   dsl.echo("Enclosing methodName="+element.getMethodName())
+                  return element.getMethodName()
               }
           }
       }
-      // Optionally log for debugging
-      loggerDebug("*** Enclosing className="+className)
-      loggerDebug("*** *Enclosing methodName="+methodName)
       return null
   }
 
@@ -701,7 +660,7 @@ class Logger implements Serializable {
   public static String getEnclosingFunctionName3() {
 
     String methodName = new Object(){}.getClass().getEnclosingMethod().getName()
-    loggerDebug("*** Enclosing methodName="+methodName)
+//     dsl.echo("methodName="+methodName)
 
     return methodName
   }
@@ -733,7 +692,7 @@ class Logger implements Serializable {
     } catch (RejectedAccessException e) {
         // do nothing
     }
-    loggerDebug("* Enclosing className="+className)
+    dsl.echo("*Enclosing className="+className)
 
     return className
   }

@@ -12,9 +12,6 @@ import groovy.transform.Field
 
 def call(Map config=[:]) {
 
-//     Logger.init(this, LogLevel.INFO)
-//     Logger log = new Logger(this)
-
     List paramList = []
 
     Map paramMap = [

@@ -6,13 +6,17 @@ import org.jenkinsci.plugins.scriptsecurity.sandbox.RejectedAccessException
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+//@Field Logger log = new Logger(this, LogLevel.INFO)
+@Field Logger log = new Logger(this)
+
 /**
  * This step brings back the GIT_BRANCH variable by trying several methods to determine the current git branch.
  * The most reliably way is configure the scm checkout to use the "LocalBranch" extension so the step will be able to
  * read it via shell command.
  */
 String call() {
-    Logger log = new Logger(this)
 
     String result = null
 

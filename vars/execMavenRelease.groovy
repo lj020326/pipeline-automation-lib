@@ -8,6 +8,11 @@ import org.apache.maven.model.Plugin
 
 import static com.dettonville.api.pipeline.utils.ConfigConstants.*
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+//@Field Logger log = new Logger(this, LogLevel.INFO)
+@Field Logger log = new Logger(this)
+
 /**
  * Utility step for performing a release with maven
  * This step implements
@@ -19,7 +24,6 @@ import static com.dettonville.api.pipeline.utils.ConfigConstants.*
  */
 void call(Map config = null) {
     config = config ?: [:]
-    Logger log = new Logger(this)
 
     // retrieve the configuration and set defaults
     Map defaultConfig = [

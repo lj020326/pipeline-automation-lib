@@ -10,9 +10,6 @@ import groovy.transform.Field
 @Field Logger log = new Logger(this, LogLevel.INFO)
 
 def call(Map params=[:]) {
-
-//     Logger.init(this, LogLevel.INFO)
-//     Logger log = new Logger(this, LogLevel.INFO)
     AcceptanceTestHarness ath = new AcceptanceTestHarness(this)
 
     pipeline {

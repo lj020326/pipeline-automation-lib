@@ -8,6 +8,11 @@ import com.dettonville.api.pipeline.utils.resources.JsonLibraryResource
 import net.sf.json.JSON
 import org.jenkinsci.plugins.workflow.cps.DSL
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+//@Field Logger log = new Logger(this, LogLevel.INFO)
+@Field Logger log = new Logger(this)
+
 /**
  * Tries to retrieve credentials for the given host by using configurations provided in
  * resources/credentials/http/credentials.json
@@ -20,7 +25,6 @@ import org.jenkinsci.plugins.workflow.cps.DSL
  * @see com.dettonville.api.pipeline.credentials.CredentialConstants
  */
 Credential lookupHttpCredential(String uri) {
-  Logger log = new Logger("lookupHttpCredential")
   // load the json
   JsonLibraryResource jsonRes = new JsonLibraryResource((DSL) this.steps, CredentialConstants.HTTP_CREDENTIALS_PATH)
   try {
@@ -78,7 +82,6 @@ Credential lookupScmCredential(String uri) {
  * @see com.dettonville.api.pipeline.credentials.CredentialConstants
  */
 Credential lookupSshCredential(String uri) {
-  Logger log = new Logger("lookupSshCredential")
   // load the json
   JsonLibraryResource jsonRes = new JsonLibraryResource((DSL) this.steps, CredentialConstants.SSH_CREDENTIALS_PATH)
   try {

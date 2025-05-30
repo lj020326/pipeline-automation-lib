@@ -8,6 +8,10 @@ import com.dettonville.api.pipeline.utils.maps.MapUtils
 
 import static com.dettonville.api.pipeline.utils.ConfigConstants.*
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+@Field Logger log = new Logger(this, LogLevel.INFO)
+
 /**
  * Executes a ansible playbook with the given configuration.
  * Please refer to the documentation for details about the configuration options
@@ -15,8 +19,8 @@ import static com.dettonville.api.pipeline.utils.ConfigConstants.*
  * @param config The configuration used to execute the playbook
  */
 void execPlaybook(Map config) {
-    Logger log = new Logger("ansible:execPlaybook -> ")
-//     log.setLevel(LogLevel.TRACE)
+//     Logger log = new Logger("ansible:execPlaybook -> ")
+// //     log.setLevel(LogLevel.TRACE)
 
     Map ansibleCfg = config[ANSIBLE] ?: null
 
@@ -118,7 +122,7 @@ void execPlaybook(Map config) {
  * @see getGalaxyRoleInfo
  */
 void checkoutRequirements(String requirementsYmlPath) {
-    Logger log = new Logger("ansible:checkoutRequirements -> ")
+//     Logger log = new Logger("ansible:checkoutRequirements -> ")
     log.debug("loading yml")
     List ymlContent = readYaml(file: requirementsYmlPath)
     log.debug("create requirements object")
@@ -161,7 +165,7 @@ void checkoutRequirements(String requirementsYmlPath) {
  * @return The API result or null when any error occurred
  */
 Object getGalaxyRoleInfo(Role role) {
-    Logger log = new Logger("ansible:getGalaxyRoleInfo -> ")
+//     Logger log = new Logger("ansible:getGalaxyRoleInfo -> ")
     if (role.isGalaxyRole() == false) {
         log.debug("Role with name: " + role.getName() + " is not a galaxy role")
         return null

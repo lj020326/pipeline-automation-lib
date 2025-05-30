@@ -19,9 +19,6 @@ import groovy.transform.Field
 
 def call(Map params=[:]) {
 
-// //    Logger.init(this, LogLevel.INFO)
-//     Logger log = new Logger(this, LogLevel.INFO)
-
     log.info("Loading Default Configs")
     Map config=loadPipelineConfig(params)
 //     boolean jobResults = true

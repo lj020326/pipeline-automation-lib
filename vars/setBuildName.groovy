@@ -2,12 +2,16 @@
 import com.dettonville.api.pipeline.environment.EnvironmentConstants
 import com.dettonville.api.pipeline.utils.logging.Logger
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+//@Field Logger log = new Logger(this, LogLevel.INFO)
+@Field Logger log = new Logger(this)
+
 /**
  * Sets the build name depending on the availability of the GIT_BRANCH environment variable.
  *
  */
 void call() {
-    Logger log = new Logger(this)
     // set default versions
     String versionNumberString = '#${BUILD_NUMBER}'
     // check if GIT_BRANCH env var is available

@@ -13,12 +13,10 @@ import groovy.json.*
 
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field
-@Field Logger log = new Logger(this, LogLevel.INFO)
+//@Field Logger log = new Logger(this, LogLevel.INFO)
+@Field Logger log = new Logger(this)
 
 def call() {
-
-// //     Logger.init(this, LogLevel.INFO)
-//     Logger log = new Logger(this, LogLevel.INFO)
 
 //     String packerTool = "packer-1.6.2" // Name of Packer Installation
 //     String packerTool = "packer-1.8.6" // Name of Packer Installation
@@ -839,6 +837,7 @@ List getPackerCommandArgList(String packerCommand, Map config) {
 }
 
 void moveTemplate(def dsl, Logger log, Map deployConfig) {
+    String logPrefix="[${deployConfig.vcenter_shortname}]:"
 
     String vm_template_name = deployConfig.vm_template_name
     String vm_template_datastore = deployConfig.vm_template_datastore
@@ -847,12 +846,12 @@ void moveTemplate(def dsl, Logger log, Map deployConfig) {
     String vm_template_host = deployConfig.vm_template_host
     String vcenter_host = deployConfig.vcenter_host
 
-    log.info("vm_template_name=${vm_template_name}")
-    log.info("vm_template_datastore=${vm_template_datastore}")
-    log.info("vm_template_deploy_folder=${vm_template_deploy_folder}")
-    log.info("vm_deploy_folder=${vm_deploy_folder}")
-    log.info("vm_template_host=${vm_template_host}")
-    log.info("vcenter_host=${vcenter_host}")
+    log.info("${logPrefix} vm_template_name=${vm_template_name}")
+    log.info("${logPrefix} vm_template_datastore=${vm_template_datastore}")
+    log.info("${logPrefix} vm_template_deploy_folder=${vm_template_deploy_folder}")
+    log.info("${logPrefix} vm_deploy_folder=${vm_deploy_folder}")
+    log.info("${logPrefix} vm_template_host=${vm_template_host}")
+    log.info("${logPrefix} vcenter_host=${vcenter_host}")
 
     dsl.withEnv(["GOVC_URL=${vcenter_host}"]) {
         dsl.withCredentials(deployConfig.secret_vars) {
@@ -870,22 +869,22 @@ void moveTemplate(def dsl, Logger log, Map deployConfig) {
             dsl.sh "govc datastore.mkdir -p -ds=${vm_template_datastore} ${vm_deploy_folder}"
 
             String targetPath = "[${vm_template_datastore}] ${vm_deploy_folder}"
-            log.info("targetPath='${targetPath}'")
+            log.info("${logPrefix} targetPath='${targetPath}'")
 
             String getVmPathCmd = "govc vm.info -json ${vm_template_name} | jq '.. |.Config?.VmPathName? | select(. != null)'"
             dsl.sh "${getVmPathCmd}"
             String vmPath = dsl.sh(script: "${getVmPathCmd}", returnStdout: true).replaceAll('"',"")
-            log.info("vmPath='${vmPath}'")
+            log.info("${logPrefix} vmPath='${vmPath}'")
 //     //        String vmDatastore = vmPath.split("/")[-1].replaceAll('([|])+','')
 //     //        String vmDatastore = vmPath.split(" ")[-1].replaceAll('([|])+','')
 //             String vmDatastore = vmPath.split(" ")[0].replaceAll('([|])+','')
 //             vmPath = vmPath.substring(0, vmPath.lastIndexOf("/"))
 //             String vmFolder = vmPath.split(" ")[1].split("/${vm_template_name}/")[0]
             String vmFolderPath = vmPath.split("/${vm_template_name}/")[0]
-            log.info("vmFolderPath='${vmFolderPath}'")
+            log.info("${logPrefix} vmFolderPath='${vmFolderPath}'")
 
             if (vmFolderPath != targetPath) {
-                log.info("moving VM from '${vmFolderPath}' to '${targetPath}'")
+                log.info("${logPrefix} moving VM from '${vmFolderPath}' to '${targetPath}'")
                 // ref: https://github.com/vmware/govmomi/blob/main/govc/USAGE.md
                 dsl.sh "govc vm.unregister ${vm_template_name}"
                 dsl.sh "govc datastore.rm -f -ds=${vm_template_datastore} ${vm_deploy_folder}/${vm_template_name}"
@@ -898,7 +897,7 @@ void moveTemplate(def dsl, Logger log, Map deployConfig) {
                     ${vm_deploy_folder}/${vm_template_name}/${vm_template_name}.vmtx
                 """
             }
-            log.info("templates/VMs in [${vm_template_datastore}] ${vm_template_deploy_folder}:")
+            log.info("${logPrefix} templates/VMs in [${vm_template_datastore}] ${vm_template_deploy_folder}:")
             dsl.sh "govc datastore.ls -ds=${vm_template_datastore} ${vm_deploy_folder}"
         }
     }

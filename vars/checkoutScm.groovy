@@ -9,6 +9,11 @@ import com.dettonville.api.pipeline.utils.resources.JsonLibraryResource
 import net.sf.json.JSON
 import org.jenkinsci.plugins.workflow.cps.DSL
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+//@Field Logger log = new Logger(this, LogLevel.INFO)
+@Field Logger log = new Logger(this)
+
 /**
  * Step which takes care about checking out source code from git. Other SCMs are currently not supported.
  *
@@ -28,7 +33,6 @@ import org.jenkinsci.plugins.workflow.cps.DSL
  * @param config configuration object
  */
 def call(Map config) {
-    Logger log = new Logger(this)
 
     // retrieve the configuration
     Map scmCfg = (Map) config[ConfigConstants.SCM] ?: [:]

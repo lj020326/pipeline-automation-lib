@@ -4,13 +4,17 @@ import com.dettonville.api.pipeline.utils.logging.Logger
 
 import static com.dettonville.api.pipeline.utils.ConfigConstants.*
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+//@Field Logger log = new Logger(this, LogLevel.INFO)
+@Field Logger log = new Logger(this)
+
 /**
  * Tries to retrieve the current scm url by using some fallback steps
  *
  * @param config Configuration options for pipeline library
  */
 String call(Map config = [:]) {
-    Logger log = new Logger(this)
     Map scmConfig = (Map) config[SCM] ?: [:]
     // try to retrieve scm url from config constants, otherwise do fallback to SCM_URL environment variable
     String detectedScmUrl = scmConfig[SCM_URL] ?: null

@@ -15,9 +15,6 @@ import groovy.transform.Field
 
 def call(Map params=[:]) {
 
-//     Logger.init(this, LogLevel.INFO)
-//     Logger log = new Logger(this)
-
     Map config = loadPipelineConfig(params)
 
     String baseDir = "/var/jenkins_home/git_repo_references"

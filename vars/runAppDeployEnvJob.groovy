@@ -12,9 +12,6 @@ import groovy.transform.Field
 
 def call(Map inConfig=[:]) {
 
-//     Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this, LogLevel.INFO)
-
     Map config = inConfig.clone()
 
     config.jobMode = config.get('jobMode', true)

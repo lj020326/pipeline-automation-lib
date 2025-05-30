@@ -3,6 +3,11 @@ import com.dettonville.api.pipeline.credentials.Credential
 import com.dettonville.api.pipeline.ssh.SSHTarget
 import com.dettonville.api.pipeline.utils.logging.Logger
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+//@Field Logger log = new Logger(this, LogLevel.INFO)
+@Field Logger log = new Logger(this)
+
 /**
  * Adapter step for one ssh target without credential aware parameter
  *
@@ -31,7 +36,6 @@ void call(SSHTarget sshTarget, Closure body) {
  * @param body the closure to execute inside the wrapper
  */
 void call(List<SSHTarget> sshTargets, Closure body) {
-    Logger log = new Logger(this)
 
     Map foundCredentials = [:]
     for (int i = 0; i < sshTargets.size(); i++) {
