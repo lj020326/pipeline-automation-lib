@@ -1,4 +1,10 @@
+import com.dettonville.api.pipeline.utils.logging.LogLevel
+import com.dettonville.api.pipeline.utils.logging.Logger
 import com.dettonville.api.pipeline.utils.JsonUtils
+
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+@Field Logger log = new Logger(this, LogLevel.INFO)
 
 /**
  * Sends an email to culprits, developers who made changes in the build, and the user who initiated the build.
@@ -9,11 +15,10 @@ import com.dettonville.api.pipeline.utils.JsonUtils
  * ref: https://docs.groovy-lang.org/latest/html/documentation/#_mixing_named_and_positional_parameters
  */
 void call(Map args=[:], java.lang.Object currentBuild, java.lang.Object env) {
-    String logPrefix="sendEmail():"
 
     // ref: https://stackoverflow.com/a/46512017/2791368
     List emailAdditionalDistList = args.get('emailAdditionalDistList', [])
-    echo("${logPrefix} emailAdditionalDistList=${JsonUtils.printToJsonString(emailAdditionalDistList)}")
+    log.info("emailAdditionalDistList=${JsonUtils.printToJsonString(emailAdditionalDistList)}")
 
     List recipientProvidersDefault = [
         [$class: 'CulpritsRecipientProvider'],
@@ -27,11 +32,11 @@ void call(Map args=[:], java.lang.Object currentBuild, java.lang.Object env) {
 
     List recipientProviders = args.get('recipientProviders', recipientProvidersDefault)
 
-    echo("${logPrefix} recipientProviders=${JsonUtils.printToJsonString(recipientProviders)}")
+    log.info("recipientProviders=${JsonUtils.printToJsonString(recipientProviders)}")
 
     String emailSubject = "Job '${env.JOB_NAME.replaceAll('%2F', '/')}' (${currentBuild.displayName}) has finished with ${currentBuild.result ? currentBuild.result : "SUCCESS"}"
     String recipients = emailAdditionalDistList.join(', ')
-    echo("${logPrefix} recipients=${recipients}")
+    log.info("recipients=${recipients}")
 
     emailext (
         mimeType: 'text/html',

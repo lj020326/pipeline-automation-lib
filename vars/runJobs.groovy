@@ -13,9 +13,6 @@ import groovy.transform.Field
 
 def call(Map params=[:]) {
 
-// //     Logger.init(this, LogLevel.INFO)
-//     Logger log = new Logger(this, LogLevel.INFO)
-
     log.info("Loading Default Configs")
     Map config = loadPipelineConfig(params)
 
@@ -137,7 +134,7 @@ def getYamlInt(Map config, String key) {
 
 //@NonCPS
 Map loadPipelineConfig(Map params, String configFile=null) {
-    String logPrefix="loadPipelineConfig():"
+
     Map config = [:]
     config.supportedJobParams=['changedEmailList','alwaysEmailList','failedEmailList']
     config.gitBranch = env.GIT_BRANCH
@@ -148,14 +145,14 @@ Map loadPipelineConfig(Map params, String configFile=null) {
         config = MapMerge.merge(configSettings.pipeline, config)
     }
     else if (configFile != null) {
-        log.info("${logPrefix} pipeline config file ${configFile} not present, using defaults...")
+        log.info("pipeline config file ${configFile} not present, using defaults...")
     } else {
-        log.info("${logPrefix} pipeline config file not specified, using defaults...")
+        log.info("pipeline config file not specified, using defaults...")
     }
 
     // copy immutable params maps to mutable config map
     params.each { key, value ->
-        log.debug("${logPrefix} params[${key}]=${value}")
+        log.debug("params[${key}]=${value}")
         key=decapitalize(key)
         if (value!="") {
             config[key]=value
@@ -168,6 +165,7 @@ Map loadPipelineConfig(Map params, String configFile=null) {
     config.continueIfFailed = config.get('continueIfFailed', false)
     config.wait = config.get('wait', true)
     config.failFast = config.get('failFast', false)
+    config.propagate = config.get('propagate', config.failFast)
 
     config.stage = config.get('stage', 'runJobs-stage')
 
@@ -176,23 +174,22 @@ Map loadPipelineConfig(Map params, String configFile=null) {
     if (config.debugPipeline) {
         log.setLevel(LogLevel.DEBUG)
     }
-    log.info("${logPrefix} log.level=${log.level}")
+    log.info("log.level=${log.level}")
 
-    log.debug("${logPrefix} params=${JsonUtils.printToJsonString(params)}")
-    log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.debug("params=${JsonUtils.printToJsonString(params)}")
+    log.info("config=${JsonUtils.printToJsonString(config)}")
 
     return config
 }
 
 Map loadJobConfigFile(Map baseConfig) {
-    String logPrefix="loadJobConfigFile():"
 
     Map jobConfigFileMap = readYaml file: config.ansiblePipelineConfigFile
-    log.debug("${logPrefix} jobConfigFileMap=${JsonUtils.printToJsonString(jobConfigFileMap)}")
+    log.debug("jobConfigFileMap=${JsonUtils.printToJsonString(jobConfigFileMap)}")
 
     Map config = MapMerge.merge(baseConfig, jobConfigFileMap)
 
-    log.info("${logPrefix} Merged config=${JsonUtils.printToJsonString(config)}")
+    log.info("Merged config=${JsonUtils.printToJsonString(config)}")
     return config
 }
 
@@ -211,7 +208,7 @@ String createJobId(Map config, i) {
 }
 
 Map runJobStage(Map stageConfig) {
-    String logPrefix="runJobStage(${stageConfig.stage}):"
+    String logPrefix="[${stageConfig.stage}]:"
 
     Map jobResults = [:]
     boolean result = false
@@ -247,9 +244,8 @@ Map runJobStage(Map stageConfig) {
 
 boolean runJobList(Map baseJobConfigs) {
 
-    String logPrefix="runJobList():"
-    log.info("${logPrefix} started")
-    log.debug("${logPrefix} baseJobConfigs=${JsonUtils.printToJsonString(baseJobConfigs)}")
+    log.info("started")
+    log.debug("baseJobConfigs=${JsonUtils.printToJsonString(baseJobConfigs)}")
 
     List jobList = []
     if (baseJobConfigs?.jobList) {
@@ -259,7 +255,7 @@ boolean runJobList(Map baseJobConfigs) {
     }
 
     if (jobList.size()==0) {
-        log.error("${logPrefix} no jobs specified")
+        log.error("no jobs specified")
         return false
     }
 
@@ -268,13 +264,13 @@ boolean runJobList(Map baseJobConfigs) {
 
     jobList.eachWithIndex { jobConfigsRaw, i ->
 
-        log.info("${logPrefix} i=${i} jobConfigsRaw=${JsonUtils.printToJsonString(jobConfigsRaw)}")
+        log.info("i=${i} jobConfigsRaw=${JsonUtils.printToJsonString(jobConfigsRaw)}")
 
         // job configs overlay parent settings
         Map jobConfigs = baseJobConfigs.findAll { !["jobList","jobs","stage"].contains(it.key) } + jobConfigsRaw
         jobConfigs.jobId = createJobId(baseJobConfigs, i)
 
-        log.info("${logPrefix} i=${i} jobConfigs=${JsonUtils.printToJsonString(jobConfigs)}")
+        log.info("i=${i} jobConfigs=${JsonUtils.printToJsonString(jobConfigs)}")
 
         if (jobConfigs?.stage) {
             runJobStage(jobConfigs)
@@ -284,8 +280,8 @@ boolean runJobList(Map baseJobConfigs) {
             }
         }
 
-        if (jobConfigs?.jobFolder || jobConfigs?.job) {
-            log.debug("${logPrefix} i=${i} jobConfigs=${JsonUtils.printToJsonString(jobConfigs)}")
+        if (jobConfigs?.jobFolder || jobConfigs?.jobName) {
+            log.debug("i=${i} jobConfigs=${JsonUtils.printToJsonString(jobConfigs)}")
 
             if (jobConfigs?.runInParallel) {
                 parallelJobs["split-${jobConfigs.jobId}"] = {
@@ -296,7 +292,7 @@ boolean runJobList(Map baseJobConfigs) {
             }
         } else {
             jobResults.add(false)
-            log.error("${logPrefix} job not specified")
+            log.error("job not specified")
 //            return result
         }
 
@@ -305,24 +301,28 @@ boolean runJobList(Map baseJobConfigs) {
         boolean result = (jobResults.size()>0) ? jobResults.inject { a, b -> a && b } : true
         if (!jobConfigs.continueIfFailed && jobResults.size()>0 && !result) {
             currentBuild.result = 'FAILURE'
-            log.info("${logPrefix} i=${i} continueIfFailed is false and results failed - not running any more jobs")
+            log.info("i=${i} continueIfFailed is false and results failed - not running any more jobs")
 //            return result
         }
 
     }
 
     if (parallelJobs.size()>0) {
-        log.info("${logPrefix} parallelJobs=${parallelJobs}")
+        // ref: https://stackoverflow.com/a/56841265
+        if (baseJobConfigs?.failFast) {
+            parallelJobs.failFast = baseJobConfigs.failFast
+        }
+        log.info("parallelJobs=${parallelJobs}")
         parallel parallelJobs
     }
 
     boolean result = (jobResults.size()>0) ? jobResults.inject { a, b -> a && b } : true
     if (!baseJobConfigs.continueIfFailed && jobResults.size()>0 && !result) {
         currentBuild.result = 'FAILURE'
-        log.info("${logPrefix} continueIfFailed is false and results failed - not running any more jobs")
+        log.info("continueIfFailed is false and results failed - not running any more jobs")
     }
 
-    log.info("${logPrefix} finished: result = ${result}")
+    log.info("finished: result = ${result}")
     // ref: https://stackoverflow.com/questions/18380667/join-list-of-boolean-elements-groovy
     //return (false in jobResults) ? false : true
     return result

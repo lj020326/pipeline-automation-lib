@@ -14,27 +14,27 @@ pipeline:
     - testStage: SMOKE
       runInParallel: true
       jobs: 
-#        - job: DCAPI/Acceptance_Test_Jobs/STAGE/SMOKE/Firefox
-        - job: "${jobFolder}/SMOKE/Firefox"
-        - job: "${jobFolder}/SMOKE/Chrome"
-        - job: "${jobFolder}/SMOKE/Safari"
-        - job: "${jobFolder}/SMOKE/Edge"
+#        - jobName: DCAPI/Acceptance_Test_Jobs/STAGE/SMOKE/Firefox
+        - jobName: "${jobFolder}/SMOKE/Firefox"
+        - jobName: "${jobFolder}/SMOKE/Chrome"
+        - jobName: "${jobFolder}/SMOKE/Safari"
+        - jobName: "${jobFolder}/SMOKE/Edge"
       
     - testStage: SANITY
       jobs: 
-#        - job: DCAPI/Acceptance_Test_Jobs/STAGE/SANITY/Firefox
-        - job: "${jobFolder}/SMOKE/Firefox"
-        - job: "${jobFolder}/SMOKE/Chrome"
-        - job: "${jobFolder}/SMOKE/Safari"
-        - job: "${jobFolder}/SMOKE/Edge"
+#        - jobName: DCAPI/Acceptance_Test_Jobs/STAGE/SANITY/Firefox
+        - jobName: "${jobFolder}/SMOKE/Firefox"
+        - jobName: "${jobFolder}/SMOKE/Chrome"
+        - jobName: "${jobFolder}/SMOKE/Safari"
+        - jobName: "${jobFolder}/SMOKE/Edge"
 
     - testStage: REGRESSION
       jobs: 
-#        - job: DCAPI/Acceptance_Test_Jobs/STAGE/REGRESSION/Firefox
-        - job: "${jobFolder}/SMOKE/Firefox"
-        - job: "${jobFolder}/SMOKE/Chrome"
-        - job: "${jobFolder}/SMOKE/Safari"
-        - job: "${jobFolder}/SMOKE/Edge"
+#        - jobName: DCAPI/Acceptance_Test_Jobs/STAGE/REGRESSION/Firefox
+        - jobName: "${jobFolder}/SMOKE/Firefox"
+        - jobName: "${jobFolder}/SMOKE/Chrome"
+        - jobName: "${jobFolder}/SMOKE/Safari"
+        - jobName: "${jobFolder}/SMOKE/Edge"
 '''
 
 Map config = [:]

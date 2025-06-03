@@ -7,6 +7,7 @@ import groovy.json.JsonOutput
 import net.sf.json.JSON
 import net.sf.json.JSONObject
 
+import com.dettonville.api.pipeline.utils.logging.LogLevel
 import com.dettonville.api.pipeline.utils.logging.Logger
 
 //import static groovy.json.JsonOutput.*
@@ -34,8 +35,7 @@ import com.cloudbees.plugins.credentials.Credentials
 class CredentialParser implements Serializable {
 
     private static final long serialVersionUID = 1L
-
-    com.dettonville.api.pipeline.utils.logging.Logger log = new com.dettonville.api.pipeline.utils.logging.Logger(this)
+    Logger log = new Logger(this)
 //    DSL dsl
     def dsl
 
@@ -58,7 +58,6 @@ class CredentialParser implements Serializable {
     @NonCPS
     @SuppressFBWarnings('SE_NO_SERIALVERSIONID')
     List<Credentials> fetch() {
-        String logPrefix="fetch():"
 
         Set<Credentials> allCredentials = new HashSet<Credentials>();
 
@@ -77,7 +76,7 @@ class CredentialParser implements Serializable {
 
         for (c in allCredentials) {
             println(c.id + ": " + c.description)
-            log.info("${logPrefix} ${c.id} : ${c.description}")
+            log.info("${c.id} : ${c.description}")
         }
 
         return allCredentials
@@ -86,12 +85,11 @@ class CredentialParser implements Serializable {
     @NonCPS
     @SuppressFBWarnings('SE_NO_SERIALVERSIONID')
     List<Credentials> parse(JSON jsonContent) {
-        String logPrefix="parse():"
         Credentials credential = null
         List<Credentials> parsedCredentials = []
         // Walk through entries, try to parse them as Credential object and add it to the returned list
         jsonContent.each { JSONObject entry ->
-            log.info("${logPrefix} entry: ", entry)
+            log.info("entry: ", entry)
 //            String comment = entry.comment ?: null
 //            String id = entry.id ?: null
 //            String pattern = entry.pattern ?: null
@@ -109,7 +107,6 @@ class CredentialParser implements Serializable {
     }
 
     List getCredentialIdList(String jsonStr) {
-        String logPrefix = "getCredentialIdList():"
         JSON envConfigs = dsl.readJSON(text: jsonStr)
 
         return getCredentialIdListFromJSON(envConfigs)
@@ -124,16 +121,14 @@ class CredentialParser implements Serializable {
     }
 
     List getCredentialIdListFromJson(def json) {
-        String logPrefix = "getCredentialIdListFromJson():"
-        log.debug("${logPrefix} json=${printToJsonString(json)}")
+        log.debug("json=${printToJsonString(json)}")
 
         return getCredentialIdListFromJson('root', json)
     }
 
 //    List getCredentialIdListFromJson(JSON json) {
     List getCredentialIdListFromJson(String label, def json) {
-        String logPrefix = "getCredentialIdListFromJson(label=${label}):"
-        log.debug("${logPrefix} json=${printToJsonString(json)}")
+        log.debug("json=${printToJsonString(json)}")
 
         List credList = []
         if (json instanceof Map) {
@@ -143,16 +138,15 @@ class CredentialParser implements Serializable {
         } else if (json instanceof String) {
             credList = getCredentialIdListFromString(label, json as String)
         } else {
-            log.error("${logPrefix} type not handled for json=${json}")
+            log.error("type not handled for json=${json}")
         }
         if (!credList.isEmpty()) credList.unique()
-        log.debug("${logPrefix} credList=${credList}")
+        log.debug("credList=${credList}")
         return credList
     }
 
     List getCredentialIdListFromMap(String label, Map map) {
-        String logPrefix = "getCredentialIdListFromMap(label=${label}):"
-        log.debug("${logPrefix} json=${printToJsonString(map)}")
+        log.debug("json=${printToJsonString(map)}")
 
         List credList = []
 
@@ -162,13 +156,12 @@ class CredentialParser implements Serializable {
             if (!results.isEmpty()) credList.addAll(results)
         }
 
-        log.debug("${logPrefix} credList=${credList}")
+        log.debug("credList=${credList}")
         return credList
     }
 
     List getCredentialIdListFromList(String label, List list) {
-        String logPrefix = "getCredentialIdListFromList(label=${label}):"
-        log.debug("${logPrefix} json=${printToJsonString(list)}")
+        log.debug("json=${printToJsonString(list)}")
 
         List credList = []
 
@@ -178,13 +171,12 @@ class CredentialParser implements Serializable {
             if (!results.isEmpty()) credList.addAll(results)
         }
 
-        log.debug("${logPrefix} credList=${credList}")
+        log.debug("credList=${credList}")
         return credList
     }
 
     List getCredentialIdListFromString(String label, String string) {
-        String logPrefix = "getCredentialIdListFromString(label=${label}):"
-        log.debug("${logPrefix} string=${printToJsonString(string)}")
+        log.debug("string=${printToJsonString(string)}")
         List credList = []
 
         def matchStr = '^\\$password\\.'
@@ -192,12 +184,12 @@ class CredentialParser implements Serializable {
         def match = (string =~ matchPattern)
 
         match.each { it ->
-            log.debug("${logPrefix} it=${it}")
+            log.debug("it=${it}")
             String credentialId = it[1]
-            log.debug("${logPrefix} string=${string} credentialId=${credentialId}")
+            log.debug("string=${string} credentialId=${credentialId}")
             credList.add(dsl.string(credentialsId: credentialId, variable: credentialId))
         }
-        log.debug("${logPrefix} credList=${credList}")
+        log.debug("credList=${credList}")
         return credList
     }
 

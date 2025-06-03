@@ -5,17 +5,17 @@
  */
 void call(String containerName) {
 
-    final String logPrefix = "cleanupDockerContainer(${containerName})" as String
+    final String logPrefix = "[${containerName}]:" as String
 
     try {
         sh "docker stop ${containerName}"
     } catch (Exception err) {
-        echo "${logPrefix}: exception occurred [${err}]"
+        echo "${logPrefix} exception occurred [${err}]"
     }
 
     try {
         sh "docker rm ${containerName}"
     } catch (Exception err) {
-        echo "${logPrefix}: exception occurred [${err}]"
+        echo "${logPrefix} exception occurred [${err}]"
     }
 }

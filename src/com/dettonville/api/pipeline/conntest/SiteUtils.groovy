@@ -34,7 +34,6 @@ class SiteUtils {
 
     @NonCPS
     static Map getHostInfo(String endpoint) {
-        String logPrefix="getHostInfo(${endpoint}):"
         Map hostInfo = [:]
         hostInfo.scheme = "https"
         hostInfo.port = "443"
@@ -43,7 +42,7 @@ class SiteUtils {
         try {
             if (endpoint.contains(":")) {
                 List site_info = endpoint.split(":")
-                log.debug("${logPrefix} endpoint=${endpoint} site_info.size()=${site_info.size()}")
+                log.debug("endpoint=${endpoint} site_info.size()=${site_info.size()}")
                 if (site_info.size() == 3) {
                     // assume the endpoint is one of the following variants:
                     // https://example.com:8443
@@ -63,7 +62,7 @@ class SiteUtils {
                     }
 
                 } else if (site_info.size() == 2 && endpoint.contains("http")) {
-                    log.debug("${logPrefix} endpoint contains http")
+                    log.debug("endpoint contains http")
                     // assume the endpoint is one of the following variants:
                     // https://example.com
                     // http://example.com
@@ -79,14 +78,14 @@ class SiteUtils {
                         hostInfo.host = hostInfo.host.split("/")[0]
                     }
                 } else if (site_info.size() == 2 && !endpoint.contains("http")) {
-                    log.debug("${logPrefix} endpoint does not contain http")
+                    log.debug("endpoint does not contain http")
                     // assume the endpoint is one of the following variants:
                     // example.com:8443
                     // example.com:8443/something
                     hostInfo.scheme = "https"
                     hostInfo.host = site_info[0]
                     hostInfo.port = site_info[1]
-                    log.debug("${logPrefix} hostInfo.host=${hostInfo.host} hostInfo.port=${hostInfo.port}")
+                    log.debug("hostInfo.host=${hostInfo.host} hostInfo.port=${hostInfo.port}")
                     if (hostInfo.port.contains("/")) {
                         hostInfo.context = hostInfo.port.split("/",2)[1]
                         hostInfo.port = hostInfo.port.split("/")[0]
@@ -112,11 +111,11 @@ class SiteUtils {
             }
 
             hostInfo.targetUrl="${hostInfo.scheme}://${hostInfo.host}:${hostInfo.port}/${hostInfo.context}"
-            log.debug("${logPrefix} hostInfo=${hostInfo}")
+            log.debug("hostInfo=${hostInfo}")
 
         } catch (Exception err) {
-            log.error("${logPrefix} exception occurred [${err}]")
-            throw new Exception("${logPrefix} exception occurred: [${err}] ")
+            log.error("exception occurred [${err}]")
+            throw new Exception("exception occurred: [${err}] ")
         }
 
         return hostInfo

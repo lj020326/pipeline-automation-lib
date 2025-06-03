@@ -7,6 +7,8 @@ import com.dettonville.api.pipeline.utils.logging.LogLevel
 import com.dettonville.api.pipeline.utils.logging.Logger
 // import com.dettonville.api.pipeline.utils.DockerUtil
 
+import org.codehaus.groovy.runtime.StackTraceUtils
+
 // ref: https://blog.nimbleci.com/2016/08/31/how-to-build-docker-images-automatically-with-jenkins-pipeline/
 // ref: https://mike42.me/blog/2019-05-how-to-integrate-gitea-and-jenkins
 // ref: https://github.com/jenkinsci/pipeline-examples/pull/83/files
@@ -14,12 +16,10 @@ import com.dettonville.api.pipeline.utils.logging.Logger
 
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field
-@Field Logger log = new Logger(this, LogLevel.INFO)
+//@Field Logger log = new Logger(this, LogLevel.INFO)
+@Field Logger log = new Logger(this)
 
 def call() {
-
-// //    Logger.init(this, LogLevel.INFO)
-//     Logger log = new Logger(this, LogLevel.INFO)
 
     List paramList = []
 
@@ -157,17 +157,17 @@ def call() {
 
 //@NonCPS
 Map loadPipelineConfig(Map params) {
-    String logPrefix = "loadPipelineConfig():"
+
     Map config = [:]
 
-    log.info("${logPrefix} copy immutable params map to mutable config map")
+    log.debug("copy immutable params map to mutable config map")
 
-    log.info("${logPrefix} params=${JsonUtils.printToJsonString(params)}")
+    log.info("params=${JsonUtils.printToJsonString(params)}")
 
 //     config = MapMerge.merge(config, params)
     params.each { key, value ->
         key=Utilities.decapitalize(key)
-        log.info("key=${key} value=${value}")
+        log.debug("key=${key} value=${value}")
         if (value!="") {
             config[key] = value
         }
@@ -183,11 +183,11 @@ Map loadPipelineConfig(Map params) {
     Date now = new Date()
 
     String buildDate = now.format("yyyy-MM-dd", TimeZone.getTimeZone('UTC'))
-    log.info("buildDate=${buildDate}")
+    log.debug("buildDate=${buildDate}")
 
 //     String buildId = "${env.BUILD_NUMBER}"
     String buildId = "build-${env.BUILD_NUMBER}"
-    log.info("buildId=${buildId}")
+    log.debug("buildId=${buildId}")
 
     config.get("buildId", buildId)
     config.get("buildDate", buildDate)
@@ -197,7 +197,7 @@ Map loadPipelineConfig(Map params) {
     if (config.debugPipeline) {
         log.setLevel(LogLevel.DEBUG)
     }
-    log.info("${logPrefix} log.level=${log.level}")
+    log.debug("log.level=${log.level}")
 
     // ref: https://issues.jenkins.io/browse/JENKINS-61372
     List dockerEnvVarsListDefault = [
@@ -205,23 +205,21 @@ Map loadPipelineConfig(Map params) {
     ]
     config.dockerEnvVarsList = config.get('dockerEnvVarsList', dockerEnvVarsListDefault)
 
-    log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.info("config=${JsonUtils.printToJsonString(config)}")
 
     return config
 }
 
 def buildDockerImage(Map config) {
-    String logPrefix="buildDockerImage():"
-    log.info("${logPrefix} started")
 
     def dockerImage
 
-    log.debug("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.debug("config=${JsonUtils.printToJsonString(config)}")
 
     List buildArgs = []
     if (config.buildArgs) {
         Object buildArgsMap = readJSON(text: config.buildArgs)
-        log.info("${logPrefix} buildArgsMap=${JsonUtils.printToJsonString(buildArgsMap)}")
+        log.info("buildArgsMap=${JsonUtils.printToJsonString(buildArgsMap)}")
 
         buildArgsMap.each { key, value ->
             buildArgs.push("--build-arg ${key}=${value}")
@@ -236,7 +234,7 @@ def buildDockerImage(Map config) {
         buildArgs.push("--build-arg BUILD_ID=${config.buildId}")
         buildArgs.push("--build-arg BUILD_DATE=${config.buildDate}")
     }
-    log.info("${logPrefix} buildArgs=${JsonUtils.printToJsonString(buildArgs)}")
+    log.debug("buildArgs=${JsonUtils.printToJsonString(buildArgs)}")
 
     dir (config.buildDir) {
 
@@ -247,7 +245,7 @@ def buildDockerImage(Map config) {
         buildArgs.push("${config.buildPath}")
         if (buildArgs) {
             String buildArgsString = buildArgs.join(" ")
-            log.info("${logPrefix} buildArgsString=${buildArgsString}")
+            log.debug("buildArgsString=${buildArgsString}")
             dockerImage = docker.build(config.buildImageLabel, buildArgsString)
         } else {
             dockerImage = docker.build(config.buildImageLabel)
@@ -257,17 +255,15 @@ def buildDockerImage(Map config) {
 }
 
 void publishDockerImage(def dockerImage, Map config) {
-    String logPrefix="publishDockerImage():"
-    log.info("${logPrefix} started")
 
-    log.debug("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.debug("config=${JsonUtils.printToJsonString(config)}")
 
     String gitCommitId = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
 //     result = gitCommit.take(6)
 //     sh "git rev-parse HEAD > .git/commit-id"
 //     String gitCommitId = readFile('.git/commit-id').trim()
 
-    log.info("${logPrefix} gitCommitId=${gitCommitId}")
+    log.debug("gitCommitId=${gitCommitId}")
 
     dir (config.buildDir) {
 

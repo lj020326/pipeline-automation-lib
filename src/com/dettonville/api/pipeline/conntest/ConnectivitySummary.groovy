@@ -59,7 +59,6 @@ class ConnectivitySummary implements Serializable {
      * @param step
      */
     void addSiteTestResultsList(List siteResultsList) {
-        String logPrefix = "ConnectivitySummary.addSiteTestResultsList():"
         for (SiteTestResults siteResults : siteResultsList) {
             addSiteTestResults(siteResults)
         }
@@ -70,12 +69,11 @@ class ConnectivitySummary implements Serializable {
      * @param step
      */
     void addSiteTestResults(SiteTestResults siteResults) {
-        String logPrefix = "ConnectivitySummary.addSiteTestResults():"
         if (! headerResults) {
             headerResults=siteResults
         }
 
-        log.info("${logPrefix} siteResults=${siteResults}")
+        log.info("siteResults=${siteResults}")
 //        def dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm")
 //        def date = new Date()
 //        siteResults.endTime = dateFormat.format(date)
@@ -104,7 +102,6 @@ class ConnectivitySummary implements Serializable {
 
     @Override
     String toString() {
-        String logPrefix = "ConnectivitySummary.toString():"
         stages.echo "${logPrefix} started"
 
         String report=""
@@ -128,18 +125,17 @@ class ConnectivitySummary implements Serializable {
     }
 
     String toHtml() {
-        String logPrefix = "ConnectivitySummary.toHtml():"
         stages.echo "${logPrefix} started"
 
         def report=""
         def nodeList=(pipelineNodes.keySet()).sort()
-        log.debug("${logPrefix} nodeList=${nodeList}")
+        log.debug("nodeList=${nodeList}")
 
         for (String nodeLabel : nodeList) {
 //            report+="<br><br><h2 style=\"background-color:#fff; margin-bottom:10px; padding:5px 10px; border-color:#ffcd13\" bgcolor=\"#ffffff\">Node: ${nodeLabel}</h2><br>" + createReportHeader()
             report+="<br><br><h2 style=\"background-color:#fff; margin-bottom:10px; padding:5px 10px; border-color:#ffcd13\" bgcolor=\"#ffffff\">Node: ${nodeLabel}</h2><br>${headerResults.createHeader()}"
 
-            log.debug("${logPrefix} nodeLabel=${nodeLabel}")
+            log.debug("nodeLabel=${nodeLabel}")
             def siteResultsList=pipelineNodes[nodeLabel]
 
             siteResultsList = sortList(siteResultsList)
@@ -149,7 +145,7 @@ class ConnectivitySummary implements Serializable {
             for (SiteTestResults siteResults : siteResultsList) {
                 def siteResultsString=siteResults.toHtml()
                 report+=siteResultsString
-                log.debug("${logPrefix} nodeLabel=${nodeLabel} siteResults.order=${siteResults.order} siteResultsString=${siteResultsString}")
+                log.debug("nodeLabel=${nodeLabel} siteResults.order=${siteResults.order} siteResultsString=${siteResultsString}")
             }
             report += "</tbody></thead></table>"
         }
@@ -240,17 +236,15 @@ class ConnectivitySummary implements Serializable {
     Map createJsonReport() {
 
         Map resultMap = [:]
-
-        String logPrefix="ConnectivitySummary.createJsonReport():"
         List nodeList=(pipelineNodes.keySet()).sort()
-        log.info("${logPrefix} nodeList=${nodeList}")
+        log.info("nodeList=${nodeList}")
 //        stages.echo "${logPrefix} config=${config}"
 
         resultMap.nodes=[]
         // print node list
         config.nodeList.eachWithIndex { node, i ->
             println "${logPrefix} i=${i} node=${node}"
-            log.info("${logPrefix} i=${i} node=${node}")
+            log.info("i=${i} node=${node}")
 
             node.name=getNodeName(node.network,node.nodeLabel)
 //            node.icon="./images/router.png"
@@ -260,7 +254,7 @@ class ConnectivitySummary implements Serializable {
 
         // print add target sites to node list
         config.networks.each { networkName, network ->
-            log.info("${logPrefix} networkName=${networkName}, network=${network}")
+            log.info("networkName=${networkName}, network=${network}")
             network.siteList.eachWithIndex { nodeConfig, i ->
                 Map node = network.findAll { it.key != 'siteList' } + nodeConfig
                 String endpoint = nodeConfig.endpoint
@@ -270,11 +264,11 @@ class ConnectivitySummary implements Serializable {
                 Map hostInfo=SiteUtils.getHostInfo(endpoint)
                 String targetName = "${hostInfo.host}:${hostInfo.port}"
 
-                log.info("${logPrefix} hostInfo=${hostInfo}")
+                log.info("hostInfo=${hostInfo}")
 
                 node.network = node.network ?: networkName
                 node.name=getNodeName(node.network,targetName)
-                log.info("${logPrefix} node.network=${node.network}, nodeName=${targetName}, node.name=${node.name}")
+                log.info("node.network=${node.network}, nodeName=${targetName}, node.name=${node.name}")
                 if (network == "external") {
                     node.icon="./images/ix.png"
                 } else {
@@ -282,7 +276,7 @@ class ConnectivitySummary implements Serializable {
                 }
 //                node.icon="./images/ix.png"
                 if (resultMap.nodes.contains(node)) {
-                    log.info("${logPrefix} i=${i} node=${node} - node already found, skipping")
+                    log.info("i=${i} node=${node} - node already found, skipping")
                 } else {
                     log.info(" i=${i} node=${node} - node not found, adding");
                     resultMap.nodes.add(node)
@@ -292,18 +286,18 @@ class ConnectivitySummary implements Serializable {
             }
         }
 
-        log.info("${logPrefix} adding links...")
+        log.info("adding links...")
         resultMap.links=[]
         config.nodeList.eachWithIndex { source, i ->
-            log.info("${logPrefix} i=${i} source=${source}")
+            log.info("i=${i} source=${source}")
 
             List siteResultList=pipelineNodes[source.nodeLabel]
 
             siteResultList = sortList(siteResultList)
 //            siteResultList.eachWithIndex { Map target, i2 ->
             siteResultList.eachWithIndex { SiteTestResults target, i2 ->
-                log.info("${logPrefix} siteResult: i2=${i2}")
-                log.info("${logPrefix} siteResult: target=${target}")
+                log.info("siteResult: i2=${i2}")
+                log.info("siteResult: target=${target}")
                 Map link=[:]
 
                 String endpoint = target.endpoint

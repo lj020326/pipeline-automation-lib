@@ -6,12 +6,12 @@ import com.dettonville.api.pipeline.utils.logging.Logger
 import com.dettonville.api.pipeline.utils.JsonUtils
 import com.dettonville.api.pipeline.utils.Utilities
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+//@Field Logger log = new Logger(this, LogLevel.INFO)
+@Field Logger log = new Logger(this)
+
 def call(Map config=[:]) {
-
-//     Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this, LogLevel.INFO)
-
-    String logPrefix="runATHParamWrapper():"
 
     config.enabledParamList = config.get('enabledParamList', [])
     config.enableDevParams = config.get('enableDevParams', (config.enabledParamList.isEmpty()) ? true : false)
@@ -86,7 +86,7 @@ def call(Map config=[:]) {
         config.remove("enabledParamList")
     }
 
-    log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.info("config=${JsonUtils.printToJsonString(config)}")
 
     runATHEnv(config)
 

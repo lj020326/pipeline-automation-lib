@@ -12,13 +12,12 @@ import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException
 
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field
-@Field Logger log = new Logger(this, LogLevel.INFO)
+//@Field Logger log = new Logger(this, LogLevel.INFO)
+@Field Logger log = new Logger(this)
 
 def call(Map params=[:]) {
 
-//     Logger log = new Logger(this, LogLevel.INFO)
-// //     log.setLevel(LogLevel.DEBUG)
-
+//     log.enableDebug()
     Map config = loadPipelineConfig(params)
     String ansibleLogSummary = "No results"
 
@@ -73,8 +72,8 @@ def call(Map params=[:]) {
                         String gitBranch = java.net.URLDecoder.decode(env.GIT_BRANCH, "UTF-8")
                         config.gitBranch = config.get('gitBranch',"${gitBranch}")
                         config.gitCommitHash = env.GIT_COMMIT
-                        log.info("config.gitBranch=${config.gitBranch}")
-                        log.info("config.gitCommitHash=${config.gitCommitHash}")
+                        log.debug("config.gitBranch=${config.gitBranch}")
+                        log.debug("config.gitCommitHash=${config.gitCommitHash}")
 
                         // install galaxy roles
                         List ansibleGalaxyArgList = []
@@ -191,9 +190,9 @@ def call(Map params=[:]) {
 
                                     if (config.isTestPipeline) {
                                         if (fileExists(config.testComponentDir)) {
-    //                                         sh "tree ${config.testBasePath}/"
-    //                                          archiveArtifacts allowEmptyArchive: true, artifacts: "${config.testBaseDir}/**"
-    //                                         sh "tree ${config.testComponentDir}/"
+//                                             sh "tree ${config.testBasePath}/"
+//                                              archiveArtifacts allowEmptyArchive: true, artifacts: "${config.testBaseDir}/**"
+//                                             sh "tree ${config.testComponentDir}/"
                                             archiveArtifacts allowEmptyArchive: true, artifacts: "${config.testComponentDir}/**"
                                             publishHTML([allowMissing         : true,
                                                          alwaysLinkToLastBuild: true,
@@ -277,17 +276,19 @@ def call(Map params=[:]) {
 
 //@NonCPS
 Map loadPipelineConfig(Map params) {
-    String logPrefix="loadPipelineConfig():"
     Map config = [:]
 
     // copy immutable params maps to mutable config map
     params.each { key, value ->
-        log.debug("${logPrefix} params[${key}]=${value}")
+        log.debug("params[${key}]=${value}")
         key=Utilities.decapitalize(key)
         if (value!="") {
             config[key]=value
         }
     }
+
+    config.logLevel = config.get('logLevel', "INFO")
+    config.debugPipeline = config.get('debugPipeline', false)
 
     log.setLevel(config.logLevel)
 
@@ -296,9 +297,7 @@ Map loadPipelineConfig(Map params) {
     }
 
     config.jenkinsNodeLabel = config.get('jenkinsNodeLabel',"ansible")
-//     config.logLevel = config.get('logLevel', "INFO")
-    config.logLevel = config.get('logLevel', "DEBUG")
-    config.debugPipeline = config.get('debugPipeline', false)
+
     config.timeout = config.get('timeout', 3)
     config.timeoutUnit = config.get('timeoutUnit', 'HOURS')
     config.tmpDirMaxFileCount = config.get('tmpDirMaxFileCount', 100)
@@ -397,27 +396,26 @@ Map loadPipelineConfig(Map params) {
 
     config.ansibleSecretVarsList = config.get('ansibleSecretVarsList', secretVarsListDefault)
 
-    log.debug("${logPrefix} params=${params}")
-    log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.debug("params=${params}")
+    log.info("config=${JsonUtils.printToJsonString(config)}")
 
     return config
 }
 
 Map loadPipelineConfigFile(Map config) {
-    String logPrefix="loadPipelineConfigFile():"
 
     Map ansiblePipelineConfigMap = readYaml file: config.ansiblePipelineConfigFile
-    log.debug("${logPrefix} ansiblePipelineConfigMap=${JsonUtils.printToJsonString(ansiblePipelineConfigMap)}")
+    log.debug("ansiblePipelineConfigMap=${JsonUtils.printToJsonString(ansiblePipelineConfigMap)}")
 
     ansibleRootConfigMap=ansiblePipelineConfigMap.findAll { !['repoList'].contains(it.key) }
 
-    log.debug("${logPrefix} config.ansibleRootConfigMap=${ansibleRootConfigMap}")
+    log.debug("config.ansibleRootConfigMap=${ansibleRootConfigMap}")
     config = MapMerge.merge(config, ansibleRootConfigMap)
 
     if (!config.ansiblePlaybookRepo) {
         return config
     }
-    log.info("${logPrefix} config.ansiblePlaybookRepo=${config.ansiblePlaybookRepo}")
+    log.debug("config.ansiblePlaybookRepo=${config.ansiblePlaybookRepo}")
 
     if (!ansiblePipelineConfigMap.repoList) {
         return config
@@ -425,36 +423,35 @@ Map loadPipelineConfigFile(Map config) {
 
     if (ansiblePipelineConfigMap.repoList["${config.ansiblePlaybookRepo}"]) {
         Map ansibleRepoConfigMap = ansiblePipelineConfigMap.repoList[config.ansiblePlaybookRepo]
-        log.debug("${logPrefix} ansibleRepoConfigMap=${JsonUtils.printToJsonString(ansibleRepoConfigMap)}")
+        log.debug("ansibleRepoConfigMap=${JsonUtils.printToJsonString(ansibleRepoConfigMap)}")
 
         ansibleRepoConfigMap=ansibleRepoConfigMap.findAll { !['SANDBOX','DEV','QA','PROD'].contains(it.key) }
 
         if (ansiblePipelineConfigMap.repoList["${config.ansiblePlaybookRepo}"]["${config.environment}"]) {
             Map ansibleEnvConfigMap = ansiblePipelineConfigMap.repoList["${config.ansiblePlaybookRepo}"]["${config.environment}"]
-            log.info("${logPrefix} ansibleEnvConfigMap=${JsonUtils.printToJsonString(ansibleEnvConfigMap)}")
+            log.debug("ansibleEnvConfigMap=${JsonUtils.printToJsonString(ansibleEnvConfigMap)}")
 
-            log.info("${logPrefix} Merge ansibleEnvConfigMap to ansibleRepoConfigMap")
+            log.debug("Merge ansibleEnvConfigMap to ansibleRepoConfigMap")
             ansibleRepoConfigMap = MapMerge.merge(ansibleRepoConfigMap, ansibleEnvConfigMap)
         }
-        log.info("${logPrefix} ansibleRepoConfigMap=${JsonUtils.printToJsonString(ansibleRepoConfigMap)}")
+        log.debug("ansibleRepoConfigMap=${JsonUtils.printToJsonString(ansibleRepoConfigMap)}")
 
-        log.info("${logPrefix} Merge ansibleRepoConfigMap to config map")
+        log.debug("Merge ansibleRepoConfigMap to config map")
         config = MapMerge.merge(config, ansibleRepoConfigMap)
     }
 //     if (config.requirementsPathsRelativeToPlaybookDir.toBoolean() && config.ansiblePlaybookDir
 //         && !config.ansibleCollectionsRequirements.startsWith(config.ansiblePlaybookDir))
     if (config.requirementsPathsRelativeToPlaybookDir.toBoolean() && config?.ansiblePlaybookDir) {
-        log.info("${logPrefix} Prepend ansiblePlaybookDir to config.ansibleCollectionsRequirements")
+        log.debug("Prepend ansiblePlaybookDir to config.ansibleCollectionsRequirements")
         config.ansibleCollectionsRequirements = "${config.ansiblePlaybookDir}/${config.ansibleCollectionsRequirements}"
-        log.info("${logPrefix} Modified config.ansibleCollectionsRequirements=${config.ansibleCollectionsRequirements}")
+        log.debug("Modified config.ansibleCollectionsRequirements=${config.ansibleCollectionsRequirements}")
     }
 
-    log.info("${logPrefix} Merged config=${JsonUtils.printToJsonString(config)}")
+    log.info("Merged config=${JsonUtils.printToJsonString(config)}")
     return config
 }
 
 Map getAnsibleCommandConfig(Map config) {
-    String logPrefix="getAnsibleCommandConfig():"
 
     String ansiblePlaybook = "${config.ansiblePlaybook}"
     if (config.ansiblePlaybookDir) {
@@ -523,7 +520,7 @@ Map getAnsibleCommandConfig(Map config) {
         extraVars+=["ansible_python_interpreter" : config.ansiblePythonInterpreter]
     }
     if (extraVars.size()>0) {
-        log.info("extraVars=${JsonUtils.printToJsonString(extraVars)}")
+        log.debug("extraVars=${JsonUtils.printToJsonString(extraVars)}")
         ansibleCfg[ANSIBLE][ANSIBLE_EXTRA_VARS]=extraVars
     }
 

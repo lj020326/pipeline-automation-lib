@@ -70,9 +70,9 @@ def main() {
 def buildsToStr(builds) {
     return builds.findResults({
         if('build_id' in it) {
-            "- job: ${it.job_name} build: ${it.build_id} (${it.build_url})"
+            "- jobName: ${it.job_name} build: ${it.build_id} (${it.build_url})"
         } else {
-            "- job: ${it.job_name} (queued id: ${it.queue_id})"
+            "- jobName: ${it.job_name} (queued id: ${it.queue_id})"
         }
     }).join("\n")
 }

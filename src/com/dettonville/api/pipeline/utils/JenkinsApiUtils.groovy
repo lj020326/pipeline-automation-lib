@@ -30,22 +30,20 @@ class JenkinsApiUtils implements Serializable {
     // ref; https://groovyconsole.appspot.com/script/1109001
     // ref: https://coderwall.com/p/utgplg/regex-full-url-base-url
     String getBaseUrl(String urlStr) {
-        String logPrefix = "getBaseUrl():"
 
         return urlStr.find(/(^.+?[^\/:](?=[?\/]|$))\.*/) { it[1] };
     }
 
     // ref: https://stackoverflow.com/questions/36194316/how-to-get-the-build-user-in-jenkins-when-job-triggered-by-timer
     Map getCurrentJobCauseInfo() {
-        String logPrefix = "getCurrentJobCauseInfo():"
 
         Map jobCauseMap = [:]
 
-        log.debug("${logPrefix} starting")
+        log.debug("starting")
 
         String buildResultsUrl = "${dsl.env.BUILD_URL}"
 
-        log.debug("${logPrefix} buildResultsUrl=${buildResultsUrl}")
+        log.debug("buildResultsUrl=${buildResultsUrl}")
         Integer responseStatus
 
         dsl.withCredentials([[$class : 'UsernamePasswordMultiBinding', credentialsId: this.jenkinsApiCredId,
@@ -53,29 +51,29 @@ class JenkinsApiUtils implements Serializable {
 
             String JENKINS_CREDS = "${dsl.env.JENKINS_USERNAME}:${dsl.env.JENKINS_TOKEN}"
 
-            log.debug("${logPrefix} Determine if job info exists")
+            log.debug("Determine if job info exists")
             responseStatus=dsl.sh(script: "curl -s -o /dev/null -w %{http_code} -u ${JENKINS_CREDS} ${buildResultsUrl}", returnStdout: true).toInteger()
 
-            log.debug("${logPrefix} responseStatus: ${responseStatus}")
+            log.debug("responseStatus: ${responseStatus}")
 
             if (responseStatus!=200) {
-                log.warn("${logPrefix} job results not found at ${buildResultsUrl}, returned responseStatus=${responseStatus}")
+                log.warn("job results not found at ${buildResultsUrl}, returned responseStatus=${responseStatus}")
                 return jobCauseMap
             }
 
-            log.debug("${logPrefix} job info exists, retrieving")
+            log.debug("job info exists, retrieving")
 
             buildResultsUrl += "api/json?pretty=true"
             String jobInfoJson = dsl.sh(script: "curl -sSL -u ${JENKINS_CREDS} ${buildResultsUrl}", returnStdout: true).trim().replaceAll('null','""')
 
-            log.debug("${logPrefix} jobInfoJson=${jobInfoJson}")
+            log.debug("jobInfoJson=${jobInfoJson}")
 
             Map jobInfoMap = dsl.readJSON text: jobInfoJson
 
-            log.debug("${logPrefix} jobInfoMap=${JsonUtils.printToJsonString(jobInfoMap)}")
+            log.debug("jobInfoMap=${JsonUtils.printToJsonString(jobInfoMap)}")
 
             jobCauseMap = jobInfoMap.actions.findResult { it.causes }[0]
-            log.debug("${logPrefix} jobCauseMap=${JsonUtils.printToJsonString(jobCauseMap)}")
+            log.debug("jobCauseMap=${JsonUtils.printToJsonString(jobCauseMap)}")
 
         }
         return jobCauseMap
@@ -86,16 +84,15 @@ class JenkinsApiUtils implements Serializable {
     // ref: https://cd.dettonville.int/jenkins/job/DCAPI/job/DeploymentJobs/job/DeployFrontendStage/job/master/721/api/json?pretty=true
 //    Integer getBuildNumber(String jobBaseUri, String buildStatus="lastSuccessfulBuild") {
     Integer getBuildNumber(String jobBaseUri, String buildStatus="lastCompletedBuild") {
-        String logPrefix = "getBuildNumber():"
 
-        log.debug("${logPrefix} starting")
+        log.debug("starting")
 
         Integer buildNumber
 
         String jenkinsMasterUrl = getBaseUrl(dsl.currentBuild.absoluteUrl)
 
         String buildResultsUrl = "${jenkinsMasterUrl}/${jobBaseUri}/${buildStatus}/buildNumber"
-        log.debug("${logPrefix} buildResultsUrl=${buildResultsUrl}")
+        log.debug("buildResultsUrl=${buildResultsUrl}")
         Integer responseStatus
 
         dsl.withCredentials([[$class : 'UsernamePasswordMultiBinding', credentialsId: this.jenkinsApiCredId,
@@ -103,20 +100,20 @@ class JenkinsApiUtils implements Serializable {
 
             String JENKINS_CREDS = "${dsl.env.JENKINS_USERNAME}:${dsl.env.JENKINS_TOKEN}"
 
-            log.debug("${logPrefix} Determine if job info exists")
+            log.debug("Determine if job info exists")
             responseStatus=dsl.sh(script: "curl -s -o /dev/null -w %{http_code} -u ${JENKINS_CREDS} ${buildResultsUrl}", returnStdout: true).toInteger()
 
-            log.debug("${logPrefix} responseStatus: ${responseStatus}")
+            log.debug("responseStatus: ${responseStatus}")
 
             if (responseStatus!=200) {
-                log.warn("${logPrefix} job results not found at ${buildResultsUrl}, returned responseStatus=${responseStatus}")
+                log.warn("job results not found at ${buildResultsUrl}, returned responseStatus=${responseStatus}")
                 return buildNumber
             }
 
-            log.debug("${logPrefix} job info exists, retrieving")
+            log.debug("job info exists, retrieving")
 
             buildNumber = dsl.sh(script: "curl -sSL -u ${JENKINS_CREDS} ${buildResultsUrl}", returnStdout: true).toInteger()
-            log.debug("${logPrefix} buildNumber=${buildNumber}")
+            log.debug("buildNumber=${buildNumber}")
 
         }
         return buildNumber
@@ -133,9 +130,8 @@ class JenkinsApiUtils implements Serializable {
 //    Map getBuildResults(String buildNumber="lastStableBuild", Map buildStatusConfig) {
 //    Map getBuildResults(String buildNumber="lastSuccessfulBuild", Map buildStatusConfig) {
     Map getBuildResults(String buildNumber="lastCompletedBuild", Map buildStatusConfig) {
-        String logPrefix = "getBuildResults():"
 
-        log.debug("${logPrefix} starting")
+        log.debug("starting")
 
         Map buildResults = [:]
 
@@ -148,7 +144,7 @@ class JenkinsApiUtils implements Serializable {
         if (buildStatusConfig.prettyPrint) {
             buildResultsUrl += "?pretty=true"
         }
-        log.debug("${logPrefix} buildResultsUrl=${buildResultsUrl}")
+        log.debug("buildResultsUrl=${buildResultsUrl}")
         Integer responseStatus
 
         dsl.withCredentials([[$class : 'UsernamePasswordMultiBinding', credentialsId: this.jenkinsApiCredId,
@@ -156,17 +152,17 @@ class JenkinsApiUtils implements Serializable {
 
             String JENKINS_CREDS = "${dsl.env.JENKINS_USERNAME}:${dsl.env.JENKINS_TOKEN}"
 
-            log.debug("${logPrefix} Determine if job info exists")
+            log.debug("Determine if job info exists")
             responseStatus=dsl.sh(script: "curl -s -o /dev/null -w %{http_code} -u ${JENKINS_CREDS} ${buildResultsUrl}", returnStdout: true).toInteger()
 
-            log.debug("${logPrefix} responseStatus: ${responseStatus}")
+            log.debug("responseStatus: ${responseStatus}")
 
             if (responseStatus!=200) {
-                log.warn("${logPrefix} job test results not found at ${buildResultsUrl}, returned responseStatus=${responseStatus}")
+                log.warn("job test results not found at ${buildResultsUrl}, returned responseStatus=${responseStatus}")
                 return buildResults
             }
 
-            log.debug("${logPrefix} job info exists, retrieving")
+            log.debug("job info exists, retrieving")
 
 //            if (buildStatusConfig.getResultsFile) {
 //                dsl.sh("curl -sSL -u ${JENKINS_CREDS} ${buildResultsUrl} 2>&1 | sed 's/null/\"\"/g' | tee ${buildResultsFile}")
@@ -179,16 +175,15 @@ class JenkinsApiUtils implements Serializable {
             String buildResultsStr = dsl.sh(script: "curl -sSL -u ${JENKINS_CREDS} ${buildResultsUrl}", returnStdout: true).trim().replaceAll('null','""')
             buildResults = dsl.readJSON text: buildResultsStr
 
-            log.debug("${logPrefix} buildResults=${JsonUtils.printToJsonString(buildResults)}")
+            log.debug("buildResults=${JsonUtils.printToJsonString(buildResults)}")
 
         }
         return buildResults
     }
 
     Map getTestResults(Integer buildNumber) {
-        String logPrefix = "getTestResults():"
 
-        log.info("${logPrefix} starting")
+        log.info("starting")
 
         Map testResults = [:]
 
@@ -196,7 +191,7 @@ class JenkinsApiUtils implements Serializable {
         String buildUrl = dsl.currentBuild.absoluteUrl.substring(0, dsl.currentBuild.absoluteUrl.lastIndexOf("/"))
         String testResultsUrl = buildUrl.substring(0, buildUrl.lastIndexOf("/"))
         testResultsUrl += "/${buildNumber}/testReport/api/json"
-        log.info("${logPrefix} testResultsUrl=${testResultsUrl}")
+        log.info("testResultsUrl=${testResultsUrl}")
         Integer responseStatus
 
         dsl.withCredentials([dsl.usernamePassword(credentialsId: this.jenkinsApiCredId,
@@ -204,23 +199,23 @@ class JenkinsApiUtils implements Serializable {
 
             String JENKINS_CREDS = "${dsl.env.JENKINS_USERNAME}:${dsl.env.JENKINS_TOKEN}"
 
-            log.info("${logPrefix} Determine if test results exists")
+            log.info("Determine if test results exists")
             responseStatus=dsl.sh(script: "curl -s -o /dev/null -w %{http_code} -u ${JENKINS_CREDS} ${testResultsUrl}", returnStdout: true).toInteger()
 
-            log.info("${logPrefix} responseStatus: ${responseStatus}")
+            log.info("responseStatus: ${responseStatus}")
             if (responseStatus==200) {
-                log.info("${logPrefix} job test results exists, retrieving")
+                log.info("job test results exists, retrieving")
 
                 dsl.sh "curl -sSL -u ${JENKINS_CREDS} ${testResultsUrl} 2>&1 | sed 's/null/\"\"/g' | tee ${testResultFile}"
                 //    dsl.sh "curl -sSL -u ${JENKINS_CREDS} ${testResultsUrl} -o ${testResultFile}"
 
 //            dsl.sh "find . -maxdepth 1 -name ${testResultFile} -type f -printf \"%TY-%Tm-%Td %TH:%TM:%.2Ts %m:%u:%g %p %k kB\\n\" | sort -k 3,3"
                 testResults = dsl.readJSON file: "${testResultFile}"
-                //    log.info("${logPrefix} testResults=${testResults}")
-                log.debug("${logPrefix} testResults=${JsonUtils.printToJsonString(testResults)}")
+                //    log.info("testResults=${testResults}")
+                log.debug("testResults=${JsonUtils.printToJsonString(testResults)}")
 
             } else {
-                log.warn("${logPrefix} job test results not found at ${testResultsUrl}, returned responseStatus=${responseStatus}")
+                log.warn("job test results not found at ${testResultsUrl}, returned responseStatus=${responseStatus}")
             }
 
         }
@@ -229,9 +224,8 @@ class JenkinsApiUtils implements Serializable {
     }
 
     Integer getJobArtifact(String artifactPath, String buildNumber="lastCompletedBuild") {
-        String logPrefix = "getJobArtifact():"
 
-        log.debug("${logPrefix} starting")
+        log.debug("starting")
 
         Map buildResults = [:]
 
@@ -239,7 +233,7 @@ class JenkinsApiUtils implements Serializable {
         String artifactUrl = buildUrl.substring(0, buildUrl.lastIndexOf("/"))
         artifactUrl += "/${buildNumber}/artifact/${artifactPath}"
 
-        log.debug("${logPrefix} artifactUrl=${artifactUrl}")
+        log.debug("artifactUrl=${artifactUrl}")
 
         Integer responseStatus
 
@@ -248,15 +242,15 @@ class JenkinsApiUtils implements Serializable {
 
             String JENKINS_CREDS = "${dsl.env.JENKINS_USERNAME}:${dsl.env.JENKINS_TOKEN}"
 
-            log.debug("${logPrefix} Determine if test results exists")
+            log.debug("Determine if test results exists")
             responseStatus=dsl.sh(script: "curl -s -o /dev/null -w %{http_code} -u ${JENKINS_CREDS} ${artifactUrl}", returnStdout: true).toInteger()
 
-            log.debug("${logPrefix} responseStatus: ${responseStatus}")
+            log.debug("responseStatus: ${responseStatus}")
             if (responseStatus!=200) {
-                log.debug("${logPrefix} artifact not found at ${artifactUrl}, returned responseStatus=${responseStatus}")
+                log.debug("artifact not found at ${artifactUrl}, returned responseStatus=${responseStatus}")
                 return buildResults
             }
-            log.debug("${logPrefix} artifact exists, retrieving")
+            log.debug("artifact exists, retrieving")
 
             dsl.sh("curl -sSL -u ${JENKINS_CREDS} ${artifactUrl} -o ${artifactPath}")
 
@@ -268,20 +262,19 @@ class JenkinsApiUtils implements Serializable {
     }
 
     Integer getJobArtifactFromBuildUrl(String buildUrl, String artifactPath, String destinationPath=null) {
-        String logPrefix = "getJobArtifactFromBuildUrl():"
-        log.debug("${logPrefix} starting")
+        log.debug("starting")
 
         destinationPath = destinationPath ?: artifactPath
 
-        log.debug("${logPrefix} artifactPath=${artifactPath}")
-        log.debug("${logPrefix} destinationPath=${destinationPath}")
+        log.debug("artifactPath=${artifactPath}")
+        log.debug("destinationPath=${destinationPath}")
 
         Map buildResults = [:]
 
         String artifactUrl = buildUrl.substring(0, buildUrl.lastIndexOf("/"))
         artifactUrl += "/artifact/${artifactPath}"
 
-        log.debug("${logPrefix} artifactUrl=${artifactUrl}")
+        log.debug("artifactUrl=${artifactUrl}")
 
         Integer responseStatus
 
@@ -290,15 +283,15 @@ class JenkinsApiUtils implements Serializable {
 
             String JENKINS_CREDS = "${dsl.env.JENKINS_USERNAME}:${dsl.env.JENKINS_TOKEN}"
 
-            log.debug("${logPrefix} Determine if test results exists")
+            log.debug("Determine if test results exists")
             responseStatus=dsl.sh(script: "curl -s -o /dev/null -w %{http_code} -u ${JENKINS_CREDS} ${artifactUrl}", returnStdout: true).toInteger()
 
-            log.debug("${logPrefix} responseStatus: ${responseStatus}")
+            log.debug("responseStatus: ${responseStatus}")
             if (responseStatus!=200) {
-                log.debug("${logPrefix} artifact not found at ${artifactUrl}, returned responseStatus=${responseStatus}")
+                log.debug("artifact not found at ${artifactUrl}, returned responseStatus=${responseStatus}")
                 return buildResults
             }
-            log.debug("${logPrefix} artifact exists, retrieving")
+            log.debug("artifact exists, retrieving")
 
             dsl.sh("curl -sSL -u ${JENKINS_CREDS} ${artifactUrl} -o ${destinationPath}")
 

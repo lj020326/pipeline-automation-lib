@@ -37,8 +37,7 @@ class ApiTestHarness extends AcceptanceTestHarness {
      * Build the Maven Integration Test command line that will be used by automation execution
      **/
     String prepareMvnIntegrationTestCommand(Map config) {
-        String logPrefix="prepareMvnIntegrationTestCommand():"
-        log.debug("${logPrefix} started")
+        log.debug("started")
 
         String mvnCmd = "${dsl.env.M3}/bin/mvn"
         mvnCmd += " clean install"
@@ -79,11 +78,11 @@ class ApiTestHarness extends AcceptanceTestHarness {
             mvnCmd += " -DprojectName='${config.rallyProjectName}'"
         }
 
-//    log.debug("${logPrefix} 9: mvnCmd=${mvnCmd}")
+//    log.debug("9: mvnCmd=${mvnCmd}")
 
         mvnCmd+=" -e"
 
-        log.debug("${logPrefix} final command: mvnCmd=${mvnCmd}")
+        log.debug("final command: mvnCmd=${mvnCmd}")
 
         return mvnCmd
     }

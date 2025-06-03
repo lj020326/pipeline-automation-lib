@@ -15,9 +15,6 @@ import groovy.transform.Field
 
 def call(Map params=[:]) {
 
-    Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this)
-
     Map config = loadPipelineConfig(params)
 
     String baseDir = "/var/jenkins_home/git_repo_references"
@@ -89,12 +86,11 @@ def call(Map params=[:]) {
 
 //@NonCPS
 Map loadPipelineConfig(Map params) {
-    String logPrefix="loadPipelineConfig():"
     Map config = [:]
 
     // copy immutable params maps to mutable config map
     params.each { key, value ->
-        log.debug("${logPrefix} params[${key}]=${value}")
+        log.debug("params[${key}]=${value}")
         key=Utilities.decapitalize(key)
         if (value!="") {
             config[key]=value
@@ -128,8 +124,8 @@ Map loadPipelineConfig(Map params) {
 
     config.jenkinsNodeLabel = config.get('jenkinsNodeLabel',"controller")
 
-    log.debug("${logPrefix} params=${params}")
-    log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.debug("params=${params}")
+    log.info("config=${JsonUtils.printToJsonString(config)}")
 
     return config
 }
@@ -141,7 +137,7 @@ def gitInitialClone(def dsl, String gitCredentialsId, String repoDir, Map repoCo
     String repoGitDir = "${repoDir}/${repoGitName}"
 
     dsl.dir(repoDir) {
-        println("Git initially cloning repo: ${repoName}")
+        log.info("Git initially cloning repo: ${repoName}")
         dsl.sshagent([gitCredentialsId]) {
             // ref: https://docs.cloudbees.com/docs/cloudbees-ci-kb/latest/client-and-managed-controllers/how-to-create-and-use-a-git-reference-repository
             // ref: https://plugins.jenkins.io/git/#plugin-content-combining-repositories
@@ -156,10 +152,10 @@ def gitFetchPrune(def dsl, String gitCredentialsId, String repoDir, Map repoConf
     String repoGitName = repoUrl.substring(repoUrl.lastIndexOf('/') + 1, repoUrl.length())
     String repoGitDir = "${repoDir}/${repoGitName}"
     dsl.dir(repoGitDir) {
-        println("Git fetch repo: ${repoGitDir}")
+        log.info("Git fetch repo: ${repoGitDir}")
         dsl.sshagent([gitCredentialsId]) {
             dsl.sh "git fetch --all --prune"
         }
-        println("Finished fetching git repo on ${repoGitDir}")
+        log.info("Finished fetching git repo on ${repoGitDir}")
     }
 }

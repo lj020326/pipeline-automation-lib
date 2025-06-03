@@ -29,14 +29,12 @@ class JsonUtils implements Serializable {
     }
 
     List getJsonDiffs(String json1, String json2, Boolean strict = false) {
-        String logPrefix = "jsonDiff():"
-        log.debug("${logPrefix} started")
+        log.debug("started")
         return getJsonDiffs('root', json1, json2, strict)
     }
 
     List getJsonDiffs(Map map1, Map map2, Boolean strict = false) {
-        String logPrefix = "jsonDiff():"
-        log.debug("${logPrefix} started")
+        log.debug("started")
         return getJsonDiffs('root', map1, map2, strict)
     }
 
@@ -50,8 +48,7 @@ class JsonUtils implements Serializable {
 
 //    @NonCPS
     List getJsonDiffs(String label, String json1, String json2, Boolean strict = false) {
-        String logPrefix = "getJsonDiffs(label=${label}):"
-        log.debug("${logPrefix} started")
+        log.debug("started")
 
 //        JsonSlurper sl = new JsonSlurper()
 //        def obj1 = sl.parseText(json1)
@@ -59,22 +56,20 @@ class JsonUtils implements Serializable {
         def obj1 = dsl.readJSON text: json1
         def obj2 = dsl.readJSON text: json2
 
-//        log.debug("${logPrefix} obj1=${printToJsonString(obj1)}")
-//        log.debug("${logPrefix} obj2=${printToJsonString(obj2)}")
+//        log.debug("obj1=${printToJsonString(obj1)}")
+//        log.debug("obj2=${printToJsonString(obj2)}")
 
         return getJsonDiffValue(label, obj1, obj2, strict)
     }
 
     List getJsonDiffs(String label, Map map1, Map map2, Boolean strict = false) {
-        String logPrefix = "getJsonDiffs(label=${label}):"
-        log.debug("${logPrefix} started")
+        log.debug("started")
 
         return getJsonDiffValue(label, map1, map2, strict)
     }
 
     List getJsonDiffValue(String label, def val1, def val2, Boolean strict = false) {
-        String logPrefix = "getJsonDiff(label=${label}):"
-        log.debug("${logPrefix} started")
+        log.debug("started")
 
         List results = []
         if (val1 instanceof Map && val2 instanceof Map) {
@@ -102,8 +97,7 @@ class JsonUtils implements Serializable {
     }
 
     List getJsonDiffMap(String label, Map map1, Map map2, Boolean strict = false) {
-        String logPrefix = "getJsonDiffMap(label=${label}):"
-        log.debug("${logPrefix} started")
+        log.debug("started")
 
         List results = []
         map1.entrySet().each { e1 ->
@@ -131,13 +125,12 @@ class JsonUtils implements Serializable {
                 results.add(diff)
             }
         }
-        log.debug("${logPrefix} finished: results = ${results}")
+        log.debug("finished: results = ${results}")
         return results
     }
 
     List getJsonDiffList(String label, List list1, List list2, Boolean strict = false) {
-        String logPrefix = "getJsonDiffList(label=${label}):"
-        log.debug("${logPrefix} started")
+        log.debug("started")
 
         List results = []
         if (list1.size() != list2.size()) {
@@ -161,21 +154,18 @@ class JsonUtils implements Serializable {
     // isJsonDiff
     ///////////
     Boolean isJsonDiff(String json1, String json2, Boolean strict = false) {
-        String logPrefix = "jsonDiff():"
-        log.debug("${logPrefix} started")
+        log.debug("started")
         return isJsonDiff('root', json1, json2, strict)
     }
 
     Boolean isJsonDiff(Map json1, Map json2, Boolean strict = false) {
-        String logPrefix = "jsonDiff():"
-        log.debug("${logPrefix} started")
+        log.debug("started")
         return isJsonDiff('root', json1, json2, strict)
     }
 
 //    @NonCPS
     Boolean isJsonDiff(String label, String json1, String json2, Boolean strict = false) {
-        String logPrefix = "isJsonDiff(label=${label}):"
-        log.debug("${logPrefix} started")
+        log.debug("started")
 
 //        JsonSlurper sl = new JsonSlurper()
 //        def obj1 = sl.parseText(json1)
@@ -183,22 +173,20 @@ class JsonUtils implements Serializable {
         def obj1 = dsl.readJSON text: json1
         def obj2 = dsl.readJSON text: json2
 
-//        log.debug("${logPrefix} obj1=${printToJsonString(obj1)}")
-//        log.debug("${logPrefix} obj2=${printToJsonString(obj2)}")
+//        log.debug("obj1=${printToJsonString(obj1)}")
+//        log.debug("obj2=${printToJsonString(obj2)}")
 
         return checkValue(label, obj1, obj2, strict)
     }
 
     Boolean isJsonDiff(String label, Map map1, Map map2, Boolean strict = false) {
-        String logPrefix = "isJsonDiff(label=${label}):"
-        log.debug("${logPrefix} started")
+        log.debug("started")
 
         return checkValue(label, map1, map2, strict)
     }
 
     Boolean checkValue(String label, def val1, def val2, Boolean strict = false) {
-        String logPrefix = "checkValue(label=${label}):"
-//        log.debug("${logPrefix} started")
+//        log.debug("started")
         if (val1 instanceof Map && val2 instanceof Map) {
             return checkMap(label, val1, val2, strict)
         } else if (val1 instanceof List && val2 instanceof List) {
@@ -214,8 +202,7 @@ class JsonUtils implements Serializable {
     }
 
     Boolean checkMap(String label, Map map1, Map map2, Boolean strict = false) {
-        String logPrefix = "checkMap(label=${label}):"
-//        log.debug("${logPrefix} started")
+//        log.debug("started")
 
         List results = []
         map1.entrySet().each { e1 ->
@@ -234,13 +221,12 @@ class JsonUtils implements Serializable {
             }
         }
         Boolean result = (results.size()>0) ? results.inject { a, b -> a || b } : false
-//        log.debug("${logPrefix} finished: result = ${result}")
+//        log.debug("finished: result = ${result}")
         return result
     }
 
     Boolean checkList(String label, List list1, List list2, Boolean strict = false) {
-        String logPrefix = "checkList(label=${label}):"
-//        log.debug("${logPrefix} started")
+//        log.debug("started")
 
         List results = []
         if (list1.size() != list2.size()) {
@@ -252,13 +238,12 @@ class JsonUtils implements Serializable {
             }
         }
         Boolean result = (results.size()>0) ? results.inject { a, b -> a || b } : false
-//        log.debug("${logPrefix} finished: result = ${result}")
+//        log.debug("finished: result = ${result}")
         return result
     }
 
     void putAlert(key, values, comment) {
-        String logPrefix = "putAlert():"
-        log.debug("${logPrefix} ${key} : ${values} // ${comment}")
+        log.debug("${key} : ${values} // ${comment}")
 //        dsl.println "${logPrefix} ${key} : ${values} // ${comment}"
     }
 

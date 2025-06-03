@@ -9,8 +9,8 @@ import com.dettonville.api.pipeline.utils.logging.Logger
 
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field
-@Field Logger log = new Logger(this, LogLevel.INFO)
-// @Field List jobResults = []
+// @Field Logger log = new Logger(this, LogLevel.INFO)
+@Field Logger log = new Logger(this)
 
 // ref: https://blog.nimbleci.com/2016/08/31/how-to-build-docker-images-automatically-with-jenkins-pipeline/
 // ref: https://mike42.me/blog/2019-05-how-to-integrate-gitea-and-jenkins
@@ -19,10 +19,6 @@ import groovy.transform.Field
 
 def call(Map params=[:]) {
 
-// //    Logger.init(this, LogLevel.INFO)
-//     Logger log = new Logger(this, LogLevel.INFO)
-
-    log.info("Loading Default Configs")
     Map config=loadPipelineConfig(params)
 //     boolean jobResults = true
     Map jobResults = [:]
@@ -55,8 +51,8 @@ def call(Map params=[:]) {
                 steps {
                     script {
                         jobResults = runDockerBuildManifest(config)
-                        log.info("jobResults=${jobResults}")
-                        if (!jobResults.status) {
+                        log.info("finished: jobResults=${JsonUtils.printToJsonString(jobResults)}")
+                        if (jobResults.failed) {
                             currentBuild.result = 'FAILURE'
                         }
                     }
@@ -73,7 +69,11 @@ def call(Map params=[:]) {
                         sendEmail(currentBuild, env)
                     }
                     log.info("Empty current workspace dir")
-                    cleanWs()
+                    try {
+                        cleanWs()
+                    } catch (Exception ex) {
+                        log.warn("Unable to cleanup workspace - e.g., likely cause git clone failure", ex.getMessage())
+                    }
                 }
             }
             success {
@@ -114,12 +114,12 @@ def call(Map params=[:]) {
 
 //@NonCPS
 Map loadPipelineConfig(Map params) {
-    String logPrefix = "loadPipelineConfig():"
+
     Map config = [:]
 
     if (params) {
-        log.info("${logPrefix} copy immutable params map to mutable config map")
-        log.info("${logPrefix} params=${JsonUtils.printToJsonString(params)}")
+        log.debug("copy immutable params map to mutable config map")
+        log.debug("params=${JsonUtils.printToJsonString(params)}")
         config = MapMerge.merge(config, params)
     }
 
@@ -130,6 +130,7 @@ Map loadPipelineConfig(Map params) {
     config.debugPipeline = config.get('debugPipeline', false)
     config.continueIfFailed = config.get('continueIfFailed', false)
     config.failFast = config.get('failFast', false)
+    config.propagate = config.get('propagate', config.failFast)
 
     config.childJobTimeout = config.get('childJobTimeout', "4")
     config.childJobTimeoutUnit = config.get('childJobTimeoutUnit', "HOURS")
@@ -153,11 +154,11 @@ Map loadPipelineConfig(Map params) {
     Date now = new Date()
 
     String buildDate = now.format("yyyy-MM-dd", TimeZone.getTimeZone('UTC'))
-    log.info("buildDate=${buildDate}")
+    log.debug("buildDate=${buildDate}")
 
 //     String buildId = "${env.BUILD_NUMBER}"
     String buildId = "build-${env.BUILD_NUMBER}"
-    log.info("buildId=${buildId}")
+    log.debug("buildId=${buildId}")
 
     config.get("buildId", buildId)
     config.get("buildDate", buildDate)
@@ -167,7 +168,7 @@ Map loadPipelineConfig(Map params) {
     if (config.debugPipeline) {
         log.setLevel(LogLevel.DEBUG)
     }
-    log.info("${logPrefix} log.level=${log.level}")
+    log.debug("log.level=${log.level}")
 
     config.runGroupsInParallel = config.get('runGroupsInParallel', false)
     config.runInParallel = config.get('runInParallel', false)
@@ -179,7 +180,7 @@ Map loadPipelineConfig(Map params) {
     ]
     config.dockerEnvVarsList = config.get('dockerEnvVarsList', dockerEnvVarsListDefault)
 
-    log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.info("config=${JsonUtils.printToJsonString(config)}")
 
     config.configFile = config.get('configFile', ".jenkins/docker-build-config.yml")
 
@@ -187,146 +188,103 @@ Map loadPipelineConfig(Map params) {
 }
 
 Map loadPipelineConfigFile(Map config) {
-    String logPrefix="loadPipelineConfigFile():"
 
     Map dockerBuildConfigMap = readYaml file: config.configFile
 
     Map buildConfigs=dockerBuildConfigMap.pipeline
-    log.info("${logPrefix} buildConfigs=${JsonUtils.printToJsonString(buildConfigs)}")
+    log.debug("buildConfigs=${JsonUtils.printToJsonString(buildConfigs)}")
 
     config = config + buildConfigs
 
-    log.info("${logPrefix} Merged config=${JsonUtils.printToJsonString(config)}")
+    log.info("Merged config=${JsonUtils.printToJsonString(config)}")
     return config
 }
 
-// boolean runDockerBuildManifest(Map config) {
 Map runDockerBuildManifest(Map config) {
-    String logPrefix = "runDockerBuildManifest():"
 
-//     boolean jobResults
     Map jobResults
     if (config?.buildImageGroups) {
         jobResults = buildAndPublishImageGroups(config)
     } else if (config?.buildImageList) {
         jobResults = buildAndPublishImageList(config)
     } else {
-//         List buildImageListDefault = [[ buildDir: config.buildDir, buildImageLabel: config.buildImageLabel]]
-//         config.get("buildImageList", buildImageListDefault)
-//         buildAndPublishImageList(config)
         jobResults = runBuildAndPublishImageJob(config)
     }
-//     if (!jobResults.status && (config.failFast || !config.continueIfFailed)) {
-//         currentBuild.result = 'FAILURE'
-//         log.info("${logPrefix} config.continueIfFailed=${config.continueIfFailed}")
-//         log.info("${logPrefix} config.failFast=${config.failFast}")
-//         log.info("${logPrefix} results failed - not running any more jobs")
-//     }
+    log.debug("finished: jobResults=${JsonUtils.printToJsonString(jobResults)}")
+    if (jobResults.failed && (config.failFast || !config.continueIfFailed)) {
+        currentBuild.result = 'FAILURE'
+        log.debug("config.continueIfFailed=${config.continueIfFailed}")
+        log.debug("config.failFast=${config.failFast}")
+        log.error("results failed - not running any more jobs")
+    }
 
-    log.info("${logPrefix} finished: jobResults=${JsonUtils.printToJsonString(jobResults)}")
     return jobResults
 }
 
-// boolean buildAndPublishImageGroups(Map config) {
 Map buildAndPublishImageGroups(Map config) {
-    String logPrefix = "buildAndPublishImageGroups():"
+
     Map parallelGroups = [:]
 
     Map jobResults = [:]
     jobResults.groups = [:]
     config.buildImageGroups.each { groupName, groupConfigRaw ->
 
-        log.info("${logPrefix} groupName=${groupName} groupConfigRaw=${JsonUtils.printToJsonString(groupConfigRaw)}")
+        log.debug("groupName=${groupName} groupConfigRaw=${JsonUtils.printToJsonString(groupConfigRaw)}")
 
         // job configs overlay parent settings
         Map groupConfig = config.findAll { !["buildImageGroups","groups"].contains(it.key) } + groupConfigRaw
         groupConfig.groupName = groupName
         String stageName = "build group ${groupName}"
-        log.info("${logPrefix} groupName=${groupName} groupConfig=${JsonUtils.printToJsonString(groupConfig)}")
+        log.debug("groupName=${groupName} groupConfig=${JsonUtils.printToJsonString(groupConfig)}")
 
         if (config?.runGroupsInParallel && config.runGroupsInParallel.toBoolean()) {
             parallelGroups["group-${groupConfig.groupName}"] = {
-//                 jobResults = runDockerBuildManifest(groupConfig)
                 jobResults.groups.put(groupConfig.groupName, runDockerBuildManifest(groupConfig))
             }
         } else {
             stage("${stageName}") {
-//                 jobResults = runDockerBuildManifest(groupConfig)
                 jobResults.groups.put(groupConfig.groupName, runDockerBuildManifest(groupConfig))
             }
         }
     }
 
     if (parallelGroups.size()>0) {
-        log.info("${logPrefix} parallelGroups=${parallelGroups}")
+        log.debug("parallelGroups=${parallelGroups}")
         parallel parallelGroups
     }
 
-//     // ref: https://stackoverflow.com/questions/18380667/join-list-of-boolean-elements-groovy
-// //     boolean status = (false in jobResults) ? false : true
-// //     boolean status = (jobResults.size()>0) ? jobResults.inject { a, b -> a && b } : true
-//     if (!status && (config.failFast || !config.continueIfFailed)) {
-//         currentBuild.result = 'FAILURE'
-//         log.info("${logPrefix} config.continueIfFailed=${config.continueIfFailed}")
-//         log.info("${logPrefix} config.failFast=${config.failFast}")
-//         log.info("${logPrefix} results failed - not running any more jobs")
-//     }
-
-    boolean status = (jobResults.size()>0) ? jobResults.inject { a, b -> a.status && b.status } : true
-    jobResults.status = result
-
-//     log.info("${logPrefix} finished: jobResults=${jobResults}")
-    log.info("${logPrefix} finished: jobResults=${JsonUtils.printToJsonString(jobResults)}")
-    return jobResults
+    log.debug("finished: jobResult=${jobResult}")
+    return jobResult
 }
 
 // boolean buildAndPublishImageList(Map config) {
 Map buildAndPublishImageList(Map config) {
-    String logPrefix = "buildAndPublishImageList():"
+
     Map parallelJobs = [:]
-//     List jobResults = []
     Map jobResults = [:]
     jobResults.items = [:]
     config.buildImageList.each { Map buildConfigRaw ->
-        log.debug("${logPrefix} buildConfigRaw=${JsonUtils.printToJsonString(buildConfigRaw)}")
+        log.debug("buildConfigRaw=${JsonUtils.printToJsonString(buildConfigRaw)}")
 
         Map buildConfig = config.findAll { !["buildImageList"].contains(it.key) } + buildConfigRaw
 
-        log.info("${logPrefix} buildConfig=${JsonUtils.printToJsonString(buildConfig)}")
+        log.debug("buildConfig=${JsonUtils.printToJsonString(buildConfig)}")
 
         if (config?.runInParallel && config.runInParallel.toBoolean()) {
             parallelJobs["split-${buildConfig.buildImageLabel}"] = {
-//                 jobResults.add(runDockerBuildManifest(buildConfig))
-                jobResults.put(buildConfig.buildImageLabel, runDockerBuildManifest(buildConfig))
-
-//                 boolean status = runBuildAndPublishImageJob(buildConfig)
-//                 jobResults.status = result
-//                 if (!status && config.failFast) {
-//                     currentBuild.result = 'FAILURE'
-//                     log.info("${logPrefix} results failed and config.failFast is set - stopping immediately")
-//                     return jobResults
-//                 }
+                jobResults.items.put(buildConfig.buildImageLabel, runDockerBuildManifest(buildConfig))
             }
         } else {
             stage("build and publish ${buildConfig.buildImageLabel}") {
-//                 jobResults.add(runDockerBuildManifest(buildConfig))
-                jobResults.put(buildConfig.buildImageLabel, runDockerBuildManifest(buildConfig))
-
-//                 boolean status = runBuildAndPublishImageJob(buildConfig)
-//                 jobResults.status = result
-//                 if (!status && config.failFast) {
-//                     currentBuild.result = 'FAILURE'
-//                     log.info("${logPrefix} results failed and config.failFast is set - stopping immediately")
-//                     return jobResults
-//                 }
+                jobResults.items.put(buildConfig.buildImageLabel, runDockerBuildManifest(buildConfig))
             }
         }
     }
 
     if (parallelJobs.size()>0) {
-        log.info("${logPrefix} parallelJobs=${parallelJobs}")
+        log.debug("parallelJobs=${parallelJobs}")
         if (config?.parallelJobsBatchSize && config.parallelJobsBatchSize>0) {
-            log.info("${logPrefix} config.parallelJobsBatchSize=${config.parallelJobsBatchSize}")
+            log.debug("config.parallelJobsBatchSize=${config.parallelJobsBatchSize}")
             Integer batchSize = config.parallelJobsBatchSize
             Map parallelJobsBatch = [:]
             for (String key : parallelJobs.keySet()) {
@@ -340,47 +298,35 @@ Map buildAndPublishImageList(Map config) {
                 parallel parallelJobsBatch
             }
         } else {
-            log.info("${logPrefix} parallelJobs=${parallelJobs}")
+            log.debug("parallelJobs=${parallelJobs}")
             parallel parallelJobs
         }
     }
 
-//     // ref: https://stackoverflow.com/questions/18380667/join-list-of-boolean-elements-groovy
-//     //boolean status = (false in jobResults) ? false : true
-//     boolean status = (jobResults.size()>0) ? jobResults.inject { a, b -> a.status && b.status } : true
+    log.debug("jobResults=${JsonUtils.printToJsonString(jobResults)}")
 
-//     if (!status && (config.failFast || !config.continueIfFailed)) {
-//         currentBuild.result = 'FAILURE'
-//         log.info("${logPrefix} config.continueIfFailed=${config.continueIfFailed}")
-//         log.info("${logPrefix} config.failFast=${config.failFast}")
-//         log.info("${logPrefix} results failed - not running any more jobs")
-//     }
-//     log.info("${logPrefix} finished: jobResults=${jobResults}")
-    log.info("${logPrefix} finished: jobResults=${JsonUtils.printToJsonString(jobResults)}")
+    // ref: https://stackoverflow.com/questions/18380667/join-list-of-boolean-elements-groovy
+    // ref: https://blog.mrhaki.com/2009/09/groovy-goodness-using-inject-method.html
+    boolean failed = (jobResults.items.size()>0) ? jobResults.items.inject(true) { a, k, v -> a && v.failed } : false
+    jobResults.failed = failed
+
+    log.debug("finished: jobResults=${JsonUtils.printToJsonString(jobResults)}")
     return jobResults
 }
 
 // boolean runBuildAndPublishImageJob(Map config) {
 Map runBuildAndPublishImageJob(Map config) {
-    String logPrefix="runBuildAndPublishImageJob(${config.buildImageLabel}):"
-    log.info("${logPrefix} started")
+    Map jobResults = [:]
+    String logPrefix = "[${config.buildImageLabel}]:"
 
     log.debug("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
-
-    boolean priorJobResults = (jobResults.size()>0) ? jobResults.inject { a, b -> a.status && b.status } : true
-    if (!priorJobResults && (config.failFast || !config.continueIfFailed)) {
-        currentBuild.result = 'FAILURE'
-        log.info("${logPrefix} config.continueIfFailed=${config.continueIfFailed}")
-        log.info("${logPrefix} config.failFast=${config.failFast}")
-        log.info("${logPrefix} current results are FAILED - not running any more jobs")
-        return [:]
-    }
 
     String gitCommitId = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
 //     sh "git rev-parse HEAD > .git/commit-id"
 //     String gitCommitId = readFile('.git/commit-id').trim()
 
-    log.info("${logPrefix} gitCommitId=${gitCommitId}")
+    log.debug("${logPrefix} gitCommitId=${gitCommitId}")
+    jobResults.gitCommitId = gitCommitId
 
 //    DockerUtil dockerUtil = new DockerUtil(this)
     Map buildArgs = [:]
@@ -423,20 +369,20 @@ Map runBuildAndPublishImageJob(Map config) {
     ]
 
 //     // ref: https://stackoverflow.com/questions/45937337/jenkins-pipeline-get-repository-url-variable-under-pipeline-script-from-scm
-//     log.info("${logPrefix} scm.userRemoteConfigs=${JsonUtils.printToJsonString(scm.userRemoteConfigs)}")
-//     log.info("${logPrefix} scm.userRemoteConfigs[0].url=${scm.userRemoteConfigs[0].url}")
+//     log.debug("${logPrefix} scm.userRemoteConfigs=${JsonUtils.printToJsonString(scm.userRemoteConfigs)}")
+//     log.debug("${logPrefix} scm.userRemoteConfigs[0].url=${scm.userRemoteConfigs[0].url}")
 //     jobConfigs.gitRepoUrl = scm.userRemoteConfigs[0].url
 //     // ref: https://stackoverflow.com/questions/38254968/how-do-i-get-the-scm-url-inside-a-jenkins-pipeline-or-multibranch-pipeline
 // //     jobConfigs.gitRepoUrl = scm.getUserRemoteConfigs()[0].getUrl()
 //
 //     // ref: https://stackoverflow.com/questions/42383273/get-git-branch-name-in-jenkins-pipeline-jenkinsfile
-//     log.info("${logPrefix} scm.branches=${JsonUtils.printToJsonString(scm.branches)}")
-//     log.info("${logPrefix} scm.branches[0].name=${scm.branches[0].name}")
+//     log.debug("${logPrefix} scm.branches=${JsonUtils.printToJsonString(scm.branches)}")
+//     log.debug("${logPrefix} scm.branches[0].name=${scm.branches[0].name}")
 //     jobConfigs.gitRepoBranch = scm.branches[0].name
 // //     jobConfigs.gitRepoBranch = scm.branches.first().getExpandedName(env.getEnvironment())
 
-    log.info("${logPrefix} GIT_URL=${GIT_URL}")
-    log.info("${logPrefix} GIT_BRANCH=${GIT_BRANCH}")
+    log.debug("${logPrefix} GIT_URL=${GIT_URL}")
+    log.debug("${logPrefix} GIT_BRANCH=${GIT_BRANCH}")
 
     Map jobParameters = [:]
     jobParameters.Timeout = config.childJobTimeout
@@ -461,19 +407,20 @@ Map runBuildAndPublishImageJob(Map config) {
     }
     jobConfigs.jobParameters = jobParameters
 
-    log.info("${logPrefix} jobConfigs=${JsonUtils.printToJsonString(jobConfigs)}")
-//     boolean jobResult = runJob(jobConfigs)
-    Map jobResults = [:]
-    jobResults.status = runJob(jobConfigs)
+    jobResults.jobParameters = jobParameters
 
-    if (!jobResults.status && (config.failFast || !config.continueIfFailed)) {
+    log.info("${logPrefix} jobConfigs=${JsonUtils.printToJsonString(jobConfigs)}")
+    Map jobResult = runJob(jobConfigs)
+    log.info("${logPrefix} jobResult=${JsonUtils.printToJsonString(jobResult)}")
+    jobResults << jobResult
+
+    if (jobResults.failed && (config.failFast || !config.continueIfFailed)) {
         currentBuild.result = 'FAILURE'
-        log.info("${logPrefix} config.continueIfFailed=${config.continueIfFailed}")
-        log.info("${logPrefix} config.failFast=${config.failFast}")
-        log.info("${logPrefix} results failed - not running any more jobs")
+        log.debug("${logPrefix} config.continueIfFailed=${config.continueIfFailed}")
+        log.debug("${logPrefix} config.failFast=${config.failFast}")
+        log.error("${logPrefix} results failed - not running any more jobs")
     }
 
-//     log.info("${logPrefix} runJob(): jobResults=${jobResults}")
-    log.info("${logPrefix} finished: jobResults=${JsonUtils.printToJsonString(jobResults)}")
+    log.debug("${logPrefix} finished: jobResults=${JsonUtils.printToJsonString(jobResults)}")
     return jobResults
 }

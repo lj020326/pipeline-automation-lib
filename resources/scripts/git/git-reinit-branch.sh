@@ -3,18 +3,9 @@
 CONFIRM=0
 SCRIPT_NAME=$(basename $0)
 
-## How to reset/restart/blast repo:
-## Make the current commit the only (initial) commit in a Git repository?
-## ref: https://stackoverflow.com/questions/9683279/make-the-current-commit-the-only-initial-commit-in-a-git-repository
-
 GIT_REPO_REMOTE_PRIVATE="origin"
-GIT_REPO_REMOTE_LOCAL="gitea"
-GIT_REPO_REMOTE_PUBLIC="github"
 
 GIT_REPO_BRANCH_PUBLIC="public"
-
-GIT_REPO_URL_ORIGIN=ssh://git@gitea.admin.dettonville.int:2222/infra/pipeline-automation-lib.git
-GIT_REPO_URL_PUBLIC=git@github.com:lj020326/pipeline-automation-lib.git
 
 usage() {
   retcode=${1:-1}
@@ -54,7 +45,6 @@ if [ $# -lt 1 ]; then
     usage 5
 fi
 
-#TARGET_BRANCH="main"
 ## https://stackoverflow.com/questions/1593051/how-to-programmatically-determine-the-current-checked-out-git-branch
 CURRENT_GIT_BRANCH=$(git symbolic-ref HEAD 2>/dev/null)
 TARGET_BRANCH=${1:-"${CURRENT_GIT_BRANCH}"}
@@ -78,39 +68,25 @@ trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
 # echo an error message before exiting
 trap 'echo "\"${last_command}\" command filed with exit code $?."' EXIT
 
-TIMESTAMP=$(date +%Y%m%d%H%M%S)
-
-GIT_ARCHIVE_DIR="save"
-GIT_ARCHIVE_NAME="${GIT_ARCHIVE_DIR}/.git.${TIMESTAMP}"
-
-if [ -d ${GIT_ARCHIVE_NAME} ]; then
-  echo "cannot save to ${GIT_ARCHIVE_NAME} - backup already exists..."
-  exit 1
-fi
-
-echo "reinitializing git repo"
-#mv .git save/
-mv .git ${GIT_ARCHIVE_NAME}
-git init
-git add .
-git commit -m 'initial commit'
-git remote add "${GIT_REPO_REMOTE_PRIVATE}" ${GIT_REPO_URL_ORIGIN}
-git remote add "${GIT_REPO_REMOTE_PUBLIC}" ${GIT_REPO_URL_PUBLIC}
-git push -u --force "${GIT_REPO_REMOTE_PRIVATE}" "${TARGET_BRANCH}"
-git push -u --force "${GIT_REPO_REMOTE_LOCAL}" "${TARGET_BRANCH}"
-
-echo "re-initialize repos for the ${GIT_REPO_BRANCH_PUBLIC} branch"
-git checkout -b "${GIT_REPO_BRANCH_PUBLIC}"
-echo "add and commit"
-git add .
-git commit -m 'updates'
-echo "push ${GIT_REPO_BRANCH_PUBLIC} branch to repos"
-echo "push ${GIT_REPO_BRANCH_PUBLIC} branch to ${GIT_REPO_REMOTE_PUBLIC} repo"
-#git push --set-upstream "${GIT_REPO_REMOTE_PUBLIC}" "${GIT_REPO_BRANCH_PUBLIC}"
-git push -u --force "${GIT_REPO_REMOTE_PUBLIC}" "${GIT_REPO_BRANCH_PUBLIC}"
-echo "push ${GIT_REPO_BRANCH_PUBLIC} branch to ${GIT_REPO_REMOTE_PRIVATE} repo"
-git push -u --force "${GIT_REPO_REMOTE_PRIVATE}" "${GIT_REPO_BRANCH_PUBLIC}"
+echo "Check out current ${TARGET_BRANCH} branch:"
 git checkout "${TARGET_BRANCH}"
-git add .
-git commit -m 'updates'
-git push "${GIT_REPO_REMOTE_PRIVATE}" "${TARGET_BRANCH}"
+
+echo "Check out to a temporary branch:"
+git checkout --orphan TEMP_BRANCH
+
+echo "Add all the files:"
+git add -A
+
+echo "Commit the changes:"
+git commit -am "Initial commit"
+
+echo "Delete the old ${TARGET_BRANCH} branch:"
+git branch -D "${TARGET_BRANCH}"
+
+echo "Rename the temporary branch to ${TARGET_BRANCH}:"
+## ref: https://gist.github.com/heiswayi/350e2afda8cece810c0f6116dadbe651
+git branch -m "${TARGET_BRANCH}"
+
+echo "Force ${TARGET_BRANCH} branch update to ${GIT_REPO_REMOTE_PRIVATE} repository:"
+git push -f "${GIT_REPO_REMOTE_PRIVATE}" "${TARGET_BRANCH}"
+#git push -f --set-upstream "${GIT_REPO_REMOTE_PRIVATE}" ${TARGET_BRANCH}

@@ -6,12 +6,12 @@ import com.dettonville.api.pipeline.utils.MapMerge
 
 import com.dettonville.api.pipeline.utils.JsonUtils
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+//@Field Logger log = new Logger(this, LogLevel.INFO)
+@Field Logger log = new Logger(this)
 
 def call(Map config=[:]) {
-    String logPrefix="runAppDeployEnv():"
-
-//     Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this, LogLevel.INFO)
 
     def ymlConfigString = """
 ---
@@ -65,31 +65,31 @@ appEnvironments:
 //    if (appEnvComponentSettings.containsKey(config.appEnvironment) &&
 //            appEnvComponentSettings[config.appEnvironment].containsKey(config.appComponentSet))
 //    {
-//        log.debug("${logPrefix} 0) any env+component specific settings. E.g., artifactVersion")
+//        log.debug("0) any env+component specific settings. E.g., artifactVersion")
 //        Map componentSettings = appEnvComponentSettings[config.appEnvironment].get(config.appComponentSet, [:])
 //        config=MapMerge.merge(componentSettings, config)
-//        log.debug("${logPrefix} 0) config=${JsonUtils.printToJsonString(config)}")
+//        log.debug("0) config=${JsonUtils.printToJsonString(config)}")
 //    }
 
     if (!config.isGroupJob) {
-        log.debug("${logPrefix} 1) apply appenv settings")
+        log.debug("1) apply appenv settings")
         config = MapMerge.merge(envSettings, config)
 //        config = MapMerge.merge(config, envSettings)
-        log.debug("${logPrefix} 1) config=${JsonUtils.printToJsonString(config)}")
+        log.debug("1) config=${JsonUtils.printToJsonString(config)}")
     }
 
     if (config?.appDeployStrategy) {
-        log.debug("${logPrefix} 2) apply deploy suite settings")
+        log.debug("2) apply deploy suite settings")
         Map appDeployStrategySettings = ymlConfigMap.appDeployStrategies.get(config.appDeployStrategy.toUpperCase(), [:])
         config=MapMerge.merge(appDeployStrategySettings, config)
-        log.debug("${logPrefix} 2) config=${JsonUtils.printToJsonString(config)}")
+        log.debug("2) config=${JsonUtils.printToJsonString(config)}")
     }
 
     if (config?.cronCfg) {
         properties([pipelineTriggers([cron("${config.cronCfg}")])])
     }
 
-    log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.info("config=${JsonUtils.printToJsonString(config)}")
 
     runAppDeployment(config)
 

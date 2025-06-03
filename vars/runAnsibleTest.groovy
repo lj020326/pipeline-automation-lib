@@ -16,9 +16,6 @@ import groovy.transform.Field
 
 def call(Map params=[:]) {
 
-//     Logger log = new Logger(this, LogLevel.INFO)
-// //     log.setLevel(LogLevel.DEBUG)
-
     Map config=loadPipelineConfig(params)
     String agentLabel = getJenkinsAgentLabel(config.jenkinsNodeLabel)
 //     def agentLabel = getJenkinsAgentLabel(config.jenkinsNodeLabel)
@@ -135,11 +132,11 @@ def call(Map params=[:]) {
             always {
                 script {
 //                     sendEmailReport(config.emailFrom, config.emailDist, currentBuild, 'ansible.log')
-//                     def build_status = "${currentBuild.result ? currentBuild.result : 'SUCCESS'}"
+//                     def build_result = "${currentBuild.result ? currentBuild.result : 'SUCCESS'}"
 //                     emailext (
 //                         to: "${config.emailDist}",
 //                         from: "${config.emailFrom}",
-//                         subject: "BUILD ${build_status}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+//                         subject: "BUILD ${build_result}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
 //                         body: "${env.EMAIL_BODY} \n\nBuild Log:\n${ansibleLogSummary}",
 //                     )
                     sendEmail(currentBuild, env)
@@ -179,12 +176,11 @@ static Result getResultFromException(Throwable e) {
 
 //@NonCPS
 Map loadPipelineConfig(Map params) {
-    String logPrefix="loadPipelineConfig():"
     Map config = [:]
 
     // copy immutable params maps to mutable config map
     params.each { key, value ->
-        log.debug("${logPrefix} params[${key}]=${value}")
+        log.debug("params[${key}]=${value}")
         key=Utilities.decapitalize(key)
         if (value!="") {
             config[key]=value
@@ -257,8 +253,8 @@ Map loadPipelineConfig(Map params) {
     
     config.collectionDir=config.get('collectionDir', 'ansible_collections')
 
-    log.debug("${logPrefix} params=${params}")
-    log.debug("${logPrefix} config=${config}")
+    log.debug("params=${params}")
+    log.debug("config=${config}")
 
     return config
 }

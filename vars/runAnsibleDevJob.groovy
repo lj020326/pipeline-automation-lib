@@ -6,12 +6,12 @@ import com.dettonville.api.pipeline.utils.logging.Logger
 import com.dettonville.api.pipeline.utils.JsonUtils
 import com.dettonville.api.pipeline.utils.Utilities
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+//@Field Logger log = new Logger(this, LogLevel.INFO)
+@Field Logger log = new Logger(this)
+
 def call(Map config=[:]) {
-
-//     Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this, LogLevel.INFO)
-
-    String logPrefix="runAnsibleDevJob():"
 
     List paramList = []
 
@@ -43,9 +43,9 @@ def call(Map config=[:]) {
     config.ansiblePlaybook = config.get('ansiblePlaybook','site.yml')
     config.gitPerformCheckout = false
 
-    log.info("${logPrefix} env.BRANCH_NAME=${env.BRANCH_NAME}")
+    log.info("env.BRANCH_NAME=${env.BRANCH_NAME}")
 
-    log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.info("config=${JsonUtils.printToJsonString(config)}")
 
     runAnsiblePlaybook(config)
 

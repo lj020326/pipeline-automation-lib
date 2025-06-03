@@ -6,11 +6,12 @@ import com.dettonville.api.pipeline.utils.logging.Logger
 import com.dettonville.api.pipeline.utils.JsonUtils
 import com.dettonville.api.pipeline.utils.Utilities
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+//@Field Logger log = new Logger(this, LogLevel.INFO)
+@Field Logger log = new Logger(this)
+
 def call(Map config=[:]) {
-
-    Logger log = new Logger(this, LogLevel.INFO)
-
-    String logPrefix="runAnsibleParamWrapper():"
 
     List paramList = []
 
@@ -84,11 +85,11 @@ def call(Map config=[:]) {
 //         string(credentialsId: 'awx-oauth-token', variable: 'TOWER_OAUTH_TOKEN')
 //     ]
 
-    log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.info("config=${JsonUtils.printToJsonString(config)}")
 
     runAnsiblePlaybook(config)
 
-    log.info("${logPrefix} finished")
+    log.info("finished")
 
 }
 
