@@ -26,10 +26,9 @@ class EmailUtils implements Serializable {
      **/
 //    void sendEmailNotification(Map config, String emailListString) {
     void sendEmailNotification(Map config, String notifyAction) {
-        String logPrefix = "sendEmailNotification():"
 
         if (!config) {
-            log.error("${logPrefix} **** config not found to derive email recipients")
+            log.error("**** config not found to derive email recipients")
             return
         }
         Map emailInfoMap = [
@@ -41,7 +40,7 @@ class EmailUtils implements Serializable {
         ]
 
         if (!emailInfoMap.containsKey(notifyAction)) {
-            log.warn("${logPrefix} **** unknown post notify result = [${notifyAction}]")
+            log.warn("**** unknown post notify result = [${notifyAction}]")
             return
         }
 
@@ -49,11 +48,11 @@ class EmailUtils implements Serializable {
         String emailListString = emailInfoMap[notifyAction].list
 
         if (!emailListString || emailListString=="") {
-            log.debug("${logPrefix} no notification subscription recipients found for event, finished here")
+            log.debug("no notification subscription recipients found for event, finished here")
             return
         }
 
-        log.info("${logPrefix} emailListString=[${emailListString}]")
+        log.info("emailListString=[${emailListString}]")
 
         String recipients = ""
 

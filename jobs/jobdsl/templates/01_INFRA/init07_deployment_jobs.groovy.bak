@@ -78,7 +78,7 @@ def createSnapshotJob(repoFolder, repo) {
 
 def createReleaseJob(repoFolder, repo) {
   pipelineJob(repoFolder+'/release') {
-    description('Triggered when pusing tag to repo in GitLab ('+repo.cloneUrl+'). '
+    description('Triggered when pushing tag to repo in GitLab ('+repo.cloneUrl+'). '
               + 'Or when run manually.')
     quietPeriod(0)
     properties {

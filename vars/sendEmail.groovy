@@ -1,15 +1,24 @@
+import com.dettonville.api.pipeline.utils.logging.LogLevel
+import com.dettonville.api.pipeline.utils.logging.Logger
 import com.dettonville.api.pipeline.utils.JsonUtils
+
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+@Field Logger log = new Logger(this, LogLevel.INFO)
 
 /**
  * Sends an email to culprits, developers who made changes in the build, and the user who initiated the build.
  * @param currentBuild Refers to the currently running build
  * @param env Environment variables applicable to the currently running build
+ *
+ * NOTE: this function supports mixing named and positional parameters per following method
+ * ref: https://docs.groovy-lang.org/latest/html/documentation/#_mixing_named_and_positional_parameters
  */
-void call(def currentBuild,
-        def env,
-        List emailAdditionalDistList=[],
-        List recipientProviders=[]) {
-    String logPrefix="sendEmail():"
+void call(Map args=[:], java.lang.Object currentBuild, java.lang.Object env) {
+
+    // ref: https://stackoverflow.com/a/46512017/2791368
+    List emailAdditionalDistList = args.get('emailAdditionalDistList', [])
+    log.info("emailAdditionalDistList=${JsonUtils.printToJsonString(emailAdditionalDistList)}")
 
     List recipientProvidersDefault = [
         [$class: 'CulpritsRecipientProvider'],
@@ -21,42 +30,20 @@ void call(def currentBuild,
 //         [$class: 'RequesterRecipientProvider']
 //     ]
 
-    echo("${logPrefix} recipientProviders=${JsonUtils.printToJsonString(recipientProviders)}")
-    echo("${logPrefix} emailAdditionalDistList=${JsonUtils.printToJsonString(emailAdditionalDistList)}")
+    List recipientProviders = args.get('recipientProviders', recipientProvidersDefault)
 
-    emailDistList = []
-    if (!emailAdditionalDistList.isEmpty()) {
-        emailDistList.addAll(emailAdditionalDistList)
-    }
-    echo("${logPrefix} emailDistList=${JsonUtils.printToJsonString(emailDistList)}")
-
-    recipientProvidersList = recipientProviders
-    if (recipientProvidersList.isEmpty()) {
-//         emailDistList = emailextrecipients(recipientProvidersDefault)
-        recipientProvidersList = recipientProvidersDefault
-    }
-    echo("${logPrefix} recipientProvidersList=${JsonUtils.printToJsonString(recipientProvidersList)}")
+    log.info("recipientProviders=${JsonUtils.printToJsonString(recipientProviders)}")
 
     String emailSubject = "Job '${env.JOB_NAME.replaceAll('%2F', '/')}' (${currentBuild.displayName}) has finished with ${currentBuild.result ? currentBuild.result : "SUCCESS"}"
+    String recipients = emailAdditionalDistList.join(', ')
+    log.info("recipients=${recipients}")
 
-    if (!emailDistList.isEmpty()) {
-        def recipients = emailDistList.join(', ')
-        echo("recipients=${recipients}")
+    emailext (
+        mimeType: 'text/html',
+        recipientProviders: recipientProviders,
+        to: recipients,
+        subject: emailSubject,
+        body: '${SCRIPT, template="groovy-html.template"}'
+    )
 
-        // ref: https://stackoverflow.com/questions/43473159/jenkins-pipeline-emailext-emailextrecipients-can-i-also-add-specific-individua
-        emailext (
-            mimeType: 'text/html',
-            to: recipients,
-            recipientProviders: recipientProvidersList,
-            subject: emailSubject,
-            body: '${SCRIPT, template="groovy-html.template"}'
-        )
-    } else {
-        emailext (
-            mimeType: 'text/html',
-            recipientProviders: recipientProvidersList,
-            subject: emailSubject,
-            body: '${SCRIPT, template="groovy-html.template"}'
-        )
-    }
 }

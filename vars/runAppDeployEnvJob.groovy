@@ -12,18 +12,13 @@ import groovy.transform.Field
 
 def call(Map inConfig=[:]) {
 
-//     Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this, LogLevel.INFO)
-
-    String logPrefix="runAppDeployEnvJob():"
-
     Map config = inConfig.clone()
 
-    config.jobMode = config.get('jobMode', true)
+    config.get('jobMode', true)
 
     if (config.jobMode) {
         List jobParts = JOB_NAME.split("/")
-        log.info("${logPrefix} jobParts=${jobParts}")
+        log.info("jobParts=${jobParts}")
 
         config.jobBaseFolderLevel = config.jobBaseFolderLevel ?: 2
 
@@ -42,7 +37,7 @@ def call(Map inConfig=[:]) {
         //    echo "${logPrefix} appDeployStrategyParts=${appDeployStrategyParts}"
         config.appDeployStrategy=appDeployStrategyParts.join("/")
 
-        log.debug("${logPrefix} config(1)=${JsonUtils.printToJsonString(config)}")
+        log.debug("config(1)=${JsonUtils.printToJsonString(config)}")
     }
 
     if (config.appComponentSet.contains("SELECTED")) {
@@ -51,14 +46,13 @@ def call(Map inConfig=[:]) {
         config = getDeploymentJobParams(config)
     }
 
-    log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.info("config=${JsonUtils.printToJsonString(config)}")
 
     runAppDeployEnv(config)
 
 }
 
 Map getDeploymentJobParams(Map inConfig) {
-    String logPrefix="getDeploymentJobParams():"
 
     List enabledParamListDefault = ['artifactVersion','runPostDeployTests','useSimulationMode','debugReleaseScript']
 //    List enabledParamListDefault = ['artifactVersion','runPostDeployTests']
@@ -66,8 +60,8 @@ Map getDeploymentJobParams(Map inConfig) {
     Map config = inConfig.clone()
     config.isGroupJob = false
 
-    config.enabledParamList = config.get('enabledParamList', enabledParamListDefault)
-    config.enableDevParams = config.get('enableDevParams', (config.enabledParamList.isEmpty()) ? true : false)
+    config.get('enabledParamList', enabledParamListDefault)
+    config.get('enableDevParams', (config.enabledParamList.isEmpty()) ? true : false)
 
     String configYmlString = """
 ---
@@ -136,7 +130,7 @@ appComponents:
                 logLevel: choice(choices: LOGLEVELS.join('\n'), description: "Choose Log Level", name: 'LogLevel')
         ]
 
-        log.debug("${logPrefix} paramMap=${JsonUtils.printToJsonString(paramMap)}")
+        log.debug("paramMap=${JsonUtils.printToJsonString(paramMap)}")
 
         if (config.enableDevParams) {
             config.enabledParamList = paramMap.keySet() as List
@@ -162,11 +156,11 @@ appComponents:
         }
 
         config.enabledParamList.each { String paramName ->
-            log.debug("${logPrefix} paramName=${paramName}")
+            log.debug("paramName=${paramName}")
             if (paramMap.containsKey(paramName)) {
                 paramList.add(paramMap[paramName])
             } else {
-                log.warn("${logPrefix} paramName=${paramName} not found")
+                log.warn("paramName=${paramName} not found")
             }
         }
 
@@ -177,7 +171,7 @@ appComponents:
             disableConcurrentBuilds()
     ])
 
-    log.debug("${logPrefix} params=${JsonUtils.printToJsonString(params)}")
+    log.debug("params=${JsonUtils.printToJsonString(params)}")
 
     params.each { String key, def value ->
         if (value!="") {
@@ -190,14 +184,13 @@ appComponents:
         config.remove("enabledParamList")
     }
 
-    log.debug("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.debug("config=${JsonUtils.printToJsonString(config)}")
 
     return config
 
 }
 
 Map getSelectableDeploymentJobParams(Map inConfig) {
-    String logPrefix="getSelectableDeploymentJobParams():"
 
     Map config = inConfig.clone()
     config.isGroupJob = true
@@ -248,20 +241,20 @@ Map getSelectableDeploymentJobParams(Map inConfig) {
         if (params["Deploy${componentId}"]) deployGroup.add(componentId)
     }
 
-    log.debug("${logPrefix} params=${JsonUtils.printToJsonString(params)}")
+    log.debug("params=${JsonUtils.printToJsonString(params)}")
 
     paramMap.each { Map entry ->
         String key=Utilities.capitalize(entry.key)
         def value = params[key]
         if (value!="") {
-            log.debug("${logPrefix} added key=${key} value=${value}")
+            log.debug("added key=${key} value=${value}")
             config[entry.key] = value
         }
     }
 
     config.deployGroup = deployGroup
 
-    log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.info("config=${JsonUtils.printToJsonString(config)}")
 
     return config
 

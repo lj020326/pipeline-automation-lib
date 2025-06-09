@@ -154,11 +154,11 @@ Map getBuildDiffs(BuildApiUtils buildApiUtils, JsonUtils jsonUtils, Map config) 
     Map buildResults1 = buildApiUtils.getBuildResults(buildNumber1, config)
     Map buildResults2 = buildApiUtils.getBuildResults(buildNumber2, config)
 
-    log.info("${logPrefix} build results json")
+    log.info("build results json")
 
     Boolean isDiff = jsonUtils.isJsonDiff(buildResults1, buildResults2, true)
 
-    log.info("${logPrefix} isDiff = ${isDiff}")
+    log.info("isDiff = ${isDiff}")
 
 //    Map deployJobDiffs = config.clone()
     Map deployJobDiffs = [:]
@@ -176,7 +176,7 @@ Map getBuildDiffs(BuildApiUtils buildApiUtils, JsonUtils jsonUtils, Map config) 
     }
     deployJobDiffs.diffs = diffMap
 
-    log.debug("${logPrefix} diffs=${diffs}")
+    log.debug("diffs=${diffs}")
 
     if (config.getResultsFile && isDiff) {
         deployJobDiffs.buildDiffResultsFile = "${config.name}.diffs.json"
@@ -184,7 +184,7 @@ Map getBuildDiffs(BuildApiUtils buildApiUtils, JsonUtils jsonUtils, Map config) 
         writeJSON file: deployJobDiffs.buildDiffResultsFile, json: jsonOut, pretty: 4
     }
 
-    log.info("${logPrefix} deployJobDiffs=${JsonUtils.printToJsonString(deployJobDiffs)}")
+    log.info("deployJobDiffs=${JsonUtils.printToJsonString(deployJobDiffs)}")
 
     return deployJobDiffs
 }

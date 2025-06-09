@@ -12,13 +12,12 @@ import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException
 
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field
-@Field Logger log = new Logger(this, LogLevel.INFO)
+//@Field Logger log = new Logger(this, LogLevel.INFO)
+@Field Logger log = new Logger(this)
 
 def call(Map params=[:]) {
 
-//     Logger log = new Logger(this, LogLevel.INFO)
-// //     log.setLevel(LogLevel.DEBUG)
-
+//     log.enableDebug()
     Map config = loadPipelineConfig(params)
     String ansibleLogSummary = "No results"
 
@@ -71,10 +70,10 @@ def call(Map params=[:]) {
 
 //                         String gitBranch = java.net.URLDecoder.decode(env.BRANCH_NAME, "UTF-8")
                         String gitBranch = java.net.URLDecoder.decode(env.GIT_BRANCH, "UTF-8")
-                        config.gitBranch = config.get('gitBranch',"${gitBranch}")
+                        config.get('gitBranch',"${gitBranch}")
                         config.gitCommitHash = env.GIT_COMMIT
-                        log.info("config.gitBranch=${config.gitBranch}")
-                        log.info("config.gitCommitHash=${config.gitCommitHash}")
+                        log.debug("config.gitBranch=${config.gitBranch}")
+                        log.debug("config.gitCommitHash=${config.gitCommitHash}")
 
                         // install galaxy roles
                         List ansibleGalaxyArgList = []
@@ -191,9 +190,9 @@ def call(Map params=[:]) {
 
                                     if (config.isTestPipeline) {
                                         if (fileExists(config.testComponentDir)) {
-    //                                         sh "tree ${config.testBasePath}/"
-    //                                          archiveArtifacts allowEmptyArchive: true, artifacts: "${config.testBaseDir}/**"
-    //                                         sh "tree ${config.testComponentDir}/"
+//                                             sh "tree ${config.testBasePath}/"
+//                                              archiveArtifacts allowEmptyArchive: true, artifacts: "${config.testBaseDir}/**"
+//                                             sh "tree ${config.testComponentDir}/"
                                             archiveArtifacts allowEmptyArchive: true, artifacts: "${config.testComponentDir}/**"
                                             publishHTML([allowMissing         : true,
                                                          alwaysLinkToLastBuild: true,
@@ -229,7 +228,7 @@ def call(Map params=[:]) {
                     }
                     if (config.gitBranch in ['origin/main','main']) {
                         log.info("post(${config.gitBranch}): sendEmail(${currentBuild.result})")
-                        sendEmail(currentBuild, env, emailAdditionalDistList=emailAdditionalDistList)
+                        sendEmail(currentBuild, env, emailAdditionalDistList: emailAdditionalDistList)
                     } else {
                         log.info("post(${config.gitBranch}): sendEmail(${currentBuild.result}, 'RequesterRecipientProvider')")
                         sendEmail(currentBuild, env)
@@ -242,7 +241,7 @@ def call(Map params=[:]) {
                 script {
                     if (config?.successEmailList) {
                         log.info("config.successEmailList=${config.successEmailList}")
-                        sendEmail(currentBuild, env, emailAdditionalDistList=[config.successEmailList.split(",")])
+                        sendEmail(currentBuild, env, emailAdditionalDistList: [config.successEmailList.split(",")])
                     }
                 }
             }
@@ -250,7 +249,7 @@ def call(Map params=[:]) {
                 script {
                     if (config?.failedEmailList) {
                         log.info("config.failedEmailList=${config.failedEmailList}")
-                        sendEmail(currentBuild, env, emailAdditionalDistList=[config.failedEmailList.split(",")])
+                        sendEmail(currentBuild, env, emailAdditionalDistList: [config.failedEmailList.split(",")])
                     }
                 }
             }
@@ -258,7 +257,7 @@ def call(Map params=[:]) {
                 script {
                     if (config?.failedEmailList) {
                         log.info("config.failedEmailList=${config.failedEmailList}")
-                        sendEmail(currentBuild, env, emailAdditionalDistList=[config.failedEmailList.split(",")])
+                        sendEmail(currentBuild, env, emailAdditionalDistList: [config.failedEmailList.split(",")])
                     }
                 }
             }
@@ -266,7 +265,7 @@ def call(Map params=[:]) {
                 script {
                     if (config?.changedEmailList) {
                         log.info("config.changedEmailList=${config.changedEmailList}")
-                        sendEmail(currentBuild, env, emailAdditionalDistList=[config.changedEmailList.split(",")])
+                        sendEmail(currentBuild, env, emailAdditionalDistList: [config.changedEmailList.split(",")])
                     }
                 }
             }
@@ -277,17 +276,19 @@ def call(Map params=[:]) {
 
 //@NonCPS
 Map loadPipelineConfig(Map params) {
-    String logPrefix="loadPipelineConfig():"
     Map config = [:]
 
     // copy immutable params maps to mutable config map
     params.each { key, value ->
-        log.debug("${logPrefix} params[${key}]=${value}")
+        log.debug("params[${key}]=${value}")
         key=Utilities.decapitalize(key)
         if (value!="") {
             config[key]=value
         }
     }
+
+    config.get('logLevel', "INFO")
+    config.get('debugPipeline', false)
 
     log.setLevel(config.logLevel)
 
@@ -295,37 +296,35 @@ Map loadPipelineConfig(Map params) {
         log.setLevel(LogLevel.DEBUG)
     }
 
-    config.jenkinsNodeLabel = config.get('jenkinsNodeLabel',"ansible")
-//     config.logLevel = config.get('logLevel', "INFO")
-    config.logLevel = config.get('logLevel', "DEBUG")
-    config.debugPipeline = config.get('debugPipeline', false)
-    config.timeout = config.get('timeout', 3)
-    config.timeoutUnit = config.get('timeoutUnit', 'HOURS')
-    config.tmpDirMaxFileCount = config.get('tmpDirMaxFileCount', 100)
+    config.get('jenkinsNodeLabel',"ansible")
+
+    config.get('timeout', 3)
+    config.get('timeoutUnit', 'HOURS')
+    config.get('tmpDirMaxFileCount', 100)
 
 //    config.emailDist = config.emailDist ?: "lee.johnson@dettonville.com"
-    config.emailDist = config.get('emailDist',"lee.johnson@dettonville.com")
+    config.get('emailDist',"lee.johnson@dettonville.com")
     // config.alwaysEmailDist = config.alwaysEmailDist ?: "lee.johnson@dettonville.com"
     config.emailFrom = config.emailFrom ?: "admin+ansible@dettonville.com"
 
-    config.skipDefaultCheckout = config.get('skipDefaultCheckout', false)
-    config.gitPerformCheckout = config.get('gitPerformCheckout', !config.get('skipDefaultCheckout',false))
+    config.get('skipDefaultCheckout', false)
+    config.get('gitPerformCheckout', !config.get('skipDefaultCheckout',false))
 
-    config.varFilesRelativeToPlaybookDir = config.get('varFilesRelativeToPlaybookDir', false)
-    config.inventoryPathRelativeToPlaybookDir = config.get('inventoryPathRelativeToPlaybookDir', false)
-    config.requirementsPathsRelativeToPlaybookDir = config.get('requirementsPathsRelativeToPlaybookDir', false)
+    config.get('varFilesRelativeToPlaybookDir', false)
+    config.get('inventoryPathRelativeToPlaybookDir', false)
+    config.get('requirementsPathsRelativeToPlaybookDir', false)
 
-//     config.ansiblePlaybookDir = config.get('ansiblePlaybookDir', 'ansible-linux')
-//     config.ansiblePlaybookDir = config.get('ansiblePlaybookDir',"ansible/${env.JOB_NAME.split('/')[-2]}")
+//     config.get('ansiblePlaybookDir', 'ansible-linux')
+//     config.get('ansiblePlaybookDir',"ansible/${env.JOB_NAME.split('/')[-2]}")
 
-    config.ansibleCollectionsRequirements = config.get('ansibleCollectionsRequirements', 'collections/requirements.yml')
+    config.get('ansibleCollectionsRequirements', 'collections/requirements.yml')
     if (config?.requirementsPathsRelativeToPlaybookDir && config.requirementsPathsRelativeToPlaybookDir.toBoolean() && config.ansiblePlaybookDir) {
         config.ansibleCollectionsRequirements = "${config.ansiblePlaybookDir}/${config.ansibleCollectionsRequirements}"
     }
 
-//     config.ansibleRolesRequirements = config.get('ansibleRolesRequirements', './roles/requirements.yml')
-//    config.ansibleInventory = config.get('ansibleInventory', 'inventory')
-//    config.ansibleInventory = config.get('ansibleInventory', 'hosts.yml')
+//     config.get('ansibleRolesRequirements', './roles/requirements.yml')
+//    config.get('ansibleInventory', 'inventory')
+//    config.get('ansibleInventory', 'hosts.yml')
     if ( config.ansibleInventory ) {
         if (config?.inventoryPathRelativeToPlaybookDir && config.inventoryPathRelativeToPlaybookDir.toBoolean() && config.ansiblePlaybookDir) {
             config.ansibleInventory = "${config.ansiblePlaybookDir}/${config.ansibleInventory}"
@@ -333,26 +332,26 @@ Map loadPipelineConfig(Map params) {
         config.ansibleInventoryDir = config.ansibleInventory.take(config.ansibleInventory.lastIndexOf('/'))
     }
 
-    config.ansibleGalaxyIgnoreCerts = config.get('ansibleGalaxyIgnoreCerts', false)
-    config.ansibleGalaxyForceOpt = config.get('ansibleGalaxyForceOpt', false)
-    config.ansibleGalaxyUpgradeOpt = config.get('ansibleGalaxyUpgradeOpt', true)
+    config.get('ansibleGalaxyIgnoreCerts', false)
+    config.get('ansibleGalaxyForceOpt', false)
+    config.get('ansibleGalaxyUpgradeOpt', false)
 
-    config.ansibleSshCredId = config.get('ansibleSshCredId', 'jenkins-ansible-ssh')
-    config.ansibleVaultCredId = config.get('ansibleVaultCredId', 'ansible-vault-password-file')
-// //     config.ansibleGalaxyTokenCredId = config.get('ansibleGalaxyTokenCredId', 'ansible-galaxy-pah-token-file')
-//     config.ansibleGalaxyTokenCredId = config.get('ansibleGalaxyTokenCredId', 'ansible-galaxy-pah-token')
-    config.ansiblePlaybook = config.get('ansiblePlaybook', 'site.yml')
-    config.ansibleTags = config.get('ansibleTags', '')
+    config.get('ansibleSshCredId', 'jenkins-ansible-ssh')
+    config.get('ansibleVaultCredId', 'ansible-vault-password-file')
+// //     config.get('ansibleGalaxyTokenCredId', 'ansible-galaxy-pah-token-file')
+//     config.get('ansibleGalaxyTokenCredId', 'ansible-galaxy-pah-token')
+    config.get('ansiblePlaybook', 'site.yml')
+    config.get('ansibleTags', '')
 
     String ansibleGalaxyCmd = "ansible-galaxy"
     String ansibleCmd = "ansible"
 
-    config.ansibleInstallation = config.get('ansibleInstallation', 'ansible-venv')
+    config.get('ansibleInstallation', 'ansible-venv')
     config.ansibleGalaxyCmd = ansibleGalaxyCmd
     config.ansibleCmd = ansibleCmd
 
-    config.ansibleGalaxyEnvVarsList = config.get('ansibleGalaxyEnvVarsList', [])
-    config.galaxySecretVarsListDefault = config.get('galaxySecretVarsListDefault', [])
+    config.get('ansibleGalaxyEnvVarsList', [])
+    config.get('galaxySecretVarsListDefault', [])
 
 //     ansibleGalaxyEnvVarsList=[
 //         "ANSIBLE_GALAXY_SERVER_LIST=published_repo,rh_certified,community_repo",
@@ -367,7 +366,7 @@ Map loadPipelineConfig(Map params) {
 //         "ANSIBLE_GALAXY_SERVER_COMMUNITY_REPO_VALIDATE_CERTS=no"
 //     ]
 //
-//     config.ansibleGalaxyEnvVarsList = config.get('ansibleGalaxyEnvVarsList', ansibleGalaxyEnvVarsList)
+//     config.get('ansibleGalaxyEnvVarsList', ansibleGalaxyEnvVarsList)
 //
 //     List galaxySecretVarsListDefault=[
 //         string(credentialsId: config.ansibleGalaxyTokenCredId, variable: 'ANSIBLE_GALAXY_SERVER_PUBLISHED_REPO_TOKEN'),
@@ -375,14 +374,14 @@ Map loadPipelineConfig(Map params) {
 //         string(credentialsId: config.ansibleGalaxyTokenCredId, variable: 'ANSIBLE_GALAXY_SERVER_COMMUNITY_REPO_TOKEN')
 //     ]
 //
-//     config.galaxySecretVarsListDefault = config.get('galaxySecretVarsListDefault', galaxySecretVarsListDefault)
+//     config.get('galaxySecretVarsListDefault', galaxySecretVarsListDefault)
 
-    config.isTestPipeline = config.get('isTestPipeline', false)
+    config.get('isTestPipeline', false)
     if (config.isTestPipeline) {
-        config.testBaseDir = config.get('testBaseDir', "test-results")
+        config.get('testBaseDir', "test-results")
     }
 
-    config.ansibleEnvVarsList = config.get('ansibleEnvVarsList', [])
+    config.get('ansibleEnvVarsList', [])
 
     // require SSH credentials for some ansible jobs (e.g., deploy-cacerts)
     // ref: https://docs.cloudbees.com/docs/cloudbees-ci/latest/cloud-secure-guide/injecting-secrets
@@ -395,29 +394,28 @@ Map loadPipelineConfig(Map params) {
 //         file(credentialsId: config.ansibleGalaxyTokenCredId, variable: 'ANSIBLE_GALAXY_TOKEN_PATH')
 //     ]
 
-    config.ansibleSecretVarsList = config.get('ansibleSecretVarsList', secretVarsListDefault)
+    config.get('ansibleSecretVarsList', secretVarsListDefault)
 
-    log.debug("${logPrefix} params=${params}")
-    log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.debug("params=${params}")
+    log.info("config=${JsonUtils.printToJsonString(config)}")
 
     return config
 }
 
 Map loadPipelineConfigFile(Map config) {
-    String logPrefix="loadPipelineConfigFile():"
 
     Map ansiblePipelineConfigMap = readYaml file: config.ansiblePipelineConfigFile
-    log.debug("${logPrefix} ansiblePipelineConfigMap=${JsonUtils.printToJsonString(ansiblePipelineConfigMap)}")
+    log.debug("ansiblePipelineConfigMap=${JsonUtils.printToJsonString(ansiblePipelineConfigMap)}")
 
     ansibleRootConfigMap=ansiblePipelineConfigMap.findAll { !['repoList'].contains(it.key) }
 
-    log.debug("${logPrefix} config.ansibleRootConfigMap=${ansibleRootConfigMap}")
+    log.debug("config.ansibleRootConfigMap=${ansibleRootConfigMap}")
     config = MapMerge.merge(config, ansibleRootConfigMap)
 
     if (!config.ansiblePlaybookRepo) {
         return config
     }
-    log.info("${logPrefix} config.ansiblePlaybookRepo=${config.ansiblePlaybookRepo}")
+    log.debug("config.ansiblePlaybookRepo=${config.ansiblePlaybookRepo}")
 
     if (!ansiblePipelineConfigMap.repoList) {
         return config
@@ -425,36 +423,35 @@ Map loadPipelineConfigFile(Map config) {
 
     if (ansiblePipelineConfigMap.repoList["${config.ansiblePlaybookRepo}"]) {
         Map ansibleRepoConfigMap = ansiblePipelineConfigMap.repoList[config.ansiblePlaybookRepo]
-        log.debug("${logPrefix} ansibleRepoConfigMap=${JsonUtils.printToJsonString(ansibleRepoConfigMap)}")
+        log.debug("ansibleRepoConfigMap=${JsonUtils.printToJsonString(ansibleRepoConfigMap)}")
 
         ansibleRepoConfigMap=ansibleRepoConfigMap.findAll { !['SANDBOX','DEV','QA','PROD'].contains(it.key) }
 
         if (ansiblePipelineConfigMap.repoList["${config.ansiblePlaybookRepo}"]["${config.environment}"]) {
             Map ansibleEnvConfigMap = ansiblePipelineConfigMap.repoList["${config.ansiblePlaybookRepo}"]["${config.environment}"]
-            log.info("${logPrefix} ansibleEnvConfigMap=${JsonUtils.printToJsonString(ansibleEnvConfigMap)}")
+            log.debug("ansibleEnvConfigMap=${JsonUtils.printToJsonString(ansibleEnvConfigMap)}")
 
-            log.info("${logPrefix} Merge ansibleEnvConfigMap to ansibleRepoConfigMap")
+            log.debug("Merge ansibleEnvConfigMap to ansibleRepoConfigMap")
             ansibleRepoConfigMap = MapMerge.merge(ansibleRepoConfigMap, ansibleEnvConfigMap)
         }
-        log.info("${logPrefix} ansibleRepoConfigMap=${JsonUtils.printToJsonString(ansibleRepoConfigMap)}")
+        log.debug("ansibleRepoConfigMap=${JsonUtils.printToJsonString(ansibleRepoConfigMap)}")
 
-        log.info("${logPrefix} Merge ansibleRepoConfigMap to config map")
+        log.debug("Merge ansibleRepoConfigMap to config map")
         config = MapMerge.merge(config, ansibleRepoConfigMap)
     }
 //     if (config.requirementsPathsRelativeToPlaybookDir.toBoolean() && config.ansiblePlaybookDir
 //         && !config.ansibleCollectionsRequirements.startsWith(config.ansiblePlaybookDir))
     if (config.requirementsPathsRelativeToPlaybookDir.toBoolean() && config?.ansiblePlaybookDir) {
-        log.info("${logPrefix} Prepend ansiblePlaybookDir to config.ansibleCollectionsRequirements")
+        log.debug("Prepend ansiblePlaybookDir to config.ansibleCollectionsRequirements")
         config.ansibleCollectionsRequirements = "${config.ansiblePlaybookDir}/${config.ansibleCollectionsRequirements}"
-        log.info("${logPrefix} Modified config.ansibleCollectionsRequirements=${config.ansibleCollectionsRequirements}")
+        log.debug("Modified config.ansibleCollectionsRequirements=${config.ansibleCollectionsRequirements}")
     }
 
-    log.info("${logPrefix} Merged config=${JsonUtils.printToJsonString(config)}")
+    log.info("Merged config=${JsonUtils.printToJsonString(config)}")
     return config
 }
 
 Map getAnsibleCommandConfig(Map config) {
-    String logPrefix="getAnsibleCommandConfig():"
 
     String ansiblePlaybook = "${config.ansiblePlaybook}"
     if (config.ansiblePlaybookDir) {
@@ -505,7 +502,7 @@ Map getAnsibleCommandConfig(Map config) {
     if (config.containsKey('ansibleExtraVars')) {
         extraVars+=config.ansibleExtraVars
     }
-    config.isTestPipeline = config.get('isTestPipeline', false)
+    config.get('isTestPipeline', false)
 
     if (config.isTestPipeline) {
 //         config.testBasePath = "${env.WORKSPACE}/${config.testBaseDir}"
@@ -523,7 +520,7 @@ Map getAnsibleCommandConfig(Map config) {
         extraVars+=["ansible_python_interpreter" : config.ansiblePythonInterpreter]
     }
     if (extraVars.size()>0) {
-        log.info("extraVars=${JsonUtils.printToJsonString(extraVars)}")
+        log.debug("extraVars=${JsonUtils.printToJsonString(extraVars)}")
         ansibleCfg[ANSIBLE][ANSIBLE_EXTRA_VARS]=extraVars
     }
 

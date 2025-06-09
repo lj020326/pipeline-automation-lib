@@ -5,17 +5,14 @@ import com.dettonville.api.pipeline.utils.logging.LogLevel
 import com.dettonville.api.pipeline.utils.logging.Logger
 import com.dettonville.api.pipeline.utils.DockerUtil
 
-
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field
-@Field Logger log = new Logger(this, LogLevel.INFO)
+//@Field Logger log = new Logger(this, LogLevel.INFO)
+@Field Logger log = new Logger(this)
 
 // ref: https://gist.github.com/fortunecookiezen/b3bc3214a07a14529608857d078b32dd
 
 def call(Map params=[:]) {
-
-// //    Logger.init(this, LogLevel.INFO)
-//     Logger log = new Logger(this, LogLevel.INFO)
 
     log.info("Loading Default Configs")
 
@@ -165,26 +162,25 @@ def call(Map params=[:]) {
 
 //@NonCPS
 Map loadPipelineConfig(Map params) {
-    String logPrefix="loadPipelineConfig():"
     Map config = [:]
 
     // copy immutable params maps to mutable config map
     params.each { key, value ->
-        log.debug("${logPrefix} params[${key}]=${value}")
+        log.debug("params[${key}]=${value}")
 //        key= Utilities.decapitalize(key)
         if (value!="") {
             config[key]=value
         }
     }
 
-    config.logLevel = config.get('logLevel', "INFO")
+    config.get('logLevel', "INFO")
 
     log.setLevel(config.logLevel)
 
-    log.info("${logPrefix} log.level=${log.level}")
+    log.info("log.level=${log.level}")
 
-    log.info("${logPrefix} params=${JsonUtils.printToJsonString(params)}")
-    log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.info("params=${JsonUtils.printToJsonString(params)}")
+    log.info("config=${JsonUtils.printToJsonString(config)}")
 
     return config
 }

@@ -29,13 +29,13 @@ import java.time.*
 class AcceptanceTestHarness implements Serializable {
     private static final long serialVersionUID = 1L
 
-    com.dettonville.api.pipeline.utils.logging.Logger log = new com.dettonville.api.pipeline.utils.logging.Logger(this)
+    Logger log = new Logger(this)
     def dsl
 
-    com.dettonville.api.pipeline.utils.CredentialParser credentialParser
-    com.dettonville.api.pipeline.utils.JenkinsApiUtils jenkinsApiUtils
-    com.dettonville.api.pipeline.utils.ArtifactApiUtils artifactApiUtils
-    com.dettonville.api.pipeline.utils.JsonUtils jsonUtils
+    CredentialParser credentialParser
+    JenkinsApiUtils jenkinsApiUtils
+    ArtifactApiUtils artifactApiUtils
+    JsonUtils jsonUtils
     EmailUtils emailUtils
 
     Map pipelineConfig
@@ -51,32 +51,31 @@ class AcceptanceTestHarness implements Serializable {
     AcceptanceTestHarness(def dsl) {
         this.dsl = dsl
 
-        com.dettonville.api.pipeline.utils.logging.Logger.init(this.dsl, com.dettonville.api.pipeline.utils.logging.LogLevel.INFO)
-        this.credentialParser = new com.dettonville.api.pipeline.utils.CredentialParser(dsl)
-        this.jenkinsApiUtils = new com.dettonville.api.pipeline.utils.JenkinsApiUtils(dsl)
-        this.artifactApiUtils = new com.dettonville.api.pipeline.utils.ArtifactApiUtils(dsl)
+        Logger.init(this.dsl, LogLevel.INFO)
+        this.credentialParser = new CredentialParser(dsl)
+        this.jenkinsApiUtils = new JenkinsApiUtils(dsl)
+        this.artifactApiUtils = new ArtifactApiUtils(dsl)
         this.emailUtils = new EmailUtils(dsl)
-        this.jsonUtils = new com.dettonville.api.pipeline.utils.JsonUtils(dsl)
+        this.jsonUtils = new JsonUtils(dsl)
 //        testResults = false
         currentState.deployJobsRanDuringTest = false
 
     }
 
     def runAllTestSteps(Map params) {
-        String logPrefix="runAllTestSteps():"
 
         dsl.stage("Pre-Test Steps") {
-            log.info("${logPrefix} Running Pre-Test Steps")
+            log.info("Running Pre-Test Steps")
             runPreTestSteps(params)
         }
 
         dsl.stage("Run Acceptance Test Harness") {
-            log.info("${logPrefix} Running Tests")
+            log.info("Running Tests")
             runTests()
         }
 
         dsl.stage('Post-Test Steps') {
-            log.info("${logPrefix} Running Post-Test Steps")
+            log.info("Running Post-Test Steps")
             runPostTestSteps()
         }
 
@@ -84,8 +83,7 @@ class AcceptanceTestHarness implements Serializable {
     }
 
     Map runPreTestSteps(Map params) {
-        String logPrefix="runPreTestSteps():"
-        log.debug("${logPrefix} started")
+        log.debug("started")
 
         initPipeline(params)
 
@@ -93,13 +91,13 @@ class AcceptanceTestHarness implements Serializable {
 
         dsl.dir(pipelineConfig.checkoutDir) {
             if (pipelineConfig.startBrowserstackLocalAgent && pipelineConfig.runBsAgentMethod == "PER_RUN") {
-                log.info("${logPrefix} Setup Browserstack Agent")
+                log.info("Setup Browserstack Agent")
                 if (!dsl.fileExists("${pipelineConfig.bsAgentBinPath}/BrowserStackLocal")) {
                     getBSAgent()
                 }
             }
 
-            log.info("${logPrefix} Compile ATH")
+            log.info("Compile ATH")
             if (pipelineConfig.useSimulationMode) {
                 dsl.figlet "SIMULATION MODE"
             }
@@ -116,7 +114,7 @@ class AcceptanceTestHarness implements Serializable {
         }
 
         if (pipelineConfig?.deployJobEnvName && pipelineConfig.checkIfDeployJobsRan) {
-            log.info("${logPrefix} Getting Pre-Test Deploy Job results")
+            log.info("Getting Pre-Test Deploy Job results")
             Map componentDeployJobSnapshots = [:]
             componentDeployJobSnapshots.before = getDeployJobResults()
             currentState.componentDeployJobSnapshots = componentDeployJobSnapshots
@@ -126,77 +124,75 @@ class AcceptanceTestHarness implements Serializable {
     }
 
     Map initPipeline(Map params) {
-        String logPrefix = "initPipeline():"
-        log.debug("${logPrefix} started")
+        log.debug("started")
 
         this.pipelineConfig=loadPipelineConfig(params)
-        log.debug("${logPrefix} initial pipelineConfig=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(pipelineConfig)}")
+        log.debug("initial pipelineConfig=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(pipelineConfig)}")
 
         log.debug("NODE_NAME = ${dsl.env.NODE_NAME}")
 
         agentLabelM3 = getJenkinsAgentLabel(pipelineConfig.jenkinsM3NodeLabel)
 
-        log.debug("${logPrefix} initializing/clearing out stashes")
+        log.debug("initializing/clearing out stashes")
         dsl.stash name: pipelineConfig.STASH_NAME_INIT, excludes: "**", allowEmpty: true
         dsl.stash name: pipelineConfig.STASH_NAME, excludes: "**", allowEmpty: true
         dsl.stash name: pipelineConfig.STASH_NAME_POST_TEST, excludes: "**", allowEmpty: true
         dsl.stash name: pipelineConfig.STASH_NAME_REPORTS, excludes: "**", allowEmpty: true
 
-        log.debug("${logPrefix} initialize job cause info")
+        log.debug("initialize job cause info")
         pipelineConfig.jobCauseMap = [:]
 
-        log.debug("${logPrefix} pipelineConfig.athGitRepo=${pipelineConfig.athGitRepo}")
-        log.debug("${logPrefix} pipelineConfig.scmUrl=${pipelineConfig.scmUrl}")
-        log.debug("${logPrefix} pipelineConfig.athGitBranch=${pipelineConfig.athGitBranch}")
-        log.debug("${logPrefix} pipelineConfig.scmBranch=${pipelineConfig.scmBranch}")
+        log.debug("pipelineConfig.athGitRepo=${pipelineConfig.athGitRepo}")
+        log.debug("pipelineConfig.scmUrl=${pipelineConfig.scmUrl}")
+        log.debug("pipelineConfig.athGitBranch=${pipelineConfig.athGitBranch}")
+        log.debug("pipelineConfig.scmBranch=${pipelineConfig.scmBranch}")
 
-        log.debug("${logPrefix} pipelineConfig.scmPomVersion=${pipelineConfig.scmPomVersion}")
+        log.debug("pipelineConfig.scmPomVersion=${pipelineConfig.scmPomVersion}")
 
         if (pipelineConfig.scmUrl != pipelineConfig.athGitRepo
                 || pipelineConfig.athGitBranch != pipelineConfig.scmBranch
                 || pipelineConfig.scmPomVersion == null) {
-            log.info("${logPrefix} Checking out ATH Source from repo")
+            log.info("Checking out ATH Source from repo")
             checkoutAutomationCode(pipelineConfig)
 
-            log.info("${logPrefix} Loading ATH Configs")
+            log.info("Loading ATH Configs")
             pipelineConfig = loadPipelineConfig(params)
-            log.info("${logPrefix} ****ATH Configs Loaded")
+            log.info("****ATH Configs Loaded")
 
             if (pipelineConfig.athGitRepo != pipelineConfig.scmUrl
                     || pipelineConfig.athGitBranch != pipelineConfig.scmBranch
                     || pipelineConfig.scmPomVersion == null) {
-                log.warn("${logPrefix} difference between desired Repo state and current Repo state")
-                log.warn("${logPrefix} pipelineConfig.athGitRepo=${pipelineConfig.athGitRepo} =? pipelineConfig.scmUrl=${pipelineConfig.scmUrl}")
-                log.warn("${logPrefix} pipelineConfig.athGitBranch=${pipelineConfig.athGitBranch} =? pipelineConfig.scmBranch=${pipelineConfig.scmBranch}")
-                log.warn("${logPrefix} pipelineConfig.scmPomVersion=${pipelineConfig.scmPomVersion}")
+                log.warn("difference between desired Repo state and current Repo state")
+                log.warn("pipelineConfig.athGitRepo=${pipelineConfig.athGitRepo} =? pipelineConfig.scmUrl=${pipelineConfig.scmUrl}")
+                log.warn("pipelineConfig.athGitBranch=${pipelineConfig.athGitBranch} =? pipelineConfig.scmBranch=${pipelineConfig.scmBranch}")
+                log.warn("pipelineConfig.scmPomVersion=${pipelineConfig.scmPomVersion}")
             }
         } else {
-            log.info("${logPrefix} **** ATH Config File already loaded since scmUrl and scmBranch agree with config")
+            log.info("**** ATH Config File already loaded since scmUrl and scmBranch agree with config")
         }
 
         if (pipelineConfig.getJobCause) {
-            log.info("${logPrefix} getting job cause info")
+            log.info("getting job cause info")
             try {
                 Map jobCauseMap = jenkinsApiUtils.getCurrentJobCauseInfo()
-                log.info("${logPrefix} jobCauseMap=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(jobCauseMap)}")
+                log.info("jobCauseMap=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(jobCauseMap)}")
                 pipelineConfig.jobCauseMap = jobCauseMap
                 pipelineConfig.jobCause = (pipelineConfig.jobCauseMap?.shortDescription) ? pipelineConfig.jobCauseMap.shortDescription : ""
-                log.info("${logPrefix} pipelineConfig.jobCause=${pipelineConfig.jobCause}")
+                log.info("pipelineConfig.jobCause=${pipelineConfig.jobCause}")
 
             } catch (Exception err) {
-                log.error("${logPrefix} exception occurred getting job cause info: [${err}]")
+                log.error("exception occurred getting job cause info: [${err}]")
             }
         }
 
         updateJobDescription()
 
-        log.info("${logPrefix} final pipelineConfig=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(pipelineConfig)}")
+        log.info("final pipelineConfig=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(pipelineConfig)}")
 
         return this.pipelineConfig
     }
 
     def runMvnClean() {
-        String logPrefix="runMvnClean():"
 
         String mvnCmd = "${dsl.env.M3}/bin/mvn clean test ${pipelineConfig.mvnLogOptions} -Denv=${pipelineConfig.appEnvironment} -DskipTests=${pipelineConfig.skipTests}"
 
@@ -209,36 +205,35 @@ class AcceptanceTestHarness implements Serializable {
         }
 
         if (pipelineConfig.useSimulationMode) {
-            log.info("${logPrefix} **** USING SIMULATION MODE - following command not actually run *****")
-            log.info("${logPrefix} mvnCmd=${mvnCmd}")
+            log.info("**** USING SIMULATION MODE - following command not actually run *****")
+            log.info("mvnCmd=${mvnCmd}")
         } else {
-            log.debug("${logPrefix} mvnCmd=${mvnCmd}")
+            log.debug("mvnCmd=${mvnCmd}")
             dsl.sh "${mvnCmd}"
         }
 
     }
 
     def runPostTestSteps() {
-        String logPrefix="runPostTestSteps():"
-        log.info("${logPrefix} started")
+        log.info("started")
 
 //        dsl.deleteDir()
         dsl.cleanWs()
-        log.debug("${logPrefix} unstashing test results")
+        log.debug("unstashing test results")
 
         dsl.unstash name: pipelineConfig.STASH_NAME
 
         if (pipelineConfig.checkIfDeployJobsRan && pipelineConfig?.deployJobEnvName) {
-            log.info("${logPrefix} Getting Post-Test Deploy Job results")
+            log.info("Getting Post-Test Deploy Job results")
             currentState.componentDeployJobSnapshots.after = getDeployJobResults()
 
             currentState.componentDeployJobDiffResults = getAllBuildDiffs()
 
-            log.info("${logPrefix} currentState.componentDeployJobDiffResults=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(currentState.componentDeployJobDiffResults)}")
+            log.info("currentState.componentDeployJobDiffResults=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(currentState.componentDeployJobDiffResults)}")
 
             if (currentState.componentDeployJobDiffResults.size()>0) {
-                log.error("${logPrefix} [${currentState.componentDeployJobDiffResults.size()}] Deployment Job Differences found")
-                log.error("${logPrefix} Deployment Jobs were run during the Test Cycle")
+                log.error("[${currentState.componentDeployJobDiffResults.size()}] Deployment Job Differences found")
+                log.error("Deployment Jobs were run during the Test Cycle")
                 currentState.deployJobsRanDuringTest = true
                 if (pipelineConfig.buildStatusConfig.getDeployBuildResults) {
                     dsl.archiveArtifacts artifacts: '*.json', onlyIfSuccessful: false
@@ -248,9 +243,9 @@ class AcceptanceTestHarness implements Serializable {
 
         if (!pipelineConfig.runSingleMvnCmdMode) {
             getTestResults(pipelineConfig)
-            log.debug("${logPrefix} aggregating test results")
+            log.debug("aggregating test results")
 
-            log.debug("${logPrefix} Post Integration - Serenity Report Creation")
+            log.debug("Post Integration - Serenity Report Creation")
             String mvnCmd = "${dsl.env.M3}/bin/mvn test serenity:aggregate ${pipelineConfig.mvnLogOptions} -Dserenity.outputDirectory=target/site/serenity -Denv=${pipelineConfig.appEnvironment} -DskipTests=${pipelineConfig.skipTests}"
 
             if (pipelineConfig.useLocalMvnRepo) {
@@ -260,10 +255,10 @@ class AcceptanceTestHarness implements Serializable {
             }
 
             if (pipelineConfig.useSimulationMode) {
-                log.info("${logPrefix} **** USING SIMULATION MODE - following command not actually run *****")
-                log.info("${logPrefix} mvnCmd=${mvnCmd}")
+                log.info("**** USING SIMULATION MODE - following command not actually run *****")
+                log.info("mvnCmd=${mvnCmd}")
             } else {
-                log.debug("${logPrefix} mvnCmd=${mvnCmd}")
+                log.debug("mvnCmd=${mvnCmd}")
                 dsl.sh "${mvnCmd}"
                 dsl.junit 'target/site/serenity/*.xml'
 
@@ -274,12 +269,12 @@ class AcceptanceTestHarness implements Serializable {
         }
 
         if (pipelineConfig.debugPipeline && !pipelineConfig.useSimulationMode) {
-            log.debug("${logPrefix} find results:")
+            log.debug("find results:")
             runFind()
         }
 
         if (pipelineConfig?.collectTestResults) {
-            log.info("${logPrefix} append to aggregated test results")
+            log.info("append to aggregated test results")
             updateHistoricalTestResults(pipelineConfig)
         }
 
@@ -288,9 +283,9 @@ class AcceptanceTestHarness implements Serializable {
                 String summaryFile = "summary.txt"
                 if (dsl.fileExists(summaryFile)) {
                     dsl.archiveArtifacts artifacts: summaryFile
-                    log.info("${logPrefix} ${summaryFile} archived")
+                    log.info("${summaryFile} archived")
                 } else {
-                    log.warn("${logPrefix} ${summaryFile} not found")
+                    log.warn("${summaryFile} not found")
                 }
             }
 
@@ -312,8 +307,8 @@ class AcceptanceTestHarness implements Serializable {
 
         currentState.duration = "${dsl.currentBuild.durationString.replace(' and counting', '')}"
 
-        log.info("${logPrefix} save currentState to ${pipelineConfig.jobResultsFile}")
-        log.debug("${logPrefix} removing componentDeployJobSnapshots from currentState before saving since noisy/unnecessary")
+        log.info("save currentState to ${pipelineConfig.jobResultsFile}")
+        log.debug("removing componentDeployJobSnapshots from currentState before saving since noisy/unnecessary")
         Map currentStateSave = currentState.findAll { it.key != 'componentDeployJobSnapshots' }
         def jsonOut = dsl.readJSON text: JsonOutput.toJson(currentStateSave)
         dsl.writeJSON file: pipelineConfig.jobResultsFile, json: jsonOut, pretty: 4
@@ -321,20 +316,19 @@ class AcceptanceTestHarness implements Serializable {
 
         dsl.stash name: pipelineConfig.STASH_NAME_POST_TEST
 
-        log.info("${logPrefix} Set Pipeline Status")
+        log.info("Set Pipeline Status")
         dsl.currentBuild.result = (currentState.testResults) ? 'SUCCESS' : 'FAILURE'
-        log.info("${logPrefix} **** dsl.currentBuild.result=${dsl.currentBuild.result}")
+        log.info("**** dsl.currentBuild.result=${dsl.currentBuild.result}")
 
         updateJobDescription()
 
     }
 
     Map getDeployJobResults() {
-        String logPrefix="getDeployJobResults():"
-        log.debug("${logPrefix} started")
+        log.debug("started")
 
         Map config = pipelineConfig.deployConfig + pipelineConfig.buildStatusConfig
-        config.deployJobEnvName = config.get("deployJobEnvName", pipelineConfig.deployJobEnvName)
+        config.get("deployJobEnvName", pipelineConfig.deployJobEnvName)
         Map buildResults = [:]
 
         config.componentList.each { Map component ->
@@ -349,7 +343,7 @@ class AcceptanceTestHarness implements Serializable {
                 componentConfig.jobBaseUri += "/${componentConfig.deployJobName}/job/${componentConfig.branch}"
             }
 
-            log.info("${logPrefix} componentConfig=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(componentConfig)}")
+            log.info("componentConfig=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(componentConfig)}")
 
             Integer buildNumber = jenkinsApiUtils.getBuildNumber(componentConfig.jobBaseUri)
             Map buildInfo = jenkinsApiUtils.getBuildResults(buildNumber, componentConfig)
@@ -359,7 +353,7 @@ class AcceptanceTestHarness implements Serializable {
             buildInfo.componentVersion = componentConfig.version
             buildInfo.componentName = componentConfig.name
 
-            log.info("${logPrefix} componentConfig.version=${componentConfig.version}")
+            log.info("componentConfig.version=${componentConfig.version}")
 
             componentConfig.deployUrl = buildInfo.url
 
@@ -371,20 +365,20 @@ class AcceptanceTestHarness implements Serializable {
                 componentConfig.deployArtifactFile="DeployInfo.json"
                 componentConfig.deployResultsFile = "DeployInfo.${componentConfig.name}.${buildNumber}.json"
                 if (jenkinsApiUtils.getJobArtifactFromBuildUrl(componentConfig.deployUrl, componentConfig.deployArtifactFile, componentConfig.deployResultsFile)==200) {
-                    log.debug("${logPrefix} ${componentConfig.deployResultsFile} retrieved")
+                    log.debug("${componentConfig.deployResultsFile} retrieved")
                     Map deployResults = dsl.readJSON file: componentConfig.deployResultsFile
-                    log.debug("${logPrefix} deployResults=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(deployResults)}")
+                    log.debug("deployResults=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(deployResults)}")
                     buildInfo.deployResults = deployResults
                     dsl.archiveArtifacts(artifacts: componentConfig.deployResultsFile, onlyIfSuccessful: false)
                 } else {
-                    log.warn("${logPrefix} artifact [${componentConfig.deployArtifactFile}] not found for ${componentConfig.deployUrl}")
+                    log.warn("artifact [${componentConfig.deployArtifactFile}] not found for ${componentConfig.deployUrl}")
                 }
             }
 
             if (componentConfig.getDeployBuildResults) {
                 componentConfig.buildResultsFile = "BuildInfo.${componentConfig.name}.${buildNumber}.json"
                 def jsonOut = dsl.readJSON text: JsonOutput.toJson(buildInfo)
-                log.debug("${logPrefix} jsonOut=${jsonOut}")
+                log.debug("jsonOut=${jsonOut}")
                 dsl.writeJSON file: componentConfig.buildResultsFile, json: jsonOut, pretty: 4
                 dsl.archiveArtifacts(artifacts: componentConfig.buildResultsFile, onlyIfSuccessful: false)
             }
@@ -392,66 +386,64 @@ class AcceptanceTestHarness implements Serializable {
             buildResults[componentConfig.name] = buildInfo
 
         }
-        log.debug("${logPrefix} buildResults=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(buildResults)}")
+        log.debug("buildResults=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(buildResults)}")
         return buildResults
     }
 
     List getAllBuildDiffs() {
-        String logPrefix="getAllBuildDiffs():"
-        log.info("${logPrefix} started")
+        log.info("started")
 
         Map config = pipelineConfig.deployConfig + pipelineConfig.buildStatusConfig
-        config.deployJobEnvName = config.get("deployJobEnvName", pipelineConfig.deployJobEnvName)
+        config.get("deployJobEnvName", pipelineConfig.deployJobEnvName)
         List componentDiffResults = []
 
         config.componentList.each { Map component ->
             Map componentConfig = config.findAll { it.key != 'componentList' } + component
 
             componentConfig.deployResultsFileName=componentConfig.name
-            log.info("${logPrefix} componentConfig=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(componentConfig)}")
+            log.info("componentConfig=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(componentConfig)}")
 
             componentConfig.buildResultsBefore = currentState.componentDeployJobSnapshots.before[componentConfig.name]
             componentConfig.buildResultsAfter = currentState.componentDeployJobSnapshots.after[componentConfig.name]
 
-            log.debug("${logPrefix} componentConfig.buildResultsBefore=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(componentConfig.buildResultsBefore)}")
-            log.debug("${logPrefix} componentConfig.buildResultsAfter=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(componentConfig.buildResultsAfter)}")
+            log.debug("componentConfig.buildResultsBefore=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(componentConfig.buildResultsBefore)}")
+            log.debug("componentConfig.buildResultsAfter=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(componentConfig.buildResultsAfter)}")
 
             Map buildDiffs
             try {
                 buildDiffs = getBuildDiffs(componentConfig)
             } catch (Exception err) {
-                log.error("${logPrefix} job exception occurred [${err}]")
+                log.error("job exception occurred [${err}]")
             }
-            log.info("${logPrefix} [${componentConfig.name}] buildDiffs=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(buildDiffs)}")
+            log.info("[${componentConfig.name}] buildDiffs=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(buildDiffs)}")
 
             if (!buildDiffs.isEmpty()) {
                 componentDiffResults.add(buildDiffs)
             }
         }
-        log.info("${logPrefix} componentDiffResults=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(componentDiffResults)}")
+        log.info("componentDiffResults=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(componentDiffResults)}")
         return componentDiffResults
     }
 
     Map getBuildDiffs(Map config) {
-        String logPrefix = "getBuildDiffs():"
         Map deployJobDiffs = [:]
 
         Map buildResultsBefore = config.buildResultsBefore
         Map buildResultsAfter = config.buildResultsAfter
 
-        log.info("${logPrefix} compare build results json")
+        log.info("compare build results json")
 
 //        Boolean isDiff = jsonUtils.isJsonDiff(buildResultsBefore, buildResultsAfter, true)
         Boolean isDiff = (buildResultsBefore.number != buildResultsAfter.number)
 
-        log.info("${logPrefix} isDiff = ${isDiff}")
+        log.info("isDiff = ${isDiff}")
 
         if (!isDiff) {
             return deployJobDiffs
         }
-        log.info("${logPrefix} config=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(config)}")
-        log.info("${logPrefix} buildResultsBefore=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(buildResultsBefore)}")
-        log.info("${logPrefix} buildResultsAfter=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(buildResultsAfter)}")
+        log.info("config=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(config)}")
+        log.info("buildResultsBefore=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(buildResultsBefore)}")
+        log.info("buildResultsAfter=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(buildResultsAfter)}")
 
         deployJobDiffs.isDiff = isDiff
         deployJobDiffs.component = config.name
@@ -467,7 +459,7 @@ class AcceptanceTestHarness implements Serializable {
 //        Map diffMap = diffs.collectEntries{ Map diff ->
 //            [(diff.label):diff.findAll { it.key != 'label' }]
 //        }
-//        log.debug("${logPrefix} diffs=${diffs}")
+//        log.debug("diffs=${diffs}")
         Map diffMap = jsonUtils.getJsonDiffMap(buildResultsBefore, buildResultsAfter, true)
         deployJobDiffs.diffs = diffMap
 
@@ -478,7 +470,7 @@ class AcceptanceTestHarness implements Serializable {
             dsl.archiveArtifacts artifacts: '*.json', onlyIfSuccessful: false
         }
 
-        log.info("${logPrefix} deployJobDiffs=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(deployJobDiffs)}")
+        log.info("deployJobDiffs=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(deployJobDiffs)}")
 
         return deployJobDiffs
     }
@@ -489,14 +481,13 @@ class AcceptanceTestHarness implements Serializable {
     }
 
     Map loadPipelineConfig(Map params, String configFile=null) {
-        String logPrefix="loadPipelineConfig():"
-        log.debug("${logPrefix} starting...")
+        log.debug("starting...")
 
         // set job config settings
         Map defaultSettings = getDefaultSettings()
         Map config=defaultSettings.pipeline
 
-        log.debug("${logPrefix} config(1)=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(config)}")
+        log.debug("config(1)=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(config)}")
 
         // handle config yml
         // handle config file
@@ -504,17 +495,17 @@ class AcceptanceTestHarness implements Serializable {
             Map configSettings = dsl.readYaml file: "${configFile}"
             config = com.dettonville.api.pipeline.utils.MapMerge.merge(config, configSettings.pipeline)
         } else if (configFile != null) {
-            log.debug("${logPrefix} pipeline config file ${configFile} not present, using defaults...")
+            log.debug("pipeline config file ${configFile} not present, using defaults...")
         } else {
-            log.debug("${logPrefix} pipeline config file not specified, using defaults...")
+            log.debug("pipeline config file not specified, using defaults...")
         }
         if (params?.yml) {
             Map ymlConfig = dsl.readYaml text: params.yml
-            log.debug("${logPrefix} ymlConfig=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(ymlConfig)}")
+            log.debug("ymlConfig=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(ymlConfig)}")
             config = com.dettonville.api.pipeline.utils.MapMerge.merge(config, ymlConfig.pipeline)
         }
 
-        log.debug("${logPrefix} params=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(params)}")
+        log.debug("params=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(params)}")
 
         // copy immutable params maps to mutable config map
 //        params.each { key, value ->
@@ -524,7 +515,7 @@ class AcceptanceTestHarness implements Serializable {
 //            }
 //        }
         config = com.dettonville.api.pipeline.utils.MapMerge.merge(config, params)
-        log.debug("${logPrefix} config(2)=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(config)}")
+        log.debug("config(2)=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(config)}")
 
 //        config=encodeToUTF8(config)
 
@@ -562,9 +553,9 @@ class AcceptanceTestHarness implements Serializable {
         config.scmBranch = getGitBranchName()
         config.scmPomVersion = getAthPomVersion()
 
-        log.debug("${logPrefix} JOB_NAME = ${dsl.env.JOB_NAME}")
-//    config.application = config.get('application', dsl.env.JOB_NAME.replaceAll('%2F', '/').replaceAll('/', '-').replaceAll(' ', '-').toUpperCase())
-        log.debug("${logPrefix} config.application = ${config.application}")
+        log.debug("JOB_NAME = ${dsl.env.JOB_NAME}")
+//    config.get('application', dsl.env.JOB_NAME.replaceAll('%2F', '/').replaceAll('/', '-').replaceAll(' ', '-').toUpperCase())
+        log.debug("config.application = ${config.application}")
 
         List jobParts = dsl.env.JOB_NAME.split("/")
         jobParts.remove(0)
@@ -576,7 +567,7 @@ class AcceptanceTestHarness implements Serializable {
 
 //    config.browserstackName = jobParts.collect{ it.toLowerCase().replaceAll(' ', '').replaceAll('-', '').replaceAll('_', '') }.join('-')
         config.browserstackName = config.jobName.toUpperCase()
-        log.debug("${logPrefix} config.browserstackName = ${config.browserstackName}")
+        log.debug("config.browserstackName = ${config.browserstackName}")
 
         config.runBsAgentMethod=(config.runBsAgentMethod=="PER_THREAD") ? "PER_RUN" : config.runBsAgentMethod
         config.bsAgentBaseDir=(config.runBsAgentMethod=="PER_RUN") ? "tmp/${config.jenkinsProjectName}" : "/var/tmp/${config.jenkinsProjectName}"
@@ -595,10 +586,10 @@ class AcceptanceTestHarness implements Serializable {
 
         if (config.debugPipeline) {
             log.setLevel(com.dettonville.api.pipeline.utils.logging.LogLevel.DEBUG)
-            log.debug("${logPrefix} **********************")
-            log.debug("${logPrefix} pipeline env variables:")
+            log.debug("**********************")
+            log.debug("pipeline env variables:")
             dsl.sh('printenv | sort')
-            log.debug("${logPrefix} **********************")
+            log.debug("**********************")
         }
 
         config.STASH_NAME_INIT="${config.application}_${dsl.env.BUILD_NUMBER}"
@@ -606,20 +597,18 @@ class AcceptanceTestHarness implements Serializable {
         config.STASH_NAME_POST_TEST="${config.STASH_NAME_INIT}_POST"
         config.STASH_NAME_REPORTS="${config.STASH_NAME_INIT}_RPT"
 
-        log.debug("${logPrefix} final config=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(config)}")
+        log.debug("final config=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(config)}")
 
         return config
     }
 
 //boolean runJob(Map config) {
     void runJob(Map config) {
-
-        String logPrefix="runJob():"
         config.supportedJobParams=['changedEmailList','alwaysEmailList','failedEmailList']
 
         // This will copy all files packaged in STASH_NAME to agent workspace root directory.
         // To copy to another agent directory, see [https://github.com/jenkinsci/pipeline-examples]
-        log.info("${logPrefix} started")
+        log.info("started")
 
         boolean result = false
         List paramList=[]
@@ -631,37 +620,35 @@ class AcceptanceTestHarness implements Serializable {
         }
 
         if (config.get('job',null)==null) {
-            log.error("${logPrefix} job not specified")
+            log.error("job not specified")
             return result
         }
 
         try {
-            log.info("${logPrefix} starting job ${config.job}")
+            log.info("starting job ${config.jobName}")
 
             // ref: http://jenkins-ci.361315.n4.nabble.com/How-to-get-build-results-from-a-build-job-in-a-pipeline-td4897887.html
-//            def jobBuild = build job: config.job, parameters: paramList, wait: config.wait, propagate: false
-            def jobBuild = build job: config.job, parameters: paramList, wait: false
+//            def jobBuild = build job: config.jobName, parameters: paramList, wait: config.wait, propagate: false
+            def jobBuild = build job: config.jobName, parameters: paramList, wait: false
         } catch (Exception err) {
-            log.error("${logPrefix} job exception occurred [${err}]")
+            log.error("job exception occurred [${err}]")
         }
 
     }
 
     String getGitUrl() {
-        String logPrefix="getGitUrl():"
         String scmUrl
         try {
             // ref: https://stackoverflow.com/questions/38254968/how-do-i-get-the-scm-url-inside-a-jenkins-pipeline-or-multibranch-pipeline
             scmUrl = dsl.sh(returnStdout: true, script: 'git config remote.origin.url || true').trim()
-            log.info("${logPrefix} scmUrl=${scmUrl}")
+            log.info("scmUrl=${scmUrl}")
         } catch (Exception err) {
-            log.debug("${logPrefix} exception occurred [${err}]")
+            log.debug("exception occurred [${err}]")
         }
         return scmUrl
     }
 
     String getGitBranchName() {
-        String logPrefix="getGitBranchName():"
 //    return scm.branches[0].name
         String scmBranch
         try {
@@ -671,22 +658,21 @@ class AcceptanceTestHarness implements Serializable {
             // ref: https://stackoverflow.com/questions/6245570/how-to-get-the-current-branch-name-in-git/19585361
             if (scmBranch=="HEAD") {
                 scmBranch = dsl.sh(returnStdout: true, script: 'git show -s --pretty=%D HEAD | tr -s "," "\n" | sed "s/^ //" | grep -v -e HEAD | sed "s/origin\\///" || true').trim()
-                log.info("${logPrefix} scmBranch=${scmBranch}")
+                log.info("scmBranch=${scmBranch}")
             }
         } catch (Exception err) {
-            log.debug("${logPrefix} exception occurred [${err}]")
+            log.debug("exception occurred [${err}]")
         }
         return scmBranch
     }
 
     String getAthPomVersion() {
-        String logPrefix="getAthPomVersion():"
         String athVersion
         try {
             athVersion = (readFile('pom.xml') =~ '<version>(.+)</version>')[0][1]
-            log.info("${logPrefix} athVersion=${athVersion}")
+            log.info("athVersion=${athVersion}")
         } catch (Exception err) {
-            log.debug("${logPrefix} exception occurred [${err}]")
+            log.debug("exception occurred [${err}]")
         }
         return athVersion
     }
@@ -716,7 +702,7 @@ class AcceptanceTestHarness implements Serializable {
 //        key=Utilities.decapitalize(key)
 //        if (value !="") {
 ////            config[key]=value
-//            log.info("${logPrefix} value.getClass().toString()=${value.getClass().toString()}")
+//            log.info("value.getClass().toString()=${value.getClass().toString()}")
 //
 //            byte[] ptext = value.toString().getBytes(ISO_8859_1)
 //            config[key] = new String(ptext, UTF_8)
@@ -754,13 +740,12 @@ class AcceptanceTestHarness implements Serializable {
     }
 
     List getCredentialIdList(Map config) {
-        String logPrefix="getCredentialIdList():"
         List credIdList = []
 
-        log.debug("${logPrefix} started}")
+        log.debug("started}")
 
         if (! dsl.fileExists(config.checkoutDir)) {
-            log.info("${logPrefix} checkoutDir [${config.checkoutDir}] not found, done")
+            log.info("checkoutDir [${config.checkoutDir}] not found, done")
             return []
         }
 
@@ -771,7 +756,7 @@ class AcceptanceTestHarness implements Serializable {
 
             Map envConfigs = loadJavaEnvConfigs(config.appEnvironment)
             if (envConfigs.size()>0) {
-                log.debug("${logPrefix} envConfigs=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(envConfigs)}")
+                log.debug("envConfigs=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(envConfigs)}")
             }
 
             credIdList = credentialParser.getCredentialIdListFromJson(envConfigs)
@@ -780,7 +765,7 @@ class AcceptanceTestHarness implements Serializable {
 
         credIdList.add(dsl.usernamePassword(credentialsId: config.jenkinsBsCredId, passwordVariable: 'BS_KEY', usernameVariable: 'BS_USER'))
         credIdList.add(dsl.string(credentialsId: config.jenkinsRallyCredId, variable: 'RALLY_KEY'))
-        log.info("${logPrefix} credIdList=${credIdList}")
+        log.info("credIdList=${credIdList}")
 
         return credIdList
     }
@@ -789,11 +774,9 @@ class AcceptanceTestHarness implements Serializable {
 
         String envFilePath = "./src/test/resources/config/environments/${appEnvironment}"
         String envFile = "${envFilePath}/environment.json"
+        log.info("started}")
 
-        String logPrefix = "loadJavaEnvConfigs(appEnvironment=${appEnvironment}):"
-        log.info("${logPrefix} started}")
-
-//    log.info("${logPrefix} find results from ${envFilePath}/:")
+//    log.info("find results from ${envFilePath}/:")
 //    dsl.sh "find ${envFilePath} -type f -printf \"%TY-%Tm-%Td %TH:%TM:%.2Ts %m:%u:%g %p\\n\" | sort -k 3,3"
 
         Map envConfigs=[:]
@@ -809,22 +792,21 @@ class AcceptanceTestHarness implements Serializable {
             envConfigs = MapMerge.merge(envParentConfigs, envConfigs.findAll { !["extendEnvironment"].contains(it.key) })
         }
 
-        log.debug("${logPrefix} envConfigs=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(envConfigs)}")
+        log.debug("envConfigs=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(envConfigs)}")
 
         return envConfigs
     }
 
     Map runTests(Map config=pipelineConfig.clone()) {
-        String logPrefix="runTests():"
-        log.info("${logPrefix} started")
-        log.debug("${logPrefix} config=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(config)}")
+        log.info("started")
+        log.debug("config=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(config)}")
 
         List testResults = []
         if (config.useTestGroups && config?.testGroups) {
             Map parallelGroups = [:]
             config.testGroups.eachWithIndex { it, i ->
 
-                log.info("${logPrefix} i=${i} it=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(it)}")
+                log.info("i=${i} it=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(it)}")
 
                 // set group to default and overlay any group settings
                 Map groupConfig = config.findAll { it.key != 'testGroups' } + it
@@ -832,7 +814,7 @@ class AcceptanceTestHarness implements Serializable {
                 groupConfig.groupId = createGroupId(config, i)
                 int groupNum = i+1
 
-                log.debug("${logPrefix} i=${i} groupConfig=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(groupConfig)}")
+                log.debug("i=${i} groupConfig=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(groupConfig)}")
 
                 if (groupConfig?.testGroups) {
                     testResults.add(runTests(groupConfig))
@@ -841,7 +823,7 @@ class AcceptanceTestHarness implements Serializable {
                     parallelGroups["split-${groupConfig.groupId}"] = {
                         if (config.useStaggeredParallelStart && config?.groupWaitTime) {
                             int waitTime = (groupNum - 1) * config.groupWaitTime
-                            log.info("${logPrefix} waiting ${waitTime} seconds to start...")
+                            log.info("waiting ${waitTime} seconds to start...")
                             dsl.sleep(time: waitTime, unit: 'SECONDS')
                         }
                         testResults.add(runTestCases(groupConfig))
@@ -849,19 +831,19 @@ class AcceptanceTestHarness implements Serializable {
                 }
             }
             if (parallelGroups.size()>0) {
-                log.info("${logPrefix} parallelGroups=${parallelGroups}")
+                log.info("parallelGroups=${parallelGroups}")
                 dsl.parallel parallelGroups
             }
         } else {
-            log.info("${logPrefix} Running single parallel run - batch mode = [${config.useBatchMode}]")
+            log.info("Running single parallel run - batch mode = [${config.useBatchMode}]")
             testResults.add(runTestParallel(config))
         }
         // ref: https://stackoverflow.com/questions/18380667/join-list-of-boolean-elements-groovy
         boolean result = (testResults.size()>0) ? testResults.inject { a, b -> a && b } : true
-        log.info("${logPrefix} finished: result = ${result}")
+        log.info("finished: result = ${result}")
 
         currentState.result = result
-        log.info("${logPrefix} currentState=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(currentState.findAll { it.key != 'componentDeployJobSnapshots' })}")
+        log.info("currentState=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(currentState.findAll { it.key != 'componentDeployJobSnapshots' })}")
 
         currentState.testResults = result
         return currentState
@@ -872,47 +854,43 @@ class AcceptanceTestHarness implements Serializable {
     }
 
     boolean runTestCases(Map config) {
-
-        String logPrefix="runTestCases():"
-        log.debug("${logPrefix} config=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(config)}")
+        log.debug("config=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(config)}")
 
         List testResults = []
         Map parallelTestCases = [:]
         config.testCases.eachWithIndex { it, i ->
 
-            log.info("${logPrefix} i=${i} it=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(it)}")
+            log.info("i=${i} it=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(it)}")
 
             // set group to default and overlay any group settings
             Map testConfig = config.findAll { it.key != 'testCases' } + it
             testConfig.testCaseId="${config.groupId}-testcase${i}"
 
-            log.debug("${logPrefix} i=${i} testConfig=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(testConfig)}")
+            log.debug("i=${i} testConfig=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(testConfig)}")
 
             int caseNum = i+1
             parallelTestCases["split-${testConfig.testCaseId}"] = {
                 if (config.useStaggeredParallelStart && config?.groupWaitTime) {
                     int waitTime = (caseNum - 1) * config.groupWaitTime
-                    log.info("${logPrefix} waiting ${waitTime} seconds to start...")
+                    log.info("waiting ${waitTime} seconds to start...")
                     dsl.sleep(time: waitTime, unit: 'SECONDS')
                 }
                 testResults.add(runTestParallel(testConfig))
             }
         }
 
-        log.info("${logPrefix} parallelTestCases=${parallelTestCases}")
+        log.info("parallelTestCases=${parallelTestCases}")
         dsl.parallel parallelTestCases
 
         // ref: https://stackoverflow.com/questions/18380667/join-list-of-boolean-elements-groovy
         boolean result = (testResults.size()>0) ? testResults.inject { a, b -> a && b } : true
 
-        log.info("${logPrefix} finished: result = ${result}")
+        log.info("finished: result = ${result}")
         return result
     }
 
     boolean runTestParallel(Map config) {
-
-        String logPrefix = "runTestParallel():"
-        log.info("${logPrefix} started")
+        log.info("started")
         boolean result = false
         def agentLabelRunTests = getJenkinsAgentLabel(config.jenkinsRunTestsLabel)
 
@@ -931,28 +909,26 @@ class AcceptanceTestHarness implements Serializable {
     }
 
     boolean runTestParallelRun(Map config) {
-
-        String logPrefix="runTestParallelRun():"
         Map parallelTests = [:]
         def agentLabelRunTests = getJenkinsAgentLabel(config.jenkinsRunTestsLabel)
 
-        log.info("${logPrefix} config.parallelRunCount=${config.parallelRunCount}")
+        log.info("config.parallelRunCount=${config.parallelRunCount}")
         List testResults = []
         for (int i = 1; i  <= config.parallelRunCount; i++) {
             Map parallelRunConfig=config.clone()
 
             parallelRunConfig.parallelRunNumber=i
 
-            log.info("${logPrefix} parallelRunConfig.parallelRunNumber=${parallelRunConfig.parallelRunNumber}")
+            log.info("parallelRunConfig.parallelRunNumber=${parallelRunConfig.parallelRunNumber}")
 
             parallelRunConfig.testCaseLabel=getTestCaseLabel(parallelRunConfig)
-            log.debug("${logPrefix} parallelRunConfig.testCaseLabel=${parallelRunConfig.testCaseLabel}")
+            log.debug("parallelRunConfig.testCaseLabel=${parallelRunConfig.testCaseLabel}")
 
             // ref: https://github.com/jenkinsci/pipeline-plugin/blob/master/TUTORIAL.md#multiple-threads
             parallelTests["split-${parallelRunConfig.testCaseLabel}"] = {
                 if (config.useStaggeredParallelStart) {
                     int waitTime = (parallelRunConfig.parallelRunNumber - 1) * config.waitingTime
-                    log.info("${logPrefix} waiting ${waitTime} seconds to start...")
+                    log.info("waiting ${waitTime} seconds to start...")
                     dsl.sleep(time: waitTime, unit: 'SECONDS')
                 }
 
@@ -964,7 +940,7 @@ class AcceptanceTestHarness implements Serializable {
                         result = runAcceptanceTestCase(parallelRunConfig)
                     }
                 }
-                log.info("${logPrefix} result=${result}")
+                log.info("result=${result}")
                 testResults.add(result)
             }
         }
@@ -983,7 +959,6 @@ class AcceptanceTestHarness implements Serializable {
     }
 
     String createBrowserstackLocalIdentifier(Map config) {
-        String logPrefix="createBrowserstackLocalIdentifier():"
         String browserstackLocalIdentifier
         if (config.runBsAgentMethod == "PER_RUN") {
 //        browserstackLocalIdentifier="${config.jenkinsProjectName}-${UUID.randomUUID()}"
@@ -1000,18 +975,17 @@ class AcceptanceTestHarness implements Serializable {
         }
 
         browserstackLocalIdentifier=browserstackLocalIdentifier.toLowerCase()
-        log.info("${logPrefix} -> created browserstackLocalIdentifier=${browserstackLocalIdentifier}")
+        log.info("-> created browserstackLocalIdentifier=${browserstackLocalIdentifier}")
         return browserstackLocalIdentifier
     }
 
     boolean runAcceptanceTestCase(Map config) {
-        String logPrefix="runAcceptanceTestCase():"
 
         boolean result = false
 
         if (config.startBrowserstackLocalAgent) {
             config.browserstackLocalIdentifier=createBrowserstackLocalIdentifier(config)
-            log.info("${logPrefix} *** ASSIGNED browserstackLocalIdentifier=${config.browserstackLocalIdentifier}")
+            log.info("*** ASSIGNED browserstackLocalIdentifier=${config.browserstackLocalIdentifier}")
         }
 
         dsl.dir(config.testCaseLabel) {
@@ -1038,8 +1012,6 @@ class AcceptanceTestHarness implements Serializable {
 
     def getTestResults(Map config) {
 
-        String logPrefix="getTestResults():"
-
         if (config.useTestGroups && config?.testGroups) {
             config.testGroups.eachWithIndex { it, i ->
 
@@ -1057,7 +1029,7 @@ class AcceptanceTestHarness implements Serializable {
                         // set group to default and overlay any group settings
                         Map testConfig = groupConfig + it2
                         testConfig.testCaseId="${testConfig.groupId}-testcase${i2}"
-                        log.debug("${logPrefix} testConfig.testCaseId=${testConfig.testCaseId}")
+                        log.debug("testConfig.testCaseId=${testConfig.testCaseId}")
 
                         getParallelRunTestResults(testConfig)
                     }
@@ -1069,14 +1041,13 @@ class AcceptanceTestHarness implements Serializable {
     }
 
     def getParallelRunTestResults(Map config) {
-        String logPrefix="getParallelRunTestResults():"
 
         if (config.useSimulationMode) {
-            log.debug("${logPrefix} ***** RUNNING SIMULATED MODE - skipping ******")
+            log.debug("***** RUNNING SIMULATED MODE - skipping ******")
             return
         }
 
-        log.debug("${logPrefix} join parallel test results")
+        log.debug("join parallel test results")
         // ref: https://stackoverflow.com/questions/47268418/how-to-aggregate-test-results-in-jenkins-parallel-pipeline
         for (int i = 1; i <= config.parallelRunCount; i++) {
             config.parallelRunNumber=i
@@ -1084,13 +1055,13 @@ class AcceptanceTestHarness implements Serializable {
             String testCaseLabel = getTestCaseLabel(config)
             String parallelRunDir = testCaseLabel
 
-            log.debug("${logPrefix} unstash parallelRun ${testCaseLabel}")
+            log.debug("unstash parallelRun ${testCaseLabel}")
             dsl.dir(parallelRunDir) {
                 dsl.unstash name: testCaseLabel
             }
-            log.debug("${logPrefix} copy parallelRun target data into final without overwrite (cp -npr)")
+            log.debug("copy parallelRun target data into final without overwrite (cp -npr)")
             if (config.debugPipeline && !config.useSimulationMode) {
-                log.debug("${logPrefix} find results from source:")
+                log.debug("find results from source:")
                 runFind("${parallelRunDir}/target")
             }
 
@@ -1098,7 +1069,7 @@ class AcceptanceTestHarness implements Serializable {
             dsl.sh "rm -fr ${parallelRunDir}"
 
             if (config.debugPipeline && !config.useSimulationMode) {
-                log.debug("${logPrefix} find results for target:")
+                log.debug("find results for target:")
                 runFind()
             }
 
@@ -1113,8 +1084,7 @@ class AcceptanceTestHarness implements Serializable {
     boolean runAcceptanceTest(Map config) {
 
 //        String logPrefix="[${config.testCaseLabel}-${config.nodeId}] runAcceptanceTest():"
-        String logPrefix="runAcceptanceTest():"
-        log.info("${logPrefix} config.parallelRunNumber=[${config.parallelRunNumber}] started on NODE [${dsl.env.NODE_NAME}] in workspace=[${dsl.env.WORKSPACE}]")
+        log.info("config.parallelRunNumber=[${config.parallelRunNumber}] started on NODE [${dsl.env.NODE_NAME}] in workspace=[${dsl.env.WORKSPACE}]")
 
         Map currentRunState = [:]
         currentRunState.result = false
@@ -1134,14 +1104,14 @@ class AcceptanceTestHarness implements Serializable {
             config.bsDiagLogFile = "${config.bsAgentLogDir}/bs-diagnostics-${config.testCaseLabel}.log"
             dsl.sh "mkdir -p ${config.bsAgentLogDir}"
 
-            log.info("${logPrefix} checking Bs Agent process status")
+            log.info("checking Bs Agent process status")
             runBsAgentPsCheck(config, true, true)
         }
 
-        log.debug("${logPrefix} pwd=[${dsl.pwd()}]")
+        log.debug("pwd=[${dsl.pwd()}]")
 
         if (config.debugPipeline && !config.useSimulationMode) {
-            log.debug("${logPrefix} Pre-test find:")
+            log.debug("Pre-test find:")
             if (config.runSingleMvnCmdMode) {
                 runFind(".")
             } else {
@@ -1152,7 +1122,7 @@ class AcceptanceTestHarness implements Serializable {
         boolean result = true
         String summaryFile = "summary.txt"
 
-        log.debug("${logPrefix} getting mvn command")
+        log.debug("getting mvn command")
         String mvnCmd = prepareMvnIntegrationTestCommand(config)
         String mvnCmdMasked = mvnCmd.replaceAll(/(\w+):\/\/(\w+):(\w+)@(\w+)/, '$1://***:***@$4')
         currentRunState.mvnCmd = mvnCmdMasked
@@ -1162,8 +1132,8 @@ class AcceptanceTestHarness implements Serializable {
         timeStartMilliseconds = System.currentTimeMillis()
 
         if (config.useSimulationMode) {
-            log.info("${logPrefix} **** USING SIMULATION MODE - following command not actually run *****")
-            log.info("${logPrefix} mvnCmd=${mvnCmd}")
+            log.info("**** USING SIMULATION MODE - following command not actually run *****")
+            log.info("mvnCmd=${mvnCmd}")
             dsl.dir("target/site/serenity") {
                 dsl.sh("touch ${summaryFile} || true")
                 dsl.archiveArtifacts artifacts: summaryFile
@@ -1172,13 +1142,13 @@ class AcceptanceTestHarness implements Serializable {
         } else {
             try {
                 dsl.withCredentials(credIdList) {
-                    log.info("${logPrefix} starting mvnCmd")
-                    log.debug("${logPrefix} mvnCmd=${mvnCmd}")
+                    log.info("starting mvnCmd")
+                    log.debug("mvnCmd=${mvnCmd}")
                     int retstat = dsl.sh(script: "${mvnCmd}", returnStatus: true)
                     result = (retstat) ? false : true
                 }
             } catch (Exception err) {
-                log.error("${logPrefix} mvn exception occurred [${err}]")
+                log.error("mvn exception occurred [${err}]")
                 result = false
             }
         }
@@ -1200,23 +1170,23 @@ class AcceptanceTestHarness implements Serializable {
         }
         currentState.runs[config.testCaseLabel] = currentState.runs[config.testCaseLabel] + currentRunState
 
-        log.info("${logPrefix} currentRunState=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(currentRunState)}")
+        log.info("currentRunState=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(currentRunState)}")
 
-        log.info("${logPrefix} config.parallelRunNumber=[${config.parallelRunNumber}] finished with result = [${result}]")
+        log.info("config.parallelRunNumber=[${config.parallelRunNumber}] finished with result = [${result}]")
 
         if (!config.useSimulationMode) {
-            log.debug("${logPrefix} stash name: ${config.testCaseLabel}, includes: 'target/site/**, target/jbehave/**'")
+            log.debug("stash name: ${config.testCaseLabel}, includes: 'target/site/**, target/jbehave/**'")
             dsl.stash name: config.testCaseLabel, includes: 'target/site/**, target/jbehave/**'
         }
 
         if (config.debugPipeline && !config.useSimulationMode) {
-            log.debug("${logPrefix} Post-test find:")
+            log.debug("Post-test find:")
             runFind(".", 1)
             runFind()
         }
 
         if (config.runSingleMvnCmdMode && config.runSerenityRpt) {
-            log.info("${logPrefix} archiving serenity results")
+            log.info("archiving serenity results")
 
             if (!config.useSimulationMode) {
                 dsl.junit 'target/site/serenity/*.xml'
@@ -1258,7 +1228,7 @@ class AcceptanceTestHarness implements Serializable {
 
 
         if (config.runBsDiagnostics && config.useBrowserstackLocalAgent && !config.startBrowserstackLocalAgent) {
-            log.info("${logPrefix} checking Bs Agent process status")
+            log.info("checking Bs Agent process status")
             runBSCurlTest(config)
             runBsAgentPsCheck(config, true, true)
             archiveBsAgentLogs(config)
@@ -1276,20 +1246,20 @@ class AcceptanceTestHarness implements Serializable {
     void initCurrentRunState(Map config, Map currentState) {
         if (config.startBrowserstackLocalAgent) {
             if (!currentState.containsKey("nodes")) {
-                log.warn("${logPrefix} unable to find currentState.nodes which should have been created by the bsAgent start method")
+                log.warn("unable to find currentState.nodes which should have been created by the bsAgent start method")
                 currentState.nodes = [:]
             }
             if (!currentState.nodes.containsKey(dsl.env.NODE_NAME)) {
-                log.warn("${logPrefix} unable to find currentState.nodes[${dsl.env.NODE_NAME}] which should have been created by the bsAgent start method")
+                log.warn("unable to find currentState.nodes[${dsl.env.NODE_NAME}] which should have been created by the bsAgent start method")
                 currentState.nodes[dsl.env.NODE_NAME] = [:]
                 currentState.nodes[dsl.env.NODE_NAME].runs = [:]
             }
             if (!currentState.nodes[dsl.env.NODE_NAME].containsKey("bsLocalAgents")) {
-                log.warn("${logPrefix} unable to find currentState.nodes[${dsl.env.NODE_NAME}].bsLocalAgents which should have been created by the bsAgent start method")
+                log.warn("unable to find currentState.nodes[${dsl.env.NODE_NAME}].bsLocalAgents which should have been created by the bsAgent start method")
                 currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents = [:]
             }
             if (!currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents.containsKey(config.browserstackLocalIdentifier)) {
-                log.warn("${logPrefix} unable to find currentState.nodes[${dsl.env.NODE_NAME}].bsLocalAgents[${config.browserstackLocalIdentifier}] which should have been created by the bsAgent start method")
+                log.warn("unable to find currentState.nodes[${dsl.env.NODE_NAME}].bsLocalAgents[${config.browserstackLocalIdentifier}] which should have been created by the bsAgent start method")
                 currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier] = [:]
             }
             if (!currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].containsKey("runs")) {
@@ -1387,29 +1357,28 @@ class AcceptanceTestHarness implements Serializable {
     }
 
     def getBSAgent(Map config=this.pipelineConfig) {
-        String logPrefix="getBSAgent():"
 //        if (config.runBsAgentMethod!='PER_RUN') {
 //            logPrefix="[${config.testCaseLabel}-${config.nodeId}] ${logPrefix}"
 //        }
 
-        log.debug("${logPrefix} starting")
+        log.debug("starting")
 
         if (!dsl.fileExists("${config.bsAgentBinDir}/BrowserStackLocal")) {
-            log.info("${logPrefix} binary not found, fetching...")
+            log.info("binary not found, fetching...")
         } else {
             String bsAgentVersion = dsl.sh(script: "${config.bsAgentBinDir}/BrowserStackLocal --version", returnStdout: true).trim()
             if (!bsAgentVersion.contains(config.bsAgentVersion)) {
-                log.info("${logPrefix} binary version ${bsAgentVersion} does not match ${config.bsAgentVersion}, fetching...")
+                log.info("binary version ${bsAgentVersion} does not match ${config.bsAgentVersion}, fetching...")
             } else {
-                log.info("${logPrefix} agent binary with version ${config.bsAgentVersion} already exists at ${config.bsAgentBinDir}")
+                log.info("agent binary with version ${config.bsAgentVersion} already exists at ${config.bsAgentBinDir}")
                 return
             }
         }
 
-        log.info("${logPrefix} getting agent binary")
+        log.info("getting agent binary")
         dsl.sh "mkdir -p ${config.bsAgentBinDir}"
 
-        log.info("${logPrefix} Fetching Browserstack agent")
+        log.info("Fetching Browserstack agent")
         dsl.dir('deploy_configs') {
             dsl.checkout scm: [
                     $class: 'GitSCM',
@@ -1426,7 +1395,7 @@ class AcceptanceTestHarness implements Serializable {
         dsl.sh "unzip -o ${config.bsAgentBinDir}/BrowserStackLocal-${config.bsAgentBinType}.zip -d ${config.bsAgentBinDir}"
         dsl.sh "chmod +x ${config.bsAgentBinDir}/BrowserStackLocal"
 
-        log.info("${logPrefix} Browserstack agent deployed to ${config.bsAgentBinDir}")
+        log.info("Browserstack agent deployed to ${config.bsAgentBinDir}")
 
         dsl.sh "rm -fr deploy_configs"
 
@@ -1440,11 +1409,10 @@ class AcceptanceTestHarness implements Serializable {
     def withBsLocalAgent(Map config, def actions) {
 
 //        String logPrefix = "[${config.testCaseLabel}-${config.nodeId}] withBsLocalAgent():"
-        String logPrefix = "withBsLocalAgent():"
-        log.info("${logPrefix} config.browserstackLocalIdentifier=${config.browserstackLocalIdentifier}")
-        log.debug("${logPrefix} ***** config=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(config)}")
-        log.info("${logPrefix} ***** config.forceBrowserstackProxy=${config.forceBrowserstackProxy}")
-        log.info("${logPrefix} ***** config.forceBrowserstackLocalProxy=${config.forceBrowserstackLocalProxy}")
+        log.info("config.browserstackLocalIdentifier=${config.browserstackLocalIdentifier}")
+        log.debug("***** config=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(config)}")
+        log.info("***** config.forceBrowserstackProxy=${config.forceBrowserstackProxy}")
+        log.info("***** config.forceBrowserstackLocalProxy=${config.forceBrowserstackLocalProxy}")
 
         config.bsPidFile = "${config.bsAgentLogDir}/bsagent-${config.browserstackLocalIdentifier}.pid"
         config.bsLogFile = "${config.bsAgentLogDir}/bsagent-${config.browserstackLocalIdentifier}.log"
@@ -1455,34 +1423,34 @@ class AcceptanceTestHarness implements Serializable {
             try {
                 actions()
             } catch (Exception err) {
-                log.error("${logPrefix} actions(): exception occurred [${err}]")
+                log.error("actions(): exception occurred [${err}]")
                 dsl.sh "cat ${config.bsLogFile}"
             }
             return
         }
 
         if (!currentState.containsKey("nodes")) {
-//            log.debug("${logPrefix} initializing currentState.nodes map")
+//            log.debug("initializing currentState.nodes map")
             currentState.nodes = [:]
         }
         if (!currentState.nodes.containsKey(dsl.env.NODE_NAME)) {
-//            log.debug("${logPrefix} initializing currentState.nodes[${dsl.env.NODE_NAME}] map")
+//            log.debug("initializing currentState.nodes[${dsl.env.NODE_NAME}] map")
             currentState.nodes[dsl.env.NODE_NAME] = [:]
         }
         if (!currentState.nodes[dsl.env.NODE_NAME].containsKey("bsLocalAgents")) {
-//            log.debug("${logPrefix} initializing currentState.nodes[${dsl.env.NODE_NAME}].bsLocalAgents map")
+//            log.debug("initializing currentState.nodes[${dsl.env.NODE_NAME}].bsLocalAgents map")
             currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents = [:]
         }
         if (!currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents.containsKey(config.browserstackLocalIdentifier)) {
-//            log.debug("${logPrefix} initializing currentState.nodes[${dsl.env.NODE_NAME}].bsLocalAgents[${config.browserstackLocalIdentifier}] map")
+//            log.debug("initializing currentState.nodes[${dsl.env.NODE_NAME}].bsLocalAgents[${config.browserstackLocalIdentifier}] map")
             currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier] = [:]
             currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].isBsAgentRunning = false
         }
 
         Map currentAgentState = currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier]
-        log.debug("${logPrefix} started with currentAgentState[node=[${dsl.env.NODE_NAME}], browserstackLocalIdentifier=${config.browserstackLocalIdentifier}]=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(currentAgentState)}")
+        log.debug("started with currentAgentState[node=[${dsl.env.NODE_NAME}], browserstackLocalIdentifier=${config.browserstackLocalIdentifier}]=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(currentAgentState)}")
         if (currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].isBsAgentRunning == false) {
-            log.info("${logPrefix} browserstacklocal agent for ${config.browserstackLocalIdentifier} not running, starting")
+            log.info("browserstacklocal agent for ${config.browserstackLocalIdentifier} not running, starting")
 
             currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].runningRunCount = 1
 
@@ -1490,26 +1458,26 @@ class AcceptanceTestHarness implements Serializable {
 
             startBSAgent(config)
 
-//        log.info("${logPrefix} starting -> currentState.nodes[${dsl.env.NODE_NAME}].bsLocalAgents[${config.browserstackLocalIdentifier}]=${currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier]}")
-            log.debug("${logPrefix} started AGENT -> currentState.nodes=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(currentState.nodes)}")
+//        log.info("starting -> currentState.nodes[${dsl.env.NODE_NAME}].bsLocalAgents[${config.browserstackLocalIdentifier}]=${currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier]}")
+            log.debug("started AGENT -> currentState.nodes=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(currentState.nodes)}")
 
-//        log.info("${logPrefix} run find after starting BS agent")
+//        log.info("run find after starting BS agent")
 //        dsl.sh "find /var/tmp/${config.jenkinsProjectName} -type f -printf \"%TY-%Tm-%Td %TH:%TM:%.2Ts %p\\n\""
-            log.info("${logPrefix} browserstacklocal agent for ${config.browserstackLocalIdentifier} started with pid = [${currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].bsAgentPid}]")
+            log.info("browserstacklocal agent for ${config.browserstackLocalIdentifier} started with pid = [${currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].bsAgentPid}]")
         } else {
             if (!currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].containsKey("bsAgentPid")) {
-                log.info("${logPrefix} Bs Agent process status assigned but not started yet for ${config.browserstackLocalIdentifier}")
+                log.info("Bs Agent process status assigned but not started yet for ${config.browserstackLocalIdentifier}")
 
                 int bsAgentWaitTime = 5
                 int bsAgentMaxWaits = 10
                 for (int i = 1; i  <= bsAgentMaxWaits; i++) {
-                    log.info("${logPrefix} waiting ${bsAgentWaitTime} seconds for agent to start...")
+                    log.info("waiting ${bsAgentWaitTime} seconds for agent to start...")
                     dsl.sleep(time: bsAgentWaitTime, unit: 'SECONDS')
                     if (currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].containsKey("bsAgentPid")) {
-                        log.info("${logPrefix} discovered Bs Agent process started with pid=[${currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].bsAgentPid}]")
+                        log.info("discovered Bs Agent process started with pid=[${currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].bsAgentPid}]")
                         break
                     } else {
-                        log.info("${logPrefix} Bs Agent process status not yet started after sleep #${i} for ${config.browserstackLocalIdentifier}")
+                        log.info("Bs Agent process status not yet started after sleep #${i} for ${config.browserstackLocalIdentifier}")
                     }
                 }
                 if (!currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].containsKey("bsAgentPid")) {
@@ -1518,21 +1486,21 @@ class AcceptanceTestHarness implements Serializable {
                     throw message
                 }
             }
-            log.info("${logPrefix} checking Bs Agent process status for pid=[${currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].bsAgentPid}]")
+            log.info("checking Bs Agent process status for pid=[${currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].bsAgentPid}]")
             runBsAgentPsCheck(config, false, true)
             currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].runningRunCount += 1
         }
 
         if (config.debugPipeline) {
-            log.info("${logPrefix} run find before running actions()")
+            log.info("run find before running actions()")
             dsl.sh "find ${config.bsAgentLogDir} -type f -printf \"%TY-%Tm-%Td %TH:%TM:%.2Ts %p\\n\""
         }
 
         try {
             actions()
         } catch (Exception err) {
-            log.error("${logPrefix} actions(): exception occurred [${err}]")
-            log.info("${logPrefix} checking Bs Agent process status")
+            log.error("actions(): exception occurred [${err}]")
+            log.info("checking Bs Agent process status")
             runBsAgentPsCheck(config, true, true)
 
 //        dsl.sh "cat ${config.bsLogFile}"
@@ -1540,7 +1508,7 @@ class AcceptanceTestHarness implements Serializable {
 
         } finally {
             if (config.debugPipeline) {
-                log.debug("${logPrefix} post action find")
+                log.debug("post action find")
                 dsl.sh "find ${config.bsAgentLogDir} -type f -printf \"%TY-%Tm-%Td %TH:%TM:%.2Ts %p\\n\""
             }
 
@@ -1549,16 +1517,16 @@ class AcceptanceTestHarness implements Serializable {
             }
 
             if (config.runBsDiagnostics) {
-                log.info("${logPrefix} Including process info in diagnostics")
+                log.info("Including process info in diagnostics")
                 runBsAgentPsCheck(config, true, true)
             }
 
             if (currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].runningRunCount == 1) {
                 if (["PER_RUN", "PER_JOB_RUN"].contains(config.runBsAgentMethod)) {
-                    log.info("${logPrefix} last run complete, stopping agent")
+                    log.info("last run complete, stopping agent")
                     stopRunningBsAgent(config)
                 } else if (config.forceShutdownBsAgent) {
-                    log.info("${logPrefix} last run complete, forceably stopping agent")
+                    log.info("last run complete, forceably stopping agent")
                     stopRunningBsAgent(config)
                 } else {
                     archiveBsAgentLogs(config)
@@ -1566,21 +1534,20 @@ class AcceptanceTestHarness implements Serializable {
             }
 
             currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].runningRunCount -= 1
-            log.debug("${logPrefix} finished -> currentState=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(currentState)}")
+            log.debug("finished -> currentState=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(currentState)}")
 
         }
     }
 
     boolean startBSAgent(Map config) {
 //        String logPrefix="[${config.testCaseLabel}-${config.nodeId}] startBSAgent():"
-        String logPrefix="startBSAgent():"
-        log.info("${logPrefix} starting agent for config.browserstackLocalIdentifier=${config.browserstackLocalIdentifier}")
+        log.info("starting agent for config.browserstackLocalIdentifier=${config.browserstackLocalIdentifier}")
 
-//        log.debug("${logPrefix} started -> currentState=${JsonUtils.printToJsonString(currentState)}")
-        log.debug("${logPrefix} started -> currentState.nodes=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(currentState.nodes)}")
+//        log.debug("started -> currentState=${JsonUtils.printToJsonString(currentState)}")
+        log.debug("started -> currentState.nodes=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(currentState.nodes)}")
 
         if (config.debugPipeline) {
-            log.debug("${logPrefix} run find before running actions() on ${config.bsAgentBaseDir}")
+            log.debug("run find before running actions() on ${config.bsAgentBaseDir}")
             dsl.sh "find ${config.bsAgentBaseDir} -type f -printf \"%TY-%Tm-%Td %TH:%TM:%.2Ts %p\\n\""
         }
 
@@ -1591,9 +1558,9 @@ class AcceptanceTestHarness implements Serializable {
         String pid
         if (currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier]?.bsAgentPid) {
             pid = currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].bsAgentPid
-            log.debug("${logPrefix} runningAgents pid=[${pid}]")
+            log.debug("runningAgents pid=[${pid}]")
         } else if (dsl.fileExists(config.bsPidFile)) {
-            log.debug("${logPrefix} pid file exists, check if actually running or if its stale")
+            log.debug("pid file exists, check if actually running or if its stale")
             pid = dsl.sh(script: "cat ${config.bsPidFile}", returnStdout: true).trim()
             currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].bsAgentPid = pid
         }
@@ -1604,19 +1571,19 @@ class AcceptanceTestHarness implements Serializable {
 
         if (pid!=null) {
             runBsAgentPsCheck(config)
-            log.info("${logPrefix} pid file exists and already running -> setting pid on runningAgent map")
+            log.info("pid file exists and already running -> setting pid on runningAgent map")
             currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].isBsAgentRunning = true
             return true
         }
 
-        log.debug("${logPrefix} initializing bs agent log directory ${config.bsAgentLogDir}")
+        log.debug("initializing bs agent log directory ${config.bsAgentLogDir}")
         dsl.sh "mkdir -p ${config.bsAgentLogDir}"
 
         if (config.runBSCurlTest || config.runBsDiagnostics) {
-            log.debug("${logPrefix} initializing directory and diagnostics logfile")
+            log.debug("initializing directory and diagnostics logfile")
             dsl.sh script: "touch ${config.bsDiagLogFile}"
 
-            log.debug("${logPrefix} checking Bs Agent process status across all running agents")
+            log.debug("checking Bs Agent process status across all running agents")
             runBsAgentPsCheck(config, true, true)
         }
 
@@ -1666,7 +1633,7 @@ class AcceptanceTestHarness implements Serializable {
 
             pid = dsl.sh(script: "cat ${config.bsPidFile}", returnStdout: true).trim()
             currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].bsAgentPid = pid
-            log.info("${logPrefix} process pid=[${pid}] return status = [${retstat}]")
+            log.info("process pid=[${pid}] return status = [${retstat}]")
 
             result = (retstat) ? false : true
 
@@ -1675,14 +1642,14 @@ class AcceptanceTestHarness implements Serializable {
             } else {
                 currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].isBsAgentRunning = false
 
-                log.error("${logPrefix} process start failed for pid=[${pid}]")
+                log.error("process start failed for pid=[${pid}]")
                 if (dsl.fileExists(config.bsLogFile)) {
                     dsl.sh "tail -30 ${config.bsLogFile}"
                 }
 
-                log.error("${logPrefix} checking if running BS process actually exists...")
+                log.error("checking if running BS process actually exists...")
 
-                log.info("${logPrefix} checking Bs Agent process status across running agent for pid")
+                log.info("checking Bs Agent process status across running agent for pid")
                 runBsAgentPsCheck(config, false, true)
 
             }
@@ -1693,44 +1660,43 @@ class AcceptanceTestHarness implements Serializable {
 
     def stopRunningBsAgent(Map config) {
 //        String logPrefix = "[${config.testCaseLabel}-${config.nodeId}] stopRunningBsAgent():"
-        String logPrefix = "stopRunningBsAgent():"
 
-        log.info("${logPrefix} starting")
+        log.info("starting")
 
-        log.debug("${logPrefix} currentState.nodes[${dsl.env.NODE_NAME}].bsLocalAgents[${config.browserstackLocalIdentifier}]= ${currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier]}")
+        log.debug("currentState.nodes[${dsl.env.NODE_NAME}].bsLocalAgents[${config.browserstackLocalIdentifier}]= ${currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier]}")
 
         String pid
         if (currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier]?.bsAgentPid) {
             pid = currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].bsAgentPid
-            log.info("${logPrefix} runningAgents pid=[${pid}]")
+            log.info("runningAgents pid=[${pid}]")
         } else if (config?.bsPidFile) {
-            log.info("${logPrefix} pid not found in running agents map, sourcing pid from ${config.bsPidFile}")
+            log.info("pid not found in running agents map, sourcing pid from ${config.bsPidFile}")
             pid = dsl.sh(script: "cat ${config.bsPidFile}", returnStdout: true).trim()
-            log.info("${logPrefix} ${config.bsPidFile} pid=[${pid}]")
+            log.info("${config.bsPidFile} pid=[${pid}]")
         }
 
         if (config.debugPipeline) {
-            log.info("${logPrefix} run find before archive/cleanup")
+            log.info("run find before archive/cleanup")
             dsl.sh "find ${config.bsAgentLogDir} -type f -printf \"%TY-%Tm-%Td %TH:%TM:%.2Ts %p\\n\""
         }
 
-        log.info("${logPrefix} show all BS agent running processes")
+        log.info("show all BS agent running processes")
         runBsAgentPsCheck(config, true)
 
 //    try {
 //        cleanupOrphanedBsAgents(config)
 //    } catch (Exception err) {
-//        log.info("${logPrefix} exception when cleaning up orphaned BS agents [${err}]")
+//        log.info("exception when cleaning up orphaned BS agents [${err}]")
 //    }
 
-        log.info("${logPrefix} stopping browserstacklocal agent execution for ${config.browserstackLocalIdentifier}")
+        log.info("stopping browserstacklocal agent execution for ${config.browserstackLocalIdentifier}")
         // Stop the connection
         try {
 //        dsl.sh "kill -9 `cat ${config.bsPidFile}`"
             dsl.sh "kill -9 ${pid}"
             currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].isBsAgentRunning = false
         } catch (Exception err) {
-            log.error("${logPrefix} kill: browserstack cleanup exception occurred [${err}]")
+            log.error("kill: browserstack cleanup exception occurred [${err}]")
             dsl.sh "tail -30 ${config.bsLogFile}"
         }
 
@@ -1739,36 +1705,35 @@ class AcceptanceTestHarness implements Serializable {
         if (["PER_RUN", "PER_JOB_RUN"].contains(config.runBsAgentMethod)
                 || config.forceShutdownBsAgent)
         {
-            log.info("${logPrefix} cleaning up agent bindir and any residue/artifacts for ${config.bsAgentLogDir}")
+            log.info("cleaning up agent bindir and any residue/artifacts for ${config.bsAgentLogDir}")
             dsl.sh "rm -fr ${config.bsAgentLogDir}"
         }
 
         if (config.forceCleanupBsBaseDir) {
-            log.info("${logPrefix} cleaning browserstacklocal agent root dir ${config.bsAgentBaseDir}")
+            log.info("cleaning browserstacklocal agent root dir ${config.bsAgentBaseDir}")
             dsl.sh "rm -fr ${config.bsAgentBaseDir}"
         }
     }
 
     def runBsAgentPsCheck(Map config, boolean showAllBsAgents = false, boolean writeToBsDiagLog = false) {
 //        String logPrefix = "[${config.testCaseLabel}-${config.nodeId}] runBsAgentPsCheck():"
-        String logPrefix = "runBsAgentPsCheck():"
         String processInfo
         String processCmd
 
-        log.debug("${logPrefix} started")
+        log.debug("started")
         String pid
         if (!showAllBsAgents) {
-            log.debug("${logPrefix} currentState.nodes[${dsl.env.NODE_NAME}].bsLocalAgents[${config.browserstackLocalIdentifier}] = ${currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier]}")
+            log.debug("currentState.nodes[${dsl.env.NODE_NAME}].bsLocalAgents[${config.browserstackLocalIdentifier}] = ${currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier]}")
             if (currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier]?.bsAgentPid) {
                 pid = currentState.nodes[dsl.env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].bsAgentPid
-                log.debug("${logPrefix} runningAgents pid=[${pid}]")
+                log.debug("runningAgents pid=[${pid}]")
             } else if (config?.bsPidFile) {
-                log.info("${logPrefix} pid not found in running agents map, sourcing pid from ${config.bsPidFile}")
+                log.info("pid not found in running agents map, sourcing pid from ${config.bsPidFile}")
                 pid = dsl.sh(script: "cat ${config.bsPidFile}", returnStdout: true).trim()
-                log.info("${logPrefix} ${config.bsPidFile} pid=[${pid}]")
+                log.info("${config.bsPidFile} pid=[${pid}]")
             }
 
-            log.debug("${logPrefix} checking process status for pid=[${pid}]")
+            log.debug("checking process status for pid=[${pid}]")
             processCmd = "ps -ef | grep ${pid} | grep -v grep || true"
         } else {
             processCmd = "ps axo pid=,stat=,ppid=,user=,lstart=,command= | grep -v -e grep -e java | grep -i browserstacklocal || true"
@@ -1776,11 +1741,11 @@ class AcceptanceTestHarness implements Serializable {
 
         try {
             processInfo = dsl.sh(script: processCmd, returnStdout: true).trim()
-//            log.info("${logPrefix} Browserstack local agent already running with pid=[${pid}] processInfo = [${processInfo}]")
+//            log.info("Browserstack local agent already running with pid=[${pid}] processInfo = [${processInfo}]")
         } catch (Exception err) {
-            log.warn("${logPrefix} browserstacklocal process does not exists")
+            log.warn("browserstacklocal process does not exists")
             if (dsl.fileExists(config.bsPidFile)) {
-                log.warn("${logPrefix} cleaning up pid file ${config.bsPidFile}")
+                log.warn("cleaning up pid file ${config.bsPidFile}")
                 dsl.sh "rm ${config.bsPidFile}"
             }
         }
@@ -1790,7 +1755,7 @@ class AcceptanceTestHarness implements Serializable {
                 processInfo = processInfo.replaceAll("${dsl.env.BS_KEY}", "***")
             }
         }
-        log.debug("${logPrefix} processInfo=[${processInfo}]")
+        log.debug("processInfo=[${processInfo}]")
 
         if (writeToBsDiagLog) {
             dsl.sh script: "echo \"${processCmd}\" >> ${config.bsDiagLogFile}", returnStatus: true
@@ -1806,9 +1771,8 @@ class AcceptanceTestHarness implements Serializable {
 
     def archiveBsAgentLogs(Map config) {
 //        String logPrefix = "[${config.testCaseLabel}-${config.nodeId}] archiveBsAgentLogs():"
-        String logPrefix = "archiveBsAgentLogs():"
 
-        log.info("${logPrefix} archiving agent log")
+        log.info("archiving agent log")
         dsl.dir(config.bsAgentLogDir) {
             def logFiles = dsl.findFiles glob: '**/*.log'
             //            def logFiles = dsl.findFiles glob: "**/${config.bsLogFile}"
@@ -1824,22 +1788,20 @@ class AcceptanceTestHarness implements Serializable {
     }
 
     def cleanupOrphanedBsAgents(Map config) {
-        String logPrefix="cleanupOrphanedBsAgents():"
-        log.debug("${logPrefix} starting")
+        log.debug("starting")
 
         String debugFlag=(config.debugPipeline) ? "-x" : ""
         String script="scripts/cleanup-zombie-process.sh"
         getResourceFile(script)
 //    dsl.sh 'find scripts -type f'
 
-        log.debug("${logPrefix} running script ${script} jenkins ${config.jenkinsProjectName} browserstacklocal")
+        log.debug("running script ${script} jenkins ${config.jenkinsProjectName} browserstacklocal")
 //        dsl.sh "bash ${debugFlag} ${script} jenkins ${config.jenkinsProjectName} browserstacklocal"
         dsl.sh "bash ${script} jenkins ${config.jenkinsProjectName} browserstacklocal"
 
     }
 
     def runBSCurlTest(Map config) {
-        String logPrefix="runBSCurlTest():"
 
         dsl.withCredentials([dsl.usernamePassword(credentialsId: config.jenkinsBsCredId, passwordVariable: 'BS_KEY', usernameVariable: 'BS_USER')]) {
 
@@ -1857,10 +1819,10 @@ class AcceptanceTestHarness implements Serializable {
                 dsl.sh script: "echo Results: >> ${config.bsDiagLogFile}", returnStatus: true
                 dsl.sh script: "echo \"######\" >> ${config.bsDiagLogFile}", returnStatus: true
 
-                log.info("${logPrefix} browserstack curl test results:")
+                log.info("browserstack curl test results:")
                 dsl.sh script: "set -o pipefail; ${curlTestCmd} 2>&1 | tee -a ${config.bsDiagLogFile}", returnStdout: true
             } catch (Exception err) {
-                log.warn("${logPrefix} browserstack curl test exception occurred: [${err}]")
+                log.warn("browserstack curl test exception occurred: [${err}]")
             }
             dsl.sh script: "echo \"\n\n\" >> ${config.bsDiagLogFile}", returnStatus: true
 
@@ -1871,8 +1833,7 @@ class AcceptanceTestHarness implements Serializable {
  * Build the Maven Integration Test command line that will be used by automation execution
  **/
     String prepareMvnIntegrationTestCommand(Map config) {
-        String logPrefix="prepareMvnIntegrationTestCommand():"
-        log.debug("${logPrefix} started")
+        log.debug("started")
 
         String mvnCmd = "${dsl.env.M3}/bin/mvn"
 
@@ -1896,7 +1857,7 @@ class AcceptanceTestHarness implements Serializable {
 
         if (config.webPlatform.contains("browserstack")) {
 
-//        log.debug("${logPrefix} 1: mvnCmd=${mvnCmd}")
+//        log.debug("1: mvnCmd=${mvnCmd}")
             String scheme = "https"
 //            if (config.useBrowserstackProxy) {
 //                scheme = "http"
@@ -1906,7 +1867,7 @@ class AcceptanceTestHarness implements Serializable {
             mvnCmd+=" -Dbrowserstack.build='${config.browserstackBuild}'"
             mvnCmd+=" -Dbrowserstack.name='${config.browserstackName}'"
 
-//        log.debug("${logPrefix} 2: mvnCmd=${mvnCmd}")
+//        log.debug("2: mvnCmd=${mvnCmd}")
 
             dsl.withCredentials([dsl.usernamePassword(credentialsId: config.jenkinsBsCredId, passwordVariable: 'BS_KEY', usernameVariable: 'BS_USER')]) {
                 mvnCmd+=" -Dbrowserstack.hub.url=${scheme}://${dsl.env.BS_USER}:${dsl.env.BS_KEY}@${config.browserstackHubUrl}/wd/hub"
@@ -1951,7 +1912,7 @@ class AcceptanceTestHarness implements Serializable {
                     default: log.warn("unknown browser: ${config.browserstackBrowser}")
                 }
 
-//            log.debug("${logPrefix} 3: mvnCmd=${mvnCmd}")
+//            log.debug("3: mvnCmd=${mvnCmd}")
 
             } else if (useMobile) {
 
@@ -1975,7 +1936,7 @@ class AcceptanceTestHarness implements Serializable {
                     default: log.warn("unknown mobile browser: ${config.browserstackBrowser}")
                 }
 
-//            log.debug("${logPrefix} 4: mvnCmd=${mvnCmd}")
+//            log.debug("4: mvnCmd=${mvnCmd}")
             }
 
             if (config.useBrowserstackLocalAgent || config.startBrowserstackLocalAgent) {
@@ -1986,7 +1947,7 @@ class AcceptanceTestHarness implements Serializable {
                 }
             }
 
-//        log.debug("${logPrefix} 5: mvnCmd=${mvnCmd}")
+//        log.debug("5: mvnCmd=${mvnCmd}")
 
             if (config.useBrowserstackProxy) {
                 // leave all ENV specific settings to runATHEnv wrapper - not to be done here
@@ -2011,7 +1972,7 @@ class AcceptanceTestHarness implements Serializable {
 //                }
             }
 
-//        log.debug("${logPrefix} 6: mvnCmd=${mvnCmd}")
+//        log.debug("6: mvnCmd=${mvnCmd}")
 
         } else {
             mvnCmd += " -Ddefault.web.execution.platform=${config.webPlatform}"
@@ -2021,7 +1982,7 @@ class AcceptanceTestHarness implements Serializable {
         if (config?.metaFilterTags) mvnCmd += " -Dmeta.filter='${config.metaFilterTags}'"
         if (config?.jbehaveExecutionThreads) mvnCmd += " -Djbehave.execution.threads=${config.jbehaveExecutionThreads}"
 
-//    log.debug("${logPrefix} 7: mvnCmd=${mvnCmd}")
+//    log.debug("7: mvnCmd=${mvnCmd}")
 
         if (config?.parallelRunNumber) {
             if (config.useBatchMode) {
@@ -2031,7 +1992,7 @@ class AcceptanceTestHarness implements Serializable {
             }
         }
 
-//    log.debug("${logPrefix} 8: mvnCmd=${mvnCmd}")
+//    log.debug("8: mvnCmd=${mvnCmd}")
 
         // enable serenity reporting
         // ref: https://fusion.dettonville.int/stash/projects/QE/repos/mtaf-jbehave-tools/browse/src/main/java/com/dettonville/testing/mtaf/jbehave/serenity/SerenitySupport.java?at=refs%2Fheads%2Fmaster
@@ -2057,7 +2018,7 @@ class AcceptanceTestHarness implements Serializable {
             mvnCmd += " -DprojectName='${config.rallyProjectName}'"
         }
 
-//    log.debug("${logPrefix} 9: mvnCmd=${mvnCmd}")
+//    log.debug("9: mvnCmd=${mvnCmd}")
 
         List contextTags = getContextTags(config)
         List injectedTags = getInjectedTags(config)
@@ -2073,7 +2034,7 @@ class AcceptanceTestHarness implements Serializable {
 
         mvnCmd+=" -e"
 
-        log.debug("${logPrefix} final command: mvnCmd=${mvnCmd}")
+        log.debug("final command: mvnCmd=${mvnCmd}")
 
         return mvnCmd
     }
@@ -2173,18 +2134,17 @@ class AcceptanceTestHarness implements Serializable {
     }
 
     void runPostJobHandler(String postJobEventType) {
-        String logPrefix = "runPostJobHandler():"
-        log.info("${logPrefix} **** post[${postJobEventType}] started")
+        log.info("**** post[${postJobEventType}] started")
 
         if (postJobEventType=="always") {
             updateJobDescription()
         }
 
-        log.debug("${logPrefix} **** post[${postJobEventType}] currentBuild.result=${dsl.currentBuild.result} - sending notification to event subscribed recipients")
+        log.debug("**** post[${postJobEventType}] currentBuild.result=${dsl.currentBuild.result} - sending notification to event subscribed recipients")
         sendReports(postJobEventType)
 
         if (postJobEventType=="always") {
-            log.info("${logPrefix} **** post[${postJobEventType}] cleaning workspace")
+            log.info("**** post[${postJobEventType}] cleaning workspace")
             dsl.cleanWs()
         }
 
@@ -2211,7 +2171,6 @@ class AcceptanceTestHarness implements Serializable {
     }
 
     void sendReports(String postJobEventType) {
-        String logPrefix = "sendReports(${postJobEventType}):"
 
         dsl.unstash name: pipelineConfig.STASH_NAME_REPORTS
         if ( pipelineConfig.createEmailableReports ) {
@@ -2245,14 +2204,13 @@ class AcceptanceTestHarness implements Serializable {
             }
         }
         if (postJobEventType=="always") {
-            log.info("${logPrefix} **** Sending build status email")
+            log.info("**** Sending build status email")
             emailUtils.sendEmailNotification(pipelineConfig, postJobEventType)
         }
     }
 
     Map updateHistoricalTestResults(Map config) {
-        String logPrefix = "updateHistoricalTestResults():"
-        log.info("${logPrefix} starting")
+        log.info("starting")
 
         String testResultsFile = config.testResultsHistory
 
@@ -2260,24 +2218,24 @@ class AcceptanceTestHarness implements Serializable {
 //    Integer priorBuildNumber = priorBuildInfo.number
         Integer buildNumber = dsl.currentBuild.number
 
-        log.info("${logPrefix} get current test results")
+        log.info("get current test results")
         Map currentTestResults = jenkinsApiUtils.getTestResults(buildNumber)
-        log.debug("${logPrefix} currentTestResults=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(currentTestResults)}")
+        log.debug("currentTestResults=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(currentTestResults)}")
 
-        log.info("${logPrefix} get prior results aggregate ${testResultsFile}")
+        log.info("get prior results aggregate ${testResultsFile}")
         Map testResults
 //    if (getJobArtifact(testResultsFile, priorBuildNumber)==200) {
         if (jenkinsApiUtils.getJobArtifact(testResultsFile)==200) {
-            log.info("${logPrefix} ${testResultsFile} retrieved")
+            log.info("${testResultsFile} retrieved")
             testResults = dsl.readJSON file: testResultsFile
-            log.debug("${logPrefix} testResults=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(testResults)}")
+            log.debug("testResults=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(testResults)}")
         } else {
-            log.info("${logPrefix} prior aggregate results does not exists, creating new one")
+            log.info("prior aggregate results does not exists, creating new one")
             testResults=[:]
             testResults.history=[]
         }
 
-        log.info("${logPrefix} appending current test results to aggregate results")
+        log.info("appending current test results to aggregate results")
         if (currentTestResults) {
             testResults.history.add(currentTestResults)
         }
@@ -2290,17 +2248,17 @@ class AcceptanceTestHarness implements Serializable {
             for (int i = 1; i  <= startIdx; i++) {
                 testResults.history.remove(0)
             }
-            log.info("${logPrefix} history reduced to last ${testResults.history.size()} results")
-            log.debug("${logPrefix} truncated testResults=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(testResults)}")
+            log.info("history reduced to last ${testResults.history.size()} results")
+            log.debug("truncated testResults=${com.dettonville.api.pipeline.utils.JsonUtils.printToJsonString(testResults)}")
         }
 
         def jsonOut = dsl.readJSON text: JsonOutput.toJson(testResults)
         dsl.writeJSON file: testResultsFile, json: jsonOut, pretty: 2
 
-        log.info("${logPrefix} aggregate results saved to ${testResultsFile}")
+        log.info("aggregate results saved to ${testResultsFile}")
 
         dsl.archiveArtifacts artifacts: testResultsFile
-        log.info("${logPrefix} ${testResultsFile} archived")
+        log.info("${testResultsFile} archived")
 
         return testResults
 

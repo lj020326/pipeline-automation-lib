@@ -1,24 +1,19 @@
 #!/usr/bin/env groovy
+import groovy.json.JsonOutput
 
-// ref: https://github.com/jenkinsci/packer-plugin/issues/20#issuecomment-469681596
+import com.dettonville.api.pipeline.utils.JsonUtils
+import com.dettonville.api.pipeline.utils.MapMerge
 
 import com.dettonville.api.pipeline.utils.Utilities
 import com.dettonville.api.pipeline.utils.logging.LogLevel
 import com.dettonville.api.pipeline.utils.logging.Logger
-import com.dettonville.api.pipeline.utils.MapMerge
-import com.dettonville.api.pipeline.utils.JsonUtils
-import groovy.json.*
-//import groovy.json.JsonOutput
-// import groovy.json.JsonSlurper
 
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field
-@Field Logger log = new Logger(this, LogLevel.INFO)
+//@Field Logger log = new Logger(this, LogLevel.INFO)
+@Field Logger log = new Logger(this)
 
 def call() {
-
-// //     Logger.init(this, LogLevel.INFO)
-//     Logger log = new Logger(this, LogLevel.INFO)
 
 //     String packerTool = "packer-1.6.2" // Name of Packer Installation
 //     String packerTool = "packer-1.8.6" // Name of Packer Installation
@@ -26,7 +21,7 @@ def call() {
     Map config=[:]
     boolean vmTemplateExists = false
 
-//    Map config=loadPipelineConfig(params)
+//    Map config = loadPipelineConfig(params)
 //    String agentLabel = getJenkinsAgentLabel(config.jenkinsNodeLabel)
 
     List paramList = []
@@ -52,6 +47,7 @@ def call() {
     }
 
     pipeline {
+
         agent {
             label "packer"
         }
@@ -65,11 +61,11 @@ def call() {
             PATH = "${env.GOVC_HOME}/bin:${env.PACKER_HOME}/bin:${env.PATH}"
         }
         options {
-            buildDiscarder(logRotator(numToKeepStr: '10'))
-            disableConcurrentBuilds()
+            buildDiscarder(logRotator(numToKeepStr: '20'))
             skipDefaultCheckout(false)
+            disableConcurrentBuilds()
             timestamps()
-            timeout(time: 3, unit: 'HOURS')
+            timeout(time: config.timeout as Integer, unit: config.timeoutUnit)
         }
 
         stages {
@@ -187,7 +183,7 @@ def call() {
                                  ${config.iso_base_dir}/${config.iso_dir}/${config.iso_file} \
                                  | grep "${config.iso_file}"
                             """
-                            vmIsoExists = sh(script: "${datastoreLsCmd}", returnStatus: true) == 0
+                            Boolean vmIsoExists = sh(script: "${datastoreLsCmd}", returnStatus: true) == 0
                             log.info("vmIsoExists=${vmIsoExists}")
 
                             if (!vmIsoExists) {
@@ -512,53 +508,79 @@ def call() {
         post {
             always {
                 script {
-                    List emailAdditionalDistList = []
-                    if (config?.gitBranch) {
-                        if (config.gitBranch in ['main','QA','PROD'] || config.gitBranch.startsWith("release/")) {
-                            if (config?.deployEmailDistList) {
-                                emailAdditionalDistList = config.deployEmailDistList
-                                log.info("post(${env.BRANCH_NAME}): sendEmail(${currentBuild.result})")
-                                sendEmail(currentBuild, env, emailAdditionalDistList=emailAdditionalDistList)
-                            }
-                        } else if (config.gitBranch in ['development']) {
-                            if (config?.alwaysEmailDistList) {
-                                emailAdditionalDistList = config.alwaysEmailDistList
-                                log.info("post(${env.BRANCH_NAME}): sendEmail(${currentBuild.result})")
-                                sendEmail(currentBuild, env, emailAdditionalDistList=emailAdditionalDistList)
-                            }
-                        }
+                    if (config?.alwaysEmailList) {
+                        log.info("config.alwaysEmailList=${config.alwaysEmailList}")
+                        sendEmail(currentBuild, env, emailAdditionalDistList: [config.alwaysEmailList.split(",")])
                     } else {
-                        log.info("post(${env.BRANCH_NAME}): sendEmail(${currentBuild.result}, 'RequesterRecipientProvider')")
                         sendEmail(currentBuild, env)
                     }
                     log.info("Empty current workspace dir")
-                    cleanWs()
+                    try {
+                        cleanWs()
+                    } catch (Exception ex) {
+                        log.warn("Unable to cleanup workspace - e.g., likely cause git clone failure", ex.getMessage())
+                    }
+                }
+            }
+            success {
+                script {
+                    if (config?.successEmailList) {
+                        log.info("config.successEmailList=${config.successEmailList}")
+                        sendEmail(currentBuild, env, emailAdditionalDistList: [config.successEmailList.split(",")])
+                    }
+                }
+            }
+            failure {
+                script {
+                    if (config?.failedEmailList) {
+                        log.info("config.failedEmailList=${config.failedEmailList}")
+                        sendEmail(currentBuild, env, emailAdditionalDistList: [config.failedEmailList.split(",")])
+                    }
+                }
+            }
+            aborted {
+                script {
+                    if (config?.failedEmailList) {
+                        log.info("config.failedEmailList=${config.failedEmailList}")
+                        sendEmail(currentBuild, env, emailAdditionalDistList: [config.failedEmailList.split(",")])
+                    }
+                }
+            }
+            changed {
+                script {
+                    if (config?.changedEmailList) {
+                        log.info("config.changedEmailList=${config.changedEmailList}")
+                        sendEmail(currentBuild, env, emailAdditionalDistList: [config.changedEmailList.split(",")])
+                    }
                 }
             }
         }
     }
-
-}
+} // body
 
 //@NonCPS
 Map loadPipelineConfig(Map params) {
-    String logPrefix="loadPipelineConfig():"
+
     Map config = [:]
 
     List jobParts = JOB_NAME.split("/")
-    log.info("${logPrefix} jobParts=${jobParts}")
+    log.info("jobParts=${jobParts}")
 //     config.jobBaseFolderLevel = (jobParts.size() - 4)
     config.jobBaseFolderLevel = 2
     config.build_dir="templates"
-    config.timeout = config.get('timeout', 3)
-    config.timeoutUnit = config.get('timeoutUnit', 'HOURS')
-    config.alwaysEmailList = config.get('alwaysEmailList', "lee.james.johnson@gmail.com")
-    config.tmpDirMaxFileCount = config.get('tmpDirMaxFileCount', 100)
-    config.tmpDirMaxAge = config.get('tmpDirMaxFileCount', 7)
+
+    config.get('logLevel', "INFO")
+    config.get('timeout', "3")
+    config.get('timeoutUnit', "HOURS")
+    config.get('debugPipeline', false)
+
+    config.get('alwaysEmailList', "lee.james.johnson@gmail.com")
+    config.get('tmpDirMaxFileCount', 100)
+    config.get('tmpDirMaxFileCount', 7)
 
     // ref: https://blog.mrhaki.com/2011/09/groovy-goodness-take-and-drop-items.html
     jobParts = jobParts.drop(config.jobBaseFolderLevel)
-    log.info("${logPrefix} jobParts[after drop]=${jobParts}")
+    log.info("jobParts[after drop]=${jobParts}")
 
     config.template_build_env = jobParts[0]
     config.build_platform = jobParts[1]
@@ -573,7 +595,7 @@ Map loadPipelineConfig(Map params) {
     // ref: https://blog.mrhaki.com/2015/01/groovy-goodness-take-or-drop-last-items.html
     jobParts = jobParts.dropRight(2)
 
-    log.info("${logPrefix} jobParts[after drop2]=${jobParts}")
+    log.info("jobParts[after drop2]=${jobParts}")
     config.build_platform_type = 'server'
     if (jobParts.size() > 1) {
         platformTypeParts = jobParts.drop(1)
@@ -584,12 +606,12 @@ Map loadPipelineConfig(Map params) {
     config.builder_type = "vsphere-iso"
     config.gitBranch = env.GIT_BRANCH
 
-    log.info("${logPrefix} template_build_env=${config.template_build_env}")
-    log.info("${logPrefix} build_platform=${config.build_platform}")
-    log.info("${logPrefix} build_platform_type=${config.build_platform_type}")
-    log.info("${logPrefix} build_distribution=${config.build_distribution}")
-    log.info("${logPrefix} build_release=${config.build_release}")
-    log.info("${logPrefix} template_build_type=${config.template_build_type}")
+    log.info("template_build_env=${config.template_build_env}")
+    log.info("build_platform=${config.build_platform}")
+    log.info("build_platform_type=${config.build_platform_type}")
+    log.info("build_distribution=${config.build_distribution}")
+    log.info("build_release=${config.build_release}")
+    log.info("template_build_type=${config.template_build_type}")
 
     String vm_template_name = "vm-template"
 //     vm_template_name += "-${config.build_distribution.toLowerCase()}${config.build_release}"
@@ -602,10 +624,10 @@ Map loadPipelineConfig(Map params) {
     config.template_build_name = "${config.template_name}-${config.build_id_left_padded}"
 
     config.build_platform_config_dir = config.build_platform
-    log.info("${logPrefix} build_platform_config_dir=${config.build_platform_config_dir}")
+    log.info("build_platform_config_dir=${config.build_platform_config_dir}")
 
     config.build_distribution_config_dir = config.build_distribution
-    log.info("${logPrefix} build_distribution_config_dir=${config.build_distribution_config_dir}")
+    log.info("build_distribution_config_dir=${config.build_distribution_config_dir}")
 
 //     config.build_release_config_dir = jobParts[1..2].join("/") + "/server"
 //     config.build_release_config_dir = jobParts[1..2].join("/")
@@ -615,13 +637,13 @@ Map loadPipelineConfig(Map params) {
     } else {
         config.build_release_config_dir = "${config.build_distribution}/${config.build_release}"
     }
-    log.info("${logPrefix} build_release_config_dir=${config.build_release_config_dir}")
+    log.info("build_release_config_dir=${config.build_release_config_dir}")
 
-    config.replaceExistingTemplate = config.get('replaceExistingTemplate', false)
-    config.vmware_iso_nfs_local_mounted = config.get('vmware_iso_nfs_local_mounted', false)
-    config.import_ovf_to_dc2 = config.get('import_ovf_to_dc2', false)
+    config.get('replaceExistingTemplate', false)
+    config.get('vmware_iso_nfs_local_mounted', false)
+    config.get('import_ovf_to_dc2', false)
 
-    log.info("${logPrefix} loading build config")
+    log.info("loading build config")
 
     String buildConfigFile = "./${config.build_dir}/${config.build_distribution_config_dir}/build-config.json"
     if (fileExists(buildConfigFile)) {
@@ -633,13 +655,13 @@ Map loadPipelineConfig(Map params) {
         throw new RuntimeException(message)
     }
 
-    log.info("${logPrefix} loading common and build vars")
+    log.info("loading common and build vars")
     Map commonVars = readJSON file: "./${config.build_dir}/common-vars.json"
-    log.info("${logPrefix} commonVars=${JsonUtils.printToJsonString(commonVars)}")
+    log.info("commonVars=${JsonUtils.printToJsonString(commonVars)}")
     config = MapMerge.merge(config, commonVars.variables)
 
     Map envVars = readJSON file: "./${config.build_dir}/env-vars.${config.template_build_env}.json"
-    log.info("${logPrefix} envVars=${JsonUtils.printToJsonString(envVars)}")
+    log.info("envVars=${JsonUtils.printToJsonString(envVars)}")
     config = MapMerge.merge(config, envVars)
 
     Map distributionVars = readJSON file: "./${config.build_dir}/${config.build_distribution_config_dir}/distribution-vars.json"
@@ -666,24 +688,22 @@ Map loadPipelineConfig(Map params) {
     if (config.iso_file.contains("?")) {
         config.iso_file = config.iso_file.split("\\?")[0]
     }
-    config.os_image_dir = config.get('os_image_dir', "/data/datacenter/jenkins/osimages")
+    config.get('os_image_dir', "/data/datacenter/jenkins/osimages")
 
-    log.info("${logPrefix} build_distribution_config_dir=${config.build_distribution_config_dir}")
-    log.info("${logPrefix} build_release_config_dir=${config.build_release_config_dir}")
+    log.info("build_distribution_config_dir=${config.build_distribution_config_dir}")
+    log.info("build_release_config_dir=${config.build_release_config_dir}")
 
     // copy immutable params maps to mutable config map
     // config = MapMerge.merge(config, params)
     params.each { key, value ->
-        log.debug("${logPrefix} params[${key}]=${value}")
+        log.debug("params[${key}]=${value}")
         key= Utilities.decapitalize(key)
         if (value!="") {
             config[key]=value
         }
     }
 
-    config.jenkinsNodeLabel = config.get('jenkinsNodeLabel',"packer")
-    config.logLevel = config.get('logLevel', "INFO")
-    config.debugPipeline = config.get('debugPipeline', false)
+    config.get('jenkinsNodeLabel',"packer")
 
     // ***********************************************
     // build specific vars overridden by pipeline
@@ -709,7 +729,7 @@ Map loadPipelineConfig(Map params) {
     imageInfo.iso_checksum = "${config.iso_checksum_type}:${config.iso_checksum}"
     config.image_info = imageInfo
 
-    config.build_on_error = config.get('build_on_error', 'abort')
+    config.get('build_on_error', 'abort')
     config.build_config = "${config.build_distribution_config_dir}/"
     if (config.build_format == "json") {
         config.packer_build_only = "${config.builder_type}"
@@ -728,7 +748,7 @@ Map loadPipelineConfig(Map params) {
     config.vcenter_shortname1 = config.vcenter_host.tokenize('.')[0]
     config.vcenter_shortname2 = config.vcenter_host2.tokenize('.')[0]
 
-    config.ansibleGalaxyTokenCredId = config.get('ansibleGalaxyTokenCredId', 'ansible-galaxy-pah-token')
+    config.get('ansibleGalaxyTokenCredId', 'ansible-galaxy-pah-token')
 
     // ref: https://docs.cloudbees.com/docs/cloudbees-ci/latest/cloud-secure-guide/injecting-secrets
     // require SSH credentials for some ansible jobs (e.g., deploy-cacerts)
@@ -745,8 +765,8 @@ Map loadPipelineConfig(Map params) {
     ]
     config.secret_vars = secretVars
 
-    log.debug("${logPrefix} params=${JsonUtils.printToJsonString(params)}")
-    log.debug("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.debug("params=${JsonUtils.printToJsonString(params)}")
+    log.debug("config=${JsonUtils.printToJsonString(config)}")
 
     return config
 }
@@ -757,20 +777,19 @@ String getJenkinsAgentLabel(String jenkinsLabel) {
 }
 
 boolean doesVmTemplateExist(def dsl, Logger log, String vmTemplateName, boolean onlyIfTypeTemplate=true) {
-    String logPrefix="doesVmTemplateExist():"
     boolean vmTemplateExists = false
 
     dsl.sh "govc vm.info ${vmTemplateName}"
 //     boolean vmTemplateExists = dsl.sh(script: "govc vm.info -json ${vmTemplateName} | jq -er '.VirtualMachines[] | select(.Config.Template == true)'", returnStatus: true) == 0
     String vmInfoResultJson = dsl.sh(script: "govc vm.info -json ${vmTemplateName}", returnStdout: true)
-    log.debug("${logPrefix} vmInfoResultJson=${vmInfoResultJson}")
+    log.debug("vmInfoResultJson=${vmInfoResultJson}")
 
     def slurper = new JsonSlurper()
     Map vmInfoResult = slurper.parseText(vmInfoResultJson)
 
 //     def vmInfoResult = dsl.readJSON(text: vmInfoResultJson)
-    log.debug("${logPrefix} vmInfoResult: ${JsonUtils.printToJsonString(vmInfoResult)}")
-//     log.info("${logPrefix} vmInfoResult: ${vmInfoResult}")
+    log.debug("vmInfoResult: ${JsonUtils.printToJsonString(vmInfoResult)}")
+//     log.info("vmInfoResult: ${vmInfoResult}")
 //     vmTemplateExists = (vmInfoResult.containsKey('VirtualMachines') && vmInfoResult.VirtualMachines.size() > 0)
 
     Map templateKeysLookup = [
@@ -793,9 +812,9 @@ boolean doesVmTemplateExist(def dsl, Logger log, String vmTemplateName, boolean 
 
     List virtualMachines=vmInfoResult[templateKeys.virtualMachines]
 
-    log.debug("${logPrefix} virtualMachines=${virtualMachines}")
+    log.debug("virtualMachines=${virtualMachines}")
     boolean resultsFound = (virtualMachines != null)
-    log.info("${logPrefix} resultsFound=${resultsFound}")
+    log.info("resultsFound=${resultsFound}")
     if (resultsFound && virtualMachines.size() == 1) {
         if (onlyIfTypeTemplate) {
             vmTemplateExists = (virtualMachines[0].containsKey(templateKeys.config)
@@ -806,12 +825,11 @@ boolean doesVmTemplateExist(def dsl, Logger log, String vmTemplateName, boolean 
         }
     }
 
-    log.info("${logPrefix} vmTemplateExists=${vmTemplateExists}")
+    log.info("vmTemplateExists=${vmTemplateExists}")
     return vmTemplateExists
 }
 
 List getPackerCommandArgList(String packerCommand, Map config) {
-    String logPrefix="getPackerCommandArgList():"
 
     List packerCmdArgList = []
     packerCmdArgList.push("packer")
@@ -837,12 +855,12 @@ List getPackerCommandArgList(String packerCommand, Map config) {
     packerCmdArgList.push("-var iso_file=${config.iso_file}")
     packerCmdArgList.push("${config.build_config}")
 
-    log.debug("${logPrefix} packerCmdArgList=${JsonUtils.printToJsonString(packerCmdArgList)}")
+    log.debug("packerCmdArgList=${JsonUtils.printToJsonString(packerCmdArgList)}")
     return packerCmdArgList
 }
 
 void moveTemplate(def dsl, Logger log, Map deployConfig) {
-    String logPrefix="moveTemplate(${deployConfig.vcenter_shortname}):"
+    String logPrefix="[${deployConfig.vcenter_shortname}]:"
 
     String vm_template_name = deployConfig.vm_template_name
     String vm_template_datastore = deployConfig.vm_template_datastore

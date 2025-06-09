@@ -6,12 +6,11 @@ import com.dettonville.api.pipeline.utils.logging.Logger
 import com.dettonville.api.pipeline.utils.JsonUtils
 import com.dettonville.api.pipeline.utils.Utilities
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+@Field Logger log = new Logger(this, LogLevel.INFO)
+
 def call(Map config=[:]) {
-
-    Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this)
-
-    String logPrefix="bootstrapReferenceReposJob():"
 
     List paramList = []
 
@@ -24,9 +23,9 @@ def call(Map config=[:]) {
     }
 
 //     // Cron job configurations – configured to run every 5 minutes
-//     cron_cfg="H/5 * * * *"
+//     String cron_cfg="H/5 * * * *"
     // Cron job configurations – configured to run every day at 23:00 PM
-    cron_cfg="H 23 * * *"
+    String cron_cfg="H 23 * * *"
 
     properties([
         parameters(paramList),
@@ -41,11 +40,11 @@ def call(Map config=[:]) {
         }
     }
 
-    log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.info("config=${JsonUtils.printToJsonString(config)}")
 
     bootstrapReferenceRepos(config)
 
-    log.info("${logPrefix} finished")
+    log.info("finished")
 
 }
 

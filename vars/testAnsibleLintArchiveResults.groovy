@@ -13,9 +13,6 @@ import groovy.transform.Field
 
 def call(Map params=[:]) {
 
-//     Logger log = new Logger(this, LogLevel.INFO)
-// //     log.setLevel(LogLevel.DEBUG)
-
     Map config = loadPipelineConfig(params)
 
     pipeline {
@@ -79,12 +76,11 @@ def call(Map params=[:]) {
 
 //@NonCPS
 Map loadPipelineConfig(Map params) {
-    String logPrefix="loadPipelineConfig():"
     Map config = [:]
 
     // copy immutable params maps to mutable config map
     params.each { key, value ->
-        log.debug("${logPrefix} params[${key}]=${value}")
+        log.debug("params[${key}]=${value}")
         key=Utilities.decapitalize(key)
         if (value!="") {
             config[key]=value
@@ -136,8 +132,8 @@ Map loadPipelineConfig(Map params) {
 
     config.buildTestName = config.get('buildTestName', 'Ansible Lint Tests')
 
-    log.debug("${logPrefix} params=${params}")
-    log.debug("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.debug("params=${params}")
+    log.debug("config=${JsonUtils.printToJsonString(config)}")
 
     return config
 }

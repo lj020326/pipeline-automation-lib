@@ -15,9 +15,6 @@ import groovy.transform.Field
 
 def call(Map params=[:]) {
 
-// //     Logger.init(this, LogLevel.INFO)
-//     Logger log = new Logger(this, LogLevel.INFO)
-
     log.info("Loading Default Configs")
     Map config=loadPipelineConfig(params)
 
@@ -169,7 +166,6 @@ String decapitalize(String string) {
 }
 
 Map loadPipelineConfig(Map params, String configFile=null) {
-    String logPrefix="loadPipelineConfig():"
     Map config = [:]
 
     def buildDeployDefaultsTxt = libraryResource 'buildDeployDefaults.yml'
@@ -177,28 +173,28 @@ Map loadPipelineConfig(Map params, String configFile=null) {
     config=defaultSettings.pipeline
 
     if (configFile != null && fileExists(configFile)) {
-        log.info("${logPrefix} pipeline config file ${configFile} present, loading ...")
+        log.info("pipeline config file ${configFile} present, loading ...")
         Map configSettings = readYaml file: "${configFile}"
         config=config + configSettings.pipeline
     }
     else {
-        log.info("${logPrefix} pipeline config file ${configFile} not present, using defaults...")
+        log.info("pipeline config file ${configFile} not present, using defaults...")
     }
 
     // copy immutable params maps to mutable config map
     params.each { key, value ->
-        log.debug("${logPrefix} params[${key}]=${value}")
+        log.debug("params[${key}]=${value}")
         key=decapitalize(key)
         if (value!="") {
             config[key]=value
         }
     }
 
-//    config.logLevel = config.get('logLevel', "INFO")
-    config.logLevel = config.get('logLevel', "DEBUG")
-    config.debugPipeline = config.get('debugPipeline', false)
+//    config.get('logLevel', "INFO")
+    config.get('logLevel', "DEBUG")
+    config.get('debugPipeline', false)
 
-    log.info("${logPrefix} params=${params}")
+    log.info("params=${params}")
 
     log.setLevel(config.logLevel)
 
@@ -206,26 +202,26 @@ Map loadPipelineConfig(Map params, String configFile=null) {
         log.setLevel(LogLevel.DEBUG)
     }
 
-//    config.useSimulationMode = config.get('useSimulationMode', true)
-    config.useSimulationMode = config.get('useSimulationMode', false)
+//    config.get('useSimulationMode', true)
+    config.get('useSimulationMode', false)
 
     // secret vars
-    config.jenkinsArtifactoryCredId = config.get('jenkinsArtifactoryCredId',"dcapi_ci_vcs_user")
+    config.get('jenkinsArtifactoryCredId',"dcapi_ci_vcs_user")
 //    config.secretVars = getSecretEnvVars(config)
 
     //
     // essential/minimal params
     //
-    log.debug("${logPrefix} env.JOB_NAME = ${env.JOB_NAME}")
-    config.application = config.get('application', env.JOB_NAME.replaceAll('%2F', '/').replaceAll('/', '-').replaceAll(' ', '-').toUpperCase())
+    log.debug("env.JOB_NAME = ${env.JOB_NAME}")
+    config.get('application', env.JOB_NAME.replaceAll('%2F', '/').replaceAll('/', '-').replaceAll(' ', '-').toUpperCase())
 
-    log.debug("${logPrefix} config.application = ${config.application}")
+    log.debug("config.application = ${config.application}")
     config.buildNumber = currentBuild.number
 
     config.repoBranch = config.repoBranch ?: config.repoBranch ?: env.BRANCH_NAME ?: "develop"
 
-    log.debug("${logPrefix} env.BRANCH_NAME = ${env.BRANCH_NAME}")
-    log.debug("${logPrefix} config.repoBranch = ${config.repoBranch}")
+    log.debug("env.BRANCH_NAME = ${env.BRANCH_NAME}")
+    log.debug("config.repoBranch = ${config.repoBranch}")
 
     config.emailFrom=config.get('emailFrom',"DCAPI.deployAutomation@dettonville.com")
 
@@ -235,7 +231,7 @@ Map loadPipelineConfig(Map params, String configFile=null) {
     config.releaseDev=config.get('releaseDev',false)
     config.releaseStage=config.get('releaseStage',false)
 
-    log.debug("${logPrefix} config=${printToJsonString(config)}")
+    log.debug("config=${printToJsonString(config)}")
 
     return config
 }

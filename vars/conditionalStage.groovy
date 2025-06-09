@@ -1,26 +1,12 @@
-/*-
- * #%L
- * dettonville.org
- * %%
- * Copyright (C) 2024 dettonville.org DevOps
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
 
 import com.dettonville.api.pipeline.utils.logging.Logger
 import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
 import org.jenkinsci.plugins.scriptsecurity.sandbox.RejectedAccessException
+
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+//@Field Logger log = new Logger(this, LogLevel.INFO)
+@Field Logger log = new Logger(this)
 
 /**
  * Conditionally executes a stage and marks it as skipped if supported
@@ -31,7 +17,6 @@ import org.jenkinsci.plugins.scriptsecurity.sandbox.RejectedAccessException
  * @param body The stage body
  */
 void call(String stageName, Boolean condition, Boolean throwException = true, Closure body) {
-  Logger log = new Logger("conditionalStage")
   stage(stageName) {
     def config = [:]
     body.resolveStrategy = Closure.OWNER_FIRST

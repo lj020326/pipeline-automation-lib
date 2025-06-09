@@ -1,22 +1,3 @@
-/*-
- * #%L
- * dettonville.org
- * %%
- * Copyright (C) 2024 dettonville.org DevOps
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
 
 import com.dettonville.api.pipeline.credentials.Credential
 import com.dettonville.api.pipeline.scm.GitRepository
@@ -25,6 +6,11 @@ import com.dettonville.api.pipeline.shell.GitCommandBuilderImpl
 import com.dettonville.api.pipeline.utils.logging.Logger
 
 import java.util.regex.Matcher
+
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+//@Field Logger log = new Logger(this, LogLevel.INFO)
+@Field Logger log = new Logger(this)
 
 /**
  * Mirrors a GIT repository from src to remote.
@@ -36,7 +22,6 @@ import java.util.regex.Matcher
  * @param targetCredentialIds List of credential ids for the ssh agent during push (optional)
  */
 void mirrorRepository(String srcUrl, String targetUrl, List<String> srcCredentialIds = null, List<String> targetCredentialIds = null) {
-  Logger log = new Logger("mirrorRepository")
   log.info("Mirror repo from '$srcUrl' to '$targetUrl'")
   GitRepository srcRepo = new GitRepository(this, srcUrl)
   GitRepository targetRepo = new GitRepository(this, targetUrl)
@@ -114,7 +99,6 @@ void mirrorRepositoryToWorkspace(GitRepository srcRepo, List<String> srcCredenti
  * @param targetCredentialIds List of credential ids for the ssh agent during push (optional)
  */
 void mirrorRepositoryToRemote(String srcRepoPath, GitRepository targetRepo, List<String> targetCredentialIds = null) {
-  Logger log = new Logger("mirrorRepositoryToRemote")
   if (!targetRepo.isValid()) {
     log.fatal("The provided target repository is invalid!")
     error("The provided target repository is invalid!")

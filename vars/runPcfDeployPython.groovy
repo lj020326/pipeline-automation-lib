@@ -11,9 +11,6 @@ import groovy.transform.Field
 
 def call(Map params=[:]) {
 
-// //     Logger.init(this, LogLevel.INFO)
-//     Logger log = new Logger(this, LogLevel.INFO)
-
     log.info("Loading Default Configs")
     Map config=loadPipelineConfig(params)
 
@@ -125,8 +122,7 @@ String decapitalize(String string) {
 
 
 Map loadPipelineConfig(Map params, String configFile=null) {
-    String logPrefix="loadPipelineConfig(configFile=${configFile}):"
-    log.debug("${logPrefix} started")
+    log.debug("started")
 
     Map config = [:]
 
@@ -135,27 +131,27 @@ Map loadPipelineConfig(Map params, String configFile=null) {
     config=defaultSettings.pipeline
 
     if (configFile != null && fileExists(configFile)) {
-        log.info("${logPrefix} pipeline config file ${configFile} present, loading ...")
+        log.info("pipeline config file ${configFile} present, loading ...")
         Map configSettings = readYaml file: "${configFile}"
         config=config + configSettings.pipeline
     }
     else {
-        log.info("${logPrefix} pipeline config file ${configFile} not present, using defaults...")
+        log.info("pipeline config file ${configFile} not present, using defaults...")
     }
-    log.debug("${logPrefix} config (pre-apply-default-settings)=${printToJsonString(config)}")
+    log.debug("config (pre-apply-default-settings)=${printToJsonString(config)}")
 
     // copy immutable params maps to mutable config map
     params.each { key, value ->
-        log.debug("${logPrefix} params[${key}]=${value}")
+        log.debug("params[${key}]=${value}")
         key=decapitalize(key)
         if (value!="") {
             config[key]=value
         }
     }
 
-//    config.logLevel = config.get('logLevel', "INFO")
-    config.logLevel = config.get('logLevel', "DEBUG")
-    config.debugPipeline = config.get('debugPipeline', true)
+//    config.get('logLevel', "INFO")
+    config.get('logLevel', "DEBUG")
+    config.get('debugPipeline', true)
     if (config.debugPipeline) {
         log.setLevel(LogLevel.DEBUG)
     }
@@ -163,66 +159,66 @@ Map loadPipelineConfig(Map params, String configFile=null) {
 
     config.gitRepoBranch = config.gitRepoBranch ?: env.BRANCH_NAME ?: "develop"
 
-    log.debug("${logPrefix} env.BRANCH_NAME = ${env.BRANCH_NAME}")
-    log.debug("${logPrefix} config.gitRepoBranch = ${config.gitRepoBranch}")
+    log.debug("env.BRANCH_NAME = ${env.BRANCH_NAME}")
+    log.debug("config.gitRepoBranch = ${config.gitRepoBranch}")
 
-//    config.useConfigFile = config.get('useConfigFile', false)
-    config.useConfigFile = config.get('useConfigFile', true)
+//    config.get('useConfigFile', false)
+    config.get('useConfigFile', true)
     config.configFile = config.configFile ?: "jenkins/runPcfDeploy.yml"
-    config.checkoutDir = config.get('checkoutDir', '.')
+    config.get('checkoutDir', '.')
 
-    config.deleteBeforePush = config.get('deleteBeforePush', false)
-    log.info("${logPrefix} params=${params}")
+    config.get('deleteBeforePush', false)
+    log.info("params=${params}")
 
-//    config.useSimulationMode = config.get('useSimulationMode', true)
-    config.useSimulationMode = config.get('useSimulationMode', false)
-//    config.pomFile = config.get('pomFile','pom.xml')
-    config.pomFile = config.get('pomFile',null)
+//    config.get('useSimulationMode', true)
+    config.get('useSimulationMode', false)
+//    config.get('pomFile','pom.xml')
+    config.get('pomFile',null)
 
     // secret vars
-    config.jenkinsArtifactoryCredId = config.get('jenkinsArtifactoryCredId',"dcapi_ci_vcs_user")
+    config.get('jenkinsArtifactoryCredId',"dcapi_ci_vcs_user")
     config.secretVars = getSecretEnvVars(config)
 
     //
     // essential/minimal params
     //
-//    log.debug("${logPrefix} env.JOB_NAME = ${env.JOB_NAME}")
-    config.jenkinsJobName = config.get('jenkinsJobName', env.JOB_NAME.replaceAll('%2F', '/').replaceAll('/', '-').replaceAll(' ', '-').toUpperCase())
+//    log.debug("env.JOB_NAME = ${env.JOB_NAME}")
+    config.get('jenkinsJobName', env.JOB_NAME.replaceAll('%2F', '/').replaceAll('/', '-').replaceAll(' ', '-').toUpperCase())
 
-    log.debug("${logPrefix} config.jenkinsJobName = ${config.jenkinsJobName}")
+    log.debug("config.jenkinsJobName = ${config.jenkinsJobName}")
     config.buildNumber = currentBuild.number
     config.emailFrom=config.get('emailFrom',"DCAPI.pcfDeployAutomation@dettonville.com")
 
-    config.runTests = config.get('runTests', true)
-    config.runJMeter = config.get('runJMeter', true)
-    config.runSonar = config.get('runSonar', false)
-    config.runFindbugs = config.get('runFindbugs', false)
-    config.runBuild = config.get('runBuild', true)
+    config.get('runTests', true)
+    config.get('runJMeter', true)
+    config.get('runSonar', false)
+    config.get('runFindbugs', false)
+    config.get('runBuild', true)
 
     // if useLocal is true - then sets/overrides the gitRepoBranch with local branch
-    config.useLocal = config.get('useLocal', false)
+    config.get('useLocal', false)
 
     if(config.useLocal && config.gitRepoBranch!=env.BRANCH_NAME) {
-        log.warn("${logPrefix} useLocal is true: the gitRepoBranch set as ${config.gitRepoBranch} will be set to local branch ${env.BRANCH_NAME}")
+        log.warn("useLocal is true: the gitRepoBranch set as ${config.gitRepoBranch} will be set to local branch ${env.BRANCH_NAME}")
         config.gitRepoBranch=env.BRANCH_NAME
     }
 
-    config.publishToArtifactory = config.get('publishToArtifactory', true)
-    config.publishToArtifactoryFromBranch = config.get('publishToArtifactoryFromBranch', null)
+    config.get('publishToArtifactory', true)
+    config.get('publishToArtifactoryFromBranch', null)
 
-    config.createSnapshot = config.get('createSnapshot', true)
-    config.createSnapshotFromBranch = config.get('createSnapshotFromBranch', null)
-    config.deployFromSnapshot = config.get('deployFromSnapshot', true)
-    config.deployFromRelease = config.get('deployFromRelease', false)
+    config.get('createSnapshot', true)
+    config.get('createSnapshotFromBranch', null)
+    config.get('deployFromSnapshot', true)
+    config.get('deployFromRelease', false)
 
-    config.createRelease = config.get('createRelease', false)
-    config.createReleaseFromBranch = config.get('createReleaseFromBranch', "develop")
+    config.get('createRelease', false)
+    config.get('createReleaseFromBranch', "develop")
 
-    config.writeToVault = config.get('writeToVault', false)
-    config.deployServices = config.get('deployServices', false)
-    config.updatePOM = config.get('updatePOM', false)
+    config.get('writeToVault', false)
+    config.get('deployServices', false)
+    config.get('updatePOM', false)
 
-    config.forceSnapshot = config.get('forceSnapshot', false)
+    config.get('forceSnapshot', false)
 
     if(config.deploySnapshot && config.deployRelease) {
         log.error("Conflicting deploySnapshot and deployRelease in the config")
@@ -262,7 +258,7 @@ Map loadPipelineConfig(Map params, String configFile=null) {
         stash includes: '**', name: "${appConfig.pcfAppName}-workspace"
     }
 
-    log.debug("${logPrefix} config=${printToJsonString(config)}")
+    log.debug("config=${printToJsonString(config)}")
 
     return config
 }
@@ -285,10 +281,9 @@ def getJenkinsAgentLabel(String jenkinsLabel) {
 
 def deployPcfAppEnv(Map config, VaultUtil vaultUtil, CaaSUtil caasUtil) {
     String pcfAppEnv=config.pcfAppEnv
-    String logPrefix = "deployPcfAppEnv(${pcfAppEnv}):"
-    log.info("${logPrefix} started")
+    log.info("started")
 
-    if (config.debugPipeline) log.debug("${logPrefix} config=${printToJsonString(config)}")
+    if (config.debugPipeline) log.debug("config=${printToJsonString(config)}")
 
     def agentLabelM3 = getJenkinsAgentLabel(config.jenkinsM3NodeLabel)
     def agentLabelDeploy = getJenkinsAgentLabel(config.jenkinsDeployNodeLabel)
@@ -325,12 +320,12 @@ def deployPcfAppEnv(Map config, VaultUtil vaultUtil, CaaSUtil caasUtil) {
     stage("Deploy - ${pcfAppEnv}") {
         node(agentLabelDeploy as String) {
             config.pcfSpringAppList.each {
-                log.info("${logPrefix} deploying it.pcfAppName=${it.pcfAppName}")
-                log.debug("${logPrefix} it=${it}")
+                log.info("deploying it.pcfAppName=${it.pcfAppName}")
+                log.debug("it=${it}")
 
                 Map appConfig = config.findAll { it.key != 'pcfSpringAppList' } + it
 
-                log.info("${logPrefix} appConfig=${appConfig}")
+                log.info("appConfig=${appConfig}")
 
                 deployPCFApp(appConfig)
             }
@@ -342,12 +337,11 @@ def deployPcfAppEnv(Map config, VaultUtil vaultUtil, CaaSUtil caasUtil) {
 def deployPCFApp(Map config) {
     String pcfAppEnv = config.pcfAppEnv
     String pcfAppName = config.pcfAppName
-    String logPrefix="deployPCFApp(${pcfAppEnv}, ${pcfAppName}):"
-    log.debug("${logPrefix} starting")
+    log.debug("starting")
 
     config.keyMap = config.keyMaps[config.pcfAppName]
 
-    if (config.debugPipeline) log.debug("${logPrefix} config=${printToJsonString(config)}")
+    if (config.debugPipeline) log.debug("config=${printToJsonString(config)}")
 
     String configEnv = pcfAppEnv.replace('-','_')
     String envLoc = pcfAppEnv.split('-')[0]
@@ -404,7 +398,7 @@ def deployPCFApp(Map config) {
 
     if(config?.deployFromSnapshot || config?.deployFromRelease) {
         if(config?.deployFromSnapshot && config?.deployFromRelease) {
-            log.error("${logPrefix} you can not set deploy from snapshot and deploy from release in the same env")
+            log.error("you can not set deploy from snapshot and deploy from release in the same env")
         }
         git url: "${config.gitRepo}", branch: "${config.gitRepoBranch}"
         def pom = readMavenPom file: pomFile
@@ -431,7 +425,7 @@ def deployPCFApp(Map config) {
         String dirToMove
         if(manifestFile.contains("/")) {
             dirToMove = manifestFile.substring(0, manifestFile.lastIndexOf("/"))
-            log.debug("${logPrefix} dirToMove=${dirToMove}")
+            log.debug("dirToMove=${dirToMove}")
             if (dirToMove!=".") {
                 sh "cp ${pom.artifactId}-${pom.version}${jarSuffix}.${pom.packaging} ${dirToMove}/${pom.artifactId}-${pom.version}${jarSuffix}.${pom.packaging}"
             }
@@ -443,7 +437,7 @@ def deployPCFApp(Map config) {
         if (config.debugPipeline) {
             sh "find . -name \\*.war -type f -printf \"%TY-%Tm-%Td %TH:%TM:%.2Ts %m:%u:%g %p %k kB\\n\" | sort -k 3,3"
 
-            log.debug("${logPrefix} updated manifest file:")
+            log.debug("updated manifest file:")
             sh "cat ${manifestFile}"
         }
 
@@ -452,7 +446,7 @@ def deployPCFApp(Map config) {
     }
 
     def suffix = config?.route_suffix ?: ''
-    log.debug("${logPrefix} using suffix ${suffix}")
+    log.debug("using suffix ${suffix}")
 
     if(useVault) {
         if (vaultApplicationName) {
@@ -464,10 +458,9 @@ def deployPCFApp(Map config) {
 
 
 void deployToPCFGoRouter(Map config) {
-    String logPrefix="deployToPCFGoRouter(${config.pcfAppEnv}, ${config.pcfAppName}):"
-    log.debug("${logPrefix} starting")
+    log.debug("starting")
 
-    if (config.debugPipeline) log.debug("${logPrefix} config=${printToJsonString(config)}")
+    if (config.debugPipeline) log.debug("config=${printToJsonString(config)}")
 
     String appHostName=config.pcfAppName
     String appDomain=config.pcfAppDomain
@@ -487,7 +480,7 @@ void deployToPCFGoRouter(Map config) {
 
     def pcfAppRoute = "https://${appHostName}.${appDomain}"
 
-    log.debug("${logPrefix} pcfAppRoute=${pcfAppRoute}")
+    log.debug("pcfAppRoute=${pcfAppRoute}")
 
 //    withEnv(["CF_HOME=${env.WORKSPACE}"]) {
     withEnv(["CF_HOME=."]) {
@@ -502,7 +495,7 @@ void deployToPCFGoRouter(Map config) {
             if(manifestLoc) pushString = " -f ${manifestLoc}"
 
             if (config.deleteBeforePush) {
-                log.info("${logPrefix} removing existing app first [${config.pcfAppName}] before pushing")
+                log.info("removing existing app first [${config.pcfAppName}] before pushing")
                 sh "cf delete ${config.pcfAppName} -f -r"
             }
 
@@ -513,7 +506,7 @@ void deployToPCFGoRouter(Map config) {
                 sh "cf push ${appHostName} ${pushString} --no-start"
             }
 
-            log.debug("${logPrefix} activeProfile=${activeProfile}")
+            log.debug("activeProfile=${activeProfile}")
 
             if(activeProfile) {
                 sh "cf set-env ${appHostName} SPRING_PROFILES_ACTIVE ${activeProfile}"
@@ -581,17 +574,17 @@ void deployToPCFGoRouter(Map config) {
             setPCFEnvVarsFromMap(appHostName,keyMap)
 
             try {
-                log.debug("${logPrefix} restage the application")
+                log.debug("restage the application")
                 sh "cf restage ${appHostName}"
             } catch (Exception err) {
-                log.error("${logPrefix} restage exception occurred [${err}]")
+                log.error("restage exception occurred [${err}]")
             }
 
             try {
-                log.debug("${logPrefix} start the application")
+                log.debug("start the application")
                 sh "cf start ${appHostName}"
             } catch (Exception err) {
-                log.error("${logPrefix} start exception occurred [${err}]")
+                log.error("start exception occurred [${err}]")
             }
 
             if(keyMap["instanceCount"] != null) {
@@ -616,8 +609,7 @@ void setPCFEnvVarsFromMap(String appHostName, Map keyMap) {
 }
 
 def deployServicesToPCF(Map config) {
-    String logPrefix="deployServicesToPCF(${config.pcfAppEnv}):"
-    log.debug("${logPrefix} starting")
+    log.debug("starting")
 
     String env=config.pcfAppEnv
 
@@ -672,7 +664,7 @@ def deployServicesToPCF(Map config) {
                 param = config?.environmentOverrides?."${configEnv}"?.param
             }
 
-            log.debug("${logPrefix} PARAM ${param} for ${configEnv}")
+            log.debug("PARAM ${param} for ${configEnv}")
 
             if(it.useCredentials) {
                 def serviceCredentialString = it.credentialsString

@@ -64,7 +64,7 @@ def getParams(repo) {
                 paramsFromRepo = readJSON file: settingsFilename
                 println "Found repo settings:\n\n" + prettyPrint(toJson(paramsFromRepo))+"\n\n"
             } catch (Throwable t) {
-                println "Was unable to read " + settingsFilename + " in root of repository. Add it to the repo (${repo.cloneUrl}) if you want to adjust build process.\n" + t.getMessage()
+                println "Was unable to read ${settingsFilename} in root of repository. Add it to the repo (${repo.cloneUrl}) if you want to adjust build process.\n" + t.getMessage()
             }
             deleteDir()
         }

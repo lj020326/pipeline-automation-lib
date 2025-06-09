@@ -64,10 +64,9 @@ class AppDeploymentUtil implements Serializable {
     }
 
     def runAll(Map params) {
-        String logPrefix="runAll():"
 
         dsl.stage("Initialize Pipeline") {
-            log.info("${logPrefix} Initailizing pipeline settings")
+            log.info("Initailizing pipeline settings")
             runPreDeploymentSteps(params)
         }
 
@@ -82,8 +81,7 @@ class AppDeploymentUtil implements Serializable {
     }
 
     Map runPreDeploymentSteps(Map params) {
-        String logPrefix="runPreDeploymentSteps():"
-        log.debug("${logPrefix} started")
+        log.debug("started")
 
         initPipeline(params)
 
@@ -92,12 +90,10 @@ class AppDeploymentUtil implements Serializable {
 
 
     Map initPipeline(Map params) {
-
-        String logPrefix="initPipeline():"
         dsl.cleanWs()
 
         this.pipelineConfig=loadPipelineConfig(params)
-        log.debug("${logPrefix} initial pipelineConfig=${JsonUtils.printToJsonString(pipelineConfig)}")
+        log.debug("initial pipelineConfig=${JsonUtils.printToJsonString(pipelineConfig)}")
 
         log.debug("NODE_NAME = ${dsl.env.NODE_NAME}")
         initCurrentRunState()
@@ -115,18 +111,17 @@ class AppDeploymentUtil implements Serializable {
     }
 
     Map loadPipelineConfig(Map params) {
-        String logPrefix="loadPipelineConfig():"
-        log.debug("${logPrefix} starting...")
+        log.debug("starting...")
 
         // set job config settings
         Map defaultSettings = getDefaultSettings()
         Map config=defaultSettings.pipeline
 
-        log.info("${logPrefix} params=${JsonUtils.printToJsonString(params)}")
+        log.info("params=${JsonUtils.printToJsonString(params)}")
         // copy immutable params maps to mutable config map
         config = MapMerge.merge(config, params)
 
-        log.debug("${logPrefix} config after applying params=${JsonUtils.printToJsonString(config)}")
+        log.debug("config after applying params=${JsonUtils.printToJsonString(config)}")
 
         log.setLevel(config.logLevel)
 
@@ -134,13 +129,13 @@ class AppDeploymentUtil implements Serializable {
 
         if (config.debugPipeline) {
 //            log.setLevel(LogLevel.DEBUG)
-            log.debug("${logPrefix} **********************")
-            log.debug("${logPrefix} pipeline env variables:")
+            log.debug("**********************")
+            log.debug("pipeline env variables:")
             dsl.sh('printenv | sort')
-            log.debug("${logPrefix} **********************")
+            log.debug("**********************")
         }
 
-        config.deployGroup = config.get('deployGroup',[])
+        config.get('deployGroup',[])
         config.deployGroupMap = [:]
 
         config.deployGroup.each { String componentId ->
@@ -153,7 +148,7 @@ class AppDeploymentUtil implements Serializable {
         }
 
         if (!config.isGroupJob) {
-            log.info("${logPrefix} merging single component config to pipeline root config")
+            log.info("merging single component config to pipeline root config")
             String componentId = config.deployGroup[0]
             Map componentConfig = config.appComponents[componentId]
             componentConfig.componentId = componentId
@@ -168,23 +163,22 @@ class AppDeploymentUtil implements Serializable {
             for (int i = 0; i < config.jobBaseFolderLevel; i++) {
                 deployJobBaseParts.add(jobParts[i])
             }
-            //    log.info("${logPrefix} appDeployStrategyParts=${appDeployStrategyParts}")
+            //    log.info("appDeployStrategyParts=${appDeployStrategyParts}")
             config.deployJobBaseUri=deployJobBaseParts.join("/")
         }
 
-        log.info("${logPrefix} final config=${JsonUtils.printToJsonString(config)}")
+        log.info("final config=${JsonUtils.printToJsonString(config)}")
 
         return config
     }
 
     void runPostDeploymentSteps() {
-        String logPrefix="runPostDeploymentSteps():"
 
         if (pipelineConfig.runPostDeployTests) {
-            log.info("${logPrefix} Running Tests")
+            log.info("Running Tests")
             runTests()
         } else {
-            log.info("${logPrefix} Skipping Post Deployment Tests")
+            log.info("Skipping Post Deployment Tests")
             currentState.testStatus = "SKIPPED"
         }
 
@@ -200,15 +194,14 @@ class AppDeploymentUtil implements Serializable {
     }
 
     void runAppDeployment(Map params) {
-        String logPrefix="runAppDeployment():"
         dsl.cleanWs()
 
 //        if (pipelineConfig.deployGroup.size()>1) {
         if (pipelineConfig.isGroupJob) {
-            log.info("${logPrefix} Deploying ${pipelineConfig.deployGroup.size()} Components")
+            log.info("Deploying ${pipelineConfig.deployGroup.size()} Components")
             runAppGroupDeployment()
         } else if (pipelineConfig.deployGroup.size()==1) {
-            log.info("${logPrefix} Deploy app component [${pipelineConfig.componentId}] using ARA release")
+            log.info("Deploy app component [${pipelineConfig.componentId}] using ARA release")
 
             def agentLabelRunAraDeploy = getJenkinsAgentLabel(pipelineConfig.jenkinsRunAraDeployLabel)
             dsl.node(agentLabelRunAraDeploy as String) {  // Evaluate the node label later
@@ -218,36 +211,35 @@ class AppDeploymentUtil implements Serializable {
             }
 
         } else {
-            log.warn("${logPrefix} No components defined in config.deployGroup")
-            log.info("${logPrefix} Skipping Post Deployment Tests")
+            log.warn("No components defined in config.deployGroup")
+            log.info("Skipping Post Deployment Tests")
             currentState.deployStatus = "SKIPPED"
         }
 
     }
 
     void setPipelineStatus() {
-        String logPrefix="setPipelineStatus():"
 
-        log.info("${logPrefix} finished: currentState.deployResults=${currentState.deployResults}")
-        log.info("${logPrefix} finished: currentState.testResults=${currentState.testResults}")
+        log.info("finished: currentState.deployResults=${currentState.deployResults}")
+        log.info("finished: currentState.testResults=${currentState.testResults}")
 
         if (pipelineConfig.useSimulationMode) currentState.useSimulationMode = pipelineConfig.useSimulationMode
         currentState.result = currentState.deployResults && currentState.testResults
         currentState.duration = "${dsl.currentBuild.durationString.replace(' and counting', '')}"
 
-        log.info("${logPrefix} finished: currentState.result = ${currentState.result}")
-        log.info("${logPrefix} finished: currentState=${JsonUtils.printToJsonString(currentState)}")
+        log.info("finished: currentState.result = ${currentState.result}")
+        log.info("finished: currentState=${JsonUtils.printToJsonString(currentState)}")
 
-        log.info("${logPrefix} save currentState to ${pipelineConfig.jobResultsFile}")
+        log.info("save currentState to ${pipelineConfig.jobResultsFile}")
 
         def jsonOut = dsl.readJSON text: JsonOutput.toJson(currentState)
         dsl.writeJSON file: pipelineConfig.jobResultsFile, json: jsonOut, pretty: 4
         dsl.archiveArtifacts artifacts: pipelineConfig.jobResultsFile
 
-        log.info("${logPrefix} Set Pipeline Status")
+        log.info("Set Pipeline Status")
 
         dsl.currentBuild.result = (currentState.result) ? 'SUCCESS' : 'FAILURE'
-        log.info("${logPrefix} **** dsl.currentBuild.result=${dsl.currentBuild.result}")
+        log.info("**** dsl.currentBuild.result=${dsl.currentBuild.result}")
 
         updateJobDescription()
     }
@@ -264,15 +256,13 @@ class AppDeploymentUtil implements Serializable {
         String araReleaseSpecFile = pipelineConfig.araReleaseSpecFile
         String araWorkflow = pipelineConfig.araWorkflow
         String artifactVersion = pipelineConfig.artifactVersion
-
-        String logPrefix = "runAraRelease():"
-        log.info("${logPrefix} started")
+        log.info("started")
         boolean result = false
 
-        log.debug("${logPrefix} araEnvSpecFile=${araEnvSpecFile}")
-        log.debug("${logPrefix} araReleaseSpecFile=${araReleaseSpecFile}")
-        log.debug("${logPrefix} araWorkflow=${araWorkflow}")
-        log.debug("${logPrefix} artifactVersion=${artifactVersion}")
+        log.debug("araEnvSpecFile=${araEnvSpecFile}")
+        log.debug("araReleaseSpecFile=${araReleaseSpecFile}")
+        log.debug("araWorkflow=${araWorkflow}")
+        log.debug("artifactVersion=${artifactVersion}")
 
         Map currentRunState = [:]
         currentRunState.id = pipelineConfig.componentId
@@ -285,7 +275,7 @@ class AppDeploymentUtil implements Serializable {
         currentRunState.artifactVersion=artifactVersion
 
         if (pipelineConfig.isSingleComponentDeploy) {
-            log.info("${logPrefix} Getting Deploy Artifact Revision")
+            log.info("Getting Deploy Artifact Revision")
             pipelineConfig.componentVersion = pipelineConfig.artifactVersion
             Map latestArtifactVersionInfo = artifactApiUtils.getLatestArtifactVersion(pipelineConfig)
             currentRunState.latestArtifactVersionInfo = latestArtifactVersionInfo
@@ -304,7 +294,7 @@ class AppDeploymentUtil implements Serializable {
 //        String releaseCliUrl = dsl.env.ARA_CLI
         String releaseCliUrl = pipelineConfig.araClientUrl
 
-        log.info("${logPrefix} Downloading ARA CLI from ${releaseCliUrl}")
+        log.info("Downloading ARA CLI from ${releaseCliUrl}")
         dsl.sh "/usr/bin/curl '${releaseCliUrl}' | tar -x"
         if (!dsl.fileExists('release.sh')) {
             dsl.error "${logPrefix} Release CLI script not found.  Please ensure that the script exists at ${releaseCliUrl}"
@@ -313,7 +303,7 @@ class AppDeploymentUtil implements Serializable {
         String environmentSpec
         String releaseSpec
 
-        log.info("${logPrefix} Cloning ARA spec files from DFS Biz Ops repository")
+        log.info("Cloning ARA spec files from DFS Biz Ops repository")
 
         dsl.dir('ara-spec-files') {
             dsl.checkout scm: [
@@ -327,17 +317,17 @@ class AppDeploymentUtil implements Serializable {
                 araEnvSpecFileDirList.remove(araEnvSpecFileDirList.size() - 1);
                 String araEnvSpecFileDir = araEnvSpecFileDirList.join("/")
 
-                log.info("${logPrefix} find results for dir [${araEnvSpecFileDir}]:")
+                log.info("find results for dir [${araEnvSpecFileDir}]:")
                 runFind(araEnvSpecFileDir)
             }
 
-            log.debug("${logPrefix} Reading env file ${araEnvSpecFile}")
+            log.debug("Reading env file ${araEnvSpecFile}")
             environmentSpec = dsl.readFile araEnvSpecFile
 
-            log.debug("${logPrefix} Reading spec file ${araReleaseSpecFile}")
+            log.debug("Reading spec file ${araReleaseSpecFile}")
             releaseSpec = dsl.readFile file: "${araReleaseSpecFile}"
 
-            log.debug("${logPrefix} Replacing application version in the release spec with ${artifactVersion}")
+            log.debug("Replacing application version in the release spec with ${artifactVersion}")
             releaseSpec = releaseSpec.replaceAll("(?m)^.*\"version\".*\$", "\"version\": \"${artifactVersion}\", ")
         }
 
@@ -352,7 +342,7 @@ class AppDeploymentUtil implements Serializable {
               \"rel_spec\": ${releaseSpec}
           }"""
 
-        log.info("${logPrefix} Initiating release")
+        log.info("Initiating release")
 
         String releaseCmd = ""
         if (pipelineConfig.debugReleaseScript) {
@@ -366,11 +356,11 @@ class AppDeploymentUtil implements Serializable {
 
         currentRunState.releaseCmd = releaseCmd
         if (pipelineConfig.useSimulationMode) {
-            log.info("${logPrefix} **** USING SIMULATION MODE - following command not actually run *****")
-            log.info("${logPrefix} releaseCmd=${releaseCmd}")
+            log.info("**** USING SIMULATION MODE - following command not actually run *****")
+            log.info("releaseCmd=${releaseCmd}")
             currentRunState.useSimulationMode=pipelineConfig.useSimulationMode
         } else {
-            log.info("${logPrefix} releaseCmd=${releaseCmd}")
+            log.info("releaseCmd=${releaseCmd}")
             dsl.withCredentials([[$class: 'UsernamePasswordMultiBinding',
                                   credentialsId   : pipelineConfig.jenkinsAraCredId,
                                   usernameVariable: 'ARA_USER',
@@ -382,7 +372,7 @@ class AppDeploymentUtil implements Serializable {
                     int retstat = dsl.sh(script: "${releaseCmd}", returnStatus: true)
                     result = (retstat) ? false : true
                 } catch (err) {
-                    log.error("${logPrefix} The deployment failed: ${err}")
+                    log.error("The deployment failed: ${err}")
                     result = false
                 }
             }
@@ -405,14 +395,13 @@ class AppDeploymentUtil implements Serializable {
         dsl.writeJSON file: pipelineConfig.deployResultsFile, json: jsonOut, pretty: 4
         dsl.archiveArtifacts artifacts: pipelineConfig.deployResultsFile
 
-        log.debug("${logPrefix} finished: result = ${result}")
+        log.debug("finished: result = ${result}")
 
         return result
     }
 
     def runAppGroupDeployment() {
-        String logPrefix="runAppGroupDeployment():"
-        log.info("${logPrefix} started")
+        log.info("started")
 
         List deployResults = []
         Map parallelJobs = [:]
@@ -424,9 +413,9 @@ class AppDeploymentUtil implements Serializable {
             Map jobConfig = pipelineConfig.findAll { !["deployGroupMap","appComponents"].contains(it.key) } + component
             jobConfig.jobId = createJobId(jobConfig, i)
 
-            jobConfig.job = "${jobConfig.deployJobBaseUri}/${jobConfig.appEnvironment}/${jobConfig.deployJobName}"
+            jobConfig.jobName = "${jobConfig.deployJobBaseUri}/${jobConfig.appEnvironment}/${jobConfig.deployJobName}"
 
-            log.debug("${logPrefix} jobConfig=${JsonUtils.printToJsonString(jobConfig)}")
+            log.debug("jobConfig=${JsonUtils.printToJsonString(jobConfig)}")
 
             parallelJobs["split-${jobConfig.jobId}"] = {
                 deployResults.add(runDeployJob(jobConfig))
@@ -435,13 +424,13 @@ class AppDeploymentUtil implements Serializable {
         }
 
         if (parallelJobs.size()>0) {
-            log.info("${logPrefix} parallelJobs=${parallelJobs}")
+            log.info("parallelJobs=${parallelJobs}")
             dsl.parallel parallelJobs
         } else {
-            log.warn("${logPrefix} no component jobs found!")
+            log.warn("no component jobs found!")
         }
 
-        log.debug("${logPrefix} deployResults=${deployResults}")
+        log.debug("deployResults=${deployResults}")
 
         // ref: https://stackoverflow.com/questions/18380667/join-list-of-boolean-elements-groovy
         boolean result = (deployResults.size()>0) ? deployResults.inject { a, b -> a && b } : true
@@ -449,7 +438,7 @@ class AppDeploymentUtil implements Serializable {
         currentState.deployResults = result
         currentState.deployStatus = (result) ? "SUCCESS" : "FAILED"
 
-        log.info("${logPrefix} finished: result = ${result}")
+        log.info("finished: result = ${result}")
         return result
     }
 
@@ -471,16 +460,14 @@ class AppDeploymentUtil implements Serializable {
 
     boolean runDeployJob(Map config) {
 
-        String logPrefix="runDeployJob():"
-
         // This will copy all files packaged in STASH_NAME to agent workspace root directory.
         // To copy to another agent directory, see [https://github.com/jenkinsci/pipeline-examples]
-        log.debug("${logPrefix} started")
+        log.debug("started")
 
         boolean result = false
         List paramList=[]
 
-        log.debug("${logPrefix} Setting child job post deployments to false")
+        log.debug("Setting child job post deployments to false")
         config.runPostDeployTests = false
 
         deployJobParamMap.each { String key, Map param ->
@@ -490,17 +477,17 @@ class AppDeploymentUtil implements Serializable {
             }
         }
 
-        log.debug("${logPrefix} paramList=${paramList}")
+        log.debug("paramList=${paramList}")
 
         Map currentRunState = [:]
         currentRunState.id = config.id
         currentRunState.name = config.name
         currentRunState.deployJobName = config.deployJobName
         currentRunState.appComponentBranch = config.appComponentBranch
-        currentRunState.job = config.job
+        currentRunState.jobName = config.jobName
         currentRunState.result = true
 
-        log.debug("${logPrefix} starting job ${config.job}")
+        log.debug("starting job ${config.jobName}")
 
         Date timeStart
         Date timeEnd
@@ -512,19 +499,19 @@ class AppDeploymentUtil implements Serializable {
 
         try {
 
-            log.info("${logPrefix} config.job=[${config.job} paramList=${paramList}")
+            log.info("config.jobName=[${config.jobName} paramList=${paramList}")
 
             // ref: http://jenkins-ci.361315.n4.nabble.com/How-to-get-build-results-from-a-build-job-in-a-pipeline-td4897887.html
             // https://javadoc.jenkins.io/plugin/workflow-support/org/jenkinsci/plugins/workflow/support/steps/build/RunWrapper.html
-            def jobBuild = dsl.build job: config.job, parameters: paramList, wait: true, propagate: !config.continueIfFailed
+            def jobBuild = dsl.build job: config.jobName, parameters: paramList, wait: true, propagate: !config.continueIfFailed
 
-            log.info("${logPrefix} jobBuild=${jobBuild}")
+            log.info("jobBuild=${jobBuild}")
 
             String jobResult = jobBuild.getResult()
             currentRunState.jobRunUrl = jobBuild.getAbsoluteUrl()
             currentRunState.jobResult = jobResult
 
-            log.info("${logPrefix} Build ${config.job} returned result: ${jobResult}")
+            log.info("Build ${config.jobName} returned result: ${jobResult}")
 
             if (jobResult == 'SUCCESS') {
                 result = true
@@ -538,7 +525,7 @@ class AppDeploymentUtil implements Serializable {
             }
 
         } catch (Exception err) {
-            log.error("${logPrefix} job exception occurred [${err}]")
+            log.error("job exception occurred [${err}]")
             result = false
             if (config.failFast) {
                 dsl.currentBuild.result = 'FAILURE'
@@ -556,7 +543,7 @@ class AppDeploymentUtil implements Serializable {
             currentRunState.duration = Utilities.getDurationString(milliseconds)
         }
 
-        log.info("${logPrefix} currentRunState=${JsonUtils.printToJsonString(currentRunState)}")
+        log.info("currentRunState=${JsonUtils.printToJsonString(currentRunState)}")
 
         currentRunState.result = result
         currentState.deployJobs[config.id] = currentRunState
@@ -565,29 +552,27 @@ class AppDeploymentUtil implements Serializable {
             dsl.currentBuild.result = 'FAILURE'
         }
 
-        log.info("${logPrefix} finished with result = ${result}")
+        log.info("finished with result = ${result}")
 
         return result
     }
 
     boolean runTests() {
-
-        String logPrefix="runTests():"
-        log.info("${logPrefix} started")
+        log.info("started")
 
         List testResults = []
 
         pipelineConfig.postDeployTests.eachWithIndex { Map component, i ->
 
-            log.info("${logPrefix} component=${JsonUtils.printToJsonString(component)}")
+            log.info("component=${JsonUtils.printToJsonString(component)}")
 
             Map jobConfig = pipelineConfig.findAll { it.key != 'postDeployTests' } + component
             jobConfig.jobId = createJobId(jobConfig, i)
 
-            jobConfig.job = "${jobConfig.testJobBaseUri}/${jobConfig.appTestEnvironment}/${jobConfig.target}"
+            jobConfig.jobName = "${jobConfig.testJobBaseUri}/${jobConfig.appTestEnvironment}/${jobConfig.target}"
 
-            log.debug("${logPrefix} jobConfig=${JsonUtils.printToJsonString(jobConfig)}")
-            log.info("${logPrefix} job=${jobConfig.job}")
+            log.debug("jobConfig=${JsonUtils.printToJsonString(jobConfig)}")
+            log.info("jobName=${jobConfig.jobName}")
 
             testResults.add(runTestJob(jobConfig))
         }
@@ -598,14 +583,13 @@ class AppDeploymentUtil implements Serializable {
         currentState.testResults = result
         currentState.testStatus = (result) ? "SUCCESS" : "FAILED"
 
-        log.debug("${logPrefix} finished: result = ${result}")
+        log.debug("finished: result = ${result}")
 
         return result
     }
 
     boolean runTestJob(Map config) {
-        String logPrefix="runTests():"
-        log.info("${logPrefix} started")
+        log.info("started")
 
         boolean result = false
         List paramList=[]
@@ -616,17 +600,17 @@ class AppDeploymentUtil implements Serializable {
                 paramList.add(param)
             }
         }
-        log.info("${logPrefix} paramList=${paramList}")
+        log.info("paramList=${paramList}")
 
         Map currentRunState = [:]
         currentRunState.target = config.target
-        currentRunState.job = config.job
+        currentRunState.jobName = config.jobName
         currentRunState.result = true
 
-        log.info("${logPrefix} starting job ${config.job}")
+        log.info("starting job ${config.jobName}")
 
         if (config.useSimulationMode) {
-            log.info("${logPrefix} ***** RUNNING SIMULATED MODE - skipping ******")
+            log.info("***** RUNNING SIMULATED MODE - skipping ******")
             currentRunState.useSimulationMode=pipelineConfig.useSimulationMode
             currentState.testJobs[config.target] = currentRunState
             return true
@@ -644,13 +628,13 @@ class AppDeploymentUtil implements Serializable {
 
             // ref: http://jenkins-ci.361315.n4.nabble.com/How-to-get-build-results-from-a-build-job-in-a-pipeline-td4897887.html
             // https://javadoc.jenkins.io/plugin/workflow-support/org/jenkinsci/plugins/workflow/support/steps/build/RunWrapper.html
-            def jobBuild = dsl.build job: config.job, parameters: paramList, wait: true, propagate: !config.continueIfFailed
+            def jobBuild = dsl.build job: config.jobName, parameters: paramList, wait: true, propagate: !config.continueIfFailed
 
             def jobResult = jobBuild.getResult()
             currentRunState.jobRunUrl = jobBuild.getAbsoluteUrl()
             currentRunState.jobResult = jobResult
 
-            log.info("${logPrefix} Build ${config.job} returned result: ${jobResult}")
+            log.info("Build ${config.jobName} returned result: ${jobResult}")
 
             if (jobResult == 'SUCCESS') {
                 result = true
@@ -663,7 +647,7 @@ class AppDeploymentUtil implements Serializable {
                 }
             }
         } catch (Exception err) {
-            log.error("${logPrefix} job exception occurred [${err}]")
+            log.error("job exception occurred [${err}]")
 
             result = false
             if (config.failFast) {
@@ -681,7 +665,7 @@ class AppDeploymentUtil implements Serializable {
         currentRunState.duration = Utilities.getDurationString(milliseconds)
         currentRunState.result = result
 
-        log.info("${logPrefix} currentRunState=${JsonUtils.printToJsonString(currentRunState)}")
+        log.info("currentRunState=${JsonUtils.printToJsonString(currentRunState)}")
 
         currentState.testJobs[config.target] = currentRunState
 
@@ -689,29 +673,28 @@ class AppDeploymentUtil implements Serializable {
             dsl.currentBuild.result = 'FAILURE'
         }
 
-        log.info("${logPrefix} finished with result = ${result}")
+        log.info("finished with result = ${result}")
 
         return result
     }
 
 
     def initJobCause() {
-        String logPrefix="initJobCause():"
-        log.debug("${logPrefix} initialize job cause info")
+        log.debug("initialize job cause info")
 
         pipelineConfig.jobCauseMap = [:]
 
         if (pipelineConfig.getJobCause) {
-            log.info("${logPrefix} getting job cause info")
+            log.info("getting job cause info")
             try {
                 Map jobCauseMap = jenkinsApiUtils.getCurrentJobCauseInfo()
-                log.info("${logPrefix} jobCauseMap=${JsonUtils.printToJsonString(jobCauseMap)}")
+                log.info("jobCauseMap=${JsonUtils.printToJsonString(jobCauseMap)}")
                 pipelineConfig.jobCauseMap = jobCauseMap
                 pipelineConfig.jobCause = (pipelineConfig.jobCauseMap?.shortDescription) ? pipelineConfig.jobCauseMap.shortDescription : ""
-                log.info("${logPrefix} pipelineConfig.jobCause=${pipelineConfig.jobCause}")
+                log.info("pipelineConfig.jobCause=${pipelineConfig.jobCause}")
 
             } catch (Exception err) {
-                log.error("${logPrefix} exception occurred getting job cause info: [${err}]")
+                log.error("exception occurred getting job cause info: [${err}]")
             }
         }
     }
@@ -734,22 +717,21 @@ class AppDeploymentUtil implements Serializable {
     }
 
     void runPostJobHandler(String postJobEventType) {
-        String logPrefix = "runPostJobHandler(): **** post[${postJobEventType}]"
-        log.info("${logPrefix} started")
+        log.info("started")
 
         if (postJobEventType=="always") {
             updateJobDescription()
         }
 
-        log.debug("${logPrefix} currentBuild.result=${dsl.currentBuild.result} - sending notification to event subscribed recipients")
+        log.debug("currentBuild.result=${dsl.currentBuild.result} - sending notification to event subscribed recipients")
         emailUtils.sendEmailNotification(pipelineConfig, postJobEventType)
 
         if (postJobEventType=="always") {
-            log.info("${logPrefix} cleaning workspace")
+            log.info("cleaning workspace")
             try {
                 dsl.cleanWs()
             } catch (Exception err) {
-                log.warn("${logPrefix} cleanWs() exception occurred [${err}]")
+                log.warn("cleanWs() exception occurred [${err}]")
             }
         }
 

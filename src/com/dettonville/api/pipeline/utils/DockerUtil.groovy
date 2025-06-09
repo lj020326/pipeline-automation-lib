@@ -25,15 +25,12 @@ class DockerUtil implements Serializable {
     // ref; https://groovyconsole.appspot.com/script/1109001
     // ref: https://coderwall.com/p/utgplg/regex-full-url-base-url
     String getUrlEndpoint(String urlStr) {
-        String logPrefix = "getUrlEndpoint():"
         String endpoint = urlStr.find(/^[a-z][a-z0-9+\-.]*:\/\/([a-z0-9\-._~%!$&'()*+,;=]+@)?([a-z0-9\-._~%]+|\[[a-z0-9\-._~%!$&'()*+,;=:]+\]):(\d+)/) { it[2] + ':' + it[3] }
         dsl.echo("endpoint = " + endpoint)
         return endpoint
     }
 
     def withRegistry(String dockerRegUrl, String dockerRegCredId="docker-registry-user", def actions) {
-
-        String logPrefix = "withRegistry():"
         this.dockerRegUrl = dockerRegUrl
         this.dockerRegEndpoint = getUrlEndpoint(dockerRegUrl)
 
@@ -53,9 +50,8 @@ class DockerUtil implements Serializable {
     }
 
     def build(String dockerImageId, String dockerImageBuildPath=".") {
-        String logPrefix = "build(${dockerImageId}):"
 
-        log.debug("${logPrefix} starting")
+        log.debug("starting")
 
         this.dockerImageId = dockerImageId
         String dockerCmd = "docker build -t ${dockerImageId} ${dockerImageBuildPath}"
@@ -68,8 +64,7 @@ class DockerUtil implements Serializable {
     }
 
     boolean push(String dockerImageTag) {
-        String logPrefix = "push(${dockerImageTag}):"
-        log.debug("${logPrefix} starting")
+        log.debug("starting")
 
         String targetImageLabel = "${this.dockerRegEndpoint}/${this.dockerImageId}:${dockerImageTag}"
 

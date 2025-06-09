@@ -132,7 +132,7 @@ String createBrowserstackLocalIdentifier(Map config) {
     }
 
     browserstackLocalIdentifier=browserstackLocalIdentifier.toLowerCase()
-    log.info("${logPrefix} -> created browserstackLocalIdentifier=${browserstackLocalIdentifier}")
+    log.info("-> created browserstackLocalIdentifier=${browserstackLocalIdentifier}")
     return browserstackLocalIdentifier
 }
 
@@ -141,58 +141,57 @@ void runTest(Map config, Map currentState) {
     config.testCaseLabel=getTestCaseLabel(config)
 
     String logPrefix="[${config.testCaseLabel}-${config.nodeId}] runTest():"
-    log.info("${logPrefix} run ${config.parallelRunNumber} started")
+    log.info("run ${config.parallelRunNumber} started")
 
     if (config.waitTime>0) {
-        log.info("${logPrefix} waiting for ${config.waitTime} seconds before checking to see that the BS agent is still running")
+        log.info("waiting for ${config.waitTime} seconds before checking to see that the BS agent is still running")
         sleep(time: config.waitTime, unit: 'SECONDS')
     }
 
     if (config.useBrowserstackLocalAgent) {
         config.browserstackLocalIdentifier=createBrowserstackLocalIdentifier(config)
-        log.info("${logPrefix} *** ASSIGNED browserstackLocalIdentifier=${config.browserstackLocalIdentifier}")
+        log.info("*** ASSIGNED browserstackLocalIdentifier=${config.browserstackLocalIdentifier}")
     }
 
-    log.info("${logPrefix} running BS agent action() closure for run ${config.parallelRunNumber}")
+    log.info("running BS agent action() closure for run ${config.parallelRunNumber}")
 
     dir(config.testCaseLabel) {
         withBsLocalAgent log, config, currentState, {
-            log.info("${logPrefix} we are here")
+            log.info("we are here")
         }
     }
 
-    log.info("${logPrefix} run ${config.parallelRunNumber} finished")
+    log.info("run ${config.parallelRunNumber} finished")
 }
 
 // COPY AND PASTE FROM runATH
 
 def getBSAgent(Map config) {
-    String logPrefix="getBSAgent():"
     if (config.runBsAgentMethod!='PER_RUN') {
         logPrefix="[${config.testCaseLabel}-${config.nodeId}] ${logPrefix}"
     }
 
-    log.info("${logPrefix} starting")
+    log.info("starting")
 
     boolean installBsAgent = false
     if (!fileExists("${config.bsAgentBinDir}/BrowserStackLocal")) {
         installBsAgent = true
-        log.info("${logPrefix} binary not found, fetching...")
+        log.info("binary not found, fetching...")
     } else {
         String bsAgentVersion = sh(script: "${config.bsAgentBinDir}/BrowserStackLocal --version", returnStdout: true).trim()
         if (!bsAgentVersion.contains(config.bsAgentVersion)) {
             installBsAgent = true
-            log.info("${logPrefix} binary version ${bsAgentVersion} does not match ${config.bsAgentVersion}, fetching...")
+            log.info("binary version ${bsAgentVersion} does not match ${config.bsAgentVersion}, fetching...")
         } else {
-            log.info("${logPrefix} agent binary with version ${config.bsAgentVersion} already exists at ${config.bsAgentBinDir}")
+            log.info("agent binary with version ${config.bsAgentVersion} already exists at ${config.bsAgentBinDir}")
         }
     }
 
     if (installBsAgent) {
-        log.info("${logPrefix} getting agent binary")
+        log.info("getting agent binary")
         sh "mkdir -p ${config.bsAgentBinDir}"
 
-        log.info("${logPrefix} Fetching Browserstack agent")
+        log.info("Fetching Browserstack agent")
         dir('deploy_configs') {
             checkout scm: [
                     $class: 'GitSCM',
@@ -209,7 +208,7 @@ def getBSAgent(Map config) {
         sh "unzip -o ${config.bsAgentBinDir}/BrowserStackLocal-${config.bsAgentBinType}.zip -d ${config.bsAgentBinDir}"
         sh "chmod +x ${config.bsAgentBinDir}/BrowserStackLocal"
 
-        log.info("${logPrefix} Browserstack agent deployed to ${config.bsAgentBinDir}")
+        log.info("Browserstack agent deployed to ${config.bsAgentBinDir}")
     }
 
 }
@@ -221,7 +220,7 @@ def getBSAgent(Map config) {
 def withBsLocalAgent(Map config, Map currentState, def actions) {
 
     String logPrefix = "${scriptName}->[${config.testCaseLabel}-${config.nodeId}] withBsLocalAgent():"
-    log.info("${logPrefix} config.browserstackLocalIdentifier=${config.browserstackLocalIdentifier}")
+    log.info("config.browserstackLocalIdentifier=${config.browserstackLocalIdentifier}")
 
     config.bsPidFile = "${config.bsAgentLogDir}/bsagent-${config.browserstackLocalIdentifier}.pid"
     config.bsLogFile = "${config.bsAgentLogDir}/bsagent-${config.browserstackLocalIdentifier}.log"
@@ -232,34 +231,34 @@ def withBsLocalAgent(Map config, Map currentState, def actions) {
         try {
             actions()
         } catch (Exception err) {
-            log.error("${logPrefix} actions(): exception occurred [${err}]")
+            log.error("actions(): exception occurred [${err}]")
             sh "cat ${config.bsLogFile}"
         }
         return
     }
 
     if (!currentState.containsKey("nodes")) {
-        log.info("${logPrefix} initializing currentState.nodes map")
+        log.info("initializing currentState.nodes map")
         currentState.nodes = [:]
     }
     if (!currentState.nodes.containsKey(env.NODE_NAME)) {
-        log.info("${logPrefix} initializing currentState.nodes[${env.NODE_NAME}] map")
+        log.info("initializing currentState.nodes[${env.NODE_NAME}] map")
         currentState.nodes[env.NODE_NAME] = [:]
     }
     if (!currentState.nodes[env.NODE_NAME].containsKey("bsLocalAgents")) {
-        log.info("${logPrefix} initializing currentState.nodes[${env.NODE_NAME}].bsLocalAgents map")
+        log.info("initializing currentState.nodes[${env.NODE_NAME}].bsLocalAgents map")
         currentState.nodes[env.NODE_NAME].bsLocalAgents = [:]
     }
     if (!currentState.nodes[env.NODE_NAME].bsLocalAgents.containsKey(config.browserstackLocalIdentifier)) {
-        log.info("${logPrefix} initializing currentState.nodes[${env.NODE_NAME}].bsLocalAgents[${config.browserstackLocalIdentifier}] map")
+        log.info("initializing currentState.nodes[${env.NODE_NAME}].bsLocalAgents[${config.browserstackLocalIdentifier}] map")
         currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier] = [:]
         currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].isBsAgentRunning = false
     }
 
     Map currentAgentState = currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier]
-    log.debug("${logPrefix} started with currentAgentState[node=[${env.NODE_NAME}], browserstackLocalIdentifier=${config.browserstackLocalIdentifier}]=${printToJsonString(currentAgentState)}")
+    log.debug("started with currentAgentState[node=[${env.NODE_NAME}], browserstackLocalIdentifier=${config.browserstackLocalIdentifier}]=${printToJsonString(currentAgentState)}")
     if (currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].isBsAgentRunning == false) {
-        log.info("${logPrefix} browserstacklocal agent for ${config.browserstackLocalIdentifier} not running, starting")
+        log.info("browserstacklocal agent for ${config.browserstackLocalIdentifier} not running, starting")
 
         currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].runningRunCount = 1
 
@@ -267,26 +266,26 @@ def withBsLocalAgent(Map config, Map currentState, def actions) {
 
         startBSAgent(config, currentState)
 
-//        log.info("${logPrefix} starting -> currentState.nodes[${env.NODE_NAME}].bsLocalAgents[${config.browserstackLocalIdentifier}]=${currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier]}")
-        log.debug("${logPrefix} started AGENT -> currentState=${printToJsonString(currentState)}")
+//        log.info("starting -> currentState.nodes[${env.NODE_NAME}].bsLocalAgents[${config.browserstackLocalIdentifier}]=${currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier]}")
+        log.debug("started AGENT -> currentState=${printToJsonString(currentState)}")
 
-//        log.info("${logPrefix} run find after starting BS agent")
+//        log.info("run find after starting BS agent")
 //        sh "find /var/tmp/${config.jenkinsProjectName} -type f -printf \"%TY-%Tm-%Td %TH:%TM:%.2Ts %p\\n\""
-        log.info("${logPrefix} browserstacklocal agent for ${config.browserstackLocalIdentifier} started with pid = [${currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].bsAgentPid}]")
+        log.info("browserstacklocal agent for ${config.browserstackLocalIdentifier} started with pid = [${currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].bsAgentPid}]")
     } else {
         if (!currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].containsKey("bsAgentPid")) {
-            log.info("${logPrefix} Bs Agent process status assigned but not started yet for ${config.browserstackLocalIdentifier}")
+            log.info("Bs Agent process status assigned but not started yet for ${config.browserstackLocalIdentifier}")
 
             int bsAgentWaitTime = 5
             int bsAgentMaxWaits = 10
             for (int i = 1; i  <= bsAgentMaxWaits; i++) {
-                log.info("${logPrefix} waiting ${bsAgentWaitTime} seconds for agent to start...")
+                log.info("waiting ${bsAgentWaitTime} seconds for agent to start...")
                 sleep(time: bsAgentWaitTime, unit: 'SECONDS')
                 if (currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].containsKey("bsAgentPid")) {
-                    log.info("${logPrefix} discovered Bs Agent process started with pid=[${currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].bsAgentPid}]")
+                    log.info("discovered Bs Agent process started with pid=[${currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].bsAgentPid}]")
                     break
                 } else {
-                    log.info("${logPrefix} Bs Agent process status not yet started after sleep #${i} for ${config.browserstackLocalIdentifier}")
+                    log.info("Bs Agent process status not yet started after sleep #${i} for ${config.browserstackLocalIdentifier}")
                 }
             }
             if (!currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].containsKey("bsAgentPid")) {
@@ -295,21 +294,21 @@ def withBsLocalAgent(Map config, Map currentState, def actions) {
                 throw message
             }
         }
-        log.info("${logPrefix} checking Bs Agent process status for pid=[${currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].bsAgentPid}]")
+        log.info("checking Bs Agent process status for pid=[${currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].bsAgentPid}]")
         runBsAgentPsCheck(config, currentState, false, true)
         currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].runningRunCount += 1
     }
 
     if (config.debugPipeline) {
-        log.info("${logPrefix} run find before running actions()")
+        log.info("run find before running actions()")
         sh "find ${config.bsAgentLogDir} -type f -printf \"%TY-%Tm-%Td %TH:%TM:%.2Ts %p\\n\""
     }
 
     try {
         actions()
     } catch (Exception err) {
-        log.error("${logPrefix} actions(): exception occurred [${err}]")
-        log.info("${logPrefix} checking Bs Agent process status")
+        log.error("actions(): exception occurred [${err}]")
+        log.info("checking Bs Agent process status")
         runBsAgentPsCheck(config, currentState, true, true)
 
 //        sh "cat ${config.bsLogFile}"
@@ -317,7 +316,7 @@ def withBsLocalAgent(Map config, Map currentState, def actions) {
 
     } finally {
         if (config.debugPipeline) {
-            log.debug("${logPrefix} post action find")
+            log.debug("post action find")
             sh "find ${config.bsAgentLogDir} -type f -printf \"%TY-%Tm-%Td %TH:%TM:%.2Ts %p\\n\""
         }
 
@@ -326,16 +325,16 @@ def withBsLocalAgent(Map config, Map currentState, def actions) {
         }
 
         if (config.runBsDiagnostics) {
-            log.info("${logPrefix} Including process info in diagnostics")
+            log.info("Including process info in diagnostics")
             runBsAgentPsCheck(config, currentState, true, true)
         }
 
         if (currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].runningRunCount == 1) {
             if (["PER_RUN", "PER_JOB_RUN"].contains(config.runBsAgentMethod)) {
-                log.info("${logPrefix} last run complete, stopping agent")
+                log.info("last run complete, stopping agent")
                 stopRunningBsAgent(config, currentState)
             } else if (config.forceShutdownBsAgent) {
-                log.info("${logPrefix} last run complete, forceably stopping agent")
+                log.info("last run complete, forceably stopping agent")
                 stopRunningBsAgent(config, currentState)
             } else {
                 archiveBsAgentLogs(config, currentState)
@@ -343,19 +342,19 @@ def withBsLocalAgent(Map config, Map currentState, def actions) {
         }
 
         currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].runningRunCount -= 1
-        log.debug("${logPrefix} finished -> currentState=${printToJsonString(currentState)}")
+        log.debug("finished -> currentState=${printToJsonString(currentState)}")
 
     }
 }
 
 boolean startBSAgent(Map config, Map currentState) {
     String logPrefix="[${config.testCaseLabel}-${config.nodeId}] startBSAgent():"
-    log.info("${logPrefix} starting agent for config.browserstackLocalIdentifier=${config.browserstackLocalIdentifier}")
+    log.info("starting agent for config.browserstackLocalIdentifier=${config.browserstackLocalIdentifier}")
 
-    log.debug("${logPrefix} started -> currentState=${printToJsonString(currentState)}")
+    log.debug("started -> currentState=${printToJsonString(currentState)}")
 
     if (config.debugPipeline) {
-        log.debug("${logPrefix} run find before running actions() on ${config.bsAgentBaseDir}")
+        log.debug("run find before running actions() on ${config.bsAgentBaseDir}")
         sh "find ${config.bsAgentBaseDir} -type f -printf \"%TY-%Tm-%Td %TH:%TM:%.2Ts %p\\n\""
     }
 
@@ -366,9 +365,9 @@ boolean startBSAgent(Map config, Map currentState) {
     String pid
     if (currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier]?.bsAgentPid) {
         pid = currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].bsAgentPid
-        log.debug("${logPrefix} runningAgents pid=[${pid}]")
+        log.debug("runningAgents pid=[${pid}]")
     } else if (fileExists(config.bsPidFile)) {
-        log.debug("${logPrefix} pid file exists, check if actually running or if its stale")
+        log.debug("pid file exists, check if actually running or if its stale")
         pid = sh(script: "cat ${config.bsPidFile}", returnStdout: true).trim()
         currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].bsAgentPid = pid
     }
@@ -379,21 +378,21 @@ boolean startBSAgent(Map config, Map currentState) {
     }
 
     if (config.runBSCurlTest || config.runBsDiagnostics) {
-        log.info("${logPrefix} initializing directory and diagnostics logfile")
+        log.info("initializing directory and diagnostics logfile")
         sh script: "touch ${config.bsDiagLogFile}"
 
-        log.debug("${logPrefix} checking Bs Agent process status across all running agents")
+        log.debug("checking Bs Agent process status across all running agents")
         runBsAgentPsCheck(config, currentState, true, true)
     }
 
     if (pid!=null) {
         runBsAgentPsCheck(config, currentState)
-        log.info("${logPrefix} pid file exists and already running -> setting pid on runningAgent map")
+        log.info("pid file exists and already running -> setting pid on runningAgent map")
         currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].isBsAgentRunning == true
         return true
     }
 
-    log.info("${logPrefix} initializing bs agent log directory ${config.bsAgentLogDir}")
+    log.info("initializing bs agent log directory ${config.bsAgentLogDir}")
     sh "mkdir -p ${config.bsAgentLogDir}"
 
     boolean result
@@ -442,7 +441,7 @@ boolean startBSAgent(Map config, Map currentState) {
 
         pid = sh(script: "cat ${config.bsPidFile}", returnStdout: true).trim()
         currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].bsAgentPid = pid
-        log.info("${logPrefix} process pid=[${pid}] return status = [${retstat}]")
+        log.info("process pid=[${pid}] return status = [${retstat}]")
 
         result = (retstat) ? false : true
 
@@ -451,14 +450,14 @@ boolean startBSAgent(Map config, Map currentState) {
         } else {
             currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].isBsAgentRunning == false
 
-            log.error("${logPrefix} process start failed for pid=[${pid}]")
+            log.error("process start failed for pid=[${pid}]")
             if (fileExists(config.bsLogFile)) {
                 sh "tail -30 ${config.bsLogFile}"
             }
 
-            log.error("${logPrefix} checking if running BS process actually exists...")
+            log.error("checking if running BS process actually exists...")
 
-            log.info("${logPrefix} checking Bs Agent process status across running agent for pid")
+            log.info("checking Bs Agent process status across running agent for pid")
             runBsAgentPsCheck(config, currentState, false, true)
 
         }
@@ -470,42 +469,42 @@ boolean startBSAgent(Map config, Map currentState) {
 def stopRunningBsAgent(Map config, Map currentState) {
     String logPrefix = "${scriptName}->[${config.testCaseLabel}-${config.nodeId}] stopRunningBsAgent():"
 
-    log.info("${logPrefix} starting")
+    log.info("starting")
 
-    log.info("${logPrefix} currentState.nodes[${env.NODE_NAME}].bsLocalAgents[${config.browserstackLocalIdentifier}]= ${currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier]}")
+    log.info("currentState.nodes[${env.NODE_NAME}].bsLocalAgents[${config.browserstackLocalIdentifier}]= ${currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier]}")
 
     String pid
     if (currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier]?.bsAgentPid) {
         pid = currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].bsAgentPid
-        log.info("${logPrefix} runningAgents pid=[${pid}]")
+        log.info("runningAgents pid=[${pid}]")
     } else if (config?.bsPidFile) {
-        log.info("${logPrefix} pid not found in running agents map, sourcing pid from ${config.bsPidFile}")
+        log.info("pid not found in running agents map, sourcing pid from ${config.bsPidFile}")
         pid = sh(script: "cat ${config.bsPidFile}", returnStdout: true).trim()
-        log.info("${logPrefix} ${config.bsPidFile} pid=[${pid}]")
+        log.info("${config.bsPidFile} pid=[${pid}]")
     }
 
     if (config.debugPipeline) {
-        log.info("${logPrefix} run find before archive/cleanup")
+        log.info("run find before archive/cleanup")
         sh "find ${config.bsAgentLogDir} -type f -printf \"%TY-%Tm-%Td %TH:%TM:%.2Ts %p\\n\""
     }
 
-    log.info("${logPrefix} show all BS agent running processes")
+    log.info("show all BS agent running processes")
     runBsAgentPsCheck(config, currentState, true)
 
 //    try {
 //        cleanupOrphanedBsAgents(config)
 //    } catch (Exception err) {
-//        log.info("${logPrefix} exception when cleaning up orphaned BS agents [${err}]")
+//        log.info("exception when cleaning up orphaned BS agents [${err}]")
 //    }
 
-    log.info("${logPrefix} stopping browserstacklocal agent execution for ${config.browserstackLocalIdentifier}")
+    log.info("stopping browserstacklocal agent execution for ${config.browserstackLocalIdentifier}")
     // Stop the connection
     try {
 //        sh "kill -9 `cat ${config.bsPidFile}`"
         sh "kill -9 ${pid}"
         currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].isBsAgentRunning == false
     } catch (Exception err) {
-        log.error("${logPrefix} kill: browserstack cleanup exception occurred [${err}]")
+        log.error("kill: browserstack cleanup exception occurred [${err}]")
         sh "tail -30 ${config.bsLogFile}"
     }
 
@@ -514,12 +513,12 @@ def stopRunningBsAgent(Map config, Map currentState) {
     if (["PER_RUN", "PER_JOB_RUN"].contains(config.runBsAgentMethod)
             || config.forceShutdownBsAgent)
     {
-        log.info("${logPrefix} cleaning up agent bindir and any residue/artifacts for ${config.bsAgentLogDir}")
+        log.info("cleaning up agent bindir and any residue/artifacts for ${config.bsAgentLogDir}")
         sh "rm -fr ${config.bsAgentLogDir}"
     }
 
     if (config.forceCleanupBsBaseDir) {
-        log.info("${logPrefix} cleaning browserstacklocal agent root dir ${config.bsAgentBaseDir}")
+        log.info("cleaning browserstacklocal agent root dir ${config.bsAgentBaseDir}")
         sh "rm -fr ${config.bsAgentBaseDir}"
     }
 }
@@ -529,42 +528,42 @@ def runBsAgentPsCheck(Map config, Map currentState, boolean showAllBsAgents = fa
     String processInfo
     String processCmd
 
-    log.info("${logPrefix} started")
-    log.debug("${logPrefix} currentState.nodes[${env.NODE_NAME}].bsLocalAgents[${config.browserstackLocalIdentifier}] = ${currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier]}")
+    log.info("started")
+    log.debug("currentState.nodes[${env.NODE_NAME}].bsLocalAgents[${config.browserstackLocalIdentifier}] = ${currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier]}")
     if (!showAllBsAgents) {
 
         String pid
         if (currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier]?.bsAgentPid) {
             pid = currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].bsAgentPid
-            log.info("${logPrefix} runningAgents pid=[${pid}]")
+            log.info("runningAgents pid=[${pid}]")
         } else if (config?.bsPidFile) {
-            log.info("${logPrefix} pid not found in running agents map, sourcing pid from ${config.bsPidFile}")
+            log.info("pid not found in running agents map, sourcing pid from ${config.bsPidFile}")
             pid = sh(script: "cat ${config.bsPidFile}", returnStdout: true).trim()
-            log.info("${logPrefix} ${config.bsPidFile} pid=[${pid}]")
+            log.info("${config.bsPidFile} pid=[${pid}]")
         }
 //    String pid = sh(script: "cat ${config.bsPidFile}", returnStdout: true).trim()
 //    String pid = currentState.nodes[env.NODE_NAME].bsLocalAgents[config.browserstackLocalIdentifier].bsAgentPid
 
-        log.info("${logPrefix} checking process status for pid=[${pid}]")
+        log.info("checking process status for pid=[${pid}]")
         try {
             processCmd = "ps -ef | grep ${pid} | grep -v grep"
 
             processInfo = sh(script: "ps -ef | grep ${pid} | grep -v grep", returnStdout: true).trim()
-//            log.info("${logPrefix} Browserstack local agent already running with pid=[${pid}] processInfo = [${processInfo}]")
+//            log.info("Browserstack local agent already running with pid=[${pid}] processInfo = [${processInfo}]")
         } catch (Exception err) {
-            log.warn("${logPrefix} browserstacklocal process does not exists")
+            log.warn("browserstacklocal process does not exists")
             if (fileExists(config.bsPidFile)) {
-                log.warn("${logPrefix} cleaning up pid file ${config.bsPidFile}")
+                log.warn("cleaning up pid file ${config.bsPidFile}")
                 sh "rm ${config.bsPidFile}"
             }
         }
     } else {
         try {
-            log.info("${logPrefix} checking process status for all BS agents")
+            log.info("checking process status for all BS agents")
 //            processInfo = sh(script: "ps -ef | grep -v grep | grep -i browserstacklocal", returnStdout: true).trim()
             processInfo = sh(script: "ps axo pid=,stat=,ppid=,user=,lstart=,command= | grep -v grep | grep -i browserstacklocal", returnStdout: true).trim()
         } catch (Exception err) {
-            log.info("${logPrefix} browserstacklocal process does not exist")
+            log.info("browserstacklocal process does not exist")
         }
     }
 
@@ -573,7 +572,7 @@ def runBsAgentPsCheck(Map config, Map currentState, boolean showAllBsAgents = fa
             processInfo = processInfo.replaceAll("${BS_KEY}", "***")
         }
     }
-    log.info("${logPrefix} processInfo=[${processInfo}]")
+    log.info("processInfo=[${processInfo}]")
 
     if (writeToBsDiagLog) {
         sh script: "echo \"${processCmd}\" >> ${config.bsDiagLogFile}", returnStatus: true
@@ -590,7 +589,7 @@ def runBsAgentPsCheck(Map config, Map currentState, boolean showAllBsAgents = fa
 def archiveBsAgentLogs(Map config, Map currentState) {
     String logPrefix = "${scriptName}->[${config.testCaseLabel}-${config.nodeId}] archiveBsAgentLogs():"
 
-    log.info("${logPrefix} archiving agent log")
+    log.info("archiving agent log")
     dir(config.bsAgentLogDir) {
         def logFiles = findFiles glob: '**/*.log'
         //            def logFiles = findFiles glob: "**/${config.bsLogFile}"
@@ -607,7 +606,7 @@ def archiveBsAgentLogs(Map config, Map currentState) {
 
 def cleanupOrphanedBsAgents(Map config) {
     String logPrefix="[${config.testCaseLabel}-${config.nodeId}] cleanupOrphanedBsAgents():"
-    log.info("${logPrefix} starting")
+    log.info("starting")
 
     String debugFlag=(config.debugPipeline) ? "-x" : ""
 //    String script="scripts/cleanup-zombie-process.sh"
@@ -615,7 +614,7 @@ def cleanupOrphanedBsAgents(Map config) {
     getResourceFile(script)
 //    sh 'find scripts -type f'
 
-    log.info("${logPrefix} running script ${script} jenkins ${config.jenkinsProjectName} browserstacklocal")
+    log.info("running script ${script} jenkins ${config.jenkinsProjectName} browserstacklocal")
     sh "bash ${debugFlag} ${script} jenkins ${config.jenkinsProjectName} browserstacklocal"
 
 }
@@ -640,12 +639,12 @@ def runBSCurlTest(Map config) {
         sh script: "echo \"######\" >> ${config.bsDiagLogFile}", returnStatus: true
 
         try {
-            log.info("${logPrefix} browserstack curl test results:")
+            log.info("browserstack curl test results:")
 //            def curlResults = sh(script: "set -o pipefail; ${curlTestCmd} 2>&1 | tee -a ${config.bsDiagLogFile}", returnStdout: true)
             sh script: "set -o pipefail; ${curlTestCmd} 2>&1 | tee -a ${config.bsDiagLogFile}", returnStdout: true
-//            log.info("${logPrefix} browserstack curl test results: [\n${curlResults}]")
+//            log.info("browserstack curl test results: [\n${curlResults}]")
         } catch (Exception err) {
-            log.warn("${logPrefix} browserstack curl test exception occurred: [${err}]")
+            log.warn("browserstack curl test exception occurred: [${err}]")
         }
         sh script: "echo \"\n\n\" >> ${config.bsDiagLogFile}", returnStatus: true
 

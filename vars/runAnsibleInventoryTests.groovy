@@ -9,13 +9,12 @@ import com.dettonville.api.pipeline.versioning.ComparableSemanticVersion
 
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field
-@Field Logger log = new Logger(this, LogLevel.INFO)
+//@Field Logger log = new Logger(this, LogLevel.INFO)
+@Field Logger log = new Logger(this)
 
 def call(Map params=[:]) {
 
-    Logger log = new Logger(this, LogLevel.INFO)
-//     log.setLevel(LogLevel.DEBUG)
-
+    // log.enableDebug()
     Map config = loadPipelineConfig(params)
     String ansibleLogSummary = "No results"
     int numTestsFailed = 0
@@ -70,6 +69,8 @@ def call(Map params=[:]) {
                         testScriptVersion = new ComparableSemanticVersion(config.testScriptVersion)
                         log.info("testScriptVersion=${testScriptVersion.toString()}")
                         log.info("minVersionPyTest=${minVersionPyTest.toString()}")
+
+                        sh "mkdir -p ${config.junitXmlReport}"
 
 //                         sh(script: "bash ${config.testScript} -r ${config.junitXmlReport} -p", returnStdout: true)
                         pytest_failed = sh(
@@ -150,7 +151,6 @@ def call(Map params=[:]) {
                 script {
 // //                     ComparableSemanticVersion testScriptVersion = new ComparableSemanticVersion(config.testScriptVersion)
 //                     if (testScriptVersion && testScriptVersion >= minVersionPyTest) {
-// //                         junit testResults: ".test-results/*.xml", skipPublishingChecks: true
 //                         junit testResults: "${config.junitXmlReportDir}/*.xml", skipPublishingChecks: true
 //                     }
 
@@ -162,12 +162,12 @@ def call(Map params=[:]) {
                         commitId: config.gitCommitHash
                     )
                     if (config?.alwaysEmailDistList) {
-                        sendEmail(currentBuild, env, emailAdditionalDistList=config.alwaysEmailDistList)
+                        sendEmail(currentBuild, env, emailAdditionalDistList: config.alwaysEmailDistList)
                     }
                     if (config.gitBranch in ['main','QA','PROD'] || config.gitBranch.startsWith("release/")) {
                         if (config?.deployEmailDistList) {
                             log.info("post(${config.gitBranch}): sendEmail(${currentBuild.result})")
-                            sendEmail(currentBuild, env, emailAdditionalDistList=config.deployEmailDistList)
+                            sendEmail(currentBuild, env, emailAdditionalDistList: config.deployEmailDistList)
                         }
                     } else {
                         log.info("post(${config.gitBranch}): sendEmail(${currentBuild.result}, 'RequesterRecipientProvider')")
@@ -184,12 +184,11 @@ def call(Map params=[:]) {
 
 //@NonCPS
 Map loadPipelineConfig(Map params) {
-    String logPrefix="loadPipelineConfig():"
     Map config = [:]
 
     // copy immutable params maps to mutable config map
     params.each { key, value ->
-        log.debug("${logPrefix} params[${key}]=${value}")
+        log.debug("params[${key}]=${value}")
         key=Utilities.decapitalize(key)
         if (value!="") {
             config[key]=value
@@ -208,7 +207,7 @@ Map loadPipelineConfig(Map params) {
     config.timeout = config.get('timeout', 3)
     config.timeoutUnit = config.get('timeoutUnit', 'HOURS')
     config.skipDefaultCheckout = config.get('skipDefaultCheckout', false)
-    config.junitXmlReportDir = ".test-results"
+    config.junitXmlReportDir = "test-results"
     config.junitXmlReport = "${config.junitXmlReportDir}/junit-report.xml"
 
     config.emailDist = config.get('emailDist',"lee.james.johnson@gmail.com")
@@ -230,18 +229,17 @@ Map loadPipelineConfig(Map params) {
 
     config.yamlLintCmd = "yamllint"
 
-    log.debug("${logPrefix} params=${params}")
-    log.debug("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.debug("params=${params}")
+    log.debug("config=${JsonUtils.printToJsonString(config)}")
 
     return config
 }
 
 String getTestScriptVersion(dsl, log, script) {
-    String logPrefix = "getTestScriptVersion():"
     String version = dsl.sh(script: "${script} -v", returnStdout: true).trim()
     if (version == "1.0") {
         version = "1.0.0"
     }
-    log.debug("${logPrefix} version=${version}")
+    log.debug("version=${version}")
     return version
 }

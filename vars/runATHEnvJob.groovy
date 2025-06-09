@@ -7,26 +7,26 @@ import com.dettonville.api.pipeline.utils.JsonUtils
 import com.dettonville.api.pipeline.utils.MapMerge
 import com.dettonville.api.pipeline.utils.Utilities
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+//@Field Logger log = new Logger(this, LogLevel.INFO)
+@Field Logger log = new Logger(this)
+
 def call(Map config=[:]) {
 
-//     Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this, LogLevel.INFO)
-
-    String logPrefix="runATHEnvJob():"
-
-    config.enabledParamList = config.get('enabledParamList', ['alwaysEmailList','useDryRun']) as List
-    config.enableDevParams = config.get('enableDevParams', (config.enabledParamList.isEmpty()) ? true : false)
+    config.get('enabledParamList', ['alwaysEmailList','useDryRun']) as List
+    config.get('enableDevParams', (config.enabledParamList.isEmpty()) ? true : false)
     config.enableBranchParam = config.enabledParamList.contains("athGitBranch") ? true : config.get('enableBranchParam', false)
-    config.athGitRepo = config.get('athGitRepo', "https://gitrepository.dettonville.int/stash/scm/api/infra-test.git")
+    config.get('athGitRepo', "https://gitrepository.dettonville.int/stash/scm/api/infra-test.git")
     config.enableBranchSettings = config.enableBranchSettings ?: false
 
     Map configDefaultsMap
 
     List jobParts = JOB_NAME.split("/")
-    log.info("${logPrefix} jobParts=${jobParts}")
+    log.info("jobParts=${jobParts}")
 
 //        int jobBaseFolderLevel = 2
-    config.jobBaseFolderLevel = config.get('jobBaseFolderLevel', 2)
+    config.get('jobBaseFolderLevel', 2)
 
 //        int startIdx=jobBaseFolderLevel+1
     int startIdx = config.jobBaseFolderLevel + 1
@@ -45,10 +45,10 @@ def call(Map config=[:]) {
     //    echo "${logPrefix} testSuiteParts=${testSuiteParts}"
     config.testSuite = testSuiteParts.join("/")
 
-    log.info("${logPrefix} config.appEnvironment=${config.appEnvironment}")
-    log.info("${logPrefix} config.athGitBranch=${config.athGitBranch}")
-    log.info("${logPrefix} config.testSuite=${config.testSuite}")
-    log.info("${logPrefix} testCase=${testCase}")
+    log.info("config.appEnvironment=${config.appEnvironment}")
+    log.info("config.athGitBranch=${config.athGitBranch}")
+    log.info("config.testSuite=${config.testSuite}")
+    log.info("testCase=${testCase}")
 
     String jobFolder = "${JOB_NAME.substring(0, JOB_NAME.lastIndexOf("/"))}"
     String parentFolder = "${jobFolder.substring(0, jobFolder.lastIndexOf("/"))}"
@@ -158,14 +158,14 @@ branchSettings:
             paramList.add(choice(choices: branchList.join('\n'), description: "Choose Branch", name: 'AthGitBranch'))
         }
 
-        log.info("${logPrefix} config.enabledParamList=${config.enabledParamList}")
+        log.info("config.enabledParamList=${config.enabledParamList}")
 
         config.enabledParamList.each { String paramName ->
-            log.debug("${logPrefix} paramName=${paramName}")
+            log.debug("paramName=${paramName}")
             if (paramMap.containsKey(paramName)) {
                 paramList.add(paramMap[paramName])
             } else {
-                log.warn("${logPrefix} paramName=${paramName} not found")
+                log.warn("paramName=${paramName} not found")
             }
         }
 
@@ -215,14 +215,14 @@ branchSettings:
         }
 
         branchSettings = (branchSettings) ? branchSettings : [:]
-        log.info("${logPrefix} branchSettings=${JsonUtils.printToJsonString(branchSettings)}")
+        log.info("branchSettings=${JsonUtils.printToJsonString(branchSettings)}")
 
         if (branchSettings!=null) {
 //                config=branchSettings + config
 //                config=MapMerge.merge(branchSettings, config)
             config=MapMerge.merge(config, branchSettings)
         } else {
-            log.warn("${logPrefix} branchSettings not set")
+            log.warn("branchSettings not set")
             return
         }
     }
@@ -230,7 +230,7 @@ branchSettings:
     if (config.containsKey("enabledParamList")) {
         config.remove("enabledParamList")
     }
-    log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.info("config=${JsonUtils.printToJsonString(config)}")
 
     runATHEnv(config)
 

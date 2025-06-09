@@ -6,17 +6,17 @@ import com.dettonville.api.pipeline.utils.logging.Logger
 import com.dettonville.api.pipeline.utils.JsonUtils
 import com.dettonville.api.pipeline.utils.Utilities
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+//@Field Logger log = new Logger(this, LogLevel.INFO)
+@Field Logger log = new Logger(this)
+
 def call(Map config=[:]) {
 
-//     Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this, LogLevel.INFO)
-
-    String logPrefix="runATHParamWrapper():"
-
-    config.enabledParamList = config.get('enabledParamList', [])
-    config.enableDevParams = config.get('enableDevParams', (config.enabledParamList.isEmpty()) ? true : false)
+    config.get('enabledParamList', [])
+    config.get('enableDevParams', (config.enabledParamList.isEmpty()) ? true : false)
     config.enableBranchParam = config.enabledParamList.contains("athGitBranch") ? true : config.get('enableBranchParam', false)
-    config.athGitRepo = config.get('athGitRepo', "https://gitrepository.dettonville.int/stash/scm/api/infra-test.git")
+    config.get('athGitRepo', "https://gitrepository.dettonville.int/stash/scm/api/infra-test.git")
 
     List paramList = []
 
@@ -86,7 +86,7 @@ def call(Map config=[:]) {
         config.remove("enabledParamList")
     }
 
-    log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.info("config=${JsonUtils.printToJsonString(config)}")
 
     runATHEnv(config)
 

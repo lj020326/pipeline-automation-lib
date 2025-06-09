@@ -5,15 +5,14 @@ import com.dettonville.api.pipeline.utils.MapMerge
 import com.dettonville.api.pipeline.utils.logging.LogLevel
 import com.dettonville.api.pipeline.utils.logging.Logger
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+//@Field Logger log = new Logger(this, LogLevel.INFO)
+@Field Logger log = new Logger(this)
 
 def call(Map inConfig=[:]) {
 
-//     Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this, LogLevel.INFO)
-
-    String logPrefix="runTerraformJob():"
-
-    log.info("${logPrefix} Loading Default Configs")
+    log.info("Loading Default Configs")
 
     List paramList = [
         booleanParam(name: 'ACTION_PLAN', defaultValue: true, description: 'Run terraform plan action'),
@@ -34,7 +33,7 @@ def call(Map inConfig=[:]) {
 
     Map config = MapMerge.merge(inConfig, params)
 
-    log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.info("config=${JsonUtils.printToJsonString(config)}")
 
     runTerraform(config)
 }

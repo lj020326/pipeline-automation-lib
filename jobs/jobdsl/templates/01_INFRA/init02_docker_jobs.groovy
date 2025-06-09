@@ -59,7 +59,7 @@ void createDockerJobs(def dsl) {
                artifactDaysToKeep(-1)
             }
             cps {
-                script("buildDockerImageJob()")
+                script("buildDockerImage()")
                 sandbox()
             }
         }

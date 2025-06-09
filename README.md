@@ -1,4 +1,4 @@
-[![License](https://img.shields.io/badge/license-GPLv3-brightgreen.svg?style=flat)](LICENSE)
+[![License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat)](LICENSE)
 
 # Jenkins Pipeline Automation Library
 
@@ -90,7 +90,10 @@ Some of the most often used pipelines in this library include:
   * [buildVmTemplate](./vars/buildVmTemplate.groovy) - pipeline used to build vm templates for vmware vsphere, kvm, virtualbox, hyperv, and other possible hypervisor environments.<br>
     See [here](https://github.com/lj020326/vm-templates/blob/main/README.md) for document explaining example setup and usage of this pipeline.
 * Build Docker Image
-  * [buildDockerImage](./vars/buildDockerImage.groovy) - pipeline used to build docker images<br>
+  * [buildDockerManifest(](./vars/buildDockerManifest(.groovy) - pipeline used to build docker images<br>
+  * This build job supports using a build manifest to specify a hierarchical set of image build dependencies.
+  * The job then leverages [a build job to build each single image individually](./vars/buildDockerImage.groovy)
+  * The single 'build-docker-image' pipeline job definition referenced in the code is located at [buildDockerImage.groovy](./vars/buildDockerImage.groovy)
     See [Jenkinsfile here for advanced example with multiple-image dependencies](https://github.com/lj020326/jenkins-docker-agent/blob/master/Jenkinsfile).
 * Run Connectivity Test 
   * [runConnectivityTest](./vars/runConnectivityTest.groovy) - pipeline used run connectivity tests from the specified jenkins nodes.<br>

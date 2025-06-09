@@ -53,9 +53,8 @@ class SiteTestResults implements Serializable {
     def dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm")
 
     SiteTestResults(Map siteConfig) {
-        String logPrefix = "SiteTestResults():"
-        log.info("${logPrefix} started for siteConfig.targetUrl=${siteConfig.targetUrl}")
-        log.debug("${logPrefix} siteConfig=${siteConfig}")
+        log.info("started for siteConfig.targetUrl=${siteConfig.targetUrl}")
+        log.debug("siteConfig=${siteConfig}")
 
         this.endpoint = siteConfig.endpoint
 //        this.description = "Connect to ${siteConfig.endpoint}"
@@ -86,7 +85,6 @@ class SiteTestResults implements Serializable {
      * @param step
      */
     void addStep(TestResult step) {
-        String logPrefix = "SiteTestResults.addStep():"
 //        def date = new Date()
 //        this.startTime = dateFormat.format(date)
 
@@ -95,7 +93,7 @@ class SiteTestResults implements Serializable {
 
         this.status+=(step.status) ? step.status : 1
 
-        log.info("${logPrefix} this.endTime=${this.endTime} step=${step}")
+        log.info("this.endTime=${this.endTime} step=${step}")
         testResults.add(step)
     }
 
@@ -120,7 +118,6 @@ class SiteTestResults implements Serializable {
 
     @Override
     String toString() {
-        String logPrefix = "SiteTestResults.toString():"
 
         testResults = sortList(testResults)
 
@@ -143,7 +140,7 @@ class SiteTestResults implements Serializable {
 
         String httpsResult=""
 
-        log.info("${logPrefix} nodeLabel=${nodeLabel} network=${network} endpoint=${endpoint} testCount=${testCount} failedConnTests=${failedConnTests} sslTestCount=${sslTestCount} failedSSLConnTests=${failedSSLConnTests}")
+        log.info("nodeLabel=${nodeLabel} network=${network} endpoint=${endpoint} testCount=${testCount} failedConnTests=${failedConnTests} sslTestCount=${sslTestCount} failedSSLConnTests=${failedSSLConnTests}")
         if (hostInfo.scheme=="http") {
             httpsResult = "NOT APPLICABLE"
         } else if (sslTestCount>0) {
@@ -176,7 +173,6 @@ class SiteTestResults implements Serializable {
     }
 
     String toHtml() {
-        String logPrefix = "SiteTestResults.toHtml():"
         String stepsString = ""
 
         // ref: http://www.tothenew.com/blog/groovy-sort-list-of-objects-on-the-basis-of-more-than-one-field/
@@ -204,7 +200,7 @@ class SiteTestResults implements Serializable {
 
         def httpsResult=""
 
-        log.debug("${logPrefix} nodeLabel=${nodeLabel} network=${network} endpoint=${endpoint} testCount=${testCount} failedConnTests=${failedConnTests} sslTestCount=${sslTestCount} failedSSLConnTests=${failedSSLConnTests} proxyUrl=${proxyUrl}")
+        log.debug("nodeLabel=${nodeLabel} network=${network} endpoint=${endpoint} testCount=${testCount} failedConnTests=${failedConnTests} sslTestCount=${sslTestCount} failedSSLConnTests=${failedSSLConnTests} proxyUrl=${proxyUrl}")
         if (hostInfo.scheme=="http") {
             httpsResult = "<td style='margin: 0;padding: 6px;border: 1px solid #ccc;text-align: left;background: #FFFFFF;'>" +
                     "<b>NOT APPLICABLE</b>" +

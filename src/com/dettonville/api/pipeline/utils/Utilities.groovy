@@ -198,7 +198,6 @@ class Utilities implements Serializable {
      */
     @NonCPS
     String getBaseUrl(String urlString) {
-        String logPrefix = "getBaseUrl():"
 
         return urlString.find(/(^.+?[^\/:](?=[?\/]|$))\.*/) { it[1] };
     }

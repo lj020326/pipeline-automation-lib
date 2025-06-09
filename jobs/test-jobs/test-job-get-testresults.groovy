@@ -68,8 +68,6 @@ String printToJsonString(Map mapVar) {
 }
 
 def runTest(Logger log) {
-    String logPrefix="runTest():"
-
 
     try {
 
@@ -93,7 +91,7 @@ def getResourceFile(String fileName) {
 
 def getTestResultFiles(Logger log) {
     String logPrefix = "${scriptName}->getTestResultFiles():"
-    log.info("${logPrefix} starting")
+    log.info("starting")
 
     LinkedList statusList = ["good","bad"]
 
@@ -102,10 +100,10 @@ def getTestResultFiles(Logger log) {
     int min = 0
 //    int idx = (new Random().nextInt(2))
     int idx = (new Random().nextInt(max-min+1)+min)
-    log.debug("${logPrefix} idx=${idx}")
+    log.debug("idx=${idx}")
 
     String randomStatus = statusList.get(idx)
-    log.debug("${logPrefix} randomStatus=${randomStatus}")
+    log.debug("randomStatus=${randomStatus}")
 
     sh "find . -type f -printf \"%TY-%Tm-%Td %TH:%TM:%.2Ts %m:%u:%g %p %k kB\\n\" | sort -k 3,3"
 
@@ -120,7 +118,7 @@ def getTestResultFiles(Logger log) {
         }
     }
 
-    log.info("${logPrefix} Test Result Files retrieved")
+    log.info("Test Result Files retrieved")
     sh "find . -type f -printf \"%TY-%Tm-%Td %TH:%TM:%.2Ts %m:%u:%g %p %k kB\\n\" | sort -k 3,3"
 
 }
@@ -128,7 +126,7 @@ def getTestResultFiles(Logger log) {
 Map getTestResults(Integer buildNumber) {
     String logPrefix = "${scriptName}->getTestResults():"
 
-    log.info("${logPrefix} starting")
+    log.info("starting")
 
     Map testResults = [:]
 
@@ -136,7 +134,7 @@ Map getTestResults(Integer buildNumber) {
     String buildUrl = currentBuild.absoluteUrl.substring(0, currentBuild.absoluteUrl.lastIndexOf("/"))
     String testResultsUrl = buildUrl.substring(0, buildUrl.lastIndexOf("/"))
     testResultsUrl += "/${buildNumber}/testReport/api/json"
-    log.info("${logPrefix} testResultsUrl=${testResultsUrl}")
+    log.info("testResultsUrl=${testResultsUrl}")
     Integer responseStatus
 
     withCredentials([[$class          : 'UsernamePasswordMultiBinding', credentialsId: 'jenkins-rest-api-user',
@@ -144,23 +142,23 @@ Map getTestResults(Integer buildNumber) {
 
         String JENKINS_CREDS = "${JENKINS_USERNAME}:${JENKINS_TOKEN}"
 
-        log.info("${logPrefix} Determine if test results exists")
+        log.info("Determine if test results exists")
         responseStatus=sh(script: "curl -s -o /dev/null -w %{http_code} -u ${JENKINS_CREDS} ${testResultsUrl}", returnStdout: true).toInteger()
 
-        log.info("${logPrefix} responseStatus: ${responseStatus}")
+        log.info("responseStatus: ${responseStatus}")
         if (responseStatus==200) {
-            log.info("${logPrefix} prior test results exists, retrieving")
+            log.info("prior test results exists, retrieving")
 
             sh "curl -sSL -u ${JENKINS_CREDS} ${testResultsUrl} 2>&1 | sed 's/null/\"\"/g' | tee ${testResultFile}"
             //    sh "curl -sSL -u ${JENKINS_CREDS} ${testResultsUrl} -o ${testResultFile}"
 
 //            sh "find . -maxdepth 1 -name ${testResultFile} -type f -printf \"%TY-%Tm-%Td %TH:%TM:%.2Ts %m:%u:%g %p %k kB\\n\" | sort -k 3,3"
             testResults = readJSON file: "${testResultFile}"
-            //    log.info("${logPrefix} testResults=${testResults}")
-            log.debug("${logPrefix} testResults=${printToJsonString(testResults)}")
+            //    log.info("testResults=${testResults}")
+            log.debug("testResults=${printToJsonString(testResults)}")
 
         } else {
-            log.warn("${logPrefix} prior test results not found at ${testResultsUrl}, returned responseStatus=${responseStatus}")
+            log.warn("prior test results not found at ${testResultsUrl}, returned responseStatus=${responseStatus}")
         }
 
     }
@@ -172,7 +170,7 @@ Map getTestResults(Integer buildNumber) {
 Integer getJobArtifact(String artifactPath, Integer buildNumber=null) {
     String logPrefix = "${scriptName}->getJobArtifact():"
 
-    log.info("${logPrefix} starting")
+    log.info("starting")
 
     Map testResults = [:]
 
@@ -184,7 +182,7 @@ Integer getJobArtifact(String artifactPath, Integer buildNumber=null) {
         artifactUrl += "/lastCompletedBuild/artifact/${artifactPath}"
     }
 
-    log.info("${logPrefix} artifactUrl=${artifactUrl}")
+    log.info("artifactUrl=${artifactUrl}")
 
     Integer responseStatus
 
@@ -193,19 +191,19 @@ Integer getJobArtifact(String artifactPath, Integer buildNumber=null) {
 
         String JENKINS_CREDS = "${JENKINS_USERNAME}:${JENKINS_TOKEN}"
 
-        log.info("${logPrefix} Determine if test results exists")
+        log.info("Determine if test results exists")
         responseStatus=sh(script: "curl -s -o /dev/null -w %{http_code} -u ${JENKINS_CREDS} ${artifactUrl}", returnStdout: true).toInteger()
 
-        log.info("${logPrefix} responseStatus: ${responseStatus}")
+        log.info("responseStatus: ${responseStatus}")
         if (responseStatus==200) {
-            log.info("${logPrefix} artifact exists, retrieving")
+            log.info("artifact exists, retrieving")
 
             sh "curl -sSL -u ${JENKINS_CREDS} ${artifactUrl} -o ${artifactPath}"
 
             sh "find . -maxdepth 1 -name ${artifactPath} -type f -printf \"%TY-%Tm-%Td %TH:%TM:%.2Ts %m:%u:%g %p %k kB\\n\" | sort -k 3,3"
 
         } else {
-            log.info("${logPrefix} artifact not found at ${artifactUrl}, returned responseStatus=${responseStatus}")
+            log.info("artifact not found at ${artifactUrl}, returned responseStatus=${responseStatus}")
         }
 
     }
@@ -215,7 +213,7 @@ Integer getJobArtifact(String artifactPath, Integer buildNumber=null) {
 
 Map updateAggregateTestResults(Map config) {
     String logPrefix = "${scriptName}->updateAggregateTestResults():"
-    log.info("${logPrefix} starting")
+    log.info("starting")
 
     String testResultsFile = config.testResultsHistory
 
@@ -223,24 +221,24 @@ Map updateAggregateTestResults(Map config) {
 //    Integer priorBuildNumber = priorBuildInfo.number
     Integer buildNumber = currentBuild.number
 
-    log.info("${logPrefix} get current test results")
+    log.info("get current test results")
     Map currentTestResults = getTestResults(buildNumber)
-    log.debug("${logPrefix} currentTestResults=${printToJsonString(currentTestResults)}")
+    log.debug("currentTestResults=${printToJsonString(currentTestResults)}")
 
-    log.info("${logPrefix} get prior results aggregate ${testResultsFile}")
+    log.info("get prior results aggregate ${testResultsFile}")
     Map testResults
 //    if (getJobArtifact(testResultsFile, priorBuildNumber)==200) {
     if (getJobArtifact(testResultsFile)==200) {
-        log.info("${logPrefix} ${testResultsFile} retrieved")
+        log.info("${testResultsFile} retrieved")
         testResults = readJSON file: testResultsFile
-        log.debug("${logPrefix} testResults=${printToJsonString(testResults)}")
+        log.debug("testResults=${printToJsonString(testResults)}")
     } else {
-        log.info("${logPrefix} prior aggregate results does not exists, creating new one")
+        log.info("prior aggregate results does not exists, creating new one")
         testResults=[:]
         testResults.history=[]
     }
 
-    log.info("${logPrefix} appending current test results to aggregate results")
+    log.info("appending current test results to aggregate results")
     if (currentTestResults) {
         testResults.history.add(currentTestResults)
     }
@@ -259,17 +257,17 @@ Map updateAggregateTestResults(Map config) {
         for (int i = 1; i  <= startIdx; i++) {
             testResults.history.remove(0)
         }
-        log.info("${logPrefix} history reduced to last ${testResults.history.size()} results")
-        log.debug("${logPrefix} truncated testResults=${printToJsonString(testResults)}")
+        log.info("history reduced to last ${testResults.history.size()} results")
+        log.debug("truncated testResults=${printToJsonString(testResults)}")
     }
 
     def jsonOut = readJSON text: JsonOutput.toJson(testResults)
     writeJSON file: testResultsFile, json: jsonOut, pretty: 2
 
-    log.info("${logPrefix} aggregate results saved to ${testResultsFile}")
+    log.info("aggregate results saved to ${testResultsFile}")
 
     archiveArtifacts artifacts: testResultsFile
-    log.info("${logPrefix} ${testResultsFile} archived")
+    log.info("${testResultsFile} archived")
 
     return testResults
 

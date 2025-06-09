@@ -1,36 +1,5 @@
 #!/usr/bin/env groovy
 
-/*-
- *
- * For info on how to configure pipeline - see here:
- * https://fusion.dettonville.int/confluence/display/MAPI/How+to+use+the+Acceptance+Test+Harness+Pipeline
- *
- * OR here:
- * ref: https://fusion.dettonville.int/stash/projects/API/repos/pipeline-automation-lib/browse/vars/runATH.md
- *
- * OR here:
- * ref: https://gitrepository.dettonville.int/stash/projects/API/repos/pipeline-automation-lib/browse/vars/runATH.md
- *
- * #%L
- * dettonville.org
- * %%
- * Copyright (C) 2024 dettonville.org DevOps
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- *
-*/
-
 import com.dettonville.api.pipeline.utils.logging.LogLevel
 import com.dettonville.api.pipeline.utils.logging.Logger
 //import groovy.json.*
@@ -46,9 +15,6 @@ import groovy.transform.Field
 
 // https://support.cloudbees.com/hc/en-us/articles/217309497-Test-a-SSL-connection-from-Jenkins
 def call(Map params=[:]) {
-
-//    Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this, LogLevel.INFO)
 
     log.info("Loading Default Configs")
     Map config=loadPipelineConfig(params)
@@ -191,14 +157,13 @@ String decapitalize(String string) {
 }
 
 Map loadPipelineConfig(Map params, String configFile=null) {
-    String logPrefix="loadPipelineConfig():"
     Map config = [:]
 
     // handle config yml
     if (params?.yml) {
 //        Map configSettings = parseUtil.parseYaml(this,params.yml)
         Map ymlConfig = readYaml text: params.yml
-        log.info("${logPrefix} ymlConfig=${printToJsonString(ymlConfig)}")
+        log.info("ymlConfig=${printToJsonString(ymlConfig)}")
         config=config + ymlConfig.pipeline
     } else if (configFile == null) {
         config.globalConfigFile = params.globalConfigFile ?: "connectivity-check-defaults.yml"
@@ -220,8 +185,8 @@ Map loadPipelineConfig(Map params, String configFile=null) {
         config[key]=value
     }
 
-    config.logLevel = config.get('logLevel', "INFO")
-    config.debugPipeline = config.get('debugPipeline', false)
+    config.get('logLevel', "INFO")
+    config.get('debugPipeline', false)
     log.info("params=${params}")
 
     if (config.debugPipeline) {
@@ -246,17 +211,17 @@ Map loadPipelineConfig(Map params, String configFile=null) {
     //
     log.info("env.JOB_NAME = ${env.JOB_NAME}")
     // set default states
-    config.useSimulationMode = config.get('useSimulationMode', false)
+    config.get('useSimulationMode', false)
     config.nodeList = config.nodeList ?: env.AGENTS.split(',').sort()
     config.timeout = config.timeout ?: 10
     config.runcount = config.runcount ?: 1
-    config.runParallelNodeSiteTests = config.get('runParallelNodeSiteTests', true)
-//    config.runParallelNodeSiteTests = config.get('runParallelNodeSiteTests', false)
-//    config.runParallelTests = config.get('runParallelTests', false)
-    config.runParallelTests = config.get('runParallelTests', true)
+    config.get('runParallelNodeSiteTests', true)
+//    config.get('runParallelNodeSiteTests', false)
+//    config.get('runParallelTests', false)
+    config.get('runParallelTests', true)
 
 //    config.emailDist = config.emailDist ?: "lee.johnson@dettonville.com"
-    config.emailDist = config.get('emailDist',"lee.johnson@dettonville.com")
+    config.get('emailDist',"lee.johnson@dettonville.com")
     config.alwaysEmailDist = config.alwaysEmailDist ?: "lee.johnson@dettonville.com"
     config.emailFrom = config.emailFrom ?: "DCAPI.TestAutomation@dettonville.com"
 
@@ -265,22 +230,21 @@ Map loadPipelineConfig(Map params, String configFile=null) {
     config.sendInlineReport = config.sendInlineReport ?: true
     config.reportName = "ConnectivityReport"
 
-    log.info("${logPrefix} config=${printToJsonString(config)}")
+    log.info("config=${printToJsonString(config)}")
 
     return config
 }
 
 ConnectivitySummary runTests(Map config) {
-    String logPrefix="runTests():"
     if (config.debugPipeline) log.debug("runTests(config=${config}): started")
-    log.debug("${logPrefix} started")
+    log.debug("started")
 
     Map nodeTests = [:]
     ConnectivitySummary connectivitySummary = new ConnectivitySummary(this, config)
 
     config.nodeList.eachWithIndex { Map it, i ->
 
-        log.debug("${logPrefix} it=${printToJsonString(it)}")
+        log.debug("it=${printToJsonString(it)}")
 
         // set group to default and overlay any group settings
         Map nodeConfig = config.findAll { !["nodeList","networks"].contains(it.key) } + it
@@ -295,13 +259,13 @@ ConnectivitySummary runTests(Map config) {
                 nodeConfig.siteList.addAll(siteList)
             }
         }
-        log.debug("${logPrefix} nodeConfig.siteList=${nodeConfig.siteList}")
+        log.debug("nodeConfig.siteList=${nodeConfig.siteList}")
 
         nodeConfig.nodeOrder=i
 
         if (nodeConfig.debugPipeline) {
-            log.debug("${logPrefix} nodeConfig=${printToJsonString(nodeConfig)}")
-            log.debug("${logPrefix} nodeConfig.siteList=${nodeConfig.siteList}")
+            log.debug("nodeConfig=${printToJsonString(nodeConfig)}")
+            log.debug("nodeConfig.siteList=${nodeConfig.siteList}")
         }
 
         nodeTests["split-${nodeConfig.nodeLabel}"] = {
@@ -313,11 +277,11 @@ ConnectivitySummary runTests(Map config) {
 //                    nodeConfig.nodeLabelOrig = nodeConfig.nodeLabel
 //                    nodeConfig.nodeLabel = "${env.NODE_NAME} (${nodeConfig.nodeLabel}}"
                     nodeConfig.nodeName = env.NODE_NAME
-                    log.debug("${logPrefix} env.NODE_NAME=${env.NODE_NAME}")
+                    log.debug("env.NODE_NAME=${env.NODE_NAME}")
 
                     unstash name: 'connectivity-check'
 
-                    log.debug("${logPrefix} nodeConfig=${printToJsonString(nodeConfig)}")
+                    log.debug("nodeConfig=${printToJsonString(nodeConfig)}")
                     List siteResults = runNodeConnTest(nodeConfig)
                     connectivitySummary.addSiteTestResultsList(siteResults)
 
@@ -333,7 +297,7 @@ ConnectivitySummary runTests(Map config) {
 
                     archiveArtifacts artifacts: "logs/${nodeConfig.nodeName}/*.log"
 
-                    log.debug("**** ${logPrefix} Finished tests: nodeLabel=${nodeConfig.nodeLabel} nodeName=${nodeConfig.nodeName} nodeOrder=${nodeConfig.nodeOrder} *****")
+                    log.debug("**** Finished tests: nodeLabel=${nodeConfig.nodeLabel} nodeName=${nodeConfig.nodeName} nodeOrder=${nodeConfig.nodeOrder} *****")
                 }
             }
         }
@@ -346,8 +310,7 @@ ConnectivitySummary runTests(Map config) {
 }
 
 List getSiteList(Map config, network) {
-    String logPrefix = "getSiteList():"
-    log.info("${logPrefix} network=${network}")
+    log.info("network=${network}")
     Map networkConfig = config.networks[network]
     List siteList = networkConfig.siteList
     List retSiteList = []
@@ -356,27 +319,26 @@ List getSiteList(Map config, network) {
         Map siteConfig = networkConfig.findAll { it.key != 'siteList' } + it
         if (!siteConfig?.network) siteConfig.network = network
 
-        log.debug("${logPrefix} siteConfig=${siteConfig}")
+        log.debug("siteConfig=${siteConfig}")
         retSiteList.add(siteConfig)
     }
-    log.debug("${logPrefix} siteList=${siteList}")
+    log.debug("siteList=${siteList}")
 //    return siteList
     return retSiteList
 }
 
 List runNodeConnTest(Map nodeConfig) {
     if (nodeConfig.debugPipeline) log.debug("runNodeConnTestParallel(nodeConfig=${nodeConfig}): started")
-    String logPrefix="runNodeConnTest():"
-    log.debug("${logPrefix} started")
+    log.debug("started")
 
     List resultList = []
     Map siteTests = [:]
 
-    log.debug("${logPrefix} nodeConfig=${printToJsonString(nodeConfig)}")
+    log.debug("nodeConfig=${printToJsonString(nodeConfig)}")
 
     nodeConfig.siteList.eachWithIndex { Map it, i ->
 
-        log.debug("${logPrefix} it=${printToJsonString(it)}")
+        log.debug("it=${printToJsonString(it)}")
 
         // set group to default and overlay any group settings
         Map siteConfig = nodeConfig.findAll { it.key != 'siteList' } + it
@@ -390,20 +352,20 @@ List runNodeConnTest(Map nodeConfig) {
         siteConfig.context=hostInfo.context
         siteConfig.targetUrl=hostInfo.targetUrl
 
-        log.info("${logPrefix} hostInfo=${hostInfo}")
+        log.info("hostInfo=${hostInfo}")
 
         if (nodeConfig.runParallelNodeTests) {
             siteTests["split-${siteConfig.nodeLabel}->${siteConfig.endpoint}"] = {
-                log.info("${logPrefix} starting tests: nodeLabel=${siteConfig.nodeLabel} nodeName=${siteConfig.nodeName} endpoint=${siteConfig.endpoint} network=${siteConfig.network} *****")
+                log.info("starting tests: nodeLabel=${siteConfig.nodeLabel} nodeName=${siteConfig.nodeName} endpoint=${siteConfig.endpoint} network=${siteConfig.network} *****")
                 SiteTestResults siteResults = runTestList(siteConfig)
                 resultList.add(siteResults)
-                log.debug("**** ${logPrefix} Finished tests: node=${siteConfig.nodeLabel} endpoint=${siteConfig.endpoint} siteOrder=${siteConfig.siteOrder} *****")
+                log.debug("**** Finished tests: node=${siteConfig.nodeLabel} endpoint=${siteConfig.endpoint} siteOrder=${siteConfig.siteOrder} *****")
             }
         } else {
-            log.info("${logPrefix} starting tests: nodeLabel=${siteConfig.nodeLabel} nodeName=${siteConfig.nodeName} endpoint=${siteConfig.endpoint} network=${siteConfig.network} *****")
+            log.info("starting tests: nodeLabel=${siteConfig.nodeLabel} nodeName=${siteConfig.nodeName} endpoint=${siteConfig.endpoint} network=${siteConfig.network} *****")
             SiteTestResults siteResults = runTestList(siteConfig)
             resultList.add(siteResults)
-            log.debug("**** ${logPrefix} Finished tests: node=${siteConfig.nodeLabel} endpoint=${siteConfig.endpoint} siteOrder=${siteConfig.siteOrder} *****")
+            log.debug("**** Finished tests: node=${siteConfig.nodeLabel} endpoint=${siteConfig.endpoint} siteOrder=${siteConfig.siteOrder} *****")
         }
 
     }
@@ -418,17 +380,16 @@ List runNodeConnTest(Map nodeConfig) {
 SiteTestResults runTestList(Map siteConfig) {
 
     if (siteConfig.debugPipeline) log.debug("runTestListParallel(siteConfig=${siteConfig}): started")
-    String logPrefix="runTestList(nodeLabel=${siteConfig.nodeLabel}):"
-    log.debug("${logPrefix} started")
+    log.debug("started")
 
     Map testRuns = [:]
-    log.debug("${logPrefix} siteTestResults = new SiteTestResults()")
+    log.debug("siteTestResults = new SiteTestResults()")
     SiteTestResults siteTestResults = new SiteTestResults(siteConfig)
 
-    log.debug("${logPrefix} iterate over siteConfig")
+    log.debug("iterate over siteConfig")
     siteConfig.testList.eachWithIndex { Map it, i ->
 
-        log.info("${logPrefix} it=${printToJsonString(it)}")
+        log.info("it=${printToJsonString(it)}")
 
         // set group to default and overlay any group settings
         Map testConfig = siteConfig.findAll { it.key != 'testList' } + it
@@ -437,14 +398,14 @@ SiteTestResults runTestList(Map siteConfig) {
         if (siteConfig.runParallelTests) {
             testRuns["split-${testConfig.nodeLabel}->${testConfig.host}-${i}-${testConfig.command}"] = {
                 Map returnStatus = runTestCommand(testConfig)
-                log.info("${logPrefix} returnStatus.result=${returnStatus.result}")
-                log.debug("${logPrefix} returnStatus=${returnStatus}")
+                log.info("returnStatus.result=${returnStatus.result}")
+                log.debug("returnStatus=${returnStatus}")
                 siteTestResults.addStep(returnStatus)
             }
         } else {
             Map returnStatus = runTestCommand(testConfig)
-            log.info("${logPrefix} returnStatus.result=${returnStatus.result}")
-            log.debug("${logPrefix} returnStatus=${returnStatus}")
+            log.info("returnStatus.result=${returnStatus.result}")
+            log.debug("returnStatus=${returnStatus}")
             siteTestResults.addStep(returnStatus)
         }
     }
@@ -469,17 +430,15 @@ def getYamlInt(Map config, String key) {
 
 Map runTestCommand(Map testConfig) {
 
-    if (testConfig.debugPipeline) log.debug("runTestCommand(testConfig=${testConfig}): started")
+    if (testConfig.debugPipeline) log.debug("testConfig=${testConfig}")
 
     String command = testConfig.command
     String timeout = testConfig.timeout
-
-    String logPrefix="runTestCommand(${command}):"
-    log.debug("${logPrefix} started")
+    log.debug("started")
 
     testConfig.runcount = getYamlInt(testConfig, "runcount")
 
-    log.info("${logPrefix} testConfig.runcount=${testConfig.runcount}")
+    log.info("testConfig.runcount=${testConfig.runcount}")
 
     testConfig.testCase=testConfig.testCase ?: command
     testConfig.testId="${command}-${testConfig.host}"
@@ -591,7 +550,7 @@ Map runTestCommand(Map testConfig) {
             return runTestScript(testConfig)
             break
         case "httpclienttest":
-            log.info("${logPrefix} testConfig.targetUrl=${testConfig.targetUrl}")
+            log.info("testConfig.targetUrl=${testConfig.targetUrl}")
             String mvnCmd="mvn ${testConfig.mvnLogOptions}"
             // ref: https://hc.apache.org/httpcomponents-client-ga/logging.html
             mvnCmd+=" -Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.SimpleLog"
@@ -613,7 +572,7 @@ Map runTestCommand(Map testConfig) {
             return runTestScript(testConfig)
             break
         case "sslhandshake":
-            log.debug("${logPrefix} testConfig.targetUrl=${testConfig.targetUrl}")
+            log.debug("testConfig.targetUrl=${testConfig.targetUrl}")
             String mvnCmd="mvn ${testConfig.mvnLogOptions} -Djavax.net.debug=ssl:handshake"
             if (testConfig?.httpProxyHost) {
                 mvnCmd+=" -Dhttps.proxyHost=${testConfig.httpProxyHost}"
@@ -629,7 +588,7 @@ Map runTestCommand(Map testConfig) {
             testConfig.requiredToConnectSSL=true
             return runTestScript(testConfig)
             break
-        default: throw new Exception("${logPrefix} unknown command [${command}] ")
+        default: throw new Exception("unknown command [${command}] ")
     }
 
 }
@@ -637,16 +596,15 @@ Map runTestCommand(Map testConfig) {
 Map runTestScript(Map testConfig) {
 
     if (testConfig.debugPipeline) log.debug("runTestScript(testConfig=${testConfig}): started")
-    String logPrefix="runTestScript(${testConfig.command}):"
-    log.debug("${logPrefix} started")
+    log.debug("started")
 
     Map returnStatus = testConfig.clone()
     try {
         returnStatus << shellCommandOutput(testConfig)
-        log.debug("${logPrefix} returnStatus=${returnStatus}")
+        log.debug("returnStatus=${returnStatus}")
     } catch (Exception err) {
         returnStatus.status = returnStatus.status ?: 999
-        log.error("${logPrefix} exception occurred [${err}] \n currentBuild.result=${currentBuild.result}")
+        log.error("exception occurred [${err}] \n currentBuild.result=${currentBuild.result}")
     }
     return returnStatus
 }
@@ -657,8 +615,8 @@ Map runTestScript(Map testConfig) {
 Map shellCommandOutput(Map testConfig) {
     Map returnStatus = [:]
 
-    if (testConfig.debugPipeline) log.debug("shellCommandOutput(testConfig=${testConfig}): started")
-    def logPrefix="shellCommandOutput(${testConfig.command}):"
+    log.debug("testConfig.command=${testConfig.command}")
+    if (testConfig.debugPipeline) log.debug("testConfig=${testConfig})")
 
     def filepath = "${BUILD_URL}artifact/logs/${testConfig.nodeName}/${testConfig.filename}"
     returnStatus.filepath=filepath
@@ -668,10 +626,10 @@ Map shellCommandOutput(Map testConfig) {
     def startDate = new Date()
     returnStatus.startDate = dateFormat.format(startDate)
 
-//    log.debug("${logPrefix} testConfig.filepath=${testConfig.filepath}")
-    log.debug("${logPrefix} testConfig.runcount=${testConfig.runcount}")
+//    log.debug("testConfig.filepath=${testConfig.filepath}")
+    log.debug("testConfig.runcount=${testConfig.runcount}")
 
-    log.debug("${logPrefix} filename=${testConfig.filename}")
+    log.debug("filename=${testConfig.filename}")
     sh script: "echo ${testConfig.script} > ${testConfig.filename}", returnStatus: true
     sh script: "echo Results: >> ${testConfig.filename}", returnStatus: true
     sh script: "echo \"\n\n######\" >> ${testConfig.filename}", returnStatus: true
@@ -679,7 +637,7 @@ Map shellCommandOutput(Map testConfig) {
     int status=0
     for (int i = 1; i  <= testConfig.runcount; i++) {
         if (testConfig.runcount>1) sh script: "echo \"\n*** iteration ${i} STARTED *** \" >> ${testConfig.filename}", returnStatus: true
-        log.debug("${logPrefix} [iter${i}]: ${testConfig.script} >> ${testConfig.filename}")
+        log.debug("[iter${i}]: ${testConfig.script} >> ${testConfig.filename}")
         int retstat
         if (testConfig.useSimulationMode) {
             retstat = sh(script: "echo 'SIMULATION MODE - not actually running command [${testConfig.script}]' >> ${testConfig.filename}", returnStatus: true)
@@ -695,7 +653,7 @@ Map shellCommandOutput(Map testConfig) {
 //            retstat = sh(script: "${testConfig.script} >> ${testConfig.filename} 2>&1", returnStatus: true)
             retstat = sh(script: "set -o pipefail; ${testConfig.script} 2>&1 | tee -a ${testConfig.filename}", returnStatus: true)
         }
-        log.debug("${logPrefix} return status=${retstat}")
+        log.debug("return status=${retstat}")
         sh script: "echo return status=${retstat} >> ${testConfig.filename}", returnStatus: true
 
         numSuccess += (retstat==0) ? 1 : 0
@@ -727,16 +685,16 @@ Map shellCommandOutput(Map testConfig) {
     if ( status ) {
         def msg = "Connection failed with retval=${status}"
         if (testConfig.runcount>1) { msg += " and successRate=${returnStatus.successRate}" }
-        log.info("${logPrefix} ${msg}")
+        log.info("${msg}")
     } else {
-        log.info("${logPrefix} Connection success")
+        log.info("Connection success")
     }
 
 //    returnStatus.cmd_return_status=status
     returnStatus.status = status
     returnStatus.result = (status>0) ? "FAIL" : (status<0) ? "SKIPPED" : "PASS"
 
-    log.debug("${logPrefix} returnStatus=${returnStatus}")
+    log.debug("returnStatus=${returnStatus}")
 
     return returnStatus
 }

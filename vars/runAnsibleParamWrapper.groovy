@@ -6,11 +6,12 @@ import com.dettonville.api.pipeline.utils.logging.Logger
 import com.dettonville.api.pipeline.utils.JsonUtils
 import com.dettonville.api.pipeline.utils.Utilities
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+//@Field Logger log = new Logger(this, LogLevel.INFO)
+@Field Logger log = new Logger(this)
+
 def call(Map config=[:]) {
-
-    Logger log = new Logger(this, LogLevel.INFO)
-
-    String logPrefix="runAnsibleParamWrapper():"
 
     List paramList = []
 
@@ -21,7 +22,7 @@ def call(Map config=[:]) {
             name: 'AnsibleLimitHosts'),
         ansibleDebugFlag : choice(choices: "\n-v\n-vv\n-vvv\n-vvvv", description: "Choose Ansible Debug Level", name: 'AnsibleDebugFlag'),
         ansibleGalaxyForceOpt : booleanParam(defaultValue: false, description: "Use Ansible Galaxy Force Mode?", name: 'AnsibleGalaxyForceOpt'),
-        ansibleGalaxyUpgradeOpt : booleanParam(defaultValue: true, description: "Use Ansible Galaxy Upgrade?", name: 'AnsibleGalaxyUpgradeOpt'),
+        ansibleGalaxyUpgradeOpt : booleanParam(defaultValue: false, description: "Use Ansible Galaxy Upgrade?", name: 'AnsibleGalaxyUpgradeOpt'),
         useCheckDiffMode : booleanParam(defaultValue: false, description: "Use Check+Diff Mode (Dry Run with Diffs)?", name: 'UseCheckDiffMode'),
         skipUntagged : booleanParam(defaultValue: false, description: "Skip Untagged plays?", name: 'SkipUntagged')
     ]
@@ -47,50 +48,48 @@ def call(Map config=[:]) {
         config.ansibleDiffMode=true
     }
 
-    config.environment = config.get('environment',"${env.JOB_NAME.split('/')[-3]}")
-    config.ansibleInstallation = config.get('ansibleInstallation',"ansible-venv")
+    config.get('environment',"${env.JOB_NAME.split('/')[-3]}")
+    config.get('ansibleInstallation',"ansible-venv")
 
+    def ansibleTagsDefault = "untagged,${env.JOB_BASE_NAME}"
     if (config.skipUntagged) {
         ansibleTagsDefault = "${env.JOB_BASE_NAME}"
-    } else {
-        // ref: https://stackoverflow.com/questions/62213910/run-only-tasks-with-a-certain-tag-or-untagged
-        ansibleTagsDefault = "untagged,${env.JOB_BASE_NAME}"
     }
-    config.ansibleTags = config.get('ansibleTags',"${ansibleTagsDefault}")
+    config.get('ansibleTags',"${ansibleTagsDefault}")
 
-    config.ansiblePipelineConfigFile = config.get('ansiblePipelineConfigFile',".jenkins.ansible.yml")
-//     config.ansibleInventory = config.get('ansibleInventory',"./inventory/${config.environment}/hosts.yml")
-    config.ansibleInventory = config.get('ansibleInventory',"./inventory/${config.environment}")
+    config.get('ansiblePipelineConfigFile',".jenkins.ansible.yml")
+//     config.get('ansibleInventory',"./inventory/${config.environment}/hosts.yml")
+    config.get('ansibleInventory',"./inventory/${config.environment}")
 
     List ansibleEnvVarsListDefault = [
         "ANSIBLE_COLLECTIONS_PATH=~/.ansible/collections:/usr/share/ansible/collections:./requirements_collections:./collections"
     ]
-    config.ansibleEnvVarsList = config.get('ansibleEnvVarsList',ansibleEnvVarsListDefault)
+    config.get('ansibleEnvVarsList',ansibleEnvVarsListDefault)
 
-    config.ansibleVarFiles = config.get('ansibleVarFiles', [])
+    config.get('ansibleVarFiles', [])
     if (config.ansibleVault) {
         config.ansibleVarFiles += ["${config.ansibleVault}"]
     }
 
 //     config.skipDefaultCheckout = true
 //     config.gitBranch = 'master'
-    config.gitBranch = config.get('gitBranch','main')
-    config.gitRepoUrl = config.get('gitRepoUrl','git@bitbucket.org:lj020326/ansible-datacenter.git')
-    config.gitCredId = config.get('gitCredId','bitbucket-ssh-jenkins')
+    config.get('gitBranch','main')
+    config.get('gitRepoUrl','git@bitbucket.org:lj020326/ansible-datacenter.git')
+    config.get('gitCredId','bitbucket-ssh-jenkins')
 
-//     config.ansibleCollectionsRequirements = config.get('ansibleCollectionsRequirements','./collections/requirements.molecule.yml')
-//     config.ansibleRolesRequirements = config.get('ansibleRolesRequirements','./roles/requirements.yml')
+//     config.get('ansibleCollectionsRequirements','./collections/requirements.molecule.yml')
+//     config.get('ansibleRolesRequirements','./roles/requirements.yml')
 
 //     List ansibleSecretVarsList=[
 //         usernamePassword(credentialsId: 'ansible-ssh-password-linux', passwordVariable: 'ANSIBLE_SSH_PASSWORD', usernameVariable: 'ANSIBLE_SSH_USERNAME'),
 //         string(credentialsId: 'awx-oauth-token', variable: 'TOWER_OAUTH_TOKEN')
 //     ]
 
-    log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.info("config=${JsonUtils.printToJsonString(config)}")
 
     runAnsiblePlaybook(config)
 
-    log.info("${logPrefix} finished")
+    log.info("finished")
 
 }
 

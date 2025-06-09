@@ -7,12 +7,12 @@ import com.dettonville.api.pipeline.utils.logging.Logger
 import com.dettonville.api.pipeline.utils.JsonUtils
 import com.dettonville.api.pipeline.utils.MapMerge
 
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+//@Field Logger log = new Logger(this, LogLevel.INFO)
+@Field Logger log = new Logger(this)
+
 def call(Map inConfig=[:]) {
-
-//     Logger.init(this, LogLevel.INFO)
-    Logger log = new Logger(this, LogLevel.INFO)
-
-    String logPrefix="runATHEnv():"
 
     Map config = inConfig.clone()
 
@@ -198,30 +198,30 @@ appEnvironments:
 
     config.testCase = (config.testCase ?: config.browserstackBrowser).toLowerCase()
 
-    log.debug("${logPrefix}  1) if multiplatform - set testgroups config")
+    log.debug(" 1) if multiplatform - set testgroups config")
     if (multiPlatformNames.contains(config.testCase)) {
         config = MapMerge.merge(getMultiPlatformSettings(), config)
     }
-    log.debug("${logPrefix} 1) config=${JsonUtils.printToJsonString(config)}")
+    log.debug("1) config=${JsonUtils.printToJsonString(config)}")
 
-    log.debug("${logPrefix} 2) apply test case settings")
+    log.debug("2) apply test case settings")
     Map testCaseSettings = ymlConfig.testCaseConfigs.get(config.testCase, [:])
     config = MapMerge.merge(testCaseSettings, config)
-    log.debug("${logPrefix} 2) config=${JsonUtils.printToJsonString(config)}")
+    log.debug("2) config=${JsonUtils.printToJsonString(config)}")
 
-    log.debug("${logPrefix} 3) apply test suite settings")
+    log.debug("3) apply test suite settings")
     if (config?.testSuite) {
         Map testSuiteSettings = ymlConfig.appTestSuites.get(config.testSuite.toUpperCase(), [:])
         testSuiteSettings = (testSuiteSettings) ? testSuiteSettings : [:]
         config=MapMerge.merge(testSuiteSettings, config)
-        log.debug("${logPrefix} 3) config=${JsonUtils.printToJsonString(config)}")
+        log.debug("3) config=${JsonUtils.printToJsonString(config)}")
     }
-    log.debug("${logPrefix} 3) config=${JsonUtils.printToJsonString(config)}")
+    log.debug("3) config=${JsonUtils.printToJsonString(config)}")
 
-    log.debug("${logPrefix} 4) apply appenv settings")
+    log.debug("4) apply appenv settings")
     Map envSettings = ymlConfig.appEnvironments.get(config.appEnvironment, [:])
     config=MapMerge.merge(envSettings, config)
-    log.debug("${logPrefix} 4) config=${JsonUtils.printToJsonString(config)}")
+    log.debug("4) config=${JsonUtils.printToJsonString(config)}")
 
     if (config?.cronCfg) {
         properties([pipelineTriggers([cron("${config.cronCfg}")])])
@@ -229,7 +229,7 @@ appEnvironments:
 
     config.testSuiteName = config.testSuiteName ?: config.testSuite
 
-    log.info("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
+    log.info("config=${JsonUtils.printToJsonString(config)}")
 
     if (config?.testSuite && config.testSuite=="API") {
         runApiTests(config)

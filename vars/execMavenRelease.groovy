@@ -1,22 +1,4 @@
-/*-
- * #%L
- * dettonville.org
- * %%
- * Copyright (C) 2024 dettonville.org DevOps
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
+
 import com.dettonville.api.pipeline.environment.EnvironmentConstants
 import com.dettonville.api.pipeline.utils.logging.Logger
 import com.dettonville.api.pipeline.utils.maps.MapUtils
@@ -25,6 +7,11 @@ import org.apache.maven.model.Model
 import org.apache.maven.model.Plugin
 
 import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+//@Field Logger log = new Logger(this, LogLevel.INFO)
+@Field Logger log = new Logger(this)
 
 /**
  * Utility step for performing a release with maven
@@ -37,7 +24,6 @@ import static com.dettonville.api.pipeline.utils.ConfigConstants.*
  */
 void call(Map config = null) {
     config = config ?: [:]
-    Logger log = new Logger(this)
 
     // retrieve the configuration and set defaults
     Map defaultConfig = [
