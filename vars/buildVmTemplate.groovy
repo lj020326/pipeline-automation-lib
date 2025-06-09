@@ -1,15 +1,12 @@
 #!/usr/bin/env groovy
+import groovy.json.JsonOutput
 
-// ref: https://github.com/jenkinsci/packer-plugin/issues/20#issuecomment-469681596
+import com.dettonville.api.pipeline.utils.JsonUtils
+import com.dettonville.api.pipeline.utils.MapMerge
 
 import com.dettonville.api.pipeline.utils.Utilities
 import com.dettonville.api.pipeline.utils.logging.LogLevel
 import com.dettonville.api.pipeline.utils.logging.Logger
-import com.dettonville.api.pipeline.utils.MapMerge
-import com.dettonville.api.pipeline.utils.JsonUtils
-import groovy.json.*
-//import groovy.json.JsonOutput
-// import groovy.json.JsonSlurper
 
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field
@@ -24,7 +21,7 @@ def call() {
     Map config=[:]
     boolean vmTemplateExists = false
 
-//    Map config=loadPipelineConfig(params)
+//    Map config = loadPipelineConfig(params)
 //    String agentLabel = getJenkinsAgentLabel(config.jenkinsNodeLabel)
 
     List paramList = []
@@ -50,6 +47,7 @@ def call() {
     }
 
     pipeline {
+
         agent {
             label "packer"
         }
@@ -63,11 +61,11 @@ def call() {
             PATH = "${env.GOVC_HOME}/bin:${env.PACKER_HOME}/bin:${env.PATH}"
         }
         options {
-            buildDiscarder(logRotator(numToKeepStr: '10'))
-            disableConcurrentBuilds()
+            buildDiscarder(logRotator(numToKeepStr: '20'))
             skipDefaultCheckout(false)
+            disableConcurrentBuilds()
             timestamps()
-            timeout(time: 3, unit: 'HOURS')
+            timeout(time: config.timeout as Integer, unit: config.timeoutUnit)
         }
 
         stages {
@@ -510,36 +508,59 @@ def call() {
         post {
             always {
                 script {
-                    List emailAdditionalDistList = []
-                    if (config?.gitBranch) {
-                        if (config.gitBranch in ['main','QA','PROD'] || config.gitBranch.startsWith("release/")) {
-                            if (config?.deployEmailDistList) {
-                                emailAdditionalDistList = config.deployEmailDistList
-                                log.info("post(${env.BRANCH_NAME}): sendEmail(${currentBuild.result})")
-                                sendEmail(currentBuild, env, emailAdditionalDistList: emailAdditionalDistList)
-                            }
-                        } else if (config.gitBranch in ['development']) {
-                            if (config?.alwaysEmailDistList) {
-                                emailAdditionalDistList = config.alwaysEmailDistList
-                                log.info("post(${env.BRANCH_NAME}): sendEmail(${currentBuild.result})")
-                                sendEmail(currentBuild, env, emailAdditionalDistList: emailAdditionalDistList)
-                            }
-                        }
+                    if (config?.alwaysEmailList) {
+                        log.info("config.alwaysEmailList=${config.alwaysEmailList}")
+                        sendEmail(currentBuild, env, emailAdditionalDistList: [config.alwaysEmailList.split(",")])
                     } else {
-                        log.info("post(${env.BRANCH_NAME}): sendEmail(${currentBuild.result}, 'RequesterRecipientProvider')")
                         sendEmail(currentBuild, env)
                     }
                     log.info("Empty current workspace dir")
-                    cleanWs()
+                    try {
+                        cleanWs()
+                    } catch (Exception ex) {
+                        log.warn("Unable to cleanup workspace - e.g., likely cause git clone failure", ex.getMessage())
+                    }
+                }
+            }
+            success {
+                script {
+                    if (config?.successEmailList) {
+                        log.info("config.successEmailList=${config.successEmailList}")
+                        sendEmail(currentBuild, env, emailAdditionalDistList: [config.successEmailList.split(",")])
+                    }
+                }
+            }
+            failure {
+                script {
+                    if (config?.failedEmailList) {
+                        log.info("config.failedEmailList=${config.failedEmailList}")
+                        sendEmail(currentBuild, env, emailAdditionalDistList: [config.failedEmailList.split(",")])
+                    }
+                }
+            }
+            aborted {
+                script {
+                    if (config?.failedEmailList) {
+                        log.info("config.failedEmailList=${config.failedEmailList}")
+                        sendEmail(currentBuild, env, emailAdditionalDistList: [config.failedEmailList.split(",")])
+                    }
+                }
+            }
+            changed {
+                script {
+                    if (config?.changedEmailList) {
+                        log.info("config.changedEmailList=${config.changedEmailList}")
+                        sendEmail(currentBuild, env, emailAdditionalDistList: [config.changedEmailList.split(",")])
+                    }
                 }
             }
         }
     }
-
-}
+} // body
 
 //@NonCPS
 Map loadPipelineConfig(Map params) {
+
     Map config = [:]
 
     List jobParts = JOB_NAME.split("/")
@@ -547,11 +568,15 @@ Map loadPipelineConfig(Map params) {
 //     config.jobBaseFolderLevel = (jobParts.size() - 4)
     config.jobBaseFolderLevel = 2
     config.build_dir="templates"
-    config.timeout = config.get('timeout', 3)
-    config.timeoutUnit = config.get('timeoutUnit', 'HOURS')
-    config.alwaysEmailList = config.get('alwaysEmailList', "lee.james.johnson@gmail.com")
-    config.tmpDirMaxFileCount = config.get('tmpDirMaxFileCount', 100)
-    config.tmpDirMaxAge = config.get('tmpDirMaxFileCount', 7)
+
+    config.get('logLevel', "INFO")
+    config.get('timeout', "3")
+    config.get('timeoutUnit', "HOURS")
+    config.get('debugPipeline', false)
+
+    config.get('alwaysEmailList', "lee.james.johnson@gmail.com")
+    config.get('tmpDirMaxFileCount', 100)
+    config.get('tmpDirMaxFileCount', 7)
 
     // ref: https://blog.mrhaki.com/2011/09/groovy-goodness-take-and-drop-items.html
     jobParts = jobParts.drop(config.jobBaseFolderLevel)
@@ -614,9 +639,9 @@ Map loadPipelineConfig(Map params) {
     }
     log.info("build_release_config_dir=${config.build_release_config_dir}")
 
-    config.replaceExistingTemplate = config.get('replaceExistingTemplate', false)
-    config.vmware_iso_nfs_local_mounted = config.get('vmware_iso_nfs_local_mounted', false)
-    config.import_ovf_to_dc2 = config.get('import_ovf_to_dc2', false)
+    config.get('replaceExistingTemplate', false)
+    config.get('vmware_iso_nfs_local_mounted', false)
+    config.get('import_ovf_to_dc2', false)
 
     log.info("loading build config")
 
@@ -663,7 +688,7 @@ Map loadPipelineConfig(Map params) {
     if (config.iso_file.contains("?")) {
         config.iso_file = config.iso_file.split("\\?")[0]
     }
-    config.os_image_dir = config.get('os_image_dir', "/data/datacenter/jenkins/osimages")
+    config.get('os_image_dir', "/data/datacenter/jenkins/osimages")
 
     log.info("build_distribution_config_dir=${config.build_distribution_config_dir}")
     log.info("build_release_config_dir=${config.build_release_config_dir}")
@@ -678,9 +703,7 @@ Map loadPipelineConfig(Map params) {
         }
     }
 
-    config.jenkinsNodeLabel = config.get('jenkinsNodeLabel',"packer")
-    config.logLevel = config.get('logLevel', "INFO")
-    config.debugPipeline = config.get('debugPipeline', false)
+    config.get('jenkinsNodeLabel',"packer")
 
     // ***********************************************
     // build specific vars overridden by pipeline
@@ -706,7 +729,7 @@ Map loadPipelineConfig(Map params) {
     imageInfo.iso_checksum = "${config.iso_checksum_type}:${config.iso_checksum}"
     config.image_info = imageInfo
 
-    config.build_on_error = config.get('build_on_error', 'abort')
+    config.get('build_on_error', 'abort')
     config.build_config = "${config.build_distribution_config_dir}/"
     if (config.build_format == "json") {
         config.packer_build_only = "${config.builder_type}"
@@ -725,7 +748,7 @@ Map loadPipelineConfig(Map params) {
     config.vcenter_shortname1 = config.vcenter_host.tokenize('.')[0]
     config.vcenter_shortname2 = config.vcenter_host2.tokenize('.')[0]
 
-    config.ansibleGalaxyTokenCredId = config.get('ansibleGalaxyTokenCredId', 'ansible-galaxy-pah-token')
+    config.get('ansibleGalaxyTokenCredId', 'ansible-galaxy-pah-token')
 
     // ref: https://docs.cloudbees.com/docs/cloudbees-ci/latest/cloud-secure-guide/injecting-secrets
     // require SSH credentials for some ansible jobs (e.g., deploy-cacerts)

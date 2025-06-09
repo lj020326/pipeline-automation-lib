@@ -173,7 +173,7 @@ Map loadPipelineConfig(Map params) {
         }
     }
 
-    config.logLevel = config.get('logLevel', "INFO")
+    config.get('logLevel', "INFO")
 
     log.setLevel(config.logLevel)
 

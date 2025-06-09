@@ -193,50 +193,50 @@ Map loadPipelineConfig(Map params) {
         log.setLevel(LogLevel.DEBUG)
     }
 
-    config.jenkinsNodeLabel = config.get('jenkinsNodeLabel',"ansible")
-    config.logLevel = config.get('logLevel', "INFO")
-    config.debugPipeline = config.get('debugPipeline', false)
-    config.timeout = config.get('timeout', 3)
-    config.timeoutUnit = config.get('timeoutUnit', 'HOURS')
+    config.get('jenkinsNodeLabel',"ansible")
+    config.get('logLevel', "INFO")
+    config.get('debugPipeline', false)
+    config.get('timeout', 3)
+    config.get('timeoutUnit', 'HOURS')
 
 //    config.emailDist = config.emailDist ?: "lee.james.johnson@gmail.com"
-    config.emailDist = config.get('emailDist',"lee.james.johnson@gmail.com")
+    config.get('emailDist',"lee.james.johnson@gmail.com")
     // config.alwaysEmailDist = config.alwaysEmailDist ?: "lee.james.johnson@gmail.com"
     config.emailFrom = config.emailFrom ?: "admin+ansible@dettonville.com"
 
-    config.skipDefaultCheckout = config.get('skipDefaultCheckout', false)
-    config.gitPerformCheckout = config.get('gitPerformCheckout', !config.get('skipDefaultCheckout',false))
-    config.gitBranch = config.get('gitBranch', '')
-    config.gitRepoUrl = config.get('gitRepoUrl', '')
-    config.gitCredId = config.get('gitCredId', '')
+    config.get('skipDefaultCheckout', false)
+    config.get('gitPerformCheckout', !config.get('skipDefaultCheckout',false))
+    config.get('gitBranch', '')
+    config.get('gitRepoUrl', '')
+    config.get('gitCredId', '')
 
-    config.ansibleCollectionsRequirements = config.get('ansibleCollectionsRequirements', './collections/requirements.yml')
-//     config.ansibleRolesRequirements = config.get('ansibleRolesRequirements', './roles/requirements.yml')
-//    config.ansibleInventory = config.get('ansibleInventory', 'inventory')
-//    config.ansibleInventory = config.get('ansibleInventory', 'hosts.ini')
-    config.ansibleInventory = config.get('ansibleInventory', 'hosts.yml')
+    config.get('ansibleCollectionsRequirements', './collections/requirements.yml')
+//     config.get('ansibleRolesRequirements', './roles/requirements.yml')
+//    config.get('ansibleInventory', 'inventory')
+//    config.get('ansibleInventory', 'hosts.ini')
+    config.get('ansibleInventory', 'hosts.yml')
     config.ansibleInventoryDir = config.ansibleInventory.take(config.ansibleInventory.lastIndexOf('/'))
 
-    config.ansibleGalaxyIgnoreCerts = config.get('ansibleGalaxyIgnoreCerts',false)
-    config.ansibleGalaxyForceOpt = config.get('ansibleGalaxyForceOpt', false)
+    config.get('ansibleGalaxyIgnoreCerts',false)
+    config.get('ansibleGalaxyForceOpt', false)
 
-//     config.ansibleSshCredId = config.get('ansibleSshCredId', 'jenkins-ansible-ssh')
-    config.ansibleVaultCredId = config.get('ansibleVaultCredId', 'ansible-vault-password-file')
-    config.ansibleTags = config.get('ansibleTags', '')
+//     config.get('ansibleSshCredId', 'jenkins-ansible-ssh')
+    config.get('ansibleVaultCredId', 'ansible-vault-password-file')
+    config.get('ansibleTags', '')
 
     String ansibleGalaxyCmd = "ansible-galaxy"
     String ansibleCmd = "ansible"
 
-    config.ansibleInstallation = config.get('ansibleInstallation', 'ansible-venv')
+    config.get('ansibleInstallation', 'ansible-venv')
     config.ansibleGalaxyCmd = ansibleGalaxyCmd
     config.ansibleCmd = ansibleCmd
 
-    config.ansibleTestCommand = config.get('ansibleTestCommand', 'integration')
-    config.ansibleTestVerbosity = config.get('ansibleTestVerbosity', '-v')
-    config.ansibleTestPythonVersion = config.get('ansibleTestPythonVersion', '3.9')
-    config.ansibleTestTarget = config.get('ansibleTestTarget', 'update_hosts')
+    config.get('ansibleTestCommand', 'integration')
+    config.get('ansibleTestVerbosity', '-v')
+    config.get('ansibleTestPythonVersion', '3.9')
+    config.get('ansibleTestTarget', 'update_hosts')
 
-    config.ansibleEnvVarsList = config.get('ansibleEnvVarsList', [])
+    config.get('ansibleEnvVarsList', [])
 
     // require SSH credentials for some ansible jobs (e.g., deploy-cacerts)
     // ref: https://emilwypych.com/2019/06/15/how-to-pass-credentials-to-jenkins-pipeline/
@@ -249,7 +249,7 @@ Map loadPipelineConfig(Map params) {
         file(credentialsId: config.ansibleGalaxyTokenCredId, variable: 'ANSIBLE_GALAXY_TOKEN_PATH')
     ]
 
-    config.ansibleSecretVarsList = config.get('ansibleSecretVarsList', secretVarsListDefault)
+    config.get('ansibleSecretVarsList', secretVarsListDefault)
     
     config.collectionDir=config.get('collectionDir', 'ansible_collections')
 

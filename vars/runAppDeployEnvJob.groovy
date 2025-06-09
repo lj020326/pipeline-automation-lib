@@ -14,7 +14,7 @@ def call(Map inConfig=[:]) {
 
     Map config = inConfig.clone()
 
-    config.jobMode = config.get('jobMode', true)
+    config.get('jobMode', true)
 
     if (config.jobMode) {
         List jobParts = JOB_NAME.split("/")
@@ -60,8 +60,8 @@ Map getDeploymentJobParams(Map inConfig) {
     Map config = inConfig.clone()
     config.isGroupJob = false
 
-    config.enabledParamList = config.get('enabledParamList', enabledParamListDefault)
-    config.enableDevParams = config.get('enableDevParams', (config.enabledParamList.isEmpty()) ? true : false)
+    config.get('enabledParamList', enabledParamListDefault)
+    config.get('enableDevParams', (config.enabledParamList.isEmpty()) ? true : false)
 
     String configYmlString = """
 ---

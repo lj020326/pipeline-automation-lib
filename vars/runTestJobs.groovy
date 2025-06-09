@@ -129,13 +129,13 @@ Map loadPipelineConfig(Map params, String configFile=null) {
         }
     }
 
-    config.jenkinsM3NodeLabel = config.get('jenkinsM3NodeLabel',"QA-LINUX || PROD-LINUX")
-    config.logLevel = config.get('logLevel', "INFO")
-    config.debugPipeline = config.get('debugPipeline', false)
-    config.continueIfFailed = config.get('continueIfFailed', false)
-    config.wait = config.get('wait', true)
-    config.failFast = config.get('failFast', false)
-    config.propagate = config.get('propagate', false)
+    config.get('jenkinsM3NodeLabel',"QA-LINUX || PROD-LINUX")
+    config.get('logLevel', "INFO")
+    config.get('debugPipeline', false)
+    config.get('continueIfFailed', false)
+    config.get('wait', true)
+    config.get('failFast', false)
+    config.get('propagate', false)
 
     log.setLevel(config.logLevel)
 
@@ -293,7 +293,7 @@ boolean runJob(Map config) {
 
         // ref: http://jenkins-ci.361315.n4.nabble.com/How-to-get-build-results-from-a-build-job-in-a-pipeline-td4897887.html
         def jobBuild = build job: config.jobName, parameters: paramList, wait: config.wait, propagate: false
-        def jobResult = jobBuild.getResult()
+        String jobResult = jobBuild.getResult()
 
         log.info("Build ${config.jobName} returned result: ${jobResult}")
 

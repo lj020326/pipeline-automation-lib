@@ -50,7 +50,7 @@ def call() {
     ])
 
     log.info("Loading Default Configs")
-    Map config=loadPipelineConfig(params)
+    Map config = loadPipelineConfig(params)
     def dockerImage
 
     pipeline {

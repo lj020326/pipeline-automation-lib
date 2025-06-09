@@ -118,12 +118,12 @@ Map loadPipelineConfig(Map params, String configFile=null) {
         }
     }
 
-    config.jenkinsJobNodeNodeLabel = config.get('jenkinsJobNodeNodeLabel',"any")
-    config.logLevel = config.get('logLevel', "INFO")
-    config.debugPipeline = config.get('debugPipeline', false)
-    config.continueIfFailed = config.get('continueIfFailed', false)
-    config.wait = config.get('wait', true)
-    config.propagate = config.get('propagate', false)
+    config.get('jenkinsJobNodeNodeLabel',"any")
+    config.get('logLevel', "INFO")
+    config.get('debugPipeline', false)
+    config.get('continueIfFailed', false)
+    config.get('wait', true)
+    config.get('propagate', false)
 
     log.setLevel(config.logLevel)
 

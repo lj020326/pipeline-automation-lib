@@ -13,10 +13,10 @@ import groovy.transform.Field
 
 def call(Map config=[:]) {
 
-    config.enabledParamList = config.get('enabledParamList', [])
-    config.enableDevParams = config.get('enableDevParams', (config.enabledParamList.isEmpty()) ? true : false)
+    config.get('enabledParamList', [])
+    config.get('enableDevParams', (config.enabledParamList.isEmpty()) ? true : false)
     config.enableBranchParam = config.enabledParamList.contains("athGitBranch") ? true : config.get('enableBranchParam', false)
-    config.athGitRepo = config.get('athGitRepo', "https://gitrepository.dettonville.int/stash/scm/api/infra-test.git")
+    config.get('athGitRepo', "https://gitrepository.dettonville.int/stash/scm/api/infra-test.git")
 
     List paramList = []
 

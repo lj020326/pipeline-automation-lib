@@ -185,8 +185,8 @@ Map loadPipelineConfig(Map params, String configFile=null) {
         config[key]=value
     }
 
-    config.logLevel = config.get('logLevel', "INFO")
-    config.debugPipeline = config.get('debugPipeline', false)
+    config.get('logLevel', "INFO")
+    config.get('debugPipeline', false)
     log.info("params=${params}")
 
     if (config.debugPipeline) {
@@ -211,17 +211,17 @@ Map loadPipelineConfig(Map params, String configFile=null) {
     //
     log.info("env.JOB_NAME = ${env.JOB_NAME}")
     // set default states
-    config.useSimulationMode = config.get('useSimulationMode', false)
+    config.get('useSimulationMode', false)
     config.nodeList = config.nodeList ?: env.AGENTS.split(',').sort()
     config.timeout = config.timeout ?: 10
     config.runcount = config.runcount ?: 1
-    config.runParallelNodeSiteTests = config.get('runParallelNodeSiteTests', true)
-//    config.runParallelNodeSiteTests = config.get('runParallelNodeSiteTests', false)
-//    config.runParallelTests = config.get('runParallelTests', false)
-    config.runParallelTests = config.get('runParallelTests', true)
+    config.get('runParallelNodeSiteTests', true)
+//    config.get('runParallelNodeSiteTests', false)
+//    config.get('runParallelTests', false)
+    config.get('runParallelTests', true)
 
 //    config.emailDist = config.emailDist ?: "lee.johnson@dettonville.com"
-    config.emailDist = config.get('emailDist',"lee.johnson@dettonville.com")
+    config.get('emailDist',"lee.johnson@dettonville.com")
     config.alwaysEmailDist = config.alwaysEmailDist ?: "lee.johnson@dettonville.com"
     config.emailFrom = config.emailFrom ?: "DCAPI.TestAutomation@dettonville.com"
 

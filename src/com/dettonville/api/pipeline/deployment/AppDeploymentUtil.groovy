@@ -135,7 +135,7 @@ class AppDeploymentUtil implements Serializable {
             log.debug("**********************")
         }
 
-        config.deployGroup = config.get('deployGroup',[])
+        config.get('deployGroup',[])
         config.deployGroupMap = [:]
 
         config.deployGroup.each { String componentId ->

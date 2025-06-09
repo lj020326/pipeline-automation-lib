@@ -292,9 +292,9 @@ Map loadPipelineConfig(Map params, String configFile=null) {
         }
     }
 
-//    config.logLevel = config.get('logLevel', "INFO")
-    config.logLevel = config.get('logLevel', "DEBUG")
-    config.debugPipeline = config.get('debugPipeline', true)
+//    config.get('logLevel', "INFO")
+    config.get('logLevel', "DEBUG")
+    config.get('debugPipeline', true)
     if (config.debugPipeline) {
         log.setLevel(LogLevel.DEBUG)
     }
@@ -324,67 +324,67 @@ Map loadPipelineConfig(Map params, String configFile=null) {
     log.debug("env.BRANCH_NAME = ${env.BRANCH_NAME}")
     log.debug("config.gitRepoBranch = ${config.gitRepoBranch}")
 
-//    config.useConfigFile = config.get('useConfigFile', false)
-    config.useConfigFile = config.get('useConfigFile', true)
+//    config.get('useConfigFile', false)
+    config.get('useConfigFile', true)
 //    config.configFile = config.configFile ?: "jenkins/${config.gitRepoBranch}.yml"
     config.configFile = config.configFile ?: "jenkins/runPcfDeploy.yml"
-    config.checkoutDir = config.get('checkoutDir', '.')
+    config.get('checkoutDir', '.')
 
-    config.jenkinsArtifactoryCredId = config.get('jenkinsArtifactoryCredId', null)
-    config.jenkinsBitbucketCredId = config.get('jenkinsBitbucketCredId', null)
+    config.get('jenkinsArtifactoryCredId', null)
+    config.get('jenkinsBitbucketCredId', null)
 
-    config.deleteBeforePush = config.get('deleteBeforePush', false)
+    config.get('deleteBeforePush', false)
     log.info("params=${params}")
 
-//    config.useSimulationMode = config.get('useSimulationMode', true)
-    config.useSimulationMode = config.get('useSimulationMode', false)
-//    config.pomFile = config.get('pomFile','pom.xml')
-    config.pomFile = config.get('pomFile',null)
+//    config.get('useSimulationMode', true)
+    config.get('useSimulationMode', false)
+//    config.get('pomFile','pom.xml')
+    config.get('pomFile',null)
 
     // secret vars
-    config.jenkinsArtifactoryCredId = config.get('jenkinsArtifactoryCredId',"dcapi_ci_vcs_user")
+    config.get('jenkinsArtifactoryCredId',"dcapi_ci_vcs_user")
     config.secretVars = getSecretEnvVars(config)
 
     //
     // essential/minimal params
     //
 //    log.debug("env.JOB_NAME = ${env.JOB_NAME}")
-    config.jenkinsJobName = config.get('jenkinsJobName', env.JOB_NAME.replaceAll('%2F', '/').replaceAll('/', '-').replaceAll(' ', '-').toUpperCase())
+    config.get('jenkinsJobName', env.JOB_NAME.replaceAll('%2F', '/').replaceAll('/', '-').replaceAll(' ', '-').toUpperCase())
 
     log.debug("config.jenkinsJobName = ${config.jenkinsJobName}")
     config.buildNumber = currentBuild.number
     config.emailFrom=config.get('emailFrom',"DCAPI.pcfDeployAutomation@dettonville.com")
 
-    config.runTests = config.get('runTests', true)
-    config.runJMeter = config.get('runJMeter', true)
-    config.runSonar = config.get('runSonar', false)
-    config.runFindbugs = config.get('runFindbugs', false)
-    config.runBuild = config.get('runBuild', true)
+    config.get('runTests', true)
+    config.get('runJMeter', true)
+    config.get('runSonar', false)
+    config.get('runFindbugs', false)
+    config.get('runBuild', true)
 
     // if useLocal is true - then sets/overrides the gitRepoBranch with local branch
-    config.useLocal = config.get('useLocal', false)
+    config.get('useLocal', false)
 
     if(config.useLocal && config.gitRepoBranch!=env.BRANCH_NAME) {
         log.warn("useLocal is true: the gitRepoBranch set as ${config.gitRepoBranch} will be set to local branch ${env.BRANCH_NAME}")
         config.gitRepoBranch=env.BRANCH_NAME
     }
 
-    config.publishToArtifactory = config.get('publishToArtifactory', true)
-    config.publishToArtifactoryFromBranch = config.get('publishToArtifactoryFromBranch', null)
+    config.get('publishToArtifactory', true)
+    config.get('publishToArtifactoryFromBranch', null)
 
-    config.createSnapshot = config.get('createSnapshot', true)
-    config.createSnapshotFromBranch = config.get('createSnapshotFromBranch', null)
-    config.deployFromSnapshot = config.get('deployFromSnapshot', true)
-    config.deployFromRelease = config.get('deployFromRelease', false)
+    config.get('createSnapshot', true)
+    config.get('createSnapshotFromBranch', null)
+    config.get('deployFromSnapshot', true)
+    config.get('deployFromRelease', false)
 
-    config.createRelease = config.get('createRelease', false)
-    config.createReleaseFromBranch = config.get('createReleaseFromBranch', "develop")
+    config.get('createRelease', false)
+    config.get('createReleaseFromBranch', "develop")
 
-    config.writeToVault = config.get('writeToVault', false)
-    config.deployServices = config.get('deployServices', false)
-    config.updatePOM = config.get('updatePOM', false)
+    config.get('writeToVault', false)
+    config.get('deployServices', false)
+    config.get('updatePOM', false)
 
-    config.forceSnapshot = config.get('forceSnapshot', false)
+    config.get('forceSnapshot', false)
 
     if(config.deploySnapshot && config.deployRelease) {
         log.error("Conflicting deploySnapshot and deployRelease in the config")

@@ -14,10 +14,10 @@ import groovy.transform.Field
 
 def call(Map config=[:]) {
 
-    config.enabledParamList = config.get('enabledParamList', ['alwaysEmailList','useDryRun']) as List
-    config.enableDevParams = config.get('enableDevParams', (config.enabledParamList.isEmpty()) ? true : false)
+    config.get('enabledParamList', ['alwaysEmailList','useDryRun']) as List
+    config.get('enableDevParams', (config.enabledParamList.isEmpty()) ? true : false)
     config.enableBranchParam = config.enabledParamList.contains("athGitBranch") ? true : config.get('enableBranchParam', false)
-    config.athGitRepo = config.get('athGitRepo', "https://gitrepository.dettonville.int/stash/scm/api/infra-test.git")
+    config.get('athGitRepo', "https://gitrepository.dettonville.int/stash/scm/api/infra-test.git")
     config.enableBranchSettings = config.enableBranchSettings ?: false
 
     Map configDefaultsMap
@@ -26,7 +26,7 @@ def call(Map config=[:]) {
     log.info("jobParts=${jobParts}")
 
 //        int jobBaseFolderLevel = 2
-    config.jobBaseFolderLevel = config.get('jobBaseFolderLevel', 2)
+    config.get('jobBaseFolderLevel', 2)
 
 //        int startIdx=jobBaseFolderLevel+1
     int startIdx = config.jobBaseFolderLevel + 1

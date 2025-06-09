@@ -328,7 +328,7 @@ class AcceptanceTestHarness implements Serializable {
         log.debug("started")
 
         Map config = pipelineConfig.deployConfig + pipelineConfig.buildStatusConfig
-        config.deployJobEnvName = config.get("deployJobEnvName", pipelineConfig.deployJobEnvName)
+        config.get("deployJobEnvName", pipelineConfig.deployJobEnvName)
         Map buildResults = [:]
 
         config.componentList.each { Map component ->
@@ -394,7 +394,7 @@ class AcceptanceTestHarness implements Serializable {
         log.info("started")
 
         Map config = pipelineConfig.deployConfig + pipelineConfig.buildStatusConfig
-        config.deployJobEnvName = config.get("deployJobEnvName", pipelineConfig.deployJobEnvName)
+        config.get("deployJobEnvName", pipelineConfig.deployJobEnvName)
         List componentDiffResults = []
 
         config.componentList.each { Map component ->
@@ -554,7 +554,7 @@ class AcceptanceTestHarness implements Serializable {
         config.scmPomVersion = getAthPomVersion()
 
         log.debug("JOB_NAME = ${dsl.env.JOB_NAME}")
-//    config.application = config.get('application', dsl.env.JOB_NAME.replaceAll('%2F', '/').replaceAll('/', '-').replaceAll(' ', '-').toUpperCase())
+//    config.get('application', dsl.env.JOB_NAME.replaceAll('%2F', '/').replaceAll('/', '-').replaceAll(' ', '-').toUpperCase())
         log.debug("config.application = ${config.application}")
 
         List jobParts = dsl.env.JOB_NAME.split("/")

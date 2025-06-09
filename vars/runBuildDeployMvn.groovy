@@ -190,9 +190,9 @@ Map loadPipelineConfig(Map params, String configFile=null) {
         }
     }
 
-//    config.logLevel = config.get('logLevel', "INFO")
-    config.logLevel = config.get('logLevel', "DEBUG")
-    config.debugPipeline = config.get('debugPipeline', false)
+//    config.get('logLevel', "INFO")
+    config.get('logLevel', "DEBUG")
+    config.get('debugPipeline', false)
 
     log.info("params=${params}")
 
@@ -202,18 +202,18 @@ Map loadPipelineConfig(Map params, String configFile=null) {
         log.setLevel(LogLevel.DEBUG)
     }
 
-//    config.useSimulationMode = config.get('useSimulationMode', true)
-    config.useSimulationMode = config.get('useSimulationMode', false)
+//    config.get('useSimulationMode', true)
+    config.get('useSimulationMode', false)
 
     // secret vars
-    config.jenkinsArtifactoryCredId = config.get('jenkinsArtifactoryCredId',"dcapi_ci_vcs_user")
+    config.get('jenkinsArtifactoryCredId',"dcapi_ci_vcs_user")
 //    config.secretVars = getSecretEnvVars(config)
 
     //
     // essential/minimal params
     //
     log.debug("env.JOB_NAME = ${env.JOB_NAME}")
-    config.application = config.get('application', env.JOB_NAME.replaceAll('%2F', '/').replaceAll('/', '-').replaceAll(' ', '-').toUpperCase())
+    config.get('application', env.JOB_NAME.replaceAll('%2F', '/').replaceAll('/', '-').replaceAll(' ', '-').toUpperCase())
 
     log.debug("config.application = ${config.application}")
     config.buildNumber = currentBuild.number

@@ -48,37 +48,37 @@ def call(Map config=[:]) {
         config.ansibleDiffMode=true
     }
 
-    config.environment = config.get('environment',"${env.JOB_NAME.split('/')[-3]}")
-    config.ansibleInstallation = config.get('ansibleInstallation',"ansible-venv")
+    config.get('environment',"${env.JOB_NAME.split('/')[-3]}")
+    config.get('ansibleInstallation',"ansible-venv")
 
     def ansibleTagsDefault = "untagged,${env.JOB_BASE_NAME}"
     if (config.skipUntagged) {
         ansibleTagsDefault = "${env.JOB_BASE_NAME}"
     }
-    config.ansibleTags = config.get('ansibleTags',"${ansibleTagsDefault}")
+    config.get('ansibleTags',"${ansibleTagsDefault}")
 
-    config.ansiblePipelineConfigFile = config.get('ansiblePipelineConfigFile',".jenkins.ansible.yml")
-//     config.ansibleInventory = config.get('ansibleInventory',"./inventory/${config.environment}/hosts.yml")
-    config.ansibleInventory = config.get('ansibleInventory',"./inventory/${config.environment}")
+    config.get('ansiblePipelineConfigFile',".jenkins.ansible.yml")
+//     config.get('ansibleInventory',"./inventory/${config.environment}/hosts.yml")
+    config.get('ansibleInventory',"./inventory/${config.environment}")
 
     List ansibleEnvVarsListDefault = [
         "ANSIBLE_COLLECTIONS_PATH=~/.ansible/collections:/usr/share/ansible/collections:./requirements_collections:./collections"
     ]
-    config.ansibleEnvVarsList = config.get('ansibleEnvVarsList',ansibleEnvVarsListDefault)
+    config.get('ansibleEnvVarsList',ansibleEnvVarsListDefault)
 
-    config.ansibleVarFiles = config.get('ansibleVarFiles', [])
+    config.get('ansibleVarFiles', [])
     if (config.ansibleVault) {
         config.ansibleVarFiles += ["${config.ansibleVault}"]
     }
 
 //     config.skipDefaultCheckout = true
 //     config.gitBranch = 'master'
-    config.gitBranch = config.get('gitBranch','main')
-    config.gitRepoUrl = config.get('gitRepoUrl','git@bitbucket.org:lj020326/ansible-datacenter.git')
-    config.gitCredId = config.get('gitCredId','bitbucket-ssh-jenkins')
+    config.get('gitBranch','main')
+    config.get('gitRepoUrl','git@bitbucket.org:lj020326/ansible-datacenter.git')
+    config.get('gitCredId','bitbucket-ssh-jenkins')
 
-//     config.ansibleCollectionsRequirements = config.get('ansibleCollectionsRequirements','./collections/requirements.molecule.yml')
-//     config.ansibleRolesRequirements = config.get('ansibleRolesRequirements','./roles/requirements.yml')
+//     config.get('ansibleCollectionsRequirements','./collections/requirements.molecule.yml')
+//     config.get('ansibleRolesRequirements','./roles/requirements.yml')
 
 //     List ansibleSecretVarsList=[
 //         usernamePassword(credentialsId: 'ansible-ssh-password-linux', passwordVariable: 'ANSIBLE_SSH_PASSWORD', usernameVariable: 'ANSIBLE_SSH_USERNAME'),
