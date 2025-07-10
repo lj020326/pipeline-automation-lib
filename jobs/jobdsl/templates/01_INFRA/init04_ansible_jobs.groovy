@@ -122,6 +122,7 @@ void createAnsibleJobs(def dsl, Map pipelineConfig) {
             String ansibleTag = jobConfigs.ansible_tag
             String ansibleLimit = jobConfigs.get('ansible_limit', '')
             boolean skipUntagged = jobConfigs.get('skip_untagged', false)
+            boolean skipAlwaysTag = jobConfigs.get('skip_always_tag', false)
 
             dsl.folder("${baseFolder}/${runEnvironment}/${repoFolder}") {
                 description "This folder contains jobs to run ansible SITE play tags for ${runEnvironment}/${ansibleTag}"
@@ -155,6 +156,7 @@ void createAnsibleJobs(def dsl, Map pipelineConfig) {
                     booleanParam("AnsibleGalaxyUpgradeOpt", false, 'Use Ansible Galaxy Upgrade?')
                     booleanParam("UseCheckDiffMode", false, 'Use Check+Diff Mode (Dry Run with Diffs)?')
                     booleanParam("SkipUntagged", skipUntagged, 'Skip Untagged plays?')
+                    booleanParam("SkipAlwaysTag", skipAlwaysTag, "Skip 'always' tagged plays?")
                 }
                 definition {
                     logRotator {

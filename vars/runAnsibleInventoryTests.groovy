@@ -164,11 +164,11 @@ def call(Map params=[:]) {
                     if (config?.alwaysEmailDistList) {
                         sendEmail(currentBuild, env, emailAdditionalDistList: config.alwaysEmailDistList)
                     }
-                    if (config.gitBranch in ['main','QA','PROD'] || config.gitBranch.startsWith("release/")) {
-                        if (config?.deployEmailDistList) {
-                            log.info("post(${config.gitBranch}): sendEmail(${currentBuild.result})")
-                            sendEmail(currentBuild, env, emailAdditionalDistList: config.deployEmailDistList)
-                        }
+//                     if (config?.gitBranch) &&
+//                         (config.gitBranch in ['main','QA','PROD'] || config.gitBranch.startsWith("release/"))
+                    if (config?.deployEmailDistList) {
+                        log.info("post(${config.gitBranch}): sendEmail(${currentBuild.result})")
+                        sendEmail(currentBuild, env, emailAdditionalDistList: config.deployEmailDistList)
                     } else {
                         log.info("post(${config.gitBranch}): sendEmail(${currentBuild.result}, 'RequesterRecipientProvider')")
                         sendEmail(currentBuild, env)
