@@ -21,9 +21,9 @@ package vars.sshAgentWrapper
 
 import com.dettonville.testing.jenkins.pipeline.LibraryIntegrationTestBase
 import com.dettonville.testing.jenkins.pipeline.StepConstants
-import com.dettonville.api.pipeline.credentials.Credential
-import com.dettonville.api.pipeline.credentials.CredentialAware
-import com.dettonville.api.pipeline.ssh.SSHTarget
+import com.dettonville.pipeline.credentials.Credential
+import com.dettonville.pipeline.credentials.CredentialAware
+import com.dettonville.pipeline.ssh.SSHTarget
 import org.junit.Test
 
 import static com.dettonville.testing.jenkins.pipeline.recorder.StepRecorderAssert.assertOnce

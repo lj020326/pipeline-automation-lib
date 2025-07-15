@@ -1,8 +1,8 @@
 
-import com.dettonville.api.pipeline.utils.NotificationTriggerHelper
-import com.dettonville.api.pipeline.utils.logging.Logger
+import com.dettonville.pipeline.utils.NotificationTriggerHelper
+import com.dettonville.pipeline.utils.logging.Logger
 
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field

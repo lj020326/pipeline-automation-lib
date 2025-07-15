@@ -1,11 +1,11 @@
 #!/usr/bin/env groovy
 
-import com.dettonville.api.pipeline.utils.JsonUtils
-import com.dettonville.api.pipeline.utils.Utilities
-import com.dettonville.api.pipeline.utils.MapMerge
-import com.dettonville.api.pipeline.utils.logging.LogLevel
-import com.dettonville.api.pipeline.utils.logging.Logger
-import com.dettonville.api.pipeline.versioning.ComparableSemanticVersion
+import com.dettonville.pipeline.utils.JsonUtils
+import com.dettonville.pipeline.utils.Utilities
+import com.dettonville.pipeline.utils.MapMerge
+import com.dettonville.pipeline.utils.logging.LogLevel
+import com.dettonville.pipeline.utils.logging.Logger
+import com.dettonville.pipeline.versioning.ComparableSemanticVersion
 
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field
@@ -44,7 +44,7 @@ def call(Map params=[:]) {
                         bitbucketStatusNotify(
                             buildKey: config.buildTestName,
                             buildName: config.buildTestName,
-                            buildState: config.bitbucketResult,
+                            buildState: config.repoStatusResult,
                             repoSlug: 'ansible-datacenter',
                             commitId: config.gitCommitHash
                         )
@@ -71,18 +71,18 @@ def call(Map params=[:]) {
                         if (config.lintConfigFile) {
                             lintCmdList.push("-c ${config.lintConfigFile}")
                         }
-//                         lintCmdList.push("|& tee ${config.testResultsDir}/ansible-lint.txt")
-//                         lintCmdList.push("2>&1 | tee ${config.testResultsDir}/ansible-lint.txt")
-                        lintCmdList.push("| tee ${config.testResultsDir}/ansible-lint.txt")
+//                         lintCmdList.push("|& tee ${config.testResultsDir}/test-console-results.txt")
+//                         lintCmdList.push("2>&1 | tee ${config.testResultsDir}/test-console-results.txt")
+                        lintCmdList.push("| tee ${config.testResultsDir}/test-console-results.txt")
                         lintCmdList.push("|| true")
 
                         String lintCmd = lintCmdList.join(' ')
                         sh(lintCmd)
 
                         try {
-                            sh("ansible-lint-junit ${config.testResultsDir}/ansible-lint.txt -o ${config.testResultsDir}/${config.testResultsJunitFile}")
+                            sh("ansible-lint-junit ${config.testResultsDir}/test-console-results.txt -o ${config.testResultsDir}/${config.testResultsJunitFile}")
 
-                            config.bitbucketResult = "SUCCESSFUL"
+                            config.repoStatusResult = "SUCCESSFUL"
 
                             sh("tree ${config.testResultsDir}")
 
@@ -110,7 +110,7 @@ def call(Map params=[:]) {
                                   skipPublishingChecks: true,
                                   allowEmptyResults: true)
                         } catch (Exception e) {
-                            config.bitbucketResult = "FAILED"
+                            config.repoStatusResult = "FAILED"
                             log.error("lint error: " + e.getMessage())
 //                             throw e
                         }
@@ -126,7 +126,7 @@ def call(Map params=[:]) {
                     bitbucketStatusNotify(
                         buildKey: config.buildTestName,
                         buildName: config.buildTestName,
-                        buildState: config.bitbucketResult,
+                        buildState: config.repoStatusResult,
                         repoSlug: 'ansible-datacenter',
                         commitId: config.gitCommitHash
                     )
@@ -183,7 +183,7 @@ Map loadPipelineConfig(Map params) {
     config.timeout = config.get('timeout', 3)
     config.timeoutUnit = config.get('timeoutUnit', 'HOURS')
     config.skipDefaultCheckout = config.get('skipDefaultCheckout', false)
-    config.bitbucketResult = "INPROGRESS"
+    config.repoStatusResult = "INPROGRESS"
 
 //    config.emailDist = config.emailDist ?: "lee.james.johnson@gmail.com"
     config.emailDist = config.get('emailDist',"lee.james.johnson@gmail.com")

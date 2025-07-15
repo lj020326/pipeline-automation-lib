@@ -1,3 +1,7 @@
+#!/usr/bin/env groovy
+
+// // Get a reference to your shared library's entry point
+// def pipelineAutomationLib = this.getBinding().getProperty('pipelineAutomationLib')
 
 // ref: https://stackoverflow.com/questions/36199072/how-to-get-the-script-name-in-groovy
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy

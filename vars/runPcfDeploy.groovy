@@ -1,7 +1,7 @@
 #!/usr/bin/env groovy
 
-import com.dettonville.api.pipeline.utils.logging.LogLevel
-import com.dettonville.api.pipeline.utils.logging.Logger
+import com.dettonville.pipeline.utils.logging.LogLevel
+import com.dettonville.pipeline.utils.logging.Logger
 
 import com.dettonville.pipeline.utility.VaultUtil
 import com.dettonville.pipeline.utility.CaaSUtil
@@ -1400,7 +1400,7 @@ void getJKSFromCaaS(Map config) {
     def bel_prodTruststorePassword = "changeit"
     def nonProdPwdLabel = "X509-Default-non-PRD"
     def prodPwdLabel = "X509-prd-ci-cd-sw"
-    def util = new com.dettonville.api.pipeline.utility.Utilities()
+    def util = new com.dettonville.pipeline.utility.Utilities()
     def synapseClientProfileId
     def synapseClientJurisdictionId
     def otherClientProfileId

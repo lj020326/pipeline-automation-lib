@@ -19,8 +19,8 @@
  */
 package vars.execMaven.jobs
 
-import static com.dettonville.api.pipeline.utils.ConfigConstants.SCM
-import static com.dettonville.api.pipeline.utils.ConfigConstants.SCM_URL
+import static com.dettonville.pipeline.utils.ConfigConstants.SCM
+import static com.dettonville.pipeline.utils.ConfigConstants.SCM_URL
 
 /**
  * Runs execMaven step with default configuration and the configFile auto lookup should add local and global maven settings,

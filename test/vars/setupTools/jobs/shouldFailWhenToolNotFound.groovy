@@ -19,9 +19,9 @@
  */
 package vars.setupTools.jobs
 
-import com.dettonville.api.pipeline.model.Tool
+import com.dettonville.pipeline.model.Tool
 
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 /**
  * Runs the setupTools step with invalid tool to test failure when tool is not found

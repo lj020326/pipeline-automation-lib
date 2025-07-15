@@ -20,7 +20,7 @@
 package vars.checkoutScm
 
 import com.dettonville.testing.jenkins.pipeline.LibraryIntegrationTestBase
-import com.dettonville.api.pipeline.utils.ConfigConstants
+import com.dettonville.pipeline.utils.ConfigConstants
 import org.junit.Test
 
 import static com.dettonville.testing.jenkins.pipeline.StepConstants.CHECKOUT

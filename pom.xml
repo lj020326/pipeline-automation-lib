@@ -28,7 +28,7 @@
   </parent>
 
   <groupId>com.dettonville.api</groupId>
-  <artifactId>com.dettonville.api.pipeline-library</artifactId>
+  <artifactId>com.dettonville.pipeline-library</artifactId>
   <version>1.0.3-SNAPSHOT</version>
   <description>dettonville.org Jenkins Pipeline Library</description>
 

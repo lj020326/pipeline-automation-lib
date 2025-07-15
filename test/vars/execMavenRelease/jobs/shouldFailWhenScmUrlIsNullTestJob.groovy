@@ -19,7 +19,7 @@
  */
 package vars.execMavenRelease.jobs
 
-import com.dettonville.api.pipeline.environment.EnvironmentConstants
+import com.dettonville.pipeline.environment.EnvironmentConstants
 
 /**
  * Runs execMavenRelease step with not supported https url

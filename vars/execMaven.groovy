@@ -1,15 +1,15 @@
 
 import hudson.AbortException
-import com.dettonville.api.pipeline.environment.EnvironmentConstants
-import com.dettonville.api.pipeline.managedfiles.ManagedFile
-import com.dettonville.api.pipeline.managedfiles.ManagedFileConstants
-import com.dettonville.api.pipeline.managedfiles.ManagedFileParser
-import com.dettonville.api.pipeline.model.PatternMatchable
-import com.dettonville.api.pipeline.shell.MavenCommandBuilderImpl
-import com.dettonville.api.pipeline.utils.ConfigConstants
-import com.dettonville.api.pipeline.utils.PatternMatcher
-import com.dettonville.api.pipeline.utils.logging.Logger
-import com.dettonville.api.pipeline.utils.resources.JsonLibraryResource
+import com.dettonville.pipeline.environment.EnvironmentConstants
+import com.dettonville.pipeline.managedfiles.ManagedFile
+import com.dettonville.pipeline.managedfiles.ManagedFileConstants
+import com.dettonville.pipeline.managedfiles.ManagedFileParser
+import com.dettonville.pipeline.model.PatternMatchable
+import com.dettonville.pipeline.shell.MavenCommandBuilderImpl
+import com.dettonville.pipeline.utils.ConfigConstants
+import com.dettonville.pipeline.utils.PatternMatcher
+import com.dettonville.pipeline.utils.logging.Logger
+import com.dettonville.pipeline.utils.resources.JsonLibraryResource
 import net.sf.json.JSON
 import org.jenkinsci.plugins.workflow.cps.DSL
 

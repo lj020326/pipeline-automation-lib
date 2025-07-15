@@ -1,7 +1,7 @@
 #!/usr/bin/env groovy
 
-import com.dettonville.api.pipeline.docker.*;
-import com.dettonville.api.pipeline.docker.steps.Step;
+import com.dettonville.pipeline.docker.*;
+import com.dettonville.pipeline.docker.steps.Step;
 
 def call(ProjectConfiguration projectConfig, def dockerImage) {
     return { variables ->

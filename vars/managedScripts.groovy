@@ -1,8 +1,8 @@
 
-import com.dettonville.api.pipeline.shell.CommandBuilder
-import com.dettonville.api.pipeline.shell.CommandBuilderImpl
-import com.dettonville.api.pipeline.utils.logging.Logger
-import com.dettonville.api.pipeline.utils.resources.LibraryResource
+import com.dettonville.pipeline.shell.CommandBuilder
+import com.dettonville.pipeline.shell.CommandBuilderImpl
+import com.dettonville.pipeline.utils.logging.Logger
+import com.dettonville.pipeline.utils.resources.LibraryResource
 import org.jenkinsci.plugins.workflow.cps.DSL
 
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy

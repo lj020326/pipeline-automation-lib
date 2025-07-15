@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 
-import com.dettonville.api.pipeline.docker.*;
+import com.dettonville.pipeline.docker.*;
 
 def call(ProjectConfiguration projectConfig, def _, def nextClosure) {
     return { variables ->

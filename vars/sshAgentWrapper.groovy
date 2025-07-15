@@ -1,7 +1,7 @@
 
-import com.dettonville.api.pipeline.credentials.Credential
-import com.dettonville.api.pipeline.ssh.SSHTarget
-import com.dettonville.api.pipeline.utils.logging.Logger
+import com.dettonville.pipeline.credentials.Credential
+import com.dettonville.pipeline.ssh.SSHTarget
+import com.dettonville.pipeline.utils.logging.Logger
 
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field

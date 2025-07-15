@@ -1,5 +1,8 @@
 #!/usr/bin/env groovy
 
+// // Get a reference to your shared library's entry point
+// def pipelineAutomationLib = this.getBinding().getProperty('pipelineAutomationLib')
+
 // ref: https://github.com/jenkinsci/configuration-as-code-plugin/blob/master/integrations/src/test/resources/io/jenkins/plugins/casc/SeedJobTest_withGiteaOrganisation.yml
 // ref: https://github.com/jenkinsci/configuration-as-code-plugin/blob/master/demos/jobs/gitea.yaml
 
@@ -7,8 +10,8 @@
 import jenkins.branch.*
 import jenkins.model.Jenkins
 
-import com.dettonville.api.pipeline.utils.MapMerge
-import com.dettonville.api.pipeline.utils.JsonUtils
+import com.dettonville.pipeline.utils.MapMerge
+import com.dettonville.pipeline.utils.JsonUtils
 
 // separate configuration from job dsl "seedjob" code
 // ref: https://stackoverflow.com/questions/47443106/jenkins-dsl-parse-yaml-for-complex-processing#54665138

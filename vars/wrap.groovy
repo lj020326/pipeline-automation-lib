@@ -1,9 +1,9 @@
 
-import com.dettonville.api.pipeline.environment.EnvironmentConstants
-import com.dettonville.api.pipeline.utils.logging.Logger
+import com.dettonville.pipeline.environment.EnvironmentConstants
+import com.dettonville.pipeline.utils.logging.Logger
 
-import static com.dettonville.api.pipeline.utils.ConfigConstants.ANSI_COLOR
-import static com.dettonville.api.pipeline.utils.ConfigConstants.ANSI_COLOR_XTERM
+import static com.dettonville.pipeline.utils.ConfigConstants.ANSI_COLOR
+import static com.dettonville.pipeline.utils.ConfigConstants.ANSI_COLOR_XTERM
 
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field

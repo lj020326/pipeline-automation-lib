@@ -1,12 +1,12 @@
 
 import groovy.json.JsonOutput
-import com.dettonville.api.pipeline.tools.ansible.Role
-import com.dettonville.api.pipeline.tools.ansible.RoleRequirements
-import com.dettonville.api.pipeline.utils.logging.LogLevel
-import com.dettonville.api.pipeline.utils.logging.Logger
-import com.dettonville.api.pipeline.utils.maps.MapUtils
+import com.dettonville.pipeline.tools.ansible.Role
+import com.dettonville.pipeline.tools.ansible.RoleRequirements
+import com.dettonville.pipeline.utils.logging.LogLevel
+import com.dettonville.pipeline.utils.logging.Logger
+import com.dettonville.pipeline.utils.maps.MapUtils
 
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field

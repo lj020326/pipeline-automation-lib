@@ -90,7 +90,7 @@ This ensures that the types like `boolean` and `integer` are retained.
 **Example**
 
 ```groovy
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 Map config = [
     (ANSIBLE) : [
@@ -120,7 +120,7 @@ When enabled the step will automatically add all build parameters as extra varia
 :bulb: These extra vars are combined with the variables defined via `ANSIBLE_EXTRA_VARS`.
 
 ```groovy
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 properties([
 	parameters([
@@ -154,7 +154,7 @@ ansible-playbook --extra-vars '{"boolparam":false,"choiceparam":"choice1","strin
 The step provides a convenient way to add extra parameters to the command line.
 
 ```groovy
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 Map config = [
     (ANSIBLE) : [
@@ -182,7 +182,7 @@ All configuration options must be inside the `ansible`
 map element to be evaluated and used by the step.
 
 ```groovy
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 ansible.execPlaybook(
         (ANSIBLE): [
@@ -252,7 +252,7 @@ Extra parameters that will be passed to ansible-playbook commandline
 **Example:**
 This example will add `-v` to the command line.
 ```groovy
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 Map config = {
     (ANSIBLE) : [
@@ -277,7 +277,7 @@ Can be used to define `--extra-vars` which will be passed in JSON format to the 
 **Example:**
 This example will add `--extra-vars '{"string":"value","boolean":true,"integer":1,"list":[1,2,3,4]}'` to the command line.
 ```groovy
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 Map config = [
     (ANSIBLE) : [
@@ -359,7 +359,7 @@ Specifies the path to the Ansible Playbook.
 
 |||
 |---|---|
-|Constant|[`ConfigConstants.ANSIBLE_SKIPPED_TAGS`](../src/com.dettonville.api.pipeline/utils/ConfigConstants.groovy)|
+|Constant|[`ConfigConstants.ANSIBLE_SKIPPED_TAGS`](../src/com.dettonville.pipeline/utils/ConfigConstants.groovy)|
 |Type|`String`|
 |Default|`null`|
 
@@ -369,7 +369,7 @@ When set the configured value will be passed as `--skip-tags <value>` to the Ans
 
 |||
 |---|---|
-|Constant|[`ConfigConstants.ANSIBLE_START_AT_TASK`](../src/com.dettonville.api.pipeline/utils/ConfigConstants.groovy)|
+|Constant|[`ConfigConstants.ANSIBLE_START_AT_TASK`](../src/com.dettonville.pipeline/utils/ConfigConstants.groovy)|
 |Type|`String`|
 |Default|`null`|
 
@@ -379,7 +379,7 @@ When set the configured value will be passed as `--start-at-task <value>` to the
 
 |||
 |---|---|
-|Constant|[`ConfigConstants.ANSIBLE_TAGS`](../src/com.dettonville.api.pipeline/utils/ConfigConstants.groovy)|
+|Constant|[`ConfigConstants.ANSIBLE_TAGS`](../src/com.dettonville.pipeline/utils/ConfigConstants.groovy)|
 |Type|`String`|
 |Default|`null`|
 
@@ -389,7 +389,7 @@ When set the configured value will be passed as `--tags <value>` to the Ansible 
 
 |||
 |---|---|
-|Constant|[`ConfigConstants.ANSIBLE_SUDO`](../src/com.dettonville.api.pipeline/utils/ConfigConstants.groovy)|
+|Constant|[`ConfigConstants.ANSIBLE_SUDO`](../src/com.dettonville.pipeline/utils/ConfigConstants.groovy)|
 |Type|`Boolean`|
 |Default|`false`|
 
@@ -399,7 +399,7 @@ When enabled sudo (become) will be used. Combined with [`sudoUser`](#sudouser-op
 
 |||
 |---|---|
-|Constant|[`ConfigConstants.ANSIBLE_SUDO_USER`](../src/com.dettonville.api.pipeline/utils/ConfigConstants.groovy)|
+|Constant|[`ConfigConstants.ANSIBLE_SUDO_USER`](../src/com.dettonville.pipeline/utils/ConfigConstants.groovy)|
 |Type|`String`|
 |Default|`null`|
 
@@ -417,8 +417,8 @@ Utility function to the the Ansible Galaxy role info from the API.
 This example will return the API role info for the role "tecris.maven"
 
 ```groovy
-import com.dettonville.api.pipeline.tools.ansible.Role
-com.dettonville.api.pipeline.tools.ansible.Role role = new com.dettonville.api.pipeline.tools.ansible.Role("tecris.maven")
+import com.dettonville.pipeline.tools.ansible.Role
+com.dettonville.pipeline.tools.ansible.Role role = new com.dettonville.pipeline.tools.ansible.Role("tecris.maven")
 
 Object apiInfo = ansible.getGalaxyRoleInfo(role)
 ```

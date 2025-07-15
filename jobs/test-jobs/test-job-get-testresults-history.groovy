@@ -1,9 +1,9 @@
 #!/usr/bin/env groovy
 
-@Library("pipeline-automation-lib@develop")
+@Library("pipelineAutomationLib@develop")
 
-import com.dettonville.api.pipeline.utils.logging.LogLevel
-import com.dettonville.api.pipeline.utils.logging.Logger
+import com.dettonville.pipeline.utils.logging.LogLevel
+import com.dettonville.pipeline.utils.logging.Logger
 import groovy.json.*
 
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy

@@ -1,12 +1,12 @@
 #!/usr/bin/env groovy
 
-@Library("pipeline-automation-lib@develop")
+@Library("pipelineAutomationLib@develop")
 
-import com.dettonville.api.pipeline.utils.logging.LogLevel
-import com.dettonville.api.pipeline.utils.logging.Logger
+import com.dettonville.pipeline.utils.logging.LogLevel
+import com.dettonville.pipeline.utils.logging.Logger
 
-import com.dettonville.api.pipeline.utils.BuildApiUtils
-import com.dettonville.api.pipeline.utils.JsonUtils
+import com.dettonville.pipeline.utils.BuildApiUtils
+import com.dettonville.pipeline.utils.JsonUtils
 import groovy.json.JsonOutput
 
 // ref: https://cd.dettonville.int/jenkins/job/DCAPI/job/DeploymentJobs/job/DeployFrontendStage/job/main/lastCompletedBuild/api/json?pretty=true

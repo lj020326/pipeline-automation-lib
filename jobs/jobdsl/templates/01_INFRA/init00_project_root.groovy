@@ -1,5 +1,8 @@
 #!/usr/bin/env groovy
 
+// // Get a reference to your shared library's entry point
+// def pipelineAutomationLib = this.getBinding().getProperty('pipelineAutomationLib')
+
 // ref: https://stackoverflow.com/questions/36199072/how-to-get-the-script-name-in-groovy
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field
@@ -85,28 +88,34 @@ if (JENKINS_ENV) {
     String pipelineLibraryBranch = pipelineEnvConfigs.pipelineLibraryBranch
 
     jobFolder.properties {
-        folderLibraries {
-            libraries {
-                // ref: https://issues.jenkins.io/browse/JENKINS-66402
-                // ref: https://devops.stackexchange.com/questions/11833/how-do-i-load-a-jenkins-shared-library-in-a-jenkins-job-dsl-seed
-                libraryConfiguration {
-                    name("pipeline-automation-lib")
-                    defaultVersion(pipelineLibraryBranch)
-                    implicit(true)
-                    includeInChangesets(false)
-                    retriever {
-                        modernSCM {
-                            scm {
-                                git {
-                                    remote(pipelineRepoUrl)
-                                    credentialsId(gitCredentialsId)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+//         folderLibraries {
+//             libraries {
+//                 // ref: https://issues.jenkins.io/browse/JENKINS-66402
+//                 // ref: https://devops.stackexchange.com/questions/11833/how-do-i-load-a-jenkins-shared-library-in-a-jenkins-job-dsl-seed
+//                 libraryConfiguration {
+//                     name("pipelineAutomationLib")
+//                     defaultVersion(pipelineLibraryBranch)
+//                     implicit(true)
+//                     includeInChangesets(false)
+//                     retriever {
+//                         modernSCM {
+//                             scm {
+//                                 git {
+//                                     remote(pipelineRepoUrl)
+//                                     credentialsId(gitCredentialsId)
+//                                 }
+//                             }
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+      authorizationMatrix {
+        inheritanceStrategy {
+            nonInheriting()
+//             inheriting()
         }
+      }
     }
 
 }

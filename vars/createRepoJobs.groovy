@@ -2,8 +2,8 @@
 // ***************************
 // ref: https://github.com/tomasbjerre/jenkins-configuration-as-code-sandbox/blob/master/vars/createJobs.groovy
 
-import com.dettonville.api.pipeline.jenkinssandbox.*
-import static com.dettonville.api.pipeline.jenkinssandbox.JenkinsSandboxUtils.*
+import com.dettonville.pipeline.jenkinssandbox.*
+import static com.dettonville.pipeline.jenkinssandbox.JenkinsSandboxUtils.*
 
 def call() {
   node {

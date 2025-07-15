@@ -1,6 +1,6 @@
 
-import com.dettonville.api.pipeline.utils.IntegrationTestHelper
-import com.dettonville.api.pipeline.utils.logging.Logger
+import com.dettonville.pipeline.utils.IntegrationTestHelper
+import com.dettonville.pipeline.utils.logging.Logger
 
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field
@@ -131,7 +131,7 @@ void runTest(String className, Closure testClosure) {
 void runTestsOnPackage(String packageName, Closure packageTestClosure) {
     // reset package test results
     IntegrationTestHelper.addTestPackage(packageName)
-    String displayName = packageName.replace("com.dettonville.api.pipeline.", "")
+    String displayName = packageName.replace("com.dettonville.pipeline.", "")
     stage(displayName) {
         packageTestClosure()
     }

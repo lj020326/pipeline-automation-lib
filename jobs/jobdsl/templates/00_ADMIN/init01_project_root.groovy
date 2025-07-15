@@ -16,28 +16,28 @@ String gitPipelineLibCredId = "bitbucket-ssh-jenkins"
 folder(projectFolder) {
     description "This project folder contains jobs for the ${projectName} project"
     properties {
-      folderLibraries {
-          libraries {
-              // ref: https://issues.jenkins.io/browse/JENKINS-66402
-              // ref: https://devops.stackexchange.com/questions/11833/how-do-i-load-a-jenkins-shared-library-in-a-jenkins-job-dsl-seed
-              libraryConfiguration {
-                  name("pipeline-automation-lib")
-                  defaultVersion("main")
-                  implicit(true)
-                  includeInChangesets(false)
-                  retriever {
-                      modernSCM {
-                          scm {
-                              git {
-                                  remote(pipelineRepoUrl)
-                                  credentialsId(gitPipelineLibCredId)
-                              }
-                          }
-                      }
-                  }
-              }
-          }
-      }
+//       folderLibraries {
+//           libraries {
+//               // ref: https://issues.jenkins.io/browse/JENKINS-66402
+//               // ref: https://devops.stackexchange.com/questions/11833/how-do-i-load-a-jenkins-shared-library-in-a-jenkins-job-dsl-seed
+//               libraryConfiguration {
+//                   name("pipelineAutomationLib")
+//                   defaultVersion("main")
+//                   implicit(true)
+//                   includeInChangesets(false)
+//                   retriever {
+//                       modernSCM {
+//                           scm {
+//                               git {
+//                                   remote(pipelineRepoUrl)
+//                                   credentialsId(gitPipelineLibCredId)
+//                               }
+//                           }
+//                       }
+//                   }
+//               }
+//           }
+//       }
       authorizationMatrix {
         inheritanceStrategy {
             nonInheriting()

@@ -19,7 +19,7 @@
  */
 package vars.sshAgentWrapper.jobs
 
-import com.dettonville.api.pipeline.ssh.SSHTarget
+import com.dettonville.pipeline.ssh.SSHTarget
 
 /**
  * Runs the transferScp step with ssh credential auto lookup (key + username)

@@ -1,11 +1,11 @@
 #!/usr/bin/env groovy
 
-@Library("pipeline-automation-lib")_
+@Library("pipelineAutomationLib")_
 
-import com.dettonville.api.pipeline.utils.logging.LogLevel
-import com.dettonville.api.pipeline.utils.logging.Logger
+import com.dettonville.pipeline.utils.logging.LogLevel
+import com.dettonville.pipeline.utils.logging.Logger
 
-import com.dettonville.api.pipeline.utils.JsonUtils
+import com.dettonville.pipeline.utils.JsonUtils
 
 Map config=[:]
 

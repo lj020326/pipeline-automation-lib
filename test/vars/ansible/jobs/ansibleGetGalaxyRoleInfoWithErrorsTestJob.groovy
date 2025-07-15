@@ -19,7 +19,7 @@
  */
 package vars.ansible.jobs
 
-import com.dettonville.api.pipeline.tools.ansible.Role
+import com.dettonville.pipeline.tools.ansible.Role
 
 /**
  * Runs execAnsible step with path to custom ansible executable

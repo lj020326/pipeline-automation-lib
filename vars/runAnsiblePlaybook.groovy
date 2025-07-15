@@ -1,11 +1,11 @@
 #!/usr/bin/env groovy
-import com.dettonville.api.pipeline.utils.JsonUtils
-import com.dettonville.api.pipeline.utils.Utilities
-import com.dettonville.api.pipeline.utils.MapMerge
-import com.dettonville.api.pipeline.utils.logging.LogLevel
-import com.dettonville.api.pipeline.utils.logging.Logger
+import com.dettonville.pipeline.utils.JsonUtils
+import com.dettonville.pipeline.utils.Utilities
+import com.dettonville.pipeline.utils.MapMerge
+import com.dettonville.pipeline.utils.logging.LogLevel
+import com.dettonville.pipeline.utils.logging.Logger
 
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 // import jenkins.model.CauseOfInterruption.*
 import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException
@@ -233,8 +233,12 @@ def call(Map params=[:]) {
                         log.info("post(${config.gitBranch}): sendEmail(${currentBuild.result}, 'RequesterRecipientProvider')")
                         sendEmail(currentBuild, env)
                     }
-                    log.info("Empty current workspace dir")
-                    cleanWs()
+                    if (!config.debugPipeline) {
+                        log.info("Empty current workspace dir")
+                        cleanWs()
+                    } else {
+                        log.info("Skipping cleanup of current workspace directory since config.debugPipeline == true")
+                    }
                 }
             }
             success {
@@ -342,6 +346,7 @@ Map loadPipelineConfig(Map params) {
 //     config.get('ansibleGalaxyTokenCredId', 'ansible-galaxy-pah-token')
     config.get('ansiblePlaybook', 'site.yml')
     config.get('ansibleTags', '')
+    config.get('ansibleSkipTags', '')
 
     String ansibleGalaxyCmd = "ansible-galaxy"
     String ansibleCmd = "ansible"
@@ -467,6 +472,7 @@ Map getAnsibleCommandConfig(Map config) {
 //             (ANSIBLE_INSTALLATION)    : "ansible-local-bin",
 //             (ANSIBLE_INVENTORY)       : "${config.ansibleInventory}",
 //             (ANSIBLE_TAGS)            : "${config.ansibleTags}",
+//             (ANSIBLE_SKIPPED_TAGS)    : "${config.ansibleSkipTags}",
 //             (ANSIBLE_CREDENTIALS_ID)  : "${config.ansibleSshCredId}",
 //             (ANSIBLE_SUDO_USER)       : "root",
 //             (ANSIBLE_EXTRA_VARS)      : [
@@ -483,6 +489,9 @@ Map getAnsibleCommandConfig(Map config) {
     }
     if (config.containsKey('ansibleTags')) {
         ansibleCfg[ANSIBLE][ANSIBLE_TAGS]=config.ansibleTags
+    }
+    if (config.containsKey('ansibleSkipTags')) {
+        ansibleCfg[ANSIBLE][ANSIBLE_SKIPPED_TAGS]=config.ansibleSkipTags
     }
     if (config.containsKey('ansibleSshCredId')) {
         ansibleCfg[ANSIBLE][ANSIBLE_CREDENTIALS_ID]=config.ansibleSshCredId

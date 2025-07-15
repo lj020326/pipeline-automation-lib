@@ -1,11 +1,14 @@
 #!/usr/bin/env groovy
 
+// // Get a reference to your shared library's entry point
+// def pipelineAutomationLib = this.getBinding().getProperty('pipelineAutomationLib')
+
 // ref: https://stackoverflow.com/questions/44004636/jenkins-multibranch-pipeline-scan-without-execution
 import jenkins.branch.*
 import jenkins.model.Jenkins
 
-import com.dettonville.api.pipeline.utils.MapMerge
-import com.dettonville.api.pipeline.utils.JsonUtils
+import com.dettonville.pipeline.utils.MapMerge
+import com.dettonville.pipeline.utils.JsonUtils
 
 // separate configuration from job dsl "seedjob" code
 // ref: https://stackoverflow.com/questions/47443106/jenkins-dsl-parse-yaml-for-complex-processing#54665138
@@ -122,6 +125,7 @@ void createAnsibleJobs(def dsl, Map pipelineConfig) {
             String ansibleTag = jobConfigs.ansible_tag
             String ansibleLimit = jobConfigs.get('ansible_limit', '')
             boolean skipUntagged = jobConfigs.get('skip_untagged', false)
+            boolean skipAlwaysTag = jobConfigs.get('skip_always_tag', false)
 
             dsl.folder("${baseFolder}/${runEnvironment}/${repoFolder}") {
                 description "This folder contains jobs to run ansible SITE play tags for ${runEnvironment}/${ansibleTag}"
@@ -155,6 +159,7 @@ void createAnsibleJobs(def dsl, Map pipelineConfig) {
                     booleanParam("AnsibleGalaxyUpgradeOpt", false, 'Use Ansible Galaxy Upgrade?')
                     booleanParam("UseCheckDiffMode", false, 'Use Check+Diff Mode (Dry Run with Diffs)?')
                     booleanParam("SkipUntagged", skipUntagged, 'Skip Untagged plays?')
+                    booleanParam("SkipAlwaysTag", skipAlwaysTag, "Skip 'always' tagged plays?")
                 }
                 definition {
                     logRotator {

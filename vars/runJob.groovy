@@ -1,10 +1,10 @@
 #!/usr/bin/env groovy
 
-import com.dettonville.api.pipeline.utils.MapMerge
+import com.dettonville.pipeline.utils.MapMerge
 
-import com.dettonville.api.pipeline.utils.logging.LogLevel
-import com.dettonville.api.pipeline.utils.logging.Logger
-import com.dettonville.api.pipeline.utils.JsonUtils
+import com.dettonville.pipeline.utils.logging.LogLevel
+import com.dettonville.pipeline.utils.logging.Logger
+import com.dettonville.pipeline.utils.JsonUtils
 //import groovy.json.*
 
 import hudson.model.Result

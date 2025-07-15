@@ -21,13 +21,13 @@ package vars.notifyMail
 
 import hudson.model.Result
 import com.dettonville.testing.jenkins.pipeline.LibraryIntegrationTestBase
-import com.dettonville.api.pipeline.environment.EnvironmentConstants
+import com.dettonville.pipeline.environment.EnvironmentConstants
 import org.junit.Test
 
 import static com.dettonville.testing.jenkins.pipeline.StepConstants.EMAILEXT
 import static com.dettonville.testing.jenkins.pipeline.recorder.StepRecorderAssert.assertNone
 import static com.dettonville.testing.jenkins.pipeline.recorder.StepRecorderAssert.assertOnce
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 import static org.junit.Assert.assertEquals
 
 class NotifyMailDefaultsIT extends LibraryIntegrationTestBase {

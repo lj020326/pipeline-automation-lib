@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 
-@Library("pipeline-automation-lib")
+@Library("pipelineAutomationLib")
 
 def getResourceFile(String fileName) {
     def file = libraryResource fileName

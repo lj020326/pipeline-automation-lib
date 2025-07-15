@@ -19,8 +19,8 @@
  */
 package vars.maven.jobs
 
-import com.dettonville.api.pipeline.utils.logging.LogLevel
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import com.dettonville.pipeline.utils.logging.LogLevel
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 /**
  * Executes the purge snapshots for a custom repo in dry run mode with fatal logLevel

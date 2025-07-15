@@ -1,0 +1,37 @@
+---
+
+pipelineConfig:
+  jobFolder: "INFRA/repo-test-automation/ansible-utils"
+  repoName: "ansible-utils"
+#  repoUrl: "ssh://git@gitea.admin.dettonville.int:2222/infra/ansible-dettonville-utils.git"
+#  gitCredentialsId: "bitbucket-ssh-jenkins"
+  repoUrl: "https://gitea.admin.dettonville.int/infra/ansible-dettonville-utils.git"
+  gitCredentialsId: "infra-jenkins-git-user"
+  branchSourceType: gitea
+#  mirrorRepoDir: "/var/jenkins_home/git_repo_references/ansible-utils/ansible-utils.git"
+  useSuppressionStrategy: false
+  initializeJobMode: false
+  periodicFolderTriggerInterval: "2m"
+  skipInitialBuildOnFirstBranchIndexing: false
+  runEnvMap:
+    DEV:
+      environment: DEV
+    PROD:
+      environment: PROD
+
+  jobList:
+    - jobName: ansible-lint
+      jobScript: .jenkins/runAnsibleLint.groovy
+      description: "ansible-lint tests"
+
+    - jobName: ansible-test-sanity
+      jobScript: .jenkins/runAnsibleTestSanity.groovy
+      description: "ansible-test sanity"
+
+    - jobName: ansible-test-units
+      jobScript: .jenkins/runAnsibleTestUnits.groovy
+      description: "ansible-test units"
+
+    - jobName: ansible-test-integration
+      jobScript: .jenkins/runAnsibleTestIntegration.groovy
+      description: "ansible-test integration"

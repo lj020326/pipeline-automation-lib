@@ -1,11 +1,11 @@
 #!/usr/bin/env groovy
 
-import com.dettonville.api.pipeline.utils.JsonUtils
-import com.dettonville.api.pipeline.utils.Utilities
-import com.dettonville.api.pipeline.utils.MapMerge
-import com.dettonville.api.pipeline.utils.logging.LogLevel
-import com.dettonville.api.pipeline.utils.logging.Logger
-import com.dettonville.api.pipeline.versioning.ComparableSemanticVersion
+import com.dettonville.pipeline.utils.JsonUtils
+import com.dettonville.pipeline.utils.Utilities
+import com.dettonville.pipeline.utils.MapMerge
+import com.dettonville.pipeline.utils.logging.LogLevel
+import com.dettonville.pipeline.utils.logging.Logger
+import com.dettonville.pipeline.versioning.ComparableSemanticVersion
 
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field
@@ -164,11 +164,11 @@ def call(Map params=[:]) {
                     if (config?.alwaysEmailDistList) {
                         sendEmail(currentBuild, env, emailAdditionalDistList: config.alwaysEmailDistList)
                     }
-                    if (config.gitBranch in ['main','QA','PROD'] || config.gitBranch.startsWith("release/")) {
-                        if (config?.deployEmailDistList) {
-                            log.info("post(${config.gitBranch}): sendEmail(${currentBuild.result})")
-                            sendEmail(currentBuild, env, emailAdditionalDistList: config.deployEmailDistList)
-                        }
+//                     if (config?.gitBranch) &&
+//                         (config.gitBranch in ['main','QA','PROD'] || config.gitBranch.startsWith("release/"))
+                    if (config?.deployEmailDistList) {
+                        log.info("post(${config.gitBranch}): sendEmail(${currentBuild.result})")
+                        sendEmail(currentBuild, env, emailAdditionalDistList: config.deployEmailDistList)
                     } else {
                         log.info("post(${config.gitBranch}): sendEmail(${currentBuild.result}, 'RequesterRecipientProvider')")
                         sendEmail(currentBuild, env)
