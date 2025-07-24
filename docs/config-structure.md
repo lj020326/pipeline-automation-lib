@@ -3,7 +3,7 @@
 You may be wondering why each step gets named config map passed like
 
 ```groovy
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 checkoutScm( 
     (SCM): [
@@ -15,7 +15,7 @@ checkoutScm(
 or
 
 ```groovy
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 execMaven(
     (MAVEN): [
@@ -27,7 +27,7 @@ execMaven(
 or
 
 ```groovy
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 setupTools([
     (TOOLS): [
@@ -45,11 +45,11 @@ With this structure you are able to keep your configuration in one place.
 Based on the steps above you are able to create a pipeline job like this:
 
 ```groovy
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 
-import com.dettonville.api.pipeline.model.Tool
-import com.dettonville.api.pipeline.utils.logging.LogLevel
-import com.dettonville.api.pipeline.utils.logging.Logger
+import com.dettonville.pipeline.model.Tool
+import com.dettonville.pipeline.utils.logging.LogLevel
+import com.dettonville.pipeline.utils.logging.Logger
 
 Map config = [
     (SCM): [
@@ -66,7 +66,7 @@ Map config = [
 ]
 
 // initialize the logger
-com.dettonville.api.pipeline.utils.logging.Logger.init(steps, config)
+com.dettonville.pipeline.utils.logging.Logger.init(steps, config)
 
 node() {
     // setup the tools

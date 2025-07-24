@@ -62,7 +62,7 @@ The Example is based on the `execMaven` step.
 This step loads a json and matches the incoming scm url against the entries to find matching settings ids to provide for the maven `shell` call.
 
 ```groovy
-import com.dettonville.api.pipeline.managedfiles.ManagedFile 
+import com.dettonville.pipeline.managedfiles.ManagedFile 
 
 ManagedFile autoLookupMavenSettings(String jsonPath, String scmUrl) {
     // load and parse the json

@@ -1,8 +1,18 @@
+// // Get a reference to your shared library's entry point
+// def pipelineAutomationLib = this.getBinding().getProperty('pipelineAutomationLib')
 
 // ref: https://stackoverflow.com/questions/36199072/how-to-get-the-script-name-in-groovy
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field
+
+import com.dettonville.pipeline.utils.MapMerge
+import com.dettonville.pipeline.utils.JsonUtils
+import com.dettonville.pipeline.utils.logging.JenkinsLogger
+
 @Field String scriptName = this.class.getName()
+
+@Field JenkinsLogger log = new JenkinsLogger(this, prefix: scriptName)
+//@Field JenkinsLogger log = new JenkinsLogger(this, logLevel: 'DEBUG', prefix: scriptName)
 
 String baseFolder = "INFRA"
 
@@ -15,17 +25,17 @@ jobFolder = "${baseFolder}/build-docker-image"
 //                    getEnvVars()
 //
 // if (!envVars?.JENKINS_ENV) {
-//     println("JENKINS_ENV not defined - skipping vm-templates project definition")
+//     log.info("JENKINS_ENV not defined - skipping vm-templates project definition")
 //     return
 // }
 //
 // String jenkinsEnv = envVars.JENKINS_ENV
 
-println("${scriptName}: JENKINS_ENV=${JENKINS_ENV}")
+log.info("${scriptName}: JENKINS_ENV=${JENKINS_ENV}")
 if (JENKINS_ENV=='PROD') {
     createDockerJobs(this)
 
-    println("${scriptName}: Finished creating docker jobs")
+    log.info("${scriptName}: Finished creating docker jobs")
 }
 
 //******************************************************
@@ -43,7 +53,8 @@ void createDockerJobs(def dsl) {
             stringParam('BuildImageLabel',  "docker-jenkins:latest", "Specify the BuildImageLabel")
             stringParam('BuildDir', "image/base", "Specify the BuildDir")
             stringParam('BuildPath', ".", "Specify the BuildPath")
-            stringParam('BuildArgs', "", "Specify the BuildArgs")
+            stringParam('BuildTags', "", "Specify the docker image tags in comma delimited format (e.g., 'build-123,latest')")
+            stringParam('BuildArgs', "", "Specify the BuildArgs in JSON string format")
             stringParam('DockerFile', "", "Specify the docker file")
             stringParam('ChangedEmailList', "", "Specify the email recipients for changed status")
             stringParam('AlwaysEmailList', "", "Specify the email recipients for always status")
@@ -62,6 +73,9 @@ void createDockerJobs(def dsl) {
                 script("buildDockerImage()")
                 sandbox()
             }
+        }
+        throttleConcurrentBuilds {
+            categories(['docker_image_builds'])
         }
     }
 }

@@ -1,7 +1,7 @@
 #!/usr/bin/env groovy
 
-import com.dettonville.api.pipeline.docker.parser.ConfigParser;
-import com.dettonville.api.pipeline.docker.*;
+import com.dettonville.pipeline.docker.parser.ConfigParser;
+import com.dettonville.pipeline.docker.*;
 
 def call(String yamlName) {
     def yaml = readYaml file: yamlName;

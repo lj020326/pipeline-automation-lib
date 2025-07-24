@@ -35,5 +35,5 @@ If you want to get the stdout from the execution set `returnStdout` to
 are set the `returnStdout` setting will be used.
 
 ## Related classes
-* [`CommandBuilder`](../src/com.dettonville.api.pipeline/shell/CommandBuilder.groovy)
+* [`CommandBuilder`](../src/com.dettonville.pipeline/shell/CommandBuilder.groovy)
 

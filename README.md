@@ -61,7 +61,7 @@ When using this library, your Jenkinsfile should look something like this:
 ```groovy
 #!/usr/bin/env groovy
 
-@Library('pipeline-automation-library')
+@Library('pipelineAutomationLib')
 
 Map config = [:]
 

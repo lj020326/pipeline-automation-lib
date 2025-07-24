@@ -1,9 +1,9 @@
 
-import com.dettonville.api.pipeline.credentials.Credential
-import com.dettonville.api.pipeline.scm.GitRepository
-import com.dettonville.api.pipeline.shell.CommandBuilder
-import com.dettonville.api.pipeline.shell.GitCommandBuilderImpl
-import com.dettonville.api.pipeline.utils.logging.Logger
+import com.dettonville.pipeline.credentials.Credential
+import com.dettonville.pipeline.scm.GitRepository
+import com.dettonville.pipeline.shell.CommandBuilder
+import com.dettonville.pipeline.shell.GitCommandBuilderImpl
+import com.dettonville.pipeline.utils.logging.Logger
 
 import java.util.regex.Matcher
 

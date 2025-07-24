@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 
-@Library("pipeline-automation-lib@beta")
+@Library("pipelineAutomationLib@beta")
 
 Map config = [:]
 config.enableBranchParam=true

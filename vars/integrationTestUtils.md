@@ -13,6 +13,6 @@ These utils are used by:
 * [integration-tests](../jenkinsfiles/integration-tests.groovy)
 
 ## Related classes
-* [`IntegrationTestHelper`](../src/com.dettonville.api.pipeline/utils/IntegrationTestHelper.groovy)
+* [`IntegrationTestHelper`](../src/com.dettonville.pipeline/utils/IntegrationTestHelper.groovy)
 
 

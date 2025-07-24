@@ -1,11 +1,15 @@
 #!/usr/bin/env groovy
 
+// // Get a reference to your shared library's entry point
+// def pipelineAutomationLib = this.getBinding().getProperty('pipelineAutomationLib')
+
 // ref: https://stackoverflow.com/questions/44004636/jenkins-multibranch-pipeline-scan-without-execution
 import jenkins.branch.*
 import jenkins.model.Jenkins
 
-import com.dettonville.api.pipeline.utils.MapMerge
-import com.dettonville.api.pipeline.utils.JsonUtils
+import com.dettonville.pipeline.utils.MapMerge
+import com.dettonville.pipeline.utils.JsonUtils
+import com.dettonville.pipeline.utils.logging.JenkinsLogger
 
 // separate configuration from job dsl "seedjob" code
 // ref: https://stackoverflow.com/questions/47443106/jenkins-dsl-parse-yaml-for-complex-processing#54665138
@@ -17,45 +21,48 @@ import org.yaml.snakeyaml.Yaml
 import groovy.transform.Field
 @Field String scriptName = this.class.getName()
 
+@Field JenkinsLogger log = new JenkinsLogger(this, prefix: scriptName)
+//@Field JenkinsLogger log = new JenkinsLogger(this, logLevel: 'DEBUG', prefix: scriptName)
+
 String pipelineConfigYaml = "config.ansible-jobs.yml"
 
 // ref: https://stackoverflow.com/questions/47336502/get-absolute-path-of-the-script-directory-that-is-being-processed-by-job-dsl#47336735
 String configFilePath = "${new File(__FILE__).parent}"
-println("${scriptName}: configFilePath: ${configFilePath}")
+log.debug("${scriptName}: configFilePath: ${configFilePath}")
 
 Map seedJobConfigs = new Yaml().load(("${configFilePath}/${pipelineConfigYaml}" as File).text)
-// println("${scriptName}: seedJobConfigs=${seedJobConfigs}")
+// log.info("${scriptName}: seedJobConfigs=${seedJobConfigs}")
 
 Map basePipelineConfig = seedJobConfigs.pipelineConfig
-println("${scriptName}: basePipelineConfig=${JsonUtils.printToJsonString(basePipelineConfig)}")
+log.debug("${scriptName}: basePipelineConfig=${JsonUtils.printToJsonString(basePipelineConfig)}")
 
 String baseFolder = basePipelineConfig.baseFolder
 List yamlProjectConfigList = basePipelineConfig.yamlProjectConfigList
 
-println("${scriptName}: yamlProjectConfigList=${yamlProjectConfigList}")
+log.debug("${scriptName}: yamlProjectConfigList=${yamlProjectConfigList}")
 
 yamlProjectConfigList.each { Map projectConfig ->
     String projectConfigYamlFile = projectConfig.pipelineConfigYaml
-    println("${scriptName}: Creating Ansible Jobs for ${projectConfigYamlFile}")
+    log.info("${scriptName}: Creating Ansible Jobs for ${projectConfigYamlFile}")
 
     Map ansibleJobConfigs = new Yaml().load(("${configFilePath}/${projectConfigYamlFile}" as File).text)
-    // println("${scriptName}: seedJobConfigs=${ansibleJobConfigs}")
+    // log.info("${scriptName}: seedJobConfigs=${JsonUtils.printToJsonString(ansibleJobConfigs)}")
 
     Map pipelineConfig = ansibleJobConfigs.pipelineConfig
-    println("${scriptName}: pipelineConfig=${JsonUtils.printToJsonString(pipelineConfig)}")
+    log.debug("${scriptName}: pipelineConfig=${JsonUtils.printToJsonString(pipelineConfig)}")
 
     createAnsibleJobs(this, pipelineConfig)
 
 }
-println("${scriptName}: Finished creating ansible jobs")
+log.info("${scriptName}: Finished creating ansible jobs")
 
 //******************************************************
 //  Function definitions from this point forward
 //
 void createAnsibleJobs(def dsl, Map pipelineConfig) {
-    String logPrefix = "${scriptName}->createAnsibleJobs():"
+    String logPrefix = "createAnsibleJobs():"
 
-//     println("${logPrefix} pipelineConfig=${JsonUtils.printToJsonString(pipelineConfig)}")
+//     log.info("${logPrefix} pipelineConfig=${JsonUtils.printToJsonString(pipelineConfig)}")
 
     String baseFolder = pipelineConfig.baseFolder
     String repoFolder = pipelineConfig.repoFolder
@@ -74,14 +81,14 @@ void createAnsibleJobs(def dsl, Map pipelineConfig) {
                        getEnvVars()
 
     if (!envVars?.JENKINS_ENV) {
-        println("${scriptName}: JENKINS_ENV not defined - skipping vm-templates project definition")
+        log.info("${scriptName}: JENKINS_ENV not defined - skipping vm-templates project definition")
         return
     }
 
     String jenkinsEnv = envVars.JENKINS_ENV
 
     if (!runEnvMap.containsKey(jenkinsEnv)) {
-        println("${scriptName}: key for JENKINS_ENV=${jenkinsEnv} not found in `runEnvMap` project definition, skipping ansible-jobs build")
+        log.info("${scriptName}: key for JENKINS_ENV=${jenkinsEnv} not found in `runEnvMap` project definition, skipping ansible-jobs build")
         return
     }
 
@@ -116,12 +123,15 @@ void createAnsibleJobs(def dsl, Map pipelineConfig) {
 
         ansibleJobList.each { Map jobConfigsRaw ->
 
+            log.info("${logPrefix} jobConfigsRaw=${JsonUtils.printToJsonString(jobConfigsRaw)}")
+
             Map jobConfigs = MapMerge.merge(envConfigs, jobConfigsRaw)
-            println("${logPrefix} jobConfigs=${JsonUtils.printToJsonString(jobConfigs)}")
+            log.debug("${logPrefix} jobConfigs=${JsonUtils.printToJsonString(jobConfigs)}")
 
             String ansibleTag = jobConfigs.ansible_tag
             String ansibleLimit = jobConfigs.get('ansible_limit', '')
             boolean skipUntagged = jobConfigs.get('skip_untagged', false)
+            boolean skipAlwaysTag = jobConfigs.get('skip_always_tag', false)
 
             dsl.folder("${baseFolder}/${runEnvironment}/${repoFolder}") {
                 description "This folder contains jobs to run ansible SITE play tags for ${runEnvironment}/${ansibleTag}"
@@ -155,6 +165,7 @@ void createAnsibleJobs(def dsl, Map pipelineConfig) {
                     booleanParam("AnsibleGalaxyUpgradeOpt", false, 'Use Ansible Galaxy Upgrade?')
                     booleanParam("UseCheckDiffMode", false, 'Use Check+Diff Mode (Dry Run with Diffs)?')
                     booleanParam("SkipUntagged", skipUntagged, 'Skip Untagged plays?')
+                    booleanParam("SkipAlwaysTag", skipAlwaysTag, "Skip 'always' tagged plays?")
                 }
                 definition {
                     logRotator {
@@ -206,7 +217,7 @@ void createAnsibleJobs(def dsl, Map pipelineConfig) {
             }
             // ref: https://stackoverflow.com/questions/62760438/jenkins-job-dsl-trigger-is-deprecated
             if (jobConfigs?.cronSpecification) {
-                println("${scriptName}: adding to job cronSpecification=[${jobConfigs?.cronSpecification}]")
+                log.info("${scriptName}: adding to job cronSpecification=[${jobConfigs?.cronSpecification}]")
                 jobObject.properties {
                     pipelineTriggers {
                         triggers {

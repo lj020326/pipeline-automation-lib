@@ -19,10 +19,10 @@
  */
 package vars.wrap.jobs
 
-import com.dettonville.api.pipeline.utils.logging.LogLevel
-import com.dettonville.api.pipeline.utils.logging.Logger
+import com.dettonville.pipeline.utils.logging.LogLevel
+import com.dettonville.pipeline.utils.logging.Logger
 
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 /**
  * Runs the wrap.color step

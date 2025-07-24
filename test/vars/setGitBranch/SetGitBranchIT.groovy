@@ -21,7 +21,7 @@ package vars.setGitBranch
 
 import com.dettonville.testing.jenkins.pipeline.LibraryIntegrationTestBase
 import com.dettonville.testing.jenkins.pipeline.StepConstants
-import com.dettonville.api.pipeline.environment.EnvironmentConstants
+import com.dettonville.pipeline.environment.EnvironmentConstants
 import org.junit.Test
 
 import static org.junit.Assert.assertEquals

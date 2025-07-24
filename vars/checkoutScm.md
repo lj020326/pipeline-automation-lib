@@ -42,7 +42,7 @@ automatically try to lookup the credentials for the provided scm url and
 use them
 
 This step uses the best match by using the
-[PatternMatcher](../src/com.dettonville.api.pipeline/utils/PatternMatcher.groovy)
+[PatternMatcher](../src/com.dettonville.pipeline/utils/PatternMatcher.groovy)
 so the Credential with the most matching characters will be used for checkout.
 
 ### GIT_BRANCH environment variable support
@@ -84,7 +84,7 @@ You have to provide at least the repository `url` for the checkout or a
 
 ##### Example 1: Simple checkout
 ```groovy
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 checkoutScm( 
     (SCM) : [
@@ -95,7 +95,7 @@ checkoutScm(
 
 ##### Example 2: Advanced checkout
 ```groovy
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 checkoutScm( 
     (SCM) : [
@@ -109,7 +109,7 @@ checkoutScm(
 
 ##### Example 3: Checkout with url and credentialId
 ```groovy
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 checkoutScm( 
     (SCM) : [
@@ -122,7 +122,7 @@ checkoutScm(
 
 ##### Example 4: Checkout with userRemoteConfigs
 ```groovy
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 checkoutScm( 
     (SCM) : [
@@ -145,7 +145,7 @@ To do a checkout within your pipeline script with this mode you have to
 call the step in your pipeline as follows:
 
 ```groovy
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 checkoutScm( 
     (SCM): [
@@ -171,14 +171,14 @@ Complete list of all configuration options. Please note that they can
 not be used all at the same time.
 
 All configuration options must be inside the `scm`
-([`ConfigConstants.SCM`](../src/com.dettonville.api.pipeline/utils/ConfigConstants.groovy))
+([`ConfigConstants.SCM`](../src/com.dettonville.pipeline/utils/ConfigConstants.groovy))
 map element to be evaluated and used by the step.
 
 :bulb: Use the "pipeline-syntax" helper which is available on pipeline
 job configuration pages to generate the configuration options
 
 ```groovy
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 checkoutScm( 
     (SCM) : [
@@ -199,7 +199,7 @@ checkoutScm(
 
 |||
 |---|---|
-|Constant|[`ConfigConstants.SCM_BRANCHES`](../src/com.dettonville.api.pipeline/utils/ConfigConstants.groovy)|
+|Constant|[`ConfigConstants.SCM_BRANCHES`](../src/com.dettonville.pipeline/utils/ConfigConstants.groovy)|
 |Type|`List` of Map `[name: 'name-of-branch']`|
 |Default|`[[name:'*/master'], [name: '*/develop']]`|
 
@@ -210,7 +210,7 @@ Use this configuration option to specify the branches you want to checkout
 ### `credentialsId` (optional)
 |||
 |---|---|
-|Constant|[`ConfigConstants.SCM_CREDENTIALS_ID`](../src/com.dettonville.api.pipeline/utils/ConfigConstants.groovy)|
+|Constant|[`ConfigConstants.SCM_CREDENTIALS_ID`](../src/com.dettonville.pipeline/utils/ConfigConstants.groovy)|
 |Type|`String`|
 |Default|`null`|
 
@@ -229,7 +229,7 @@ are set
 ### `doGenerateSubmoduleConfigurations` (optional)
 |||
 |---|---|
-|Constant|[`ConfigConstants.SCM_DO_GENERATE_SUBMODULE_CONFIGURATION`](../src/com.dettonville.api.pipeline/utils/ConfigConstants.groovy)|
+|Constant|[`ConfigConstants.SCM_DO_GENERATE_SUBMODULE_CONFIGURATION`](../src/com.dettonville.pipeline/utils/ConfigConstants.groovy)|
 |Type|`Boolean`|
 |Default|`false`|
 
@@ -241,7 +241,7 @@ true made sense. It is safe to omit this configuration option.
 ### `extensions` (optional)
 |||
 |---|---|
-|Constant|[`ConfigConstants.SCM_EXTENSIONS`](../src/com.dettonville.api.pipeline/utils/ConfigConstants.groovy)|
+|Constant|[`ConfigConstants.SCM_EXTENSIONS`](../src/com.dettonville.pipeline/utils/ConfigConstants.groovy)|
 |Type|`List` of `Map`|
 |Default|`[[$class: 'LocalBranch']]`|
 
@@ -253,7 +253,7 @@ To ensure that GIT_BRANCH is set correctly always add the `LocalBranch` extensio
 ### `submoduleCfg`  (optional)
 |||
 |---|---|
-|Constant|[`ConfigConstants.SCM_SUBMODULE_CONFIG`](../src/com.dettonville.api.pipeline/utils/ConfigConstants.groovy)|
+|Constant|[`ConfigConstants.SCM_SUBMODULE_CONFIG`](../src/com.dettonville.pipeline/utils/ConfigConstants.groovy)|
 |Type|`List`|
 |Default|`[]`|
 
@@ -265,7 +265,7 @@ config options are supported this option was added
 ### `url`
 |||
 |---|---|
-|Constant|[`ConfigConstants.SCM_URL`](../src/com.dettonville.api.pipeline/utils/ConfigConstants.groovy)|
+|Constant|[`ConfigConstants.SCM_URL`](../src/com.dettonville.pipeline/utils/ConfigConstants.groovy)|
 |Type|`String`|
 |Default|`null`|
 
@@ -281,7 +281,7 @@ are set
 ### `userRemoteConfig` (optional)
 |||
 |---|---|
-|Constant|[`ConfigConstants.SCM_USER_REMOTE_CONFIG`](../src/com.dettonville.api.pipeline/utils/ConfigConstants.groovy)|
+|Constant|[`ConfigConstants.SCM_USER_REMOTE_CONFIG`](../src/com.dettonville.pipeline/utils/ConfigConstants.groovy)|
 |Type|`Map` with format `[credentialsId: 'jenkins-credential-id', url: 'git@domain.tld/group/project.git']`|
 |Default|`null`|
 
@@ -296,7 +296,7 @@ are set
 ### `userRemoteConfigs` (optional)
 |||
 |---|---|
-|Constant|[`ConfigConstants.SCM_USER_REMOTE_CONFIGS`](../src/com.dettonville.api.pipeline/utils/ConfigConstants.groovy)|
+|Constant|[`ConfigConstants.SCM_USER_REMOTE_CONFIGS`](../src/com.dettonville.pipeline/utils/ConfigConstants.groovy)|
 |Type|List of `Map` with format `[[credentialsId: 'jenkins-credential-id', url: 'git@domain.tld/group/project.git']]`|
 |Default|`null`|
 
@@ -309,7 +309,7 @@ are set
 ### `useScmVar` (optional)
 |||
 |---|---|
-|Constant|[`ConfigConstants.SCM_USE_SCM_VAR`](../src/com.dettonville.api.pipeline/utils/ConfigConstants.groovy)|
+|Constant|[`ConfigConstants.SCM_USE_SCM_VAR`](../src/com.dettonville.pipeline/utils/ConfigConstants.groovy)|
 |Type|`Boolean`|
 |Default|`false`|
 
@@ -317,8 +317,8 @@ When set to `true` the step uses the `scm` variable of the pipeline to
 checkout the scm.
 
 ## Related classes
-* [`Credential`](../src/com.dettonville.api.pipeline/credentials/Credential.groovy)
-* [`CredentialConstants`](../src/com.dettonville.api.pipeline/credentials/CredentialConstants.groovy)
-* [`CredentialParser`](../src/com.dettonville.api.pipeline/credentials/CredentialParser.groovy)
-* [`PatternMatchable`](../src/com.dettonville.api.pipeline/model/PatternMatchable.groovy)
-* [`PatternMatcher`](../src/com.dettonville.api.pipeline/utils/PatternMatcher.groovy)
+* [`Credential`](../src/com.dettonville.pipeline/credentials/Credential.groovy)
+* [`CredentialConstants`](../src/com.dettonville.pipeline/credentials/CredentialConstants.groovy)
+* [`CredentialParser`](../src/com.dettonville.pipeline/credentials/CredentialParser.groovy)
+* [`PatternMatchable`](../src/com.dettonville.pipeline/model/PatternMatchable.groovy)
+* [`PatternMatcher`](../src/com.dettonville.pipeline/utils/PatternMatcher.groovy)

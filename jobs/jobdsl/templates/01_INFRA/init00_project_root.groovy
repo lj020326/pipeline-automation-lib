@@ -1,9 +1,20 @@
 #!/usr/bin/env groovy
 
+// // Get a reference to your shared library's entry point
+// def pipelineAutomationLib = this.getBinding().getProperty('pipelineAutomationLib')
+
 // ref: https://stackoverflow.com/questions/36199072/how-to-get-the-script-name-in-groovy
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field
+
+import com.dettonville.pipeline.utils.MapMerge
+import com.dettonville.pipeline.utils.JsonUtils
+import com.dettonville.pipeline.utils.logging.JenkinsLogger
+
 @Field String scriptName = this.class.getName()
+
+@Field JenkinsLogger log = new JenkinsLogger(this, prefix: scriptName)
+//@Field JenkinsLogger log = new JenkinsLogger(this, logLevel: 'DEBUG', prefix: scriptName)
 
 // ref: https://github.com/sheehan/job-dsl-gradle-example/blob/master/src/jobs/example4Jobs.groovy
 String projectName = "INFRA"
@@ -19,13 +30,13 @@ String pipelineConfigYaml = "config.project-root.yml"
 
 // ref: https://stackoverflow.com/questions/47336502/get-absolute-path-of-the-script-directory-that-is-being-processed-by-job-dsl#47336735
 String configFilePath = "${new File(__FILE__).parent}"
-println("${scriptName}: configFilePath: ${configFilePath}")
+log.info("${scriptName}: configFilePath: ${configFilePath}")
 
 Map seedJobConfigs = new Yaml().load(("${configFilePath}/${pipelineConfigYaml}" as File).text)
-// println("${scriptName}: seedJobConfigs=${seedJobConfigs}")
+// log.info("${scriptName}: seedJobConfigs=${seedJobConfigs}")
 
 Map pipelineConfig = seedJobConfigs.pipelineConfig
-// println("${scriptName}: pipelineConfig=${JsonUtils.printToJsonString(pipelineConfig)}")
+// log.info("${scriptName}: pipelineConfig=${JsonUtils.printToJsonString(pipelineConfig)}")
 
 String pipelineRepoUrl = pipelineConfig.pipelineRepoUrl
 String gitCredentialsId = pipelineConfig.gitCredentialsId
@@ -78,35 +89,41 @@ def jobFolder = folder(projectFolder) {
     }
 }
 
-println("${scriptName}: JENKINS_ENV=${JENKINS_ENV}")
+log.info("${scriptName}: JENKINS_ENV=${JENKINS_ENV}")
 
 if (JENKINS_ENV) {
     Map pipelineEnvConfigs = envConfigs[JENKINS_ENV]
     String pipelineLibraryBranch = pipelineEnvConfigs.pipelineLibraryBranch
 
     jobFolder.properties {
-        folderLibraries {
-            libraries {
-                // ref: https://issues.jenkins.io/browse/JENKINS-66402
-                // ref: https://devops.stackexchange.com/questions/11833/how-do-i-load-a-jenkins-shared-library-in-a-jenkins-job-dsl-seed
-                libraryConfiguration {
-                    name("pipeline-automation-lib")
-                    defaultVersion(pipelineLibraryBranch)
-                    implicit(true)
-                    includeInChangesets(false)
-                    retriever {
-                        modernSCM {
-                            scm {
-                                git {
-                                    remote(pipelineRepoUrl)
-                                    credentialsId(gitCredentialsId)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+//         folderLibraries {
+//             libraries {
+//                 // ref: https://issues.jenkins.io/browse/JENKINS-66402
+//                 // ref: https://devops.stackexchange.com/questions/11833/how-do-i-load-a-jenkins-shared-library-in-a-jenkins-job-dsl-seed
+//                 libraryConfiguration {
+//                     name("pipelineAutomationLib")
+//                     defaultVersion(pipelineLibraryBranch)
+//                     implicit(true)
+//                     includeInChangesets(false)
+//                     retriever {
+//                         modernSCM {
+//                             scm {
+//                                 git {
+//                                     remote(pipelineRepoUrl)
+//                                     credentialsId(gitCredentialsId)
+//                                 }
+//                             }
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+      authorizationMatrix {
+        inheritanceStrategy {
+            nonInheriting()
+//             inheriting()
         }
+      }
     }
 
 }

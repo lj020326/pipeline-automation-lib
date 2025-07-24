@@ -23,7 +23,7 @@ package com.dettonville.testing.jenkins.pipeline
 import com.lesfurets.jenkins.unit.BasePipelineTest
 import hudson.AbortException
 import hudson.model.Run
-import com.dettonville.api.pipeline.environment.EnvironmentConstants
+import com.dettonville.pipeline.environment.EnvironmentConstants
 import org.apache.maven.model.Model
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
 import org.apache.tools.ant.DirectoryScanner

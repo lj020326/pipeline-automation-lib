@@ -1,11 +1,11 @@
 
-import com.dettonville.api.pipeline.credentials.Credential
-import com.dettonville.api.pipeline.credentials.CredentialConstants
-import com.dettonville.api.pipeline.credentials.CredentialParser
-import com.dettonville.api.pipeline.utils.ConfigConstants
-import com.dettonville.api.pipeline.utils.PatternMatcher
-import com.dettonville.api.pipeline.utils.logging.Logger
-import com.dettonville.api.pipeline.utils.resources.JsonLibraryResource
+import com.dettonville.pipeline.credentials.Credential
+import com.dettonville.pipeline.credentials.CredentialConstants
+import com.dettonville.pipeline.credentials.CredentialParser
+import com.dettonville.pipeline.utils.ConfigConstants
+import com.dettonville.pipeline.utils.PatternMatcher
+import com.dettonville.pipeline.utils.logging.Logger
+import com.dettonville.pipeline.utils.resources.JsonLibraryResource
 import net.sf.json.JSON
 import org.jenkinsci.plugins.workflow.cps.DSL
 

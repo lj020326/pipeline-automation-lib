@@ -2,8 +2,8 @@
 
 // ref: https://fusion.dettonville.int/stash/projects/MPASS/repos/dcuser-wallet-cookbook/browse/static/documents/blue-green-deployment/blue-green-deploy-Snapshot-Jenkinsfile
 
-def pcfUtil = new com.dettonville.api.pipeline.utility.PCFUtil(this)
-def caasUtil = new com.dettonville.api.pipeline.utility.CaaSUtil(this)
+def pcfUtil = new com.dettonville.pipeline.utility.PCFUtil(this)
+def caasUtil = new com.dettonville.pipeline.utility.CaaSUtil(this)
 
 def greenAppName = "mobile-wallet-service-green"
 def blueAppName = "mobile-wallet-service-blue"

@@ -16,12 +16,12 @@ This function is a map based adapter function for [`purgeSnapshots`](#purgesnaps
 Complete list of all configuration options.
 
 All configuration options must be inside the `MAVEN_PURGE_SNAPSHOTS`
-([`ConfigConstants.MAVEN_PURGE_SNAPSHOTS`](../src/com.dettonville.api.pipeline/utils/ConfigConstants.groovy))
+([`ConfigConstants.MAVEN_PURGE_SNAPSHOTS`](../src/com.dettonville.pipeline/utils/ConfigConstants.groovy))
 map element to be evaluated and used by the function.
 
 ```groovy
-import com.dettonville.api.pipeline.utils.logging.LogLevel
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import com.dettonville.pipeline.utils.logging.LogLevel
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 maven.purgeSnapshots(
         (MAVEN_PURGE_SNAPSHOTS): [
@@ -37,7 +37,7 @@ maven.purgeSnapshots(
 
 |||
 |---|---|
-|Constant|[`ConfigConstants.MAVEN_PURGE_SNAPSHOTS_REPO_PATH`](../src/com.dettonville.api.pipeline/utils/ConfigConstants.groovy)|
+|Constant|[`ConfigConstants.MAVEN_PURGE_SNAPSHOTS_REPO_PATH`](../src/com.dettonville.pipeline/utils/ConfigConstants.groovy)|
 |Type|`String`|
 |Default|`null`|
 
@@ -47,7 +47,7 @@ The path to the maven repository.
 
 |||
 |---|---|
-|Constant|[`ConfigConstants.MAVEN_PURGE_SNAPSHOTS_DRY_RUN`](../src/com.dettonville.api.pipeline/utils/ConfigConstants.groovy)|
+|Constant|[`ConfigConstants.MAVEN_PURGE_SNAPSHOTS_DRY_RUN`](../src/com.dettonville.pipeline/utils/ConfigConstants.groovy)|
 |Type|`Boolean`|
 |Default|`false`|
 
@@ -57,7 +57,7 @@ Controls if the snapshot purging is executed in test mode.
 
 |||
 |---|---|
-|Constant|[`ConfigConstants.MAVEN_PURGE_SNAPSHOTS_LOG_LEVEL`](../src/com.dettonville.api.pipeline/utils/ConfigConstants.groovy)|
+|Constant|[`ConfigConstants.MAVEN_PURGE_SNAPSHOTS_LOG_LEVEL`](../src/com.dettonville.pipeline/utils/ConfigConstants.groovy)|
 |Type|`Boolean`|
 |Default|`null`|
 

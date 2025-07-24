@@ -1,5 +1,18 @@
 #!/usr/bin/env groovy
 
+// ref: https://stackoverflow.com/questions/36199072/how-to-get-the-script-name-in-groovy
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+
+import com.dettonville.pipeline.utils.MapMerge
+import com.dettonville.pipeline.utils.JsonUtils
+import com.dettonville.pipeline.utils.logging.JenkinsLogger
+
+@Field String scriptName = this.class.getName()
+
+@Field JenkinsLogger log = new JenkinsLogger(this, prefix: scriptName)
+//@Field JenkinsLogger log = new JenkinsLogger(this, logLevel: 'DEBUG', prefix: scriptName)
+
 // ref: https://github.com/sheehan/job-dsl-gradle-example/blob/master/src/jobs/example4Jobs.groovy
 String projectName = "ADMIN"
 
@@ -16,28 +29,6 @@ String gitPipelineLibCredId = "bitbucket-ssh-jenkins"
 folder(projectFolder) {
     description "This project folder contains jobs for the ${projectName} project"
     properties {
-      folderLibraries {
-          libraries {
-              // ref: https://issues.jenkins.io/browse/JENKINS-66402
-              // ref: https://devops.stackexchange.com/questions/11833/how-do-i-load-a-jenkins-shared-library-in-a-jenkins-job-dsl-seed
-              libraryConfiguration {
-                  name("pipeline-automation-lib")
-                  defaultVersion("main")
-                  implicit(true)
-                  includeInChangesets(false)
-                  retriever {
-                      modernSCM {
-                          scm {
-                              git {
-                                  remote(pipelineRepoUrl)
-                                  credentialsId(gitPipelineLibCredId)
-                              }
-                          }
-                      }
-                  }
-              }
-          }
-      }
       authorizationMatrix {
         inheritanceStrategy {
             nonInheriting()

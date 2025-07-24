@@ -16,10 +16,10 @@ It uses the pipeline configuration to set the color mode
 ### `color` Example
 
 ```groovy
-import com.dettonville.api.pipeline.utils.logging.LogLevel
-import com.dettonville.api.pipeline.utils.logging.Logger
+import com.dettonville.pipeline.utils.logging.LogLevel
+import com.dettonville.pipeline.utils.logging.Logger
 
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 Map config = [
     (ANSI_COLOR) : ANSI_COLOR_XTERM
 ]
@@ -39,7 +39,7 @@ The value used in this configuration option is the color mode provided to the
 `ansiColor` Step
 
 ```groovy
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 wrap.color(
         (ANSI_COLOR): ANSI_COLOR_XTERM

@@ -20,7 +20,7 @@
 package vars.execNpm
 
 import com.dettonville.testing.jenkins.pipeline.LibraryIntegrationTestBase
-import com.dettonville.api.pipeline.managedfiles.ManagedFileConstants
+import com.dettonville.pipeline.managedfiles.ManagedFileConstants
 import org.junit.Assert
 import org.junit.Test
 

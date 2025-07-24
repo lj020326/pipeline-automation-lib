@@ -90,7 +90,7 @@ It is recommended to use folder based shared library!
   ```groovy
    @Library ('pipeline-library') pipelineLibrary
 
-   import com.dettonville.api.pipeline.utils.logging.*
+   import com.dettonville.pipeline.utils.logging.*
 
    Logger.init(steps, LogLevel.INFO)
    Logger log = new Logger(this)
@@ -293,8 +293,8 @@ the pipeline script to
 @Library('pipeline-library@feature') pipelineLibrary
 @Library('pipeline-library-example') pipelineLibraryExample
 
-import com.dettonville.api.pipeline.utils.logging.Logger
-import com.dettonville.api.pipeline.utils.logging.LogLevel
+import com.dettonville.pipeline.utils.logging.Logger
+import com.dettonville.pipeline.utils.logging.LogLevel
 
 Logger.init(steps, LogLevel.INFO)
 Logger log = new Logger(this)

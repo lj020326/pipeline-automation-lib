@@ -19,8 +19,8 @@
  */
 package vars.sshAgentWrapper.jobs
 
-import com.dettonville.api.pipeline.shell.ScpCommandBuilderImpl
-import com.dettonville.api.pipeline.ssh.SSHTarget
+import com.dettonville.pipeline.shell.ScpCommandBuilderImpl
+import com.dettonville.pipeline.ssh.SSHTarget
 import org.jenkinsci.plugins.workflow.cps.DSL
 
 /**

@@ -19,7 +19,7 @@
  */
 package vars.execMaven.jobs
 
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 /**
  * Runs execMaven step with path to custom maven executable

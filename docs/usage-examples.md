@@ -3,11 +3,11 @@
 ## Example 1: Building a maven project with notifications
 
 ```groovy
-import com.dettonville.api.pipeline.model.Tool
-import com.dettonville.api.pipeline.utils.logging.LogLevel
-import com.dettonville.api.pipeline.utils.logging.Logger
+import com.dettonville.pipeline.model.Tool
+import com.dettonville.pipeline.utils.logging.LogLevel
+import com.dettonville.pipeline.utils.logging.Logger
 
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 Map config = [
     (SCM): [

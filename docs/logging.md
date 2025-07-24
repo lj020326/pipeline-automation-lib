@@ -29,8 +29,8 @@ beginning of your pipeline script:
 
 ```groovy
 // do the import
-import com.dettonville.api.pipeline.utils.logging.LogLevel
-import com.dettonville.api.pipeline.utils.logging.Logger
+import com.dettonville.pipeline.utils.logging.LogLevel
+import com.dettonville.pipeline.utils.logging.Logger
 
 // initialize the logger with WorkflowScript reference (this 
 Logger.init(this, [ logLevel: LogLevel.INFO ])
@@ -84,8 +84,8 @@ initialize the `Logger` or set the `LogLevel` to `NONE`
 
 ```groovy
 // do the import
-import com.dettonville.api.pipeline.utils.logging.LogLevel
-import com.dettonville.api.pipeline.utils.logging.Logger
+import com.dettonville.pipeline.utils.logging.LogLevel
+import com.dettonville.pipeline.utils.logging.Logger
 
 // initialize the logger 
 Logger.init(this, [ logLevel: LogLevel.TRACE ])
@@ -103,9 +103,9 @@ Output:
 
 ```groovy
 // do the import
-import com.dettonville.api.pipeline.utils.logging.LogLevel
-import com.dettonville.api.pipeline.utils.logging.Logger
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import com.dettonville.pipeline.utils.logging.LogLevel
+import com.dettonville.pipeline.utils.logging.Logger
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 // initialize the logger 
 Logger.init(this, [ (LOGLEVEL) : LogLevel.WARN] )
@@ -127,9 +127,9 @@ the `String` representation (`toString()`) should always work.
 
 ```groovy
 // do the import
-import com.dettonville.api.pipeline.utils.logging.LogLevel
-import com.dettonville.api.pipeline.utils.logging.Logger
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import com.dettonville.pipeline.utils.logging.LogLevel
+import com.dettonville.pipeline.utils.logging.Logger
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 Map config = [ (LOGLEVEL) : LogLevel.DEBUG ]
 
@@ -150,9 +150,9 @@ This example will output all log levels with theis colors.
 
 ```groovy
 // do the import
-import com.dettonville.api.pipeline.utils.logging.LogLevel
-import com.dettonville.api.pipeline.utils.logging.Logger
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import com.dettonville.pipeline.utils.logging.LogLevel
+import com.dettonville.pipeline.utils.logging.Logger
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 Map config = [ (LOGLEVEL) : LogLevel.TRACE ]
 

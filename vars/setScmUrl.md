@@ -16,7 +16,7 @@ In this case the step tries to retrieve the `SCM_URL` from
 the config object:
 
 ```groovy
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 setScmUrl(
     (SCM): [

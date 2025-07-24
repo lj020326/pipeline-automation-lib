@@ -67,7 +67,7 @@ this content:
 
 When you now execute the `execNpm` Step with
 ```groovy
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 execNpm(
     (SCM) : [ (SCM_URL) : 'https://git.company.tld/group1/project1.git' ],
     (NPM) : [ (NPM_ARGUMENTS): ['run', 'build'] ]
@@ -92,7 +92,7 @@ All configuration options must be inside the `npm`
 map element to be evaluated and used by the step.
 
 ```groovy
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 execNpm( 
     (NPM) : [
