@@ -1,11 +1,10 @@
 #!/usr/bin/env groovy
 
-import com.dettonville.api.pipeline.utils.Utilities
-import com.dettonville.api.pipeline.utils.JsonUtils
-import com.dettonville.api.pipeline.utils.MapMerge
-import com.dettonville.api.pipeline.utils.logging.LogLevel
-import com.dettonville.api.pipeline.utils.logging.Logger
-// import com.dettonville.api.pipeline.utils.DockerUtil
+import com.dettonville.pipeline.utils.Utilities
+import com.dettonville.pipeline.utils.JsonUtils
+import com.dettonville.pipeline.utils.MapMerge
+import com.dettonville.pipeline.utils.logging.LogLevel
+import com.dettonville.pipeline.utils.logging.Logger
 
 import org.codehaus.groovy.runtime.StackTraceUtils
 
@@ -32,13 +31,14 @@ def call() {
         buildImageLabel: string(defaultValue:  "docker-jenkins:latest", description: "Specify the BuildImageLabel", name: "BuildImageLabel"),
         buildDir: string(defaultValue: "image/base", description: "Specify the BuildDir", name: "BuildDir"),
         buildPath: string(defaultValue: ".", description: "Specify the BuildPath", name: "BuildPath"),
+        buildTags: string(defaultValue: "", description: "Specify the docker image tags in comma delimited format (e.g., 'build-123,latest')", name: "BuildTags"),
         buildArgs: string(defaultValue: "", description: "Specify the BuildArgs in JSON string format", name: "BuildArgs"),
         dockerFile: string(defaultValue: "", description: "Specify the docker file", name: 'DockerFile'),
         changedEmailList: string(defaultValue: "", description: "Specify the email recipients for job 'changed' status", name: 'ChangedEmailList'),
         alwaysEmailList: string(defaultValue: "", description: "Specify the email recipients for job 'always' status", name: 'AlwaysEmailList'),
         failedEmailList: string(defaultValue: "", description: "Specify the email recipients for job 'failed' status", name: 'FailedEmailList'),
         timeout: string(defaultValue: "4", description: "Specify the job timeout", name: 'Timeout'),
-        timeoutUnit: string(defaultValue: "HOURS", description: "Specify the job timeout unit (HOURS, MINUTES, etc)", name: 'TimeoutUnit')
+        timeoutUnit: string(defaultValue: "HOURS", description: "Specify the job timeout unit (HOURS, MINUTES, etc)", name: 'TimeoutUnit'),
     ]
 
     paramMap.each { String key, def param ->
@@ -101,16 +101,16 @@ def call() {
                 script {
                     List emailAdditionalDistList = []
                     if (config?.deployEmailDistList) {
-                        if (config?.gitRepoBranch) {
+                        if (config.gitRepoBranch) {
                             if (config.gitRepoBranch in ['main','QA','PROD'] || config.gitRepoBranch.startsWith("release/")) {
                                 emailAdditionalDistList = config.deployEmailDistList
-                                log.info("post(${config?.gitRepoBranch}): sendEmail(${currentBuild.result})")
+                                log.info("post(${config.gitRepoBranch}): sendEmail(${currentBuild.result})")
                                 sendEmail(currentBuild, env, emailAdditionalDistList: emailAdditionalDistList)
                             }
                         }
                     } else if (config?.alwaysEmailList) {
                         log.info("config.alwaysEmailList=${config.alwaysEmailList}")
-                        sendEmail(currentBuild, env, emailAdditionalDistList: [config.alwaysEmailList.split(",")])
+                        sendEmail(currentBuild, env, emailAdditionalDistList: config.alwaysEmailList.split(","))
                     } else {
                         log.info("sendEmail default")
                         sendEmail(currentBuild, env)
@@ -123,7 +123,7 @@ def call() {
                 script {
                     if (config?.successEmailList) {
                         log.info("config.successEmailList=${config.successEmailList}")
-                        sendEmail(currentBuild, env, emailAdditionalDistList: [config.successEmailList.split(",")])
+                        sendEmail(currentBuild, env, emailAdditionalDistList: config.successEmailList.split(","))
                     }
                 }
             }
@@ -131,7 +131,7 @@ def call() {
                 script {
                     if (config?.failedEmailList) {
                         log.info("config.failedEmailList=${config.failedEmailList}")
-                        sendEmail(currentBuild, env, emailAdditionalDistList: [config.failedEmailList.split(",")])
+                        sendEmail(currentBuild, env, emailAdditionalDistList: config.failedEmailList.split(","))
                     }
                 }
             }
@@ -139,7 +139,7 @@ def call() {
                 script {
                     if (config?.failedEmailList) {
                         log.info("config.failedEmailList=${config.failedEmailList}")
-                        sendEmail(currentBuild, env, emailAdditionalDistList: [config.failedEmailList.split(",")])
+                        sendEmail(currentBuild, env, emailAdditionalDistList: config.failedEmailList.split(","))
                     }
                 }
             }
@@ -147,7 +147,7 @@ def call() {
                 script {
                     if (config?.changedEmailList) {
                         log.info("config.changedEmailList=${config.changedEmailList}")
-                        sendEmail(currentBuild, env, emailAdditionalDistList: [config.changedEmailList.split(",")])
+                        sendEmail(currentBuild, env, emailAdditionalDistList: config.changedEmailList.split(","))
                     }
                 }
             }
@@ -173,11 +173,12 @@ Map loadPipelineConfig(Map params) {
         }
     }
 
-//    config.logLevel = config.get('logLevel', "INFO")
-    config.logLevel = config.get('logLevel', "DEBUG")
-    config.debugPipeline = config.get('debugPipeline', false)
-    config.timeout = config.get('timeout', "4")
-    config.timeoutUnit = config.get('timeoutUnit', "HOURS")
+//    config.get('logLevel', "INFO")
+    config.get('logLevel', "DEBUG")
+    config.get('debugPipeline', false)
+    config.get('timeout', "4")
+    config.get('timeoutUnit', "HOURS")
+    config.get('maxRandomDelaySeconds', "0") as String
 
     // ref: https://stackoverflow.com/questions/40261710/getting-current-timestamp-in-inline-pipeline-script-using-pipeline-plugin-of-hud
     Date now = new Date()
@@ -191,6 +192,7 @@ Map loadPipelineConfig(Map params) {
 
     config.get("buildId", buildId)
     config.get("buildDate", buildDate)
+    config.buildLabel = "${config.buildImageLabel}:${config.buildId}"
 
     log.setLevel(config.logLevel)
 
@@ -216,6 +218,8 @@ def buildDockerImage(Map config) {
 
     log.debug("config=${JsonUtils.printToJsonString(config)}")
 
+    log.debug("config.buildLabel=${config.buildLabel}")
+
     List buildArgs = []
     if (config.buildArgs) {
         Object buildArgsMap = readJSON(text: config.buildArgs)
@@ -237,18 +241,18 @@ def buildDockerImage(Map config) {
     log.debug("buildArgs=${JsonUtils.printToJsonString(buildArgs)}")
 
     dir (config.buildDir) {
-
         // ref: https://www.jenkins.io/doc/book/pipeline/docker/
         if (config?.dockerFile) {
             buildArgs.push("-f ${config.dockerFile}")
         }
+
         buildArgs.push("${config.buildPath}")
         if (buildArgs) {
             String buildArgsString = buildArgs.join(" ")
             log.debug("buildArgsString=${buildArgsString}")
-            dockerImage = docker.build(config.buildImageLabel, buildArgsString)
+            dockerImage = docker.build(config.buildLabel, buildArgsString)
         } else {
-            dockerImage = docker.build(config.buildImageLabel)
+            dockerImage = docker.build(config.buildLabel)
         }
     }
     return dockerImage
@@ -269,20 +273,32 @@ void publishDockerImage(def dockerImage, Map config) {
 
         docker.withRegistry(config.registryUrl, config.registryCredId) {
             withEnv(config.dockerEnvVarsList) {
-                dockerImage.push "${config?.gitRepoBranch}"
-                if (config?.buildId) {
-                    dockerImage.push "${config.buildId}"
+                if (config.buildTags) {
+                    List buildTagsList = []
+                    // ref: https://stackoverflow.com/a/73789296/2791368
+                    buildTagsList = config.buildTags.split(",").collect{ it.trim() }
+                    log.info("buildTagsList=${JsonUtils.printToJsonString(buildTagsList)}")
+                    buildTagsList.each { String tagValue ->
+                        log.info("docker push ${tagValue}")
+                        dockerImage.push "${tagValue}"
+                    }
                 } else {
-                    dockerImage.push "build-${env.BUILD_NUMBER}"
-                }
-                if (config?.buildDate) {
-                    dockerImage.push "${config.buildDate}"
-                }
-                if (config?.pushCommitLabel && config.pushCommitLabel.toBoolean()) {
-                    dockerImage.push "${gitCommitId}"
-                }
-                if (config?.gitRepoBranch in ['master','main']) {
-                    dockerImage.push 'latest'
+                    // push to standard set of derived tags (e.g., branch, buildId, buildDate, gitCommitId, latest)
+                    dockerImage.push "${config.gitRepoBranch}"
+                    if (config?.buildId) {
+                        dockerImage.push "${config.buildId}"
+                    } else {
+                        dockerImage.push "build-${env.BUILD_NUMBER}"
+                    }
+                    if (config?.buildDate) {
+                        dockerImage.push "${config.buildDate}"
+                    }
+                    if (config?.pushCommitLabel && config.pushCommitLabel.toBoolean()) {
+                        dockerImage.push "${gitCommitId}"
+                    }
+                    if (config.gitRepoBranch in ['master','main']) {
+                        dockerImage.push 'latest'
+                    }
                 }
             }
         }

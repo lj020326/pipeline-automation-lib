@@ -25,8 +25,8 @@ tool is also available in the `PATH` environment variable
 
 ``` groovy
 ``` groovy
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
-import com.dettonville.api.pipeline.model.Tool
+import static com.dettonville.pipeline.utils.ConfigConstants.*
+import com.dettonville.pipeline.model.Tool
 
 setupTools(
     (TOOLS): [
@@ -47,8 +47,8 @@ paths to the tools.
 
 ``` groovy
 ``` groovy
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
-import com.dettonville.api.pipeline.model.Tool
+import static com.dettonville.pipeline.utils.ConfigConstants.*
+import com.dettonville.pipeline.model.Tool
 
 setupTools([
     (TOOLS): [
@@ -72,8 +72,8 @@ there now will be two java binaries in the paths
 
 ``` groovy
 ``` groovy
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
-import com.dettonville.api.pipeline.model.Tool
+import static com.dettonville.pipeline.utils.ConfigConstants.*
+import com.dettonville.pipeline.model.Tool
 setupTools([
     (TOOLS): [
         [ (TOOL_NAME): 'jdk8' ]     
@@ -115,7 +115,7 @@ evaluated and used by the step.
 
 The `tools` element must be a `List`.
 ```groovy
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 setupTools([
     (TOOLS): [

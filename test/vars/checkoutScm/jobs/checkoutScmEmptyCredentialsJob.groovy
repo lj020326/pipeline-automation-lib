@@ -19,8 +19,8 @@
  */
 package vars.checkoutScm.jobs
 
-import static com.dettonville.api.pipeline.utils.ConfigConstants.SCM
-import static com.dettonville.api.pipeline.utils.ConfigConstants.SCM_URL
+import static com.dettonville.pipeline.utils.ConfigConstants.SCM
+import static com.dettonville.pipeline.utils.ConfigConstants.SCM_URL
 
 /**
  * Executes default checkout with no credential found during auto lookup for the given scm url

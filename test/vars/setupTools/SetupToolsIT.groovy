@@ -21,7 +21,7 @@ package vars.setupTools
 
 import hudson.AbortException
 import com.dettonville.testing.jenkins.pipeline.LibraryIntegrationTestBase
-import com.dettonville.api.pipeline.model.Tool
+import com.dettonville.pipeline.model.Tool
 import org.hamcrest.CoreMatchers
 import org.junit.Test
 

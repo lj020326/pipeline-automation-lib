@@ -1,13 +1,13 @@
-import com.dettonville.api.pipeline.java.Git
-import com.dettonville.api.pipeline.java.SonarQube
-import com.dettonville.api.pipeline.java.model.JavaPipelineInfo
-import com.dettonville.api.pipeline.java.MavenBuild
-import com.dettonville.api.pipeline.java.model.MavenBuildInfo
-import com.dettonville.api.pipeline.summary.ImpactfulAction
-import com.dettonville.api.pipeline.summary.PipelineSummary
-import com.dettonville.api.pipeline.summary.SkippedStep
-import com.dettonville.api.pipeline.utils.Maven
-import com.dettonville.api.pipeline.utils.Utilities
+import com.dettonville.pipeline.java.Git
+import com.dettonville.pipeline.java.SonarQube
+import com.dettonville.pipeline.java.model.JavaPipelineInfo
+import com.dettonville.pipeline.java.MavenBuild
+import com.dettonville.pipeline.java.model.MavenBuildInfo
+import com.dettonville.pipeline.summary.ImpactfulAction
+import com.dettonville.pipeline.summary.PipelineSummary
+import com.dettonville.pipeline.summary.SkippedStep
+import com.dettonville.pipeline.utils.Maven
+import com.dettonville.pipeline.utils.Utilities
 
 def call(def buildSlaveLabel) {
     node(buildSlaveLabel) {

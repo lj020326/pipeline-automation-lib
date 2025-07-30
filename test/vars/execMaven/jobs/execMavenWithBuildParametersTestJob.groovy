@@ -19,11 +19,11 @@
  */
 package vars.execMaven.jobs
 
-import static com.dettonville.api.pipeline.utils.ConfigConstants.MAVEN
-import static com.dettonville.api.pipeline.utils.ConfigConstants.MAVEN_GOALS
-import static com.dettonville.api.pipeline.utils.ConfigConstants.MAVEN_INJECT_PARAMS
-import static com.dettonville.api.pipeline.utils.ConfigConstants.SCM
-import static com.dettonville.api.pipeline.utils.ConfigConstants.SCM_URL
+import static com.dettonville.pipeline.utils.ConfigConstants.MAVEN
+import static com.dettonville.pipeline.utils.ConfigConstants.MAVEN_GOALS
+import static com.dettonville.pipeline.utils.ConfigConstants.MAVEN_INJECT_PARAMS
+import static com.dettonville.pipeline.utils.ConfigConstants.SCM
+import static com.dettonville.pipeline.utils.ConfigConstants.SCM_URL
 
 /**
  * Runs execMaven step with default configuration to test auto lookup for global and local maven settings

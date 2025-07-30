@@ -20,9 +20,9 @@
 package vars.setupTools.jobs
 
 import com.dettonville.testing.jenkins.pipeline.LibraryIntegrationTestBase
-import com.dettonville.api.pipeline.model.Tool
+import com.dettonville.pipeline.model.Tool
 
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 /**
  * Runs the setupTools step with custom environment variables

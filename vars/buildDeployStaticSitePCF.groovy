@@ -2,8 +2,8 @@
 
 // ref: https://fusion.dettonville.int/stash/projects/MCREFARCH/repos/polaris-documentation/browse/Jenkinsfile
 
-def pcfUtil = new com.dettonville.api.pipeline.utility.PCFUtil(this)
-def mvnUtil = new com.dettonville.api.pipeline.utility.MavenUtil(this)
+def pcfUtil = new com.dettonville.pipeline.utility.PCFUtil(this)
+def mvnUtil = new com.dettonville.pipeline.utility.MavenUtil(this)
 def emailList = 'lee.johnson@dettonville.com joe.tester@dettonville.com'
 
 def appHostName = "polaris-documentation"

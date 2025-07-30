@@ -1,11 +1,11 @@
 #!/usr/bin/env groovy
 
-@Library("pipeline-automation-lib")
+@Library("pipelineAutomationLib")
 
-import com.dettonville.api.pipeline.utils.logging.LogLevel
-import com.dettonville.api.pipeline.utils.logging.Logger
+import com.dettonville.pipeline.utils.logging.LogLevel
+import com.dettonville.pipeline.utils.logging.Logger
 
-import com.dettonville.api.pipeline.utils.CredentialParser
+import com.dettonville.pipeline.utils.CredentialParser
 import net.sf.json.JSON
 
 String jsonStr='''

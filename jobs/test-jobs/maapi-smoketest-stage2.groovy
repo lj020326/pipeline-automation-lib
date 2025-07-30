@@ -1,4 +1,4 @@
-@Library("pipeline-automation-lib")_
+@Library("pipelineAutomationLib")_
 
 import sendEmail
 

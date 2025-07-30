@@ -19,7 +19,7 @@
  */
 package vars.checkoutScm.jobs
 
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 /**
  * Executes a custom checkout with all supported configuration options that should not use the provided credentialsId

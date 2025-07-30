@@ -2,11 +2,11 @@
 
 def call(body, Map pipelineParams) {
 
-	def vaultUtil = new com.dettonville.api.pipeline.utility.VaultUtil(this)
-	def caasUtil = new com.dettonville.api.pipeline.utility.CaaSUtil(this)
-	def pcfUtil = new com.dettonville.api.pipeline.utility.PCFUtil(this)
-	def mvnUtil = new com.dettonville.api.pipeline.utility.MavenUtil(this)
-	def parseUtil = new com.dettonville.api.pipeline.utility.ParseUtil(this)
+	def vaultUtil = new com.dettonville.pipeline.utility.VaultUtil(this)
+	def caasUtil = new com.dettonville.pipeline.utility.CaaSUtil(this)
+	def pcfUtil = new com.dettonville.pipeline.utility.PCFUtil(this)
+	def mvnUtil = new com.dettonville.pipeline.utility.MavenUtil(this)
+	def parseUtil = new com.dettonville.pipeline.utility.ParseUtil(this)
 	def keyMaps = [:]
 //	def pipelineParams= [:]
 	def config = [:]

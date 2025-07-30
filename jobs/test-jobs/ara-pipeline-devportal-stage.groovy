@@ -1,5 +1,5 @@
 
-@Library("pipeline-automation-lib")
+@Library("pipelineAutomationLib")
 
 import release
 import sendEmail

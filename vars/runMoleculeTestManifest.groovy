@@ -1,11 +1,11 @@
 #!/usr/bin/env groovy
 import groovy.json.JsonOutput
 
-import com.dettonville.api.pipeline.utils.JsonUtils
-import com.dettonville.api.pipeline.utils.MapMerge
-import com.dettonville.api.pipeline.utils.logging.LogLevel
-import com.dettonville.api.pipeline.utils.logging.Logger
-// import com.dettonville.api.pipeline.utils.DockerUtil
+import com.dettonville.pipeline.utils.JsonUtils
+import com.dettonville.pipeline.utils.MapMerge
+import com.dettonville.pipeline.utils.logging.LogLevel
+import com.dettonville.pipeline.utils.logging.Logger
+// import com.dettonville.pipeline.utils.DockerUtil
 
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field
@@ -56,7 +56,7 @@ def call(Map params=[:]) {
                 script {
                     if (config?.alwaysEmailList) {
                         log.info("config.alwaysEmailList=${config.alwaysEmailList}")
-                        sendEmail(currentBuild, env, emailAdditionalDistList: [config.alwaysEmailList.split(",")])
+                        sendEmail(currentBuild, env, emailAdditionalDistList: config.alwaysEmailList.split(","))
                     } else {
                         sendEmail(currentBuild, env)
                     }
@@ -72,7 +72,7 @@ def call(Map params=[:]) {
                 script {
                     if (config?.successEmailList) {
                         log.info("config.successEmailList=${config.successEmailList}")
-                        sendEmail(currentBuild, env, emailAdditionalDistList: [config.successEmailList.split(",")])
+                        sendEmail(currentBuild, env, emailAdditionalDistList: config.successEmailList.split(","))
                     }
                 }
             }
@@ -80,7 +80,7 @@ def call(Map params=[:]) {
                 script {
                     if (config?.failedEmailList) {
                         log.info("config.failedEmailList=${config.failedEmailList}")
-                        sendEmail(currentBuild, env, emailAdditionalDistList: [config.failedEmailList.split(",")])
+                        sendEmail(currentBuild, env, emailAdditionalDistList: config.failedEmailList.split(","))
                     }
                 }
             }
@@ -88,7 +88,7 @@ def call(Map params=[:]) {
                 script {
                     if (config?.failedEmailList) {
                         log.info("config.failedEmailList=${config.failedEmailList}")
-                        sendEmail(currentBuild, env, emailAdditionalDistList: [config.failedEmailList.split(",")])
+                        sendEmail(currentBuild, env, emailAdditionalDistList: config.failedEmailList.split(","))
                     }
                 }
             }
@@ -96,7 +96,7 @@ def call(Map params=[:]) {
                 script {
                     if (config?.changedEmailList) {
                         log.info("config.changedEmailList=${config.changedEmailList}")
-                        sendEmail(currentBuild, env, emailAdditionalDistList: [config.changedEmailList.split(",")])
+                        sendEmail(currentBuild, env, emailAdditionalDistList: config.changedEmailList.split(","))
                     }
                 }
             }
@@ -251,7 +251,7 @@ Map runMoleculeImageGroups(Map config) {
 
     // ref: https://stackoverflow.com/questions/18380667/join-list-of-boolean-elements-groovy
     // ref: https://blog.mrhaki.com/2009/09/groovy-goodness-using-inject-method.html
-    boolean failed = (jobResults.groups.size()>0) ? jobResults.groups.inject(false) { a, k, v -> a && v.failed } : false
+    boolean failed = (jobResults.groups.size()>0) ? jobResults.groups.inject(false) { a, k, v -> a || v.failed } : false
     jobResults.failed = failed
 
     log.debug("finished: jobResults=${JsonUtils.printToJsonString(jobResults)}")
@@ -310,7 +310,7 @@ Map runMoleculeImageList(Map config) {
 
     // ref: https://stackoverflow.com/questions/18380667/join-list-of-boolean-elements-groovy
     // ref: https://blog.mrhaki.com/2009/09/groovy-goodness-using-inject-method.html
-    boolean failed = (jobResults.items.size()>0) ? jobResults.items.inject(false) { a, k, v -> a && v.failed } : false
+    boolean failed = (jobResults.items.size()>0) ? jobResults.items.inject(false) { a, k, v -> a || v.failed } : false
     jobResults.failed = failed
 
     log.debug("finished: jobResults=${JsonUtils.printToJsonString(jobResults)}")

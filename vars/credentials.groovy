@@ -1,10 +1,10 @@
 
-import com.dettonville.api.pipeline.credentials.Credential
-import com.dettonville.api.pipeline.credentials.CredentialConstants
-import com.dettonville.api.pipeline.credentials.CredentialParser
-import com.dettonville.api.pipeline.utils.PatternMatcher
-import com.dettonville.api.pipeline.utils.logging.Logger
-import com.dettonville.api.pipeline.utils.resources.JsonLibraryResource
+import com.dettonville.pipeline.credentials.Credential
+import com.dettonville.pipeline.credentials.CredentialConstants
+import com.dettonville.pipeline.credentials.CredentialParser
+import com.dettonville.pipeline.utils.PatternMatcher
+import com.dettonville.pipeline.utils.logging.Logger
+import com.dettonville.pipeline.utils.resources.JsonLibraryResource
 import net.sf.json.JSON
 import org.jenkinsci.plugins.workflow.cps.DSL
 
@@ -19,10 +19,10 @@ import groovy.transform.Field
  *
  * @param uri The uri to retrieve the credentials for
  * @return The found Credential object or null when no credential object was found during auto lookup
- * @see com.dettonville.api.pipeline.credentials.Credential
- * @see com.dettonville.api.pipeline.credentials.CredentialParser
+ * @see com.dettonville.pipeline.credentials.Credential
+ * @see com.dettonville.pipeline.credentials.CredentialParser
  * @see JsonLibraryResource
- * @see com.dettonville.api.pipeline.credentials.CredentialConstants
+ * @see com.dettonville.pipeline.credentials.CredentialConstants
  */
 Credential lookupHttpCredential(String uri) {
   // load the json
@@ -47,13 +47,12 @@ Credential lookupHttpCredential(String uri) {
  *
  * @param uri The uri to lookup the credentials for
  * @return The found Credential object or null when no credential object was found during auto lookup
- * @see com.dettonville.api.pipeline.credentials.Credential
- * @see com.dettonville.api.pipeline.credentials.CredentialParser
- * @see com.dettonville.api.pipeline.utils.resources.JsonLibraryResource
- * @see com.dettonville.api.pipeline.credentials.CredentialConstants
+ * @see com.dettonville.pipeline.credentials.Credential
+ * @see com.dettonville.pipeline.credentials.CredentialParser
+ * @see com.dettonville.pipeline.utils.resources.JsonLibraryResource
+ * @see com.dettonville.pipeline.credentials.CredentialConstants
  */
 Credential lookupScmCredential(String uri) {
-  Logger log = new Logger("lookupScmCredential")
   // load the json
   JsonLibraryResource jsonRes = new JsonLibraryResource((DSL) this.steps, CredentialConstants.SCM_CREDENTIALS_PATH)
   try {
@@ -76,10 +75,10 @@ Credential lookupScmCredential(String uri) {
  *
  * @param uri The uri to lookup the credentials for
  * @return The found Credential object or null when no credential object was found during auto lookup
- * @see com.dettonville.api.pipeline.credentials.Credential
- * @see com.dettonville.api.pipeline.credentials.CredentialParser
+ * @see com.dettonville.pipeline.credentials.Credential
+ * @see com.dettonville.pipeline.credentials.CredentialParser
  * @see JsonLibraryResource
- * @see com.dettonville.api.pipeline.credentials.CredentialConstants
+ * @see com.dettonville.pipeline.credentials.CredentialConstants
  */
 Credential lookupSshCredential(String uri) {
   // load the json

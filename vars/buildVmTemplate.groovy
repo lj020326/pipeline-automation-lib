@@ -1,12 +1,12 @@
 #!/usr/bin/env groovy
 import groovy.json.JsonOutput
 
-import com.dettonville.api.pipeline.utils.JsonUtils
-import com.dettonville.api.pipeline.utils.MapMerge
+import com.dettonville.pipeline.utils.JsonUtils
+import com.dettonville.pipeline.utils.MapMerge
 
-import com.dettonville.api.pipeline.utils.Utilities
-import com.dettonville.api.pipeline.utils.logging.LogLevel
-import com.dettonville.api.pipeline.utils.logging.Logger
+import com.dettonville.pipeline.utils.Utilities
+import com.dettonville.pipeline.utils.logging.LogLevel
+import com.dettonville.pipeline.utils.logging.Logger
 
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field
@@ -510,7 +510,7 @@ def call() {
                 script {
                     if (config?.alwaysEmailList) {
                         log.info("config.alwaysEmailList=${config.alwaysEmailList}")
-                        sendEmail(currentBuild, env, emailAdditionalDistList: [config.alwaysEmailList.split(",")])
+                        sendEmail(currentBuild, env, emailAdditionalDistList: config.alwaysEmailList.split(","))
                     } else {
                         sendEmail(currentBuild, env)
                     }
@@ -526,7 +526,7 @@ def call() {
                 script {
                     if (config?.successEmailList) {
                         log.info("config.successEmailList=${config.successEmailList}")
-                        sendEmail(currentBuild, env, emailAdditionalDistList: [config.successEmailList.split(",")])
+                        sendEmail(currentBuild, env, emailAdditionalDistList: config.successEmailList.split(","))
                     }
                 }
             }
@@ -534,7 +534,7 @@ def call() {
                 script {
                     if (config?.failedEmailList) {
                         log.info("config.failedEmailList=${config.failedEmailList}")
-                        sendEmail(currentBuild, env, emailAdditionalDistList: [config.failedEmailList.split(",")])
+                        sendEmail(currentBuild, env, emailAdditionalDistList: config.failedEmailList.split(","))
                     }
                 }
             }
@@ -542,7 +542,7 @@ def call() {
                 script {
                     if (config?.failedEmailList) {
                         log.info("config.failedEmailList=${config.failedEmailList}")
-                        sendEmail(currentBuild, env, emailAdditionalDistList: [config.failedEmailList.split(",")])
+                        sendEmail(currentBuild, env, emailAdditionalDistList: config.failedEmailList.split(","))
                     }
                 }
             }
@@ -550,7 +550,7 @@ def call() {
                 script {
                     if (config?.changedEmailList) {
                         log.info("config.changedEmailList=${config.changedEmailList}")
-                        sendEmail(currentBuild, env, emailAdditionalDistList: [config.changedEmailList.split(",")])
+                        sendEmail(currentBuild, env, emailAdditionalDistList: config.changedEmailList.split(","))
                     }
                 }
             }

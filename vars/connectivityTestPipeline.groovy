@@ -1,7 +1,7 @@
 
-import com.dettonville.api.pipeline.conntest.ConnectivitySummary
-import com.dettonville.api.pipeline.conntest.SiteTestResults
-import com.dettonville.api.pipeline.conntest.TestResult
+import com.dettonville.pipeline.conntest.ConnectivitySummary
+import com.dettonville.pipeline.conntest.SiteTestResults
+import com.dettonville.pipeline.conntest.TestResult
 import java.text.SimpleDateFormat
 
 // https://support.cloudbees.com/hc/en-us/articles/217309497-Test-a-SSL-connection-from-Jenkins

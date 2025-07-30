@@ -19,8 +19,8 @@
  */
 package vars.maven.jobs
 
-import com.dettonville.api.pipeline.shell.CommandBuilder
-import com.dettonville.api.pipeline.shell.CommandBuilderImpl
+import com.dettonville.pipeline.shell.CommandBuilder
+import com.dettonville.pipeline.shell.CommandBuilderImpl
 
 /**
  * Executes the purge snapshots from repository with default settings

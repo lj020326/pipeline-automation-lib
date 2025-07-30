@@ -1,10 +1,10 @@
 #!/usr/bin/env groovy
 
-import com.dettonville.api.pipeline.utils.logging.LogLevel
-import com.dettonville.api.pipeline.utils.logging.Logger
+import com.dettonville.pipeline.utils.logging.LogLevel
+import com.dettonville.pipeline.utils.logging.Logger
 
-import com.dettonville.api.pipeline.utils.JsonUtils
-import com.dettonville.api.pipeline.utils.Utilities
+import com.dettonville.pipeline.utils.JsonUtils
+import com.dettonville.pipeline.utils.Utilities
 
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field
@@ -24,7 +24,9 @@ def call(Map config=[:]) {
         ansibleGalaxyForceOpt : booleanParam(defaultValue: false, description: "Use Ansible Galaxy Force Mode?", name: 'AnsibleGalaxyForceOpt'),
         ansibleGalaxyUpgradeOpt : booleanParam(defaultValue: false, description: "Use Ansible Galaxy Upgrade?", name: 'AnsibleGalaxyUpgradeOpt'),
         useCheckDiffMode : booleanParam(defaultValue: false, description: "Use Check+Diff Mode (Dry Run with Diffs)?", name: 'UseCheckDiffMode'),
-        skipUntagged : booleanParam(defaultValue: false, description: "Skip Untagged plays?", name: 'SkipUntagged')
+        skipUntagged : booleanParam(defaultValue: false, description: "Skip Untagged plays?", name: 'SkipUntagged'),
+        skipAlwaysTag : booleanParam(defaultValue: false, description: "Skip 'always' tagged plays?", name: 'SkipAlwaysTag'),
+        debugPipeline : booleanParam(defaultValue: false, description: "Debug pipeline mode?", name: 'DebugPipeline')
     ]
 
     paramMap.each { String key, def param ->
@@ -51,11 +53,15 @@ def call(Map config=[:]) {
     config.get('environment',"${env.JOB_NAME.split('/')[-3]}")
     config.get('ansibleInstallation',"ansible-venv")
 
-    def ansibleTagsDefault = "untagged,${env.JOB_BASE_NAME}"
+    def ansibleTags = "untagged,${env.JOB_BASE_NAME}"
     if (config.skipUntagged) {
-        ansibleTagsDefault = "${env.JOB_BASE_NAME}"
+        ansibleTags = "${env.JOB_BASE_NAME}"
     }
-    config.get('ansibleTags',"${ansibleTagsDefault}")
+    config.get('ansibleTags',"${ansibleTags}")
+
+    if (config.skipAlwaysTag) {
+        config.get('ansibleSkipTags',"always")
+    }
 
     config.get('ansiblePipelineConfigFile',".jenkins.ansible.yml")
 //     config.get('ansibleInventory',"./inventory/${config.environment}/hosts.yml")
@@ -74,8 +80,9 @@ def call(Map config=[:]) {
 //     config.skipDefaultCheckout = true
 //     config.gitBranch = 'master'
     config.get('gitBranch','main')
-    config.get('gitRepoUrl','git@bitbucket.org:lj020326/ansible-datacenter.git')
-    config.get('gitCredId','bitbucket-ssh-jenkins')
+    config.get('gitRepoUrl','ssh://git@repo.example.org:2222/ansible/ansible-datacenter.git')
+    config.get('gitCredentialsId','git-ssh-jenkins')
+    config.get('gitRepoSlug', 'ansible-repo-slug')
 
 //     config.get('ansibleCollectionsRequirements','./collections/requirements.molecule.yml')
 //     config.get('ansibleRolesRequirements','./roles/requirements.yml')
@@ -92,4 +99,3 @@ def call(Map config=[:]) {
     log.info("finished")
 
 }
-

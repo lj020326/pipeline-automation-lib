@@ -19,8 +19,8 @@
  */
 package vars.logging.jobs
 
-import com.dettonville.api.pipeline.utils.logging.LogLevel
-import com.dettonville.api.pipeline.utils.logging.Logger
+import com.dettonville.pipeline.utils.logging.LogLevel
+import com.dettonville.pipeline.utils.logging.Logger
 
 /**
  * Runs execNpm step  with default configuration by providing only the scm url

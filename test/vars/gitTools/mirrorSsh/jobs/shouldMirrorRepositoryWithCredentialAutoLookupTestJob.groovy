@@ -19,8 +19,8 @@
  */
 package vars.gitTools.mirrorSsh.jobs
 
-import com.dettonville.api.pipeline.shell.CommandBuilder
-import com.dettonville.api.pipeline.shell.CommandBuilderImpl
+import com.dettonville.pipeline.shell.CommandBuilder
+import com.dettonville.pipeline.shell.CommandBuilderImpl
 
 def execute() {
   gitTools.mirrorRepository("git@host1.domain.tld:api/pipeline-automation-lib.git","git@host2.domain.tld:api/pipeline-automation-lib.git")

@@ -20,7 +20,7 @@ pipelineConfig:
   ansibleJobList:
     - ansible_tag: bootstrap-ansible
     - ansible_tag: bootstrap-ansible-user
-      skip_untagged: 'true'
+      skip_always_tag: 'true'
     - ansible_tag: bootstrap-cacerts
       ansible_limit: ca_keystore
     - ansible_tag: bootstrap-certs
@@ -30,9 +30,12 @@ pipelineConfig:
     - ansible_tag: bootstrap-docker-stack
       ansible_limit: docker_stack
     - ansible_tag: bootstrap-docker-swarm
+    - ansible_tag: bootstrap-esxi
+      skip_always_tag: 'true'
+      ansible_limit: vmware_physical_esx_host
     - ansible_tag: bootstrap-idrac
       ansible_limit: dell_idrac_hosts
-      skip_untagged: 'true'
+      skip_always_tag: 'true'
     - ansible_tag: bootstrap-jenkins-agent
     - ansible_tag: bootstrap-ldap
     - ansible_tag: bootstrap-ldap-client
@@ -42,6 +45,7 @@ pipelineConfig:
     - ansible_tag: bootstrap-linux-logrotate
     - ansible_tag: bootstrap-linux-package
     - ansible_tag: bootstrap-linux-user
+    - ansible_tag: bootstrap-llm-server
     - ansible_tag: bootstrap-cron
     - ansible_tag: bootstrap-mounts
     - ansible_tag: bootstrap-nfs
@@ -60,15 +64,17 @@ pipelineConfig:
       ansible_limit: localhost
     - ansible_tag: bootstrap-sshd
     - ansible_tag: bootstrap-vcenter
+      skip_always_tag: 'true'
+    - ansible_tag: bootstrap-vsphere
       ansible_limit: localhost
-      skip_untagged: 'true'
+      skip_always_tag: 'true'
     - ansible_tag: bootstrap-vm
-      skip_untagged: 'true'
+      skip_always_tag: 'true'
     - ansible_tag: bootstrap-vmware-esxi
-      skip_untagged: 'true'
-      ansible_limit: localhost
+      skip_always_tag: 'true'
+      ansible_limit: vmware_physical_esx_host
     - ansible_tag: bootstrap-vmware-mounts
-      skip_untagged: 'true'
+      skip_always_tag: 'true'
       ansible_limit: localhost
     - ansible_tag: bootstrap-webmin
     - ansible_tag: deploy-cacerts
@@ -78,13 +84,13 @@ pipelineConfig:
     - ansible_tag: deploy-registry-certs
       ansible_limit: docker
     - ansible_tag: deploy-vm
-      skip_untagged: 'true'
+      skip_always_tag: 'true'
       ansible_limit: localhost
     - ansible_tag: display-common-vars
     - ansible_tag: display-controller-vars
-      skip_untagged: 'true'
+      skip_always_tag: 'true'
       ansible_limit: localhost
     - ansible_tag: display-hostvars
     - ansible_tag: vmware-remount-datastores
-      skip_untagged: 'true'
+      skip_always_tag: 'true'
       ansible_limit: localhost

@@ -19,8 +19,8 @@
  */
 package vars.gitTools.mirrorHttps.jobs
 
-import com.dettonville.api.pipeline.shell.CommandBuilder
-import com.dettonville.api.pipeline.shell.CommandBuilderImpl
+import com.dettonville.pipeline.shell.CommandBuilder
+import com.dettonville.pipeline.shell.CommandBuilderImpl
 
 def execute() {
   List srcCredentialIds = [

@@ -1,11 +1,15 @@
 #!/usr/bin/env groovy
 
+// // Get a reference to your shared library's entry point
+// def pipelineAutomationLib = this.getBinding().getProperty('pipelineAutomationLib')
+
 // ref: https://stackoverflow.com/questions/44004636/jenkins-multibranch-pipeline-scan-without-execution
 import jenkins.branch.*
 import jenkins.model.Jenkins
 
-import com.dettonville.api.pipeline.utils.MapMerge
-import com.dettonville.api.pipeline.utils.JsonUtils
+import com.dettonville.pipeline.utils.MapMerge
+import com.dettonville.pipeline.utils.JsonUtils
+import com.dettonville.pipeline.utils.logging.JenkinsLogger
 
 // separate configuration from job dsl "seedjob" code
 // ref: https://stackoverflow.com/questions/47443106/jenkins-dsl-parse-yaml-for-complex-processing#54665138
@@ -17,29 +21,32 @@ import org.yaml.snakeyaml.Yaml
 import groovy.transform.Field
 @Field String scriptName = this.class.getName()
 
+@Field JenkinsLogger log = new JenkinsLogger(this, prefix: scriptName)
+//@Field JenkinsLogger log = new JenkinsLogger(this, logLevel: 'DEBUG', prefix: scriptName)
+
 String pipelineConfigYaml = "config.vm-template-jobs.yml"
 
 // ref: https://stackoverflow.com/questions/47336502/get-absolute-path-of-the-script-directory-that-is-being-processed-by-job-dsl#47336735
 String configFilePath = "${new File(__FILE__).parent}"
-println("${scriptName}: configFilePath: ${configFilePath}")
+log.debug("${scriptName}: configFilePath: ${configFilePath}")
 
 Map seedJobConfigs = new Yaml().load(("${configFilePath}/${pipelineConfigYaml}" as File).text)
-// println("${scriptName}: seedJobConfigs=${seedJobConfigs}")
+// log.debug("${scriptName}: seedJobConfigs=${seedJobConfigs}")
 
 Map pipelineConfig = seedJobConfigs.pipelineConfig
-// println("${scriptName}: pipelineConfig=${JsonUtils.printToJsonString(pipelineConfig)}")
+// log.debug("${scriptName}: pipelineConfig=${JsonUtils.printToJsonString(pipelineConfig)}")
 
 createVmTemplateJobs(this, pipelineConfig)
 
-println("${scriptName}: Finished creating vm-template jobs")
+log.info("${scriptName}: Finished creating vm-template jobs")
 
 //******************************************************
 //  Function definitions from this point forward
 //
 void createVmTemplateJobs(def dsl, Map pipelineConfig) {
-    String logPrefix = "${scriptName}->createVmTemplateJobs():"
+    String logPrefix = "createVmTemplateJobs():"
 
-//     println("${logPrefix} pipelineConfig=${JsonUtils.printToJsonString(pipelineConfig)}")
+//     log.debug("${logPrefix} pipelineConfig=${JsonUtils.printToJsonString(pipelineConfig)}")
 
     String baseFolder = pipelineConfig.baseFolder
     String repoUrl = pipelineConfig.repoUrl
@@ -49,7 +56,7 @@ void createVmTemplateJobs(def dsl, Map pipelineConfig) {
     List vmTemplateList = pipelineConfig.vmTemplateList
 
     Map runEnvMap = pipelineConfig.runEnvMap
-    println("${logPrefix} runEnvMap=${JsonUtils.printToJsonString(runEnvMap)}")
+    log.info("${logPrefix} runEnvMap=${JsonUtils.printToJsonString(runEnvMap)}")
 
     // ref: https://stackoverflow.com/questions/40215394/how-to-get-environment-variable-in-jenkins-groovy-script-console
     def envVars = Jenkins.instance.
@@ -58,14 +65,14 @@ void createVmTemplateJobs(def dsl, Map pipelineConfig) {
                        getEnvVars()
 
     if (!envVars?.JENKINS_ENV) {
-        println("${scriptName}: JENKINS_ENV not defined - skipping vm-templates project definition")
+        log.info("${scriptName}: JENKINS_ENV not defined - skipping vm-templates project definition")
         return
     }
 
     String jenkinsEnv = envVars.JENKINS_ENV
 
     if (!runEnvMap.containsKey(jenkinsEnv)) {
-        println("${scriptName}: key for JENKINS_ENV=${jenkinsEnv} not found in `runEnvMap` project definition, skipping vm-template-jobs build")
+        log.info("${scriptName}: key for JENKINS_ENV=${jenkinsEnv} not found in `runEnvMap` project definition, skipping vm-template-jobs build")
         return
     }
 
@@ -102,7 +109,7 @@ void createVmTemplateJobs(def dsl, Map pipelineConfig) {
 
             Map templateConfigs = MapMerge.merge(envConfigs.findAll { !["jobList"].contains(it.key) }, templateConfigsRaw)
             templateConfigs.buildType = templateConfigs.get("buildType", "medium")
-            println("${logPrefix} templateConfigs=${JsonUtils.printToJsonString(templateConfigs)}")
+            log.info("${logPrefix} templateConfigs=${JsonUtils.printToJsonString(templateConfigs)}")
 
             List templateDistFolderList = templateConfigs.buildDistribution.split('/')[0..-1]
             if (templateDistFolderList.size() > 0) {
@@ -209,7 +216,7 @@ void createVmTemplateJobs(def dsl, Map pipelineConfig) {
             }
             // ref: https://stackoverflow.com/questions/62760438/jenkins-job-dsl-trigger-is-deprecated
             if (templateConfigs?.cronSpecification) {
-                println("${scriptName}: adding to job cronSpecification=[${templateConfigs?.cronSpecification}]")
+                log.info("${scriptName}: adding to job cronSpecification=[${templateConfigs?.cronSpecification}]")
                 jobObject.properties {
                     pipelineTriggers {
                         triggers {
@@ -257,7 +264,7 @@ void createVmTemplateJobs(def dsl, Map pipelineConfig) {
 
                 // ref: https://stackoverflow.com/questions/62760438/jenkins-job-dsl-trigger-is-deprecated
                 if (jobConfigs?.cronSpecification) {
-                    println("${scriptName}: adding to job cronSpecification=[${jobConfigs?.cronSpecification}]")
+                    log.info("${scriptName}: adding to job cronSpecification=[${jobConfigs?.cronSpecification}]")
                     envJobsObject.properties {
                         pipelineTriggers {
                             triggers {

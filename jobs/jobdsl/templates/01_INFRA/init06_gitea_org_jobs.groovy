@@ -1,5 +1,8 @@
 #!/usr/bin/env groovy
 
+// // Get a reference to your shared library's entry point
+// def pipelineAutomationLib = this.getBinding().getProperty('pipelineAutomationLib')
+
 // ref: https://github.com/jenkinsci/configuration-as-code-plugin/blob/master/integrations/src/test/resources/io/jenkins/plugins/casc/SeedJobTest_withGiteaOrganisation.yml
 // ref: https://github.com/jenkinsci/configuration-as-code-plugin/blob/master/demos/jobs/gitea.yaml
 
@@ -7,8 +10,9 @@
 import jenkins.branch.*
 import jenkins.model.Jenkins
 
-import com.dettonville.api.pipeline.utils.MapMerge
-import com.dettonville.api.pipeline.utils.JsonUtils
+import com.dettonville.pipeline.utils.JsonUtils
+import com.dettonville.pipeline.utils.MapMerge
+import com.dettonville.pipeline.utils.logging.JenkinsLogger
 
 // separate configuration from job dsl "seedjob" code
 // ref: https://stackoverflow.com/questions/47443106/jenkins-dsl-parse-yaml-for-complex-processing#54665138
@@ -20,26 +24,29 @@ import org.yaml.snakeyaml.Yaml
 import groovy.transform.Field
 @Field String scriptName = this.class.getName()
 
+@Field JenkinsLogger log = new JenkinsLogger(this, prefix: scriptName)
+//@Field JenkinsLogger log = new JenkinsLogger(this, logLevel: 'DEBUG', prefix: scriptName)
+
 String pipelineConfigYaml = "config.gitea-orgs.yml"
 
 // ref: https://stackoverflow.com/questions/47336502/get-absolute-path-of-the-script-directory-that-is-being-processed-by-job-dsl#47336735
 String configFilePath = "${new File(__FILE__).parent}"
-println("${scriptName}: configFilePath: ${configFilePath}")
+log.info("${scriptName}: configFilePath: ${configFilePath}")
 
 Map seedJobConfigs = new Yaml().load(("${configFilePath}/${pipelineConfigYaml}" as File).text)
-println("${scriptName}: seedJobConfigs=${seedJobConfigs}")
+log.info("${scriptName}: seedJobConfigs=${seedJobConfigs}")
 
 Map giteaOrgConfig = seedJobConfigs.pipelineConfig
-println("${scriptName}: giteaOrgConfig=${giteaOrgConfig}")
+log.info("${scriptName}: giteaOrgConfig=${giteaOrgConfig}")
 
 String baseFolder = giteaOrgConfig.baseFolder
 
-println("${scriptName}: JENKINS_ENV=${JENKINS_ENV}")
+log.info("${scriptName}: JENKINS_ENV=${JENKINS_ENV}")
 
 if (JENKINS_ENV=='PROD') {
     createGiteaOrgFolder(this, giteaOrgConfig)
 
-    println("${scriptName}: Finished creating GITEA Organization Folder jobs")
+    log.info("${scriptName}: Finished creating GITEA Organization Folder jobs")
 }
 
 // ref: https://stackoverflow.com/questions/25039270/how-to-groovy-ify-a-null-check
@@ -53,9 +60,9 @@ def defaultValue(def value, def defaultValue) {
 //  Function definitions from this point forward
 //
 void createGiteaOrgFolder(def dsl, Map config) {
-    String logPrefix = "${scriptName}->createGiteaOrgFolder():"
+    String logPrefix = "createGiteaOrgFolder():"
 
-    println("${logPrefix} config=${config}")
+    log.info("${logPrefix} config=${config}")
 
     String baseFolder = config.baseFolder
     String orgServerUrl = config.serverUrl
@@ -76,10 +83,10 @@ void createGiteaOrgFolder(def dsl, Map config) {
 
     ownerList.each { Map ownerConfigRaw ->
 
-        println("${logPrefix} ownerConfigRaw=${ownerConfigRaw}")
+        log.info("${logPrefix} ownerConfigRaw=${ownerConfigRaw}")
 
         Map ownerConfig = MapMerge.merge(config.findAll { !["ownerList"].contains(it.key) }, ownerConfigRaw)
-//         println("${logPrefix} ownerConfig=${ownerConfig}")
+//         log.info("${logPrefix} ownerConfig=${ownerConfig}")
 
         String orgOwner = ownerConfig.ownerName
         String orgFolder = "${baseFolder}/${orgOwner}"
@@ -160,7 +167,7 @@ void createGiteaOrgFolder(def dsl, Map config) {
         }
 
         if (ownerConfig?.scriptPath) {
-            println("${scriptName}: adding to job scriptPath=[${ownerConfig.scriptPath}]")
+            log.info("${scriptName}: adding to job scriptPath=[${ownerConfig.scriptPath}]")
             folderObject.projectFactories {
                 workflowMultiBranchProjectFactory {
                     // Relative location within the checkout of your Pipeline script.
@@ -171,13 +178,13 @@ void createGiteaOrgFolder(def dsl, Map config) {
 
         // ref: https://stackoverflow.com/questions/62760438/jenkins-job-dsl-trigger-is-deprecated
         if (ownerConfig?.cronSpecification) {
-            println("${scriptName}: adding to job cronSpecification=[${ownerConfig.cronSpecification}]")
+            log.info("${scriptName}: adding to job cronSpecification=[${ownerConfig.cronSpecification}]")
             folderObject.cron {
                 spec(ownerConfig.cronSpecification)
             }
         }
         if (ownerConfig?.periodicInterval) {
-            println("${scriptName}: adding to job periodicInterval=[${ownerConfig.periodicInterval}]")
+            log.info("${scriptName}: adding to job periodicInterval=[${ownerConfig.periodicInterval}]")
             folderObject.triggers {
                 periodicFolderTrigger {
                     interval(ownerConfig.periodicInterval)
@@ -185,7 +192,7 @@ void createGiteaOrgFolder(def dsl, Map config) {
             }
         }
         if (ownerConfig?.childTriggerInterval) {
-            println("${scriptName}: adding to job periodicFolderTriggerInterval=[${ownerConfig.childTriggerInterval}]")
+            log.info("${scriptName}: adding to job periodicFolderTriggerInterval=[${ownerConfig.childTriggerInterval}]")
             // "Scan Organization Folder Triggers" : 5 minutes
             // ref: https://issues.jenkins.io/browse/JENKINS-59642
             // time in milliseconds

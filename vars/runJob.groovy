@@ -1,10 +1,10 @@
 #!/usr/bin/env groovy
 
-import com.dettonville.api.pipeline.utils.MapMerge
+import com.dettonville.pipeline.utils.MapMerge
 
-import com.dettonville.api.pipeline.utils.logging.LogLevel
-import com.dettonville.api.pipeline.utils.logging.Logger
-import com.dettonville.api.pipeline.utils.JsonUtils
+import com.dettonville.pipeline.utils.logging.LogLevel
+import com.dettonville.pipeline.utils.logging.Logger
+import com.dettonville.pipeline.utils.JsonUtils
 //import groovy.json.*
 
 import hudson.model.Result
@@ -49,6 +49,29 @@ Map call(Map rawJobConfigs) {
     // This will copy all files packaged in STASH_NAME to agent workspace root directory.
     // To copy to another agent directory, see [https://github.com/jenkinsci/pipeline-examples]
     log.info("${logPrefix} started")
+
+    // --- Start of new random delay logic ---
+    // Check for maxRandomDelaySeconds in jobParameters
+    Integer maxDelay = 0
+    if (jobConfigs?.maxRandomDelaySeconds) {
+        try {
+            maxDelay = jobConfigs.maxRandomDelaySeconds as Integer
+        } catch (NumberFormatException e) {
+            log.warn("${logPrefix} Invalid value for MaxRandomDelaySeconds: ${jobConfigs.maxRandomDelaySeconds}. Defaulting to 0.")
+            maxDelay = 0
+        }
+    }
+
+    if (maxDelay > 0) {
+        // Generate a random delay between 0 and maxDelay
+        Random rand = new Random()
+        Integer delaySeconds = rand.nextInt(maxDelay + 1) // +1 to include maxDelay
+        log.info("${logPrefix} Waiting for a random delay of ${delaySeconds} seconds before starting the child job...")
+        sleep(time: delaySeconds, unit: 'SECONDS')
+    } else {
+        log.info("${logPrefix} No random delay configured (MaxRandomDelaySeconds is 0 or not set).")
+    }
+    // --- End of new random delay logic ---
 
     boolean result = false
     List paramList=[]

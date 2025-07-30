@@ -1,6 +1,6 @@
 
-import com.dettonville.api.pipeline.environment.EnvironmentConstants
-import com.dettonville.api.pipeline.utils.logging.Logger
+import com.dettonville.pipeline.environment.EnvironmentConstants
+import com.dettonville.pipeline.utils.logging.Logger
 import org.jenkinsci.plugins.scriptsecurity.sandbox.RejectedAccessException
 
 import java.util.regex.Matcher

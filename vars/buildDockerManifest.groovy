@@ -1,11 +1,11 @@
 #!/usr/bin/env groovy
 import groovy.json.JsonOutput
 
-import com.dettonville.api.pipeline.utils.JsonUtils
-import com.dettonville.api.pipeline.utils.MapMerge
+import com.dettonville.pipeline.utils.JsonUtils
+import com.dettonville.pipeline.utils.MapMerge
 
-import com.dettonville.api.pipeline.utils.logging.LogLevel
-import com.dettonville.api.pipeline.utils.logging.Logger
+import com.dettonville.pipeline.utils.logging.LogLevel
+import com.dettonville.pipeline.utils.logging.Logger
 
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field
@@ -57,7 +57,7 @@ def call(Map params=[:]) {
                             // ref: https://www.jenkins.io/doc/pipeline/steps/pipeline-utility-steps/#writeyaml-write-a-yaml-from-an-object-or-objects
                             writeYaml file: config.buildReport, data: jobResults
                         } catch (Exception err) {
-                            log.error("writeFile(${config.buildReport}): exception occurred [${err}]")
+                            log.error("writeYaml(${config.buildReport}): exception occurred [${err}]")
                         }
 
                         archiveArtifacts(
@@ -77,7 +77,7 @@ def call(Map params=[:]) {
                 script {
                     if (config?.alwaysEmailList) {
                         log.info("config.alwaysEmailList=${config.alwaysEmailList}")
-                        sendEmail(currentBuild, env, emailAdditionalDistList: [config.alwaysEmailList.split(",")])
+                        sendEmail(currentBuild, env, emailAdditionalDistList: config.alwaysEmailList.split(","))
                     } else {
                         sendEmail(currentBuild, env)
                     }
@@ -93,7 +93,7 @@ def call(Map params=[:]) {
                 script {
                     if (config?.successEmailList) {
                         log.info("config.successEmailList=${config.successEmailList}")
-                        sendEmail(currentBuild, env, emailAdditionalDistList: [config.successEmailList.split(",")])
+                        sendEmail(currentBuild, env, emailAdditionalDistList: config.successEmailList.split(","))
                     }
                 }
             }
@@ -101,7 +101,7 @@ def call(Map params=[:]) {
                 script {
                     if (config?.failedEmailList) {
                         log.info("config.failedEmailList=${config.failedEmailList}")
-                        sendEmail(currentBuild, env, emailAdditionalDistList: [config.failedEmailList.split(",")])
+                        sendEmail(currentBuild, env, emailAdditionalDistList: config.failedEmailList.split(","))
                     }
                 }
             }
@@ -109,7 +109,7 @@ def call(Map params=[:]) {
                 script {
                     if (config?.failedEmailList) {
                         log.info("config.failedEmailList=${config.failedEmailList}")
-                        sendEmail(currentBuild, env, emailAdditionalDistList: [config.failedEmailList.split(",")])
+                        sendEmail(currentBuild, env, emailAdditionalDistList: config.failedEmailList.split(","))
                     }
                 }
             }
@@ -117,7 +117,7 @@ def call(Map params=[:]) {
                 script {
                     if (config?.changedEmailList) {
                         log.info("config.changedEmailList=${config.changedEmailList}")
-                        sendEmail(currentBuild, env, emailAdditionalDistList: [config.changedEmailList.split(",")])
+                        sendEmail(currentBuild, env, emailAdditionalDistList: config.changedEmailList.split(","))
                     }
                 }
             }
@@ -144,6 +144,7 @@ Map loadPipelineConfig(Map params) {
     config.get('wait', true)
     config.get('failFast', false)
     config.get('propagate', config.failFast)
+    config.get('maxRandomDelaySeconds', "0")
 
     config.get('childJobTimeout', "4")
     config.get('childJobTimeoutUnit', "HOURS")
@@ -298,7 +299,7 @@ Map buildAndPublishImageGroups(Map config) {
 
     // ref: https://stackoverflow.com/questions/18380667/join-list-of-boolean-elements-groovy
     // ref: https://blog.mrhaki.com/2009/09/groovy-goodness-using-inject-method.html
-    boolean failed = (jobResults.groups.size()>0) ? jobResults.groups.inject(false) { a, k, v -> a && v.failed } : false
+    boolean failed = (jobResults.groups.size()>0) ? jobResults.groups.inject(false) { a, k, v -> a || v.failed } : false
     jobResults.failed = failed
 
     log.debug("finished: jobResults=${JsonUtils.printToJsonString(jobResults)}")
@@ -310,20 +311,23 @@ Map buildAndPublishImageList(Map config) {
     Map parallelJobs = [:]
     Map jobResults = [:]
     jobResults.items = [:]
-    config.buildImageList.each { Map buildConfigRaw ->
+    config.buildImageList.eachWithIndex { Map buildConfigRaw, index ->
         log.debug("buildConfigRaw=${JsonUtils.printToJsonString(buildConfigRaw)}")
 
         Map buildConfig = config.findAll { !["buildImageList"].contains(it.key) } + buildConfigRaw
 
+        String buildJobId = "${buildConfig.buildImageLabel}-${index}"
+        buildConfig.buildJobId = buildJobId
+
         log.debug("buildConfig=${JsonUtils.printToJsonString(buildConfig)}")
 
         if (config?.runInParallel && config.runInParallel.toBoolean()) {
-            parallelJobs["split-${buildConfig.buildImageLabel}"] = {
-                jobResults.items.put(buildConfig.buildImageLabel, runDockerBuildManifest(buildConfig))
+            parallelJobs["split-${buildConfig.buildJobId}"] = {
+                jobResults.items.put(buildConfig.buildJobId, runDockerBuildManifest(buildConfig))
             }
         } else {
-            stage("build and publish ${buildConfig.buildImageLabel}") {
-                jobResults.items.put(buildConfig.buildImageLabel, runDockerBuildManifest(buildConfig))
+            stage("build and publish ${buildConfig.buildImageLabel}-${index}") {
+                jobResults.items.put(buildConfig.buildJobId, runDockerBuildManifest(buildConfig))
             }
         }
     }
@@ -337,7 +341,7 @@ Map buildAndPublishImageList(Map config) {
 
     // ref: https://stackoverflow.com/questions/18380667/join-list-of-boolean-elements-groovy
     // ref: https://blog.mrhaki.com/2009/09/groovy-goodness-using-inject-method.html
-    boolean failed = (jobResults.items.size()>0) ? jobResults.items.inject(false) { a, k, v -> a && v.failed } : false
+    boolean failed = (jobResults.items.size()>0) ? jobResults.items.inject(false) { a, k, v -> a || v.failed } : false
     jobResults.failed = failed
 
     log.debug("finished: jobResults=${JsonUtils.printToJsonString(jobResults)}")
@@ -384,13 +388,14 @@ Map runBuildAndPublishImageJob(Map config) {
         "BuildImageLabel",
         "BuildDir",
         "BuildPath",
+        "BuildTags",
         "BuildArgs",
         "DockerFile",
         "ChangedEmailList",
         "AlwaysEmailList",
         "FailedEmailList",
         "Timeout",
-        "TimeoutUnits"
+        "TimeoutUnit",
     ]
 
     log.debug("${logPrefix} GIT_URL=${GIT_URL}")
@@ -398,7 +403,7 @@ Map runBuildAndPublishImageJob(Map config) {
 
     Map jobParameters = [:]
     jobParameters.Timeout = config.childJobTimeout
-    jobParameters.TimeoutUnits = config.childJobTimeoutUnit
+    jobParameters.TimeoutUnit = config.childJobTimeoutUnit
 
     jobParameters.GitRepoUrl = GIT_URL
     jobParameters.GitRepoBranch = GIT_BRANCH
@@ -410,6 +415,17 @@ Map runBuildAndPublishImageJob(Map config) {
     jobParameters.BuildImageLabel = config.buildImageLabel
     jobParameters.BuildDir = config.buildDir
     jobParameters.BuildPath = config.buildPath
+
+    if (config?.buildTags) {
+        if (config.buildTags instanceof List) {
+            jobParameters.BuildTags = config.buildTags.join(",")
+        } else if (config.buildTags instanceof String) {
+            jobParameters.BuildTags = config.buildTags
+        } else {
+            log.error("unsupported buildTags type : " + config.buildTags.getClass())
+        }
+    }
+
 //     jobParameters.BuildArgs = JsonUtils.printToJsonString(buildArgs)
     jobParameters.BuildArgs = JsonOutput.toJson(buildArgs)
 
@@ -423,6 +439,7 @@ Map runBuildAndPublishImageJob(Map config) {
     jobConfigs.wait = config.wait
     jobConfigs.failFast = config.failFast
     jobConfigs.logLevel = config.logLevel
+    jobConfigs.maxRandomDelaySeconds = config.maxRandomDelaySeconds
 
     log.debug("${logPrefix} jobConfigs=${JsonUtils.printToJsonString(jobConfigs)}")
 

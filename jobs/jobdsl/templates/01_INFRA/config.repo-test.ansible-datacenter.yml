@@ -6,8 +6,11 @@ pipelineConfig:
   repoUrl: "git@bitbucket.org:lj020326/ansible-datacenter.git"
   gitCredentialsId: "bitbucket-ssh-jenkins"
   mirrorRepoDir: "/var/jenkins_home/git_repo_references/ansible-datacenter/ansible-datacenter.git"
+
+  buildAllBranches: true
   useSuppressionStrategy: false
   initializeJobMode: false
+
   periodicFolderTriggerInterval: "2m"
   skipInitialBuildOnFirstBranchIndexing: false
   runEnvMap:

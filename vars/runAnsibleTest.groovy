@@ -1,265 +1,196 @@
 #!/usr/bin/env groovy
-import com.dettonville.api.pipeline.utils.JsonUtils
-import com.dettonville.api.pipeline.utils.Utilities
-import com.dettonville.api.pipeline.utils.MapMerge
-import com.dettonville.api.pipeline.utils.logging.LogLevel
-import com.dettonville.api.pipeline.utils.logging.Logger
 
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+/**
+ * Runs 'ansible-test' with specified testing type, *a single* Ansible core, and *a single* Python version
+ *
+ * This function provides similar capabilities to the 'ansible-community/ansible-test-gh-action'.
+ * https://github.com/ansible-community/ansible-test-gh-action/blob/main/action.yml
+ *
+ * @param config A map containing configuration options:
+ * - ansibleVersion (String, REQUIRED): A single Ansible core version to test against.
+ * - pythonVersion (String, REQUIRED): A single Python version to test under.
+ * - testingType (String, optional): The type of ansible-test to run (e.g., 'sanity', 'units', 'integration').
+ * Defaults to 'sanity'.
+ * - testDeps (String or List<String>, optional): A collection name or list of collection names.
+ * - preTestCmd (String, optional): A shell command to execute before 'ansible-test' runs.
+ */
 
-// import jenkins.model.CauseOfInterruption.*
-import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException
+import com.dettonville.pipeline.utils.logging.LogLevel
+import com.dettonville.pipeline.utils.logging.Logger
+import com.dettonville.pipeline.utils.JsonUtils
 
-// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field
-@Field Logger log = new Logger(this, LogLevel.INFO)
+// @Field Logger log = new Logger(this)
+@Field Logger log = new Logger(this, LogLevel.DEBUG)
 
-def call(Map params=[:]) {
-
-    Map config=loadPipelineConfig(params)
-    String agentLabel = getJenkinsAgentLabel(config.jenkinsNodeLabel)
-//     def agentLabel = getJenkinsAgentLabel(config.jenkinsNodeLabel)
-//     String ansibleTool = 'ansible-venv'
-    String ansibleLogSummary = "No results"
-
-    pipeline {
-        agent {
-            label agentLabel as String
-        }
-        options {
-            disableConcurrentBuilds()
-            timestamps()
-            buildDiscarder(logRotator(numToKeepStr: '10'))
-            skipDefaultCheckout(config.skipDefaultCheckout)
-            timeout(time: config.timeout, unit: config.timeoutUnit)
-        }
-        stages {
-            stage('Run collections and roles Install') {
-                when {
-                    expression { config.ansibleCollectionsRequirements || config.ansibleRolesRequirements }
-                }
-                tools {
-                    // ref: https://webapp.chatgpt4google.com/s/MzY5MjYw
-                    // ref: https://stackoverflow.com/questions/47895668/how-to-select-multiple-jdk-version-in-declarative-pipeline-jenkins#48368506
-                    ansible "${config.ansibleInstallation}"
-                }
-                steps {
-                    script {
-                        // install galaxy roles
-                        List ansibleGalaxyArgList = []
-                        if (config.ansibleGalaxyIgnoreCerts) {
-                            ansibleGalaxyArgList.push("--ignore-certs")
-                        }
-                        if (config.ansibleGalaxyForceOpt) {
-                            ansibleGalaxyArgList.push("--force")
-                        }
-                        String ansibleGalaxyArgs = ansibleGalaxyArgList.join(" ")
-
-                        withCredentials(config.ansibleSecretVarsList) {
-                            sh "env | sort"
-                            sh "${config.ansibleGalaxyCmd} --version"
-                            if (fileExists(config.ansibleCollectionsRequirements)) {
-                                sh "${config.ansibleGalaxyCmd} collection install ${ansibleGalaxyArgs} -r ${config.ansibleCollectionsRequirements}"
-                            }
-                            if (fileExists(config.ansibleRolesRequirements)) {
-                                sh "${config.ansibleGalaxyCmd} install ${ansibleGalaxyArgs} -r ${config.ansibleRolesRequirements}"
-                            }
-                        }
-                    }
-                }
-            }
-
-            stage('Run Ansible Playbook') {
-                tools {
-                    // ref: https://webapp.chatgpt4google.com/s/MzY5MjYw
-                    // ref: https://stackoverflow.com/questions/47895668/how-to-select-multiple-jdk-version-in-declarative-pipeline-jenkins#48368506
-                    ansible "${config.ansibleInstallation}"
-                }
-                steps {
-                    script {
-
-                        dir(config.collectionDir) {
-                            sh "${config.ansibleCmd} --version"
-                            // ref: https://stackoverflow.com/questions/44022775/jenkins-ignore-failure-in-pipeline-build-step#47789656
-                            try {
-                                catchError{
-
-                                    List ansibleTestCommandList = []
-                                    ansibleTestCommandList.push("ansible-test")
-                                    ansibleTestCommandList.push("${config.ansibleTestCommand}")
-                                    ansibleTestCommandList.push("${config.ansibleTestVerbosity} --color")
-                                    ansibleTestCommandList.push("--python ${config.testPythonVersion}")
-                                    ansibleTestCommandList.push("${config.target}")
-
-                                    String ansibleTestCommand = ansibleTestCommandList.join(" ")
-
-                                    sh "${ansibleTestCommand}"
-//                                     ansibleTestUtil.withTestConfigVault(config.ansibleVaultCredId) {
-//                                         ansibleTestUtil.runAnsibleTest(
-//                                             command="integration",
-//                                             color = "auto",
-//                                             verbosity="-v",
-//                                             pythonVersion="3.6",
-//                                             target = "update_hosts"
-//                                         )
-//                                     }
-                                    }
-                                } catch (hudson.AbortException ae) {
-                                    // handle an AbortException
-                                    // ref: https://github.com/jenkinsci/pipeline-model-definition-plugin/blob/master/pipeline-model-definition/src/main/groovy/org/jenkinsci/plugins/pipeline/modeldefinition/Utils.groovy
-//                                     return getResultFromException(ae)
-                                    if (manager.build.getAction(InterruptedBuildAction.class) ||
-                                        // this ambiguous condition means a user _probably_ aborted, not sure if this one is really necessary
-                                        (error instanceof org.jenkinsci.plugins.workflow.steps.FlowInterruptedException && error.causes.size() == 0)) {
-                                        throw error
-                                    } else {
-                                        ansibleLogSummary = "ansible.execPlaybook error: " + e.getMessage()
-                                        log.error("ansible.execPlaybook error: " + e.getMessage())
-                                    }
-                                    currentBuild.result = 'FAILURE'
-                                }
-                                if (fileExists("ansible.log")) {
-                                    ansibleLogSummary = sh(returnStdout: true, script: "tail -n 50 ansible.log").trim()
-                                }
-                                log.info("**** currentBuild.result=${currentBuild.result}")
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        post {
-            always {
-                script {
-//                     sendEmailReport(config.emailFrom, config.emailDist, currentBuild, 'ansible.log')
-//                     def build_result = "${currentBuild.result ? currentBuild.result : 'SUCCESS'}"
-//                     emailext (
-//                         to: "${config.emailDist}",
-//                         from: "${config.emailFrom}",
-//                         subject: "BUILD ${build_result}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-//                         body: "${env.EMAIL_BODY} \n\nBuild Log:\n${ansibleLogSummary}",
-//                     )
-                    sendEmail(currentBuild, env)
-                }
-
-//                 echo "Empty current workspace dir"
-//                 deleteDir()
-            }
-        }
-    }
-
-} // body
-
-// ref: https://github.com/jenkinsci/pipeline-model-definition-plugin/blob/master/pipeline-model-definition/src/main/groovy/org/jenkinsci/plugins/pipeline/modeldefinition/Utils.groovy
-static Result getResultFromException(Throwable e) {
-    // ref: https://issues.jenkins.io/browse/JENKINS-34376
-    // ref: https://gist.github.com/stephansnyt/3ad161eaa6185849872c3c9fce43ca81#file-exceptionhandle-groovy
-//     if (e.getMessage().contains('script returned exit code 143')) {
-//         throw new jenkins.model.CauseOfInterruption.UserInterruptedException(e)
-//     } else {
-//         log.error("ansible.execPlaybook error: " + e.getMessage())
-//     }
-//     if (manager.build.getAction(InterruptedBuildAction.class) ||
-//         // this ambiguous condition means a user _probably_ aborted, not sure if this one is really necessary
-//         (error instanceof org.jenkinsci.plugins.workflow.steps.FlowInterruptedException && error.causes.size() == 0)) {
-//         throw error
-//     } else {
-//         log.error("ansible.execPlaybook error: " + e.getMessage())
-//     }
-
-    if (e instanceof FlowInterruptedException) {
-        return ((FlowInterruptedException)e).result
+// Helper function to get Docker image tag
+String getImageTag(Map config) {
+    String tag = ""
+    if (config.ansibleVersion == 'latest') {
+        tag = "latest-py${config.pythonVersion}"
+    } else if (config.ansibleVersion == 'devel') {
+        tag = "devel-py${config.pythonVersion}"
     } else {
-        return Result.FAILURE
+        tag = "${config.ansibleVersion}-py${config.pythonVersion}"
     }
+    return "${config.baseRegistry}/${config.baseImageName}:${tag}"
 }
 
-//@NonCPS
-Map loadPipelineConfig(Map params) {
-    Map config = [:]
+// Core logic for running a single ansible-test
+// This function needs to be callable from outside its original 'call' context.
+// Making it a direct global variable or a separate function within the same file.
+// For simplicity, we'll keep it within this file and ensure 'call' sets up and invokes it.
+Map runSingleAnsibleTest(Map config) {
+    Map jobResult = [:]
 
-    // copy immutable params maps to mutable config map
-    params.each { key, value ->
-        log.debug("params[${key}]=${value}")
-        key=Utilities.decapitalize(key)
-        if (value!="") {
-            config[key]=value
+    // Crucially, this 'call' expects a single ansibleVersion and pythonVersion
+    // from the matrix iteration in runMatrixStages.groovy
+    if (!config.ansibleVersion || !config.pythonVersion) {
+        error "runAnsibleTest must be called with 'ansibleVersion' and 'pythonVersion' for matrix execution."
+    }
+
+    config.dockerImage = getImageTag(config)
+    String logPrefix = "[${config.dockerImage}]:"
+
+    log.info("${logPrefix} Running tests inside docker container: ${config.dockerImage}")
+
+//     docker.image(config.dockerImage).inside {
+    docker.image(config.dockerImage).inside("-v /var/run/docker.sock:/var/run/docker.sock --privileged") {
+
+        if (config.testDeps) {
+            config.dependsCollectionDir = "${config.targetCollectionDir}/ansible_collections"
+            sh "mkdir -p ${config.dependsCollectionDir}"
+
+            log.info("${logPrefix} installing test dependencies")
+            def depsToInstall = []
+            if (config.testDeps instanceof String) {
+                depsToInstall = config.testDeps.split('\\r?\\n').findAll { it.trim() != '' }
+                if (depsToInstall.isEmpty()) {
+                    depsToInstall = [config.testDeps.trim()]
+                }
+            } else if (config.testDeps instanceof List) {
+                depsToInstall = config.testDeps.findAll { it.trim() != '' }
+            } else {
+                error "${logPrefix} Unsupported type for 'testDeps'. Must be a String or List<String>."
+            }
+
+            for (dep in depsToInstall) {
+//                 log.info("${logPrefix} installing collection: ${dep} to ${config.collectionsBaseDir}")
+//                 sh "find ${config.collectionsBaseDir}/ -maxdepth 3"
+                log.info("${logPrefix} installing collection: ${dep} to ${pwd()}")
+                sh "find . -maxdepth 3"
+
+//                     sh "set -x; ansible-galaxy collection install ${dep} -p ${config.collectionsBaseDir}; set +x"
+//                     sh "set -x; ansible-galaxy collection install ${dep}; set +x"
+                sh "set -x; ansible-galaxy collection install ${dep} -p .; set +x"
+
+                log.info("${logPrefix} content in ${config.collectionsBaseDir} after installing ${dep}")
+                sh "find . -maxdepth 3"
+//                 sh "find ${config.collectionsBaseDir}/ -maxdepth 3"
+            }
+        }
+
+        if (config.preTestCmd) {
+            log.info("${logPrefix} executing pre-test-cmd: '${config.preTestCmd}'")
+            sh "${config.preTestCmd}"
+        }
+
+//         String ansible_collections_path="${WORKSPACE}"
+//         log.info("${logPrefix} ansible_collections_path=${ansible_collections_path}")
+
+        log.info("${logPrefix} running 'ansible-test ${config.testingType}' For ansible ${config.ansibleVersion} Under python ${config.pythonVersion}")
+        sh("mkdir -p ${config.testResultsDir}")
+//         sh("ansible-test --version")
+
+        List testCmdList = []
+//         testCmdList.push("env ANSIBLE_TEST_CONTENT_ROOT=${config.targetCollectionDir}")
+//         testCmdList.push("env ANSIBLE_TEST_CONTENT_ROOT=${pwd()}")
+        testCmdList.push("ansible-test")
+        testCmdList.push("${config.testingType}")
+//         testCmdList.push("--requirements")
+        if (config?.debugVerbosity) {
+            testCmdList.push("${config.debugVerbosity}")
+        }
+        testCmdList.push("--color no")
+        if (config.testingType=="sanity") {
+            testCmdList.push("--junit")
+        } else if (config.testingType=="units") {
+//             testCmdList.push("--containers '{}'")
+            testCmdList.push("--truncate 0")
+            testCmdList.push("--coverage")
+            testCmdList.push("--docker")
+//             testCmdList.push("--docker default")
+        }
+        testCmdList.push("--python ${config.pythonVersion}")
+        testCmdList.push("2>&1 | tee ${config.testResultsDir}/ansible-test-console.txt")
+//         testCmdList.push("| tee ${config.testResultsDir}/ansible-test-console.txt")
+//         testCmdList.push("|| true") // To ensure the shell command itself doesn't fail the pipeline immediately
+
+        String testCmd = testCmdList.join(' ')
+        try {
+            sh(testCmd)
+            jobResult.buildStatus = "SUCCESSFUL"
+            jobResult.failed = false
+            log.info("${logPrefix} ansible-test completed successfully.")
+
+//             archiveArtifacts(
+//                 allowEmptyArchive: true,
+//                 artifacts: "${config.testResultsDir}/ansible-test-console.txt",
+//                 fingerprint: true
+//             )
+
+            sh("find ${config.testResultsDir} -type f")
+            archiveArtifacts(
+                allowEmptyArchive: true,
+                artifacts: "${config.testResultsDir}/**",
+                fingerprint: true
+            )
+            junit(testResults: "${config.testResultsDir}/*.xml",
+                  skipPublishingChecks: true,
+                  allowEmptyResults: true
+            )
+        } catch (Exception e) {
+            archiveArtifacts(
+                allowEmptyArchive: true,
+                artifacts: "${config.testResultsDir}/ansible-test-console.txt",
+                fingerprint: true
+            )
+
+            jobResult.buildStatus = "FAILED"
+            jobResult.failed = true
+            log.error("${logPrefix} ansible-test failed: " + e.getMessage())
+            // Do not re-throw here if failFast is handled by the parallel step
+            // or if you want to collect all results before failing the build.
+            // For failFast, the Jenkins 'parallel' step will handle the abortion.
         }
     }
-
-    log.setLevel(config.logLevel)
-
-    if (config.debugPipeline) {
-        log.setLevel(LogLevel.DEBUG)
-    }
-
-    config.get('jenkinsNodeLabel',"ansible")
-    config.get('logLevel', "INFO")
-    config.get('debugPipeline', false)
-    config.get('timeout', 3)
-    config.get('timeoutUnit', 'HOURS')
-
-//    config.emailDist = config.emailDist ?: "lee.james.johnson@gmail.com"
-    config.get('emailDist',"lee.james.johnson@gmail.com")
-    // config.alwaysEmailDist = config.alwaysEmailDist ?: "lee.james.johnson@gmail.com"
-    config.emailFrom = config.emailFrom ?: "admin+ansible@dettonville.com"
-
-    config.get('skipDefaultCheckout', false)
-    config.get('gitPerformCheckout', !config.get('skipDefaultCheckout',false))
-    config.get('gitBranch', '')
-    config.get('gitRepoUrl', '')
-    config.get('gitCredId', '')
-
-    config.get('ansibleCollectionsRequirements', './collections/requirements.yml')
-//     config.get('ansibleRolesRequirements', './roles/requirements.yml')
-//    config.get('ansibleInventory', 'inventory')
-//    config.get('ansibleInventory', 'hosts.ini')
-    config.get('ansibleInventory', 'hosts.yml')
-    config.ansibleInventoryDir = config.ansibleInventory.take(config.ansibleInventory.lastIndexOf('/'))
-
-    config.get('ansibleGalaxyIgnoreCerts',false)
-    config.get('ansibleGalaxyForceOpt', false)
-
-//     config.get('ansibleSshCredId', 'jenkins-ansible-ssh')
-    config.get('ansibleVaultCredId', 'ansible-vault-password-file')
-    config.get('ansibleTags', '')
-
-    String ansibleGalaxyCmd = "ansible-galaxy"
-    String ansibleCmd = "ansible"
-
-    config.get('ansibleInstallation', 'ansible-venv')
-    config.ansibleGalaxyCmd = ansibleGalaxyCmd
-    config.ansibleCmd = ansibleCmd
-
-    config.get('ansibleTestCommand', 'integration')
-    config.get('ansibleTestVerbosity', '-v')
-    config.get('ansibleTestPythonVersion', '3.9')
-    config.get('ansibleTestTarget', 'update_hosts')
-
-    config.get('ansibleEnvVarsList', [])
-
-    // require SSH credentials for some ansible jobs (e.g., deploy-cacerts)
-    // ref: https://emilwypych.com/2019/06/15/how-to-pass-credentials-to-jenkins-pipeline/
-//     List secretVarsListDefault = []
-//     List secretVarsListDefault=[
-//         usernamePassword(credentialsId: 'ansible-ssh-password-linux', passwordVariable: 'ANSIBLE_SSH_PASSWORD', usernameVariable: 'ANSIBLE_SSH_USERNAME'),
-//         sshUserPrivateKey(credentialsId: 'bitbucket-ssh-jenkins')
-//     ]
-    List secretVarsListDefault=[
-        file(credentialsId: config.ansibleGalaxyTokenCredId, variable: 'ANSIBLE_GALAXY_TOKEN_PATH')
-    ]
-
-    config.get('ansibleSecretVarsList', secretVarsListDefault)
-    
-    config.collectionDir=config.get('collectionDir', 'ansible_collections')
-
-    log.debug("params=${params}")
-    log.debug("config=${config}")
-
-    return config
+    return jobResult
 }
 
-String getJenkinsAgentLabel(String jenkinsLabel) {
-    // ref: https://stackoverflow.com/questions/46630168/in-a-declarative-jenkins-pipeline-can-i-set-the-agent-label-dynamically
-    return "${-> println 'Right Now the Jenkins Agent Label Name is ' + jenkinsLabel; return jenkinsLabel}"
+// The main entry point for the global variable function
+def call(Map params = [:]) {
+    // This 'call' method will now execute runSingleAnsibleTest for a single combination.
+    // It is effectively one "cell" in the matrix.
+
+    Map config = params.clone()
+    log.debug("config=${JsonUtils.printToJsonString(config)}")
+
+    // Apply default values if not provided by the matrix driver
+    config.get("baseRegistry", "media.johnson.int:5000")
+    config.get("baseImageName", "ansible/ansible-test")
+    config.get("testingType", "sanity") // Default, but should be overridden by runAnsibleTestManifest
+    config.get("testDeps", [])
+    config.get("preTestCmd", "")
+    config.get('testResultsDir', 'tests/output/junit')
+    config.get('testResultsJunitFile', 'ansible-test-sanity.xml')
+
+    Map result = [:]
+
+    // Execute the single test run
+    dir(config.targetCollectionDir) {
+        result = runSingleAnsibleTest(config)
+    }
+
+    // You might want to return the result, so the calling function (runMatrixStages) can collect it.
+    return result
 }

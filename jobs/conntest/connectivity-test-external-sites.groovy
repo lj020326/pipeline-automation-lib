@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 
-@Library("pipeline-automation-lib@develop")_
+@Library("pipelineAutomationLib@develop")_
 
 // once every 4 hours every day
 //cron_cfg="H(0-15) */4 * * *"

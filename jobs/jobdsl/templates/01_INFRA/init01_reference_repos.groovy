@@ -1,16 +1,27 @@
 
+// // Get a reference to your shared library's entry point
+// def pipelineAutomationLib = this.getBinding().getProperty('pipelineAutomationLib')
+
 // ref: https://stackoverflow.com/questions/36199072/how-to-get-the-script-name-in-groovy
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field
+
+import com.dettonville.pipeline.utils.MapMerge
+import com.dettonville.pipeline.utils.JsonUtils
+import com.dettonville.pipeline.utils.logging.JenkinsLogger
+
 @Field String scriptName = this.class.getName()
+
+@Field JenkinsLogger log = new JenkinsLogger(this, prefix: scriptName)
+//@Field JenkinsLogger log = new JenkinsLogger(this, logLevel: 'DEBUG', prefix: scriptName)
 
 String baseFolder = "INFRA"
 
-println("${scriptName}: JENKINS_ENV=${JENKINS_ENV}")
+log.info("${scriptName}: JENKINS_ENV=${JENKINS_ENV}")
 
 jobFolder = "${baseFolder}/bootstrap-reference-repos"
 
-println("${scriptName}: Creating ${jobFolder} job")
+log.info("${scriptName}: Creating ${jobFolder} job")
 
 pipelineJob(jobFolder) {
     parameters {
@@ -32,7 +43,7 @@ pipelineJob(jobFolder) {
 
 
 jobFolder = "${baseFolder}/bootstrap-all-reference-repos"
-println("${scriptName}: Creating ${jobFolder} job")
+log.info("${scriptName}: Creating ${jobFolder} job")
 
 pipelineJob(jobFolder) {
     definition {
@@ -52,4 +63,4 @@ pipelineJob(jobFolder) {
 //     }
 }
 
-println("${scriptName}: Finished creating reference repo jobs")
+log.info("${scriptName}: Finished creating reference repo jobs")

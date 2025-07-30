@@ -1,12 +1,12 @@
 
-import com.dettonville.api.pipeline.environment.EnvironmentConstants
-import com.dettonville.api.pipeline.utils.logging.Logger
-import com.dettonville.api.pipeline.utils.maps.MapUtils
-import com.dettonville.api.pipeline.versioning.ComparableVersion
+import com.dettonville.pipeline.environment.EnvironmentConstants
+import com.dettonville.pipeline.utils.logging.Logger
+import com.dettonville.pipeline.utils.maps.MapUtils
+import com.dettonville.pipeline.versioning.ComparableVersion
 import org.apache.maven.model.Model
 import org.apache.maven.model.Plugin
 
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field

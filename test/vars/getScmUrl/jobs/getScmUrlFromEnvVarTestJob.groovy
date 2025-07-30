@@ -19,9 +19,9 @@
  */
 package vars.getScmUrl.jobs
 
-import com.dettonville.api.pipeline.environment.EnvironmentConstants
+import com.dettonville.pipeline.environment.EnvironmentConstants
 
-import static com.dettonville.api.pipeline.utils.ConfigConstants.SCM
+import static com.dettonville.pipeline.utils.ConfigConstants.SCM
 
 /**
  * Runs execNpm step  with default configuration by providing only the scm url

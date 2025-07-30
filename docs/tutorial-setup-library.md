@@ -64,7 +64,7 @@ Here we use the project based shared library approach.
   ```groovy
    @Library ('pipeline-library')
 
-   import com.dettonville.api.pipeline.utils.logging.*
+   import com.dettonville.pipeline.utils.logging.*
 
    Logger.init(steps, LogLevel.INFO)
    Logger log = new Logger(this)

@@ -1,11 +1,11 @@
 #!/usr/bin/env groovy
 
-@Library("pipeline-automation-lib@develop")
+@Library("pipelineAutomationLib@develop")
 
-import com.dettonville.api.pipeline.utils.logging.LogLevel
-import com.dettonville.api.pipeline.utils.logging.Logger
+import com.dettonville.pipeline.utils.logging.LogLevel
+import com.dettonville.pipeline.utils.logging.Logger
 
-import com.dettonville.api.pipeline.utils.Utilities
+import com.dettonville.pipeline.utils.Utilities
 
 //import groovy.time.Duration
 import java.time.*

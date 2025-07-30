@@ -19,7 +19,7 @@
  */
 package vars.transferScp.jobs
 
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 /**
  * Runs the transferScp step with ssh credential auto lookup (key + username)

@@ -19,7 +19,7 @@
  */
 package vars.credentials.lookupScmCredential
 
-import com.dettonville.api.pipeline.credentials.Credential
+import com.dettonville.pipeline.credentials.Credential
 import com.dettonville.testing.jenkins.pipeline.LibraryIntegrationTestBase
 import org.junit.Assert
 import org.junit.Test

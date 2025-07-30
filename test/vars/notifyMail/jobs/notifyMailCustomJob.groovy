@@ -19,7 +19,7 @@
  */
 package vars.notifyMail.jobs
 
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 /**
  * Runs notifyMail step with custom configuration (opposite of default configuration)

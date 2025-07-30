@@ -20,8 +20,8 @@
 package vars.execMaven
 
 import com.dettonville.testing.jenkins.pipeline.LibraryIntegrationTestBase
-import com.dettonville.api.pipeline.environment.EnvironmentConstants
-import com.dettonville.api.pipeline.managedfiles.ManagedFileConstants
+import com.dettonville.pipeline.environment.EnvironmentConstants
+import com.dettonville.pipeline.managedfiles.ManagedFileConstants
 import org.junit.Test
 
 import static com.dettonville.testing.jenkins.pipeline.recorder.StepRecorderAssert.assertOneShellCommand

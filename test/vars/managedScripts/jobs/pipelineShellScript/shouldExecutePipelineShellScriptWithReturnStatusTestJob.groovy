@@ -19,8 +19,8 @@
  */
 package vars.managedScripts.jobs.pipelineShellScript
 
-import com.dettonville.api.pipeline.shell.CommandBuilder
-import com.dettonville.api.pipeline.shell.CommandBuilderImpl
+import com.dettonville.pipeline.shell.CommandBuilder
+import com.dettonville.pipeline.shell.CommandBuilderImpl
 
 /**
  * @return The script

@@ -22,7 +22,7 @@ package vars.wrap
 import com.dettonville.testing.jenkins.pipeline.LibraryIntegrationTestBase
 import com.dettonville.testing.jenkins.pipeline.StepConstants
 import com.dettonville.testing.jenkins.pipeline.recorder.StepRecorderAssert
-import com.dettonville.api.pipeline.utils.logging.Logger
+import com.dettonville.pipeline.utils.logging.Logger
 import org.junit.Assert
 import org.junit.Test
 

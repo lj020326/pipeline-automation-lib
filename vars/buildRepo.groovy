@@ -3,10 +3,10 @@
 // ref: https://github.com/tomasbjerre/jenkins-configuration-as-code-sandbox/blob/master/vars/buildRepo.groovy
 
 import groovy.json.*
-import com.dettonville.api.pipeline.jenkinssandbox.*
+import com.dettonville.pipeline.jenkinssandbox.*
 
 import static groovy.json.JsonOutput.*
-import static com.dettonville.api.pipeline.jenkinssandbox.JenkinsSandboxUtils.*
+import static com.dettonville.pipeline.jenkinssandbox.JenkinsSandboxUtils.*
 
 
 def getChangelogTemplateString(params) {

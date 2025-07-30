@@ -1,10 +1,10 @@
 #!/usr/bin/env groovy
 
-import com.dettonville.api.pipeline.utils.logging.LogLevel
-import com.dettonville.api.pipeline.utils.logging.Logger
+import com.dettonville.pipeline.utils.logging.LogLevel
+import com.dettonville.pipeline.utils.logging.Logger
 
-import com.dettonville.api.pipeline.utils.JsonUtils
-import com.dettonville.api.pipeline.utils.Utilities
+import com.dettonville.pipeline.utils.JsonUtils
+import com.dettonville.pipeline.utils.Utilities
 
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field
@@ -85,4 +85,3 @@ def call(Map config=[:]) {
     log.info("finished")
 
 }
-

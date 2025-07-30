@@ -1,9 +1,9 @@
 
-import com.dettonville.api.pipeline.shell.CommandBuilder
-import com.dettonville.api.pipeline.shell.CommandBuilderImpl
-import com.dettonville.api.pipeline.utils.logging.LogLevel
+import com.dettonville.pipeline.shell.CommandBuilder
+import com.dettonville.pipeline.shell.CommandBuilderImpl
+import com.dettonville.pipeline.utils.logging.LogLevel
 
-import static com.dettonville.api.pipeline.utils.ConfigConstants.*
+import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 /**
  * Adapter function to allow execution by providing a config map.

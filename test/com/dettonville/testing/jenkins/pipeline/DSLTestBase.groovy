@@ -19,8 +19,8 @@
  */
 package com.dettonville.testing.jenkins.pipeline
 
-import com.dettonville.api.pipeline.utils.logging.LogLevel
-import com.dettonville.api.pipeline.utils.logging.Logger
+import com.dettonville.pipeline.utils.logging.LogLevel
+import com.dettonville.pipeline.utils.logging.Logger
 import org.junit.Before
 
 /**
