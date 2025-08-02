@@ -83,7 +83,7 @@ Configure the library in jenkins as seen below.
 Some of the most often used pipelines in this library include:
 
 * Run Ansible Playbook
-  * [runAnsibleParamWrapper](./vars/runAnsibleParamWrapper.groovy) - used by pipelines within a defined node hierarchy (e.g., environment and tag) to collect node parameters to start the common [ansible playbook job](./vars/runAnsiblePlaybook.groovy).<br>
+  * [runAnsibleParamWrapper](./vars/runAnsibleParamWrapper.groovy) - used by pipelines within a defined node hierarchy (e.g., environment and tag) to collect node parameters to start the common [ansible playbook job](./vars/runAnsiblePipeline.groovy).<br>
     See [here](https://github.com/lj020326/ansible-datacenter/blob/main/README.md) for document explaining example setup and usage of this pipeline.<br>
   * [runAnsibleDevJob](./vars/runAnsibleDevJob.groovy) - used to develop ansible playbooks against a branch of the ansible source repo.
 * Build Vm Template

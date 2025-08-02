@@ -35,18 +35,19 @@ def call(Map params=[:]) {
                     script {
                         String gitBranch = java.net.URLDecoder.decode(env.GIT_BRANCH, "UTF-8")
                         config.gitBranch = config.get('gitBranch',"${gitBranch}")
-                        config.gitCommitHash = env.GIT_COMMIT
+                        config.gitCommitId = env.GIT_COMMIT
 
                         log.info("config=${JsonUtils.printToJsonString(config)}")
 
                         // ref: https://www.jenkins.io/doc/pipeline/steps/stashNotifier/
-                        bitbucketStatusNotify(
-                                buildKey: config.buildTestName,
-                                buildName: config.buildTestName,
-                                buildState: 'INPROGRESS',
-                                repoSlug: 'ansible-datacenter',
-                                commitId: config.gitCommitHash
-                            )
+                        notifyGitRemoteRepo(
+                        	config.gitRemoteRepoType,
+                            gitRemoteBuildKey: config.buildTestName,
+                            gitRemoteBuildName: config.buildTestName,
+                            gitRemoteBuildStatus: 'INPROGRESS',
+                            gitRemoteBuildSummary: 'ansible-datacenter',
+                            gitCommitId: config.gitCommitId
+                        )
                     }
                 }
             }
@@ -103,7 +104,7 @@ def call(Map params=[:]) {
                         try {
                             sh(lintCmd)
 
-                            config.bitbucketResult = "SUCCESSFUL"
+                            config.gitRemoteBuildStatus = "SUCCESSFUL"
 
                             sh("tree ${config.testResultsDir}")
 
@@ -127,7 +128,7 @@ def call(Map params=[:]) {
                                        reportName: 'KICS Results',
                                        reportTitles: ''])
                         } catch (Exception e) {
-                            config.bitbucketResult = "FAILED"
+                            config.gitRemoteBuildStatus = "FAILED"
                             log.error("lint error: " + e.getMessage())
 //                             throw e
                         }
@@ -140,12 +141,13 @@ def call(Map params=[:]) {
                 script {
 
                     // ref: https://www.jenkins.io/doc/pipeline/steps/stashNotifier/
-                    bitbucketStatusNotify(
-                        buildKey: config.buildTestName,
-                        buildName: config.buildTestName,
-                        buildState: config.bitbucketResult,
-                        repoSlug: 'ansible-datacenter',
-                        commitId: config.gitCommitHash
+                    notifyGitRemoteRepo(
+                    	config.gitRemoteRepoType,
+                        gitRemoteBuildKey: config.buildTestName,
+                        gitRemoteBuildName: config.buildTestName,
+                        gitRemoteBuildStatus: config.gitRemoteBuildStatus,
+                        gitRemoteBuildSummary: 'ansible-datacenter',
+                        gitCommitId: config.gitCommitId
                     )
 
                     List emailAdditionalDistList = []
@@ -217,7 +219,9 @@ Map loadPipelineConfig(Map params) {
 
     config.lintConfigFile = config.get('lintConfigFile', '.kics-config.yml')
 
-    config.buildTestName = config.get('buildTestName', 'KICS Lint Tests')
+    config.get("gitRemoteBuildKey", 'KICS Lint Tests')
+	config.get("gitRemoteBuildName", 'KICS Lint Tests')
+    config.get("gitRemoteBuildSummary", "${config.gitRemoteBuildName} update")
 
     log.debug("params=${params}")
     log.debug("config=${JsonUtils.printToJsonString(config)}")

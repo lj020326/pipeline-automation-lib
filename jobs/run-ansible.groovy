@@ -2,4 +2,4 @@
 
 @Library("pipelineAutomationLib")_
 
-runAnsiblePlaybook()
+runAnsiblePipeline()

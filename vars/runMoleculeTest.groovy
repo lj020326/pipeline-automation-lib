@@ -38,17 +38,18 @@ def call(Map params=[:]) {
                     script {
                         String gitBranch = java.net.URLDecoder.decode(env.GIT_BRANCH, "UTF-8")
                         config.gitBranch = config.get('gitBranch',"${gitBranch}")
-                        config.gitCommitHash = env.GIT_COMMIT
+                        config.gitCommitId = env.GIT_COMMIT
 
                         log.info("config=${JsonUtils.printToJsonString(config)}")
 
                         // ref: https://www.jenkins.io/doc/pipeline/steps/stashNotifier/
-                        bitbucketStatusNotify(
-                                buildKey: config.buildTestName,
-                                buildName: config.buildTestName,
-                                repoSlug: 'ansible-datacenter',
-                                commitId: config.gitCommitHash
-                            )
+                        notifyGitRemoteRepo(
+                        	config.gitRemoteRepoType,
+                            gitRemoteBuildKey: config.buildTestName,
+                            gitRemoteBuildName: config.buildTestName,
+                            gitRemoteBuildSummary: 'ansible-datacenter',
+                            gitCommitId: config.gitCommitId
+                        )
 
                     }
                 }
@@ -78,12 +79,13 @@ def call(Map params=[:]) {
                 script {
 
                     // ref: https://www.jenkins.io/doc/pipeline/steps/stashNotifier/
-                    bitbucketStatusNotify(
-                                buildKey: config.buildTestName,
-                                buildName: config.buildTestName,
-                                repoSlug: 'ansible-datacenter',
-                                commitId: config.gitCommitHash
-                            )
+                    notifyGitRemoteRepo(
+                    	config.gitRemoteRepoType,
+                        gitRemoteBuildKey: config.buildTestName,
+                        gitRemoteBuildName: config.buildTestName,
+                        gitRemoteBuildSummary: 'ansible-datacenter',
+                        gitCommitId: config.gitCommitId
+                    )
 
                     List emailAdditionalDistList = []
                     if (config.alwaysEmailDistList) {

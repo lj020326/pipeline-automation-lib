@@ -58,7 +58,8 @@ class Logger implements Serializable {
    * The log level
    */
 //   public LogLevel level = LogLevel.TRACE
-  public LogLevel level = LogLevel.INFO
+//   public LogLevel level = LogLevel.INFO
+  public static LogLevel level = LogLevel.INFO
 
   /**
    * The name of the logger
@@ -449,7 +450,7 @@ class Logger implements Serializable {
     String message = args.message as String
     Object object = args.object
 
-    if (doLog(logLevel)) {
+    if (isLogActive(logLevel)) {
       String fullMessage = message
       if (object != null) {
         String objectName = getClassName(object)
@@ -548,6 +549,19 @@ class Logger implements Serializable {
    * @return true , when the loglevel should be displayed, false when the loglevel is disabled
    */
   private boolean doLog(LogLevel logLevel) {
+    if (logLevel.getLevel() >= level.getLevel()) {
+      return true
+    }
+    return false
+  }
+
+  /**
+   * Utility function to determine if the given logLevel is active
+   *
+   * @param logLevel
+   * @return true , when the loglevel should be displayed, false when the loglevel is disabled
+   */
+  public boolean isLogActive(LogLevel logLevel) {
     if (logLevel.getLevel() >= level.getLevel()) {
       return true
     }

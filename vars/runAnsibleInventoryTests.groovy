@@ -46,16 +46,17 @@ def call(Map params=[:]) {
                     script {
                         String gitBranch = java.net.URLDecoder.decode(env.GIT_BRANCH, "UTF-8")
                         config.gitBranch = config.get('gitBranch',"${gitBranch}")
-                        config.gitCommitHash = env.GIT_COMMIT
+                        config.gitCommitId = env.GIT_COMMIT
                         log.info("config=${JsonUtils.printToJsonString(config)}")
 
                         // ref: https://github.com/jenkinsci/bitbucket-build-status-notifier-plugin
-                        bitbucketStatusNotify(
-                            buildKey: 'test',
-                            buildName: 'Test',
-                            buildState: 'INPROGRESS',
-                            repoSlug: 'ansible-datacenter',
-                            commitId: config.gitCommitHash
+                        notifyGitRemoteRepo(
+                        	config.gitRemoteRepoType,
+                            gitRemoteBuildKey: 'test',
+                            gitRemoteBuildName: 'Test',
+                            gitRemoteBuildStatus: 'INPROGRESS',
+                            gitRemoteBuildSummary: 'ansible-datacenter',
+                            gitCommitId: config.gitCommitId
                         )
                     }
                 }
@@ -141,7 +142,7 @@ def call(Map params=[:]) {
                         }
 
                         currentBuild.result = (pytest_failed) ? "FAILURE" : "SUCCESS"
-                        config.bitbucketResult = (pytest_failed) ? "FAILED" : "SUCCESSFUL"
+                        config.gitRemoteBuildStatus = (pytest_failed) ? "FAILED" : "SUCCESSFUL"
                     }
                 }
             }
@@ -154,12 +155,13 @@ def call(Map params=[:]) {
 //                         junit testResults: "${config.junitXmlReportDir}/*.xml", skipPublishingChecks: true
 //                     }
 
-                    bitbucketStatusNotify(
-                        buildKey: 'test',
-                        buildName: 'Test',
-                        buildState: config.bitbucketResult,
-                        repoSlug: 'ansible-datacenter',
-                        commitId: config.gitCommitHash
+                    notifyGitRemoteRepo(
+                    	config.gitRemoteRepoType,
+                        gitRemoteBuildKey: 'test',
+                        gitRemoteBuildName: 'Test',
+                        gitRemoteBuildStatus: config.gitRemoteBuildStatus,
+                        gitRemoteBuildSummary: 'ansible-datacenter',
+                        gitCommitId: config.gitCommitId
                     )
                     if (config?.alwaysEmailDistList) {
                         sendEmail(currentBuild, env, emailAdditionalDistList: config.alwaysEmailDistList)
