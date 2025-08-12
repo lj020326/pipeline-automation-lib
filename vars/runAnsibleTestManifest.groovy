@@ -18,72 +18,74 @@
  * - integrationConfigFile (String, optional): Path to the integration test YAML config.
  */
 
-import groovy.json.JsonOutput
-
 import com.dettonville.pipeline.utils.JsonUtils
 import com.dettonville.pipeline.utils.MapMerge
 
 import com.dettonville.pipeline.utils.logging.LogLevel
 import com.dettonville.pipeline.utils.logging.Logger
 
+// import jenkins.model.CauseOfInterruption.*
+import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException
+
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field
-// @Field Logger log = new Logger(this)
-@Field Logger log = new Logger(this, LogLevel.DEBUG)
+//@Field Logger log = new Logger(this, LogLevel.DEBUG)
+@Field Logger log = new Logger(this)
 
-def call(Map params = [:]) {
+def call(Map args=[:]) {
 
-    Map config = loadPipelineConfig(params)
+    Map config = loadPipelineConfig(args)
     log.info("config=${JsonUtils.printToJsonString(config)}")
 
-    log.info("Initiating Ansible Tests from Manifest Files")
     pipeline {
-
         agent {
             label "docker"
         }
         options {
-            buildDiscarder(logRotator(numToKeepStr: '20'))
-            skipDefaultCheckout(false)
             disableConcurrentBuilds()
             timestamps()
+            buildDiscarder(logRotator(numToKeepStr: '20'))
+            skipDefaultCheckout(false)
             timeout(time: config.timeout as Integer, unit: config.timeoutUnit)
         }
-
         stages {
-            stage('Prepare Ansible Test Environment') {
+            stage('Load Collection Galaxy config') {
                 steps {
                     script {
-                        def galaxyConfig = readYaml(file: config.galaxyYamlPath)
-                        config.collectionNamespace = galaxyConfig.namespace
-                        config.collectionName = galaxyConfig.name
-
-                        log.info("Derived Collection Namespace: ${config.collectionNamespace}")
-                        log.info("Derived Collection Name: ${config.collectionName}")
-
-                        if (!config?.collectionNamespace || !config?.collectionName) {
-                            error "FATAL: Could not derive collection namespace or name from ${config.galaxyYamlPath}. Please ensure 'namespace' and 'name' fields are present."
-                        }
-                        config.collectionsBaseDir = "${WORKSPACE}/ansible_collections"
-                        config.targetCollectionDir = "${config.collectionsBaseDir}/${config.collectionNamespace}/${config.collectionName}"
-
-                        log.info("config.collectionsBaseDir=${config.collectionsBaseDir}")
-
-                        sh """
-                            echo "Current working directory: \$(pwd)
-                            echo "Creating collection directory: ${config.targetCollectionDir}
-                            mkdir -p ${config.targetCollectionDir}
-                            rsync -dar --links --exclude=.git --exclude=releases --exclude=ansible_collections . ${config.targetCollectionDir}/
-                            echo "Contents of target collection directory:"
-                            find ${config.targetCollectionDir}/ -type d
-                        """
+                        config = loadCollectionGalaxyConfig(config)
+                    }
+                }
+            }
+            stage('Setup Ansible Test Environment') {
+                steps {
+                    script {
+                        setupCollectionTestEnv(config)
                     }
                 }
             }
             stage("Run Ansible Test Manifest") {
                 steps {
                     script {
-                        Map jobResults = runAnsibleTestConfigs(config)
+                        Map jobResults = [:]
+                        try {
+                            jobResults = runAnsibleTestConfigs(config)
+                        } catch (hudson.AbortException ae) {
+                            // handle an AbortException
+                            // ref: https://github.com/jenkinsci/pipeline-model-definition-plugin/blob/master/pipeline-model-definition/src/main/groovy/org/jenkinsci/plugins/pipeline/modeldefinition/Utils.groovy
+                            // ref: https://gist.github.com/stephansnyt/3ad161eaa6185849872c3c9fce43ca81
+                            if (manager.build.getAction(InterruptedBuildAction.class) ||
+                                // this ambiguous condition means a user _probably_ aborted, not sure if this one is really necessary
+                                (ae instanceof FlowInterruptedException && ae.causes.size() == 0)) {
+                                config.gitRemoteBuildConclusion = "ABORTED"
+                                throw ae
+                            } else {
+                                ansibleLogSummary = "ansible.execPlaybook error: " + ae.getMessage()
+                                log.error("ansible.execPlaybook error: " + ae.getMessage())
+                            }
+                            config.gitRemoteBuildStatus = "FAILED"
+                            config.gitRemoteBuildConclusion = "FAILURE"
+                            currentBuild.result = 'FAILURE'
+                        }
 
                         log.info("finished: jobResults=${JsonUtils.printToJsonString(jobResults)}")
                         dir(config.testResultsDir) {
@@ -103,7 +105,13 @@ def call(Map params = [:]) {
                             fingerprint: true)
 
                         if (jobResults.failed) {
+                            config.gitRemoteBuildStatus = "FAILED"
+                            config.gitRemoteBuildConclusion = "FAILURE"
                             currentBuild.result = 'FAILURE'
+                        } else {
+                            config.gitRemoteBuildStatus = "SUCCESS"
+                            config.gitRemoteBuildConclusion = "SUCCESS"
+                            currentBuild.result = 'SUCCESS'
                         }
 
                     }
@@ -113,17 +121,30 @@ def call(Map params = [:]) {
         post {
             always {
                 script {
+                    notifyGitRemoteRepo(
+                        config.gitRemoteRepoType,
+                        gitRemoteBuildKey: config.gitRemoteBuildKey,
+                        gitRemoteBuildName: config.gitRemoteBuildName,
+                        gitRemoteBuildStatus: config.gitRemoteBuildStatus,
+                        gitRemoteBuildSummary: config.gitRemoteBuildSummary,
+                        gitRemoteBuildConclusion: config.gitRemoteBuildConclusion,
+                        gitCommitId: config.gitCommitId
+                    )
                     if (config?.alwaysEmailList) {
                         log.info("config.alwaysEmailList=${config.alwaysEmailList}")
                         sendEmail(currentBuild, env, emailAdditionalDistList: config.alwaysEmailList.split(","))
                     } else {
                         sendEmail(currentBuild, env)
                     }
-                    log.info("Empty current workspace dir")
-                    try {
-                        cleanWs()
-                    } catch (Exception ex) {
-                        log.warn("Unable to cleanup workspace - e.g., likely cause git clone failure", ex.getMessage())
+                    if (!config.debugPipeline) {
+                        log.info("Empty current workspace dir")
+                        try {
+                            cleanWs()
+                        } catch (Exception ex) {
+                            log.warn("Unable to cleanup workspace - e.g., likely cause git clone failure", ex.getMessage())
+                        }
+                    } else {
+                        log.info("Skipping cleanup of current workspace directory since config.debugPipeline == true")
                     }
                 }
             }
@@ -201,6 +222,11 @@ Map loadPipelineConfig(Map params) {
     def testTypesToProcess = ['sanity', 'units', 'integration']
     config.get("testTypesToProcess", testTypesToProcess)
 
+    config.get("gitRemoteRepoType", "gitea")
+    config.get("gitRemoteBuildKey", 'ansible-test')
+	config.get("gitRemoteBuildName", 'Ansible Test')
+    config.get("gitRemoteBuildSummary", "${config.gitRemoteBuildName} update")
+
     config.get("galaxyYamlPath", "galaxy.yml")
     config.get('testResultsDir', 'tests/output/junit')
     config.get('testResultsJunitFile', 'ansible-test-sanity.xml')
@@ -215,6 +241,9 @@ Map loadPipelineConfig(Map params) {
 def runAnsibleTestConfigs(Map config) {
     for (String testType : config.testTypesToProcess) {
         String manifestPath = config.manifestPaths."${testType}"
+
+        config.get("gitRemoteBuildKey", "ansible-test ${testType}")
+        config.get("gitRemoteBuildName", "Ansible Test ${testType}")
 
         if (fileExists(manifestPath)) {
             log.info("Attempting to load configuration for '${testType}' from: '${manifestPath}'")

@@ -17,24 +17,45 @@
 
 import com.dettonville.pipeline.utils.logging.LogLevel
 import com.dettonville.pipeline.utils.logging.Logger
+
 import com.dettonville.pipeline.utils.JsonUtils
 
-import groovy.transform.Field
-// @Field Logger log = new Logger(this)
-@Field Logger log = new Logger(this, LogLevel.DEBUG)
+// import jenkins.model.CauseOfInterruption.*
+import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException
 
-// Helper function to get Docker image tag
-String getImageTag(Map config) {
-    String tag = ""
-    if (config.ansibleVersion == 'latest') {
-        tag = "latest-py${config.pythonVersion}"
-    } else if (config.ansibleVersion == 'devel') {
-        tag = "devel-py${config.pythonVersion}"
-    } else {
-        tag = "${config.ansibleVersion}-py${config.pythonVersion}"
+// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+import groovy.transform.Field
+//@Field Logger log = new Logger(this, LogLevel.DEBUG)
+@Field Logger log = new Logger(this)
+
+// The main entry point for the global variable function
+def call(Map params = [:]) {
+    // This 'call' method will now execute runSingleAnsibleTest for a single combination.
+    // It is effectively one "cell" in the matrix.
+
+    Map config = params.clone()
+    log.debug("config=${JsonUtils.printToJsonString(config)}")
+
+    // Apply default values if not provided by the matrix driver
+    config.get("dockerRegistry", "media.johnson.int:5000")
+    config.get("dockerImageName", "ansible/ansible-test")
+    config.get("testingType", "sanity") // Default, but should be overridden by runAnsibleTestManifest
+    config.get("testDeps", [])
+    config.get("preTestCmd", "")
+    config.get('testResultsDir', 'tests/output/junit')
+    config.get('testResultsJunitFile', 'ansible-test-sanity.xml')
+
+    Map result = [:]
+
+    // Execute the single test run
+    dir(config.targetCollectionDir) {
+        result = runSingleAnsibleTest(config)
     }
-    return "${config.baseRegistry}/${config.baseImageName}:${tag}"
+
+    // You might want to return the result, so the calling function (runMatrixStages) can collect it.
+    return result
 }
+
 
 // Core logic for running a single ansible-test
 // This function needs to be callable from outside its original 'call' context.
@@ -46,10 +67,14 @@ Map runSingleAnsibleTest(Map config) {
     // Crucially, this 'call' expects a single ansibleVersion and pythonVersion
     // from the matrix iteration in runMatrixStages.groovy
     if (!config.ansibleVersion || !config.pythonVersion) {
-        error "runAnsibleTest must be called with 'ansibleVersion' and 'pythonVersion' for matrix execution."
+        error "runSingleAnsibleTest must be called with 'ansibleVersion' and 'pythonVersion' for matrix execution."
     }
 
-    config.dockerImage = getImageTag(config)
+    config.dockerImage = getAnsibleDockerImageTag(
+                            ansibleVersion: config.ansibleVersion,
+                            pythonVersion: config.pythonVersion,
+                            dockerRegistry: config.dockerRegistry)
+
     String logPrefix = "[${config.dockerImage}]:"
 
     log.info("${logPrefix} Running tests inside docker container: ${config.dockerImage}")
@@ -90,7 +115,7 @@ Map runSingleAnsibleTest(Map config) {
             }
         }
 
-        if (config.preTestCmd) {
+        if (config?.preTestCmd) {
             log.info("${logPrefix} executing pre-test-cmd: '${config.preTestCmd}'")
             sh "${config.preTestCmd}"
         }
@@ -165,32 +190,4 @@ Map runSingleAnsibleTest(Map config) {
         }
     }
     return jobResult
-}
-
-// The main entry point for the global variable function
-def call(Map params = [:]) {
-    // This 'call' method will now execute runSingleAnsibleTest for a single combination.
-    // It is effectively one "cell" in the matrix.
-
-    Map config = params.clone()
-    log.debug("config=${JsonUtils.printToJsonString(config)}")
-
-    // Apply default values if not provided by the matrix driver
-    config.get("baseRegistry", "media.johnson.int:5000")
-    config.get("baseImageName", "ansible/ansible-test")
-    config.get("testingType", "sanity") // Default, but should be overridden by runAnsibleTestManifest
-    config.get("testDeps", [])
-    config.get("preTestCmd", "")
-    config.get('testResultsDir', 'tests/output/junit')
-    config.get('testResultsJunitFile', 'ansible-test-sanity.xml')
-
-    Map result = [:]
-
-    // Execute the single test run
-    dir(config.targetCollectionDir) {
-        result = runSingleAnsibleTest(config)
-    }
-
-    // You might want to return the result, so the calling function (runMatrixStages) can collect it.
-    return result
 }

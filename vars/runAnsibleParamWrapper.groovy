@@ -82,7 +82,11 @@ def call(Map config=[:]) {
     config.get('gitBranch','main')
     config.get('gitRepoUrl','ssh://git@repo.example.org:2222/ansible/ansible-datacenter.git')
     config.get('gitCredentialsId','git-ssh-jenkins')
-    config.get('gitRepoSlug', 'ansible-repo-slug')
+
+    config.get("gitRemoteRepoType","bitbucket")
+    config.get("gitRemoteBuildKey", 'Ansible playbook run')
+	config.get("gitRemoteBuildName", 'Ansible playbook run')
+    config.get("gitRemoteBuildSummary", "${config.gitRemoteBuildName} update")
 
 //     config.get('ansibleCollectionsRequirements','./collections/requirements.molecule.yml')
 //     config.get('ansibleRolesRequirements','./roles/requirements.yml')
@@ -94,7 +98,7 @@ def call(Map config=[:]) {
 
     log.info("config=${JsonUtils.printToJsonString(config)}")
 
-    runAnsiblePlaybook(config)
+    runAnsiblePipeline(config)
 
     log.info("finished")
 

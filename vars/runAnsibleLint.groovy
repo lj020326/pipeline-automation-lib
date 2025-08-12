@@ -36,17 +36,18 @@ def call(Map params=[:]) {
                         String gitBranch = java.net.URLDecoder.decode(env.GIT_BRANCH, "UTF-8")
                         log.info("gitBranch=${gitBranch}")
                         config.gitBranch = config.get('gitBranch',gitBranch)
-                        config.gitCommitHash = env.GIT_COMMIT
+                        config.gitCommitId = env.GIT_COMMIT
 
                         log.info("config=${JsonUtils.printToJsonString(config)}")
 
                         // ref: https://www.jenkins.io/doc/pipeline/steps/stashNotifier/
-                        bitbucketStatusNotify(
-                            buildKey: config.buildTestName,
-                            buildName: config.buildTestName,
-                            buildState: config.buildStatus,
-                            repoSlug: 'ansible-datacenter',
-                            commitId: config.gitCommitHash
+                        notifyGitRemoteRepo(
+                        	config.gitRemoteRepoType,
+                            gitRemoteBuildKey: config.buildTestName,
+                            gitRemoteBuildName: config.buildTestName,
+                            gitRemoteBuildStatus: config.gitRemoteBuildStatus,
+                            gitRemoteBuildSummary: 'ansible-datacenter',
+                            gitCommitId: config.gitCommitId
                         )
                     }
                 }
@@ -82,7 +83,7 @@ def call(Map params=[:]) {
                         try {
                             sh("ansible-lint-junit ${config.testResultsDir}/test-console-results.txt -o ${config.testResultsDir}/${config.testResultsJunitFile}")
 
-                            config.buildStatus = "SUCCESSFUL"
+                            config.gitRemoteBuildStatus = "SUCCESSFUL"
 
                             sh("tree ${config.testResultsDir}")
 
@@ -110,7 +111,7 @@ def call(Map params=[:]) {
                                   skipPublishingChecks: true,
                                   allowEmptyResults: true)
                         } catch (Exception e) {
-                            config.buildStatus = "FAILED"
+                            config.gitRemoteBuildStatus = "FAILED"
                             log.error("lint error: " + e.getMessage())
 //                             throw e
                         }
@@ -123,12 +124,13 @@ def call(Map params=[:]) {
                 script {
 
                     // ref: https://www.jenkins.io/doc/pipeline/steps/stashNotifier/
-                    bitbucketStatusNotify(
-                        buildKey: config.buildTestName,
-                        buildName: config.buildTestName,
-                        buildState: config.buildStatus,
-                        repoSlug: 'ansible-datacenter',
-                        commitId: config.gitCommitHash
+                    notifyGitRemoteRepo(
+                    	config.gitRemoteRepoType,
+                        gitRemoteBuildKey: config.buildTestName,
+                        gitRemoteBuildName: config.buildTestName,
+                        gitRemoteBuildStatus: config.gitRemoteBuildStatus,
+                        gitRemoteBuildSummary: 'ansible-datacenter',
+                        gitCommitId: config.gitCommitId
                     )
 
                     List emailAdditionalDistList = []
@@ -183,7 +185,7 @@ Map loadPipelineConfig(Map params) {
     config.timeout = config.get('timeout', 3)
     config.timeoutUnit = config.get('timeoutUnit', 'HOURS')
     config.skipDefaultCheckout = config.get('skipDefaultCheckout', false)
-    config.buildStatus = "INPROGRESS"
+    config.gitRemoteBuildStatus = "INPROGRESS"
 
 //    config.emailDist = config.emailDist ?: "lee.james.johnson@gmail.com"
     config.emailDist = config.get('emailDist',"lee.james.johnson@gmail.com")
@@ -200,7 +202,9 @@ Map loadPipelineConfig(Map params) {
 
 //     config.lintConfigFile = config.get('lintConfigFile', ".ansible-lint")
 
-    config.buildTestName = config.get('buildTestName', 'Ansible Lint Tests')
+    config.get("gitRemoteBuildKey", 'Ansible Lint Tests')
+	config.get("gitRemoteBuildName", 'Ansible Lint Tests')
+    config.get("gitRemoteBuildSummary", "${config.gitRemoteBuildName} update")
 
     log.debug("params=${params}")
     log.debug("config=${JsonUtils.printToJsonString(config)}")
