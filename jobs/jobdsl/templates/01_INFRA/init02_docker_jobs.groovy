@@ -18,19 +18,7 @@ String baseFolder = "INFRA"
 
 jobFolder = "${baseFolder}/build-docker-image"
 
-// // ref: https://stackoverflow.com/questions/40215394/how-to-get-environment-variable-in-jenkins-groovy-script-console
-// def envVars = Jenkins.instance.
-//                    getGlobalNodeProperties().
-//                    get(hudson.slaves.EnvironmentVariablesNodeProperty).
-//                    getEnvVars()
-//
-// if (!envVars?.JENKINS_ENV) {
-//     log.info("JENKINS_ENV not defined - skipping vm-templates project definition")
-//     return
-// }
-//
-// String jenkinsEnv = envVars.JENKINS_ENV
-
+// ref: https://stackoverflow.com/questions/40215394/how-to-get-environment-variable-in-jenkins-groovy-script-console
 log.info("${scriptName}: JENKINS_ENV=${JENKINS_ENV}")
 if (JENKINS_ENV=='PROD') {
     createDockerJobs(this)
@@ -45,22 +33,7 @@ void createDockerJobs(def dsl) {
 
     dsl.pipelineJob(jobFolder) {
         parameters {
-            stringParam('GitRepoUrl', "ssh://git@gitea.admin.dettonville.int:2222/infra/docker-jenkins.git", "Specify the git repo image URL")
-            stringParam('GitRepoBranch', "main", "Specify the git repo branch")
-            stringParam('GitCredentialsId', "bitbucket-ssh-jenkins", "Specify the git repo credential ID")
-            stringParam('RegistryUrl', "https://media.johnson.int:5000", "Specify the RegistryUrl")
-            stringParam('RegistryCredId',  "docker-registry-admin", "Specify the RegistryCredId")
-            stringParam('BuildImageLabel',  "docker-jenkins:latest", "Specify the BuildImageLabel")
-            stringParam('BuildDir', "image/base", "Specify the BuildDir")
-            stringParam('BuildPath', ".", "Specify the BuildPath")
-            stringParam('BuildTags', "", "Specify the docker image tags in comma delimited format (e.g., 'build-123,latest')")
-            stringParam('BuildArgs', "", "Specify the BuildArgs in JSON string format")
-            stringParam('DockerFile', "", "Specify the docker file")
-            stringParam('ChangedEmailList', "", "Specify the email recipients for changed status")
-            stringParam('AlwaysEmailList', "", "Specify the email recipients for always status")
-            stringParam('FailedEmailList', "", "Specify the email recipients for failed status")
-            stringParam('Timeout', "1", "Specify the job timeout")
-            stringParam('TimeoutUnit', "HOURS", "Specify the job timeout unit (HOURS, MINUTES, etc)")
+            booleanParam('InitializeParamsOnly', false, 'Set to true to only initialize parameters without full execution.')
         }
         definition {
             logRotator {
@@ -70,7 +43,7 @@ void createDockerJobs(def dsl) {
                artifactDaysToKeep(-1)
             }
             cps {
-                script("buildDockerImage()")
+                script("buildDockerImagePipeline()")
                 sandbox()
             }
         }

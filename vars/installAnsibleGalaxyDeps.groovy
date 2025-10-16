@@ -44,30 +44,34 @@ def call(Map args=[:]) {
     // ref: https://docs.ansible.com/ansible/latest/collections_guide/collections_installing.html
     if (ansibleGalaxyUpgradeOpt) {
         ansibleGalaxyArgList.push("--upgrade")
+//         ansibleGalaxyArgList.push("--clear-response-cache")
     }
     String ansibleGalaxyArgs = ansibleGalaxyArgList.join(" ")
 
     runWithConditionalEnvAndCredentials(ansibleGalaxyEnvVarsList, galaxySecretVarsList) {
         sh "${ansibleGalaxyCmd} collection list"
-        sh "${ansibleGalaxyCmd} --version"
+
+        if (log.isLogActive(LogLevel.DEBUG)) {
+            sh "${ansibleGalaxyCmd} --version"
+        }
 
         log.info("ansibleCollectionsRequirements=${ansibleCollectionsRequirements}")
 
-        if (log.isLogActive(LogLevel.DEBUG)) {
-    //         sh "set -x; ls -Fla ${ansibleCollectionsRequirements}; set +x"
-            sh """
-                pwd;
-                find tests/ -maxdepth 2 -mindepth 1 -type f -print
-                ls -Fla "${ansibleCollectionsRequirements}"
-            """
-        }
+//         if (log.isLogActive(LogLevel.DEBUG)) {
+//     //         sh "set -x; ls -Fla ${ansibleCollectionsRequirements}; set +x"
+//             sh """
+//                 pwd;
+//                 find tests/ -maxdepth 2 -mindepth 1 -type f -print
+//                 ls -Fla "${ansibleCollectionsRequirements}"
+//             """
+//         }
         if (ansibleCollectionsRequirements && fileExists(ansibleCollectionsRequirements)) {
-            sh "set -x; ${ansibleGalaxyCmd} collection install ${ansibleGalaxyArgs} -r ${ansibleCollectionsRequirements}; set +x"
+            sh "set -x; ${ansibleGalaxyCmd} collection install ${ansibleGalaxyArgs} -r ${ansibleCollectionsRequirements} > /dev/null; set +x"
         }
 
         if (ansibleRolesRequirements && fileExists(config.ansibleRolesRequirements)) {
             log.debug("ansibleRolesRequirements=${ansibleRolesRequirements}")
-            sh "set -x; ${ansibleGalaxyCmd} install ${ansibleGalaxyArgs} -r ${ansibleRolesRequirements}; set +x"
+            sh "set -x; ${ansibleGalaxyCmd} install ${ansibleGalaxyArgs} -r ${ansibleRolesRequirements} > /dev/null; set +x"
         }
     }
 }

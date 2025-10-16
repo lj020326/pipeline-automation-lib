@@ -1,9 +1,9 @@
 package com.dettonville.pipeline.utils
 /*-
  * #%L
- * dcapi.dettonville.org
+ * apps.dettonville.org
  * %%
- * Copyright (C) 2024 Dettonville DevOps
+ * Copyright (C) 2025 Dettonville
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

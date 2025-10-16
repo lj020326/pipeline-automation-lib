@@ -7,7 +7,7 @@ import com.dettonville.pipeline.ath.AcceptanceTestHarness
 
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field
-@Field Logger log = new Logger(this, LogLevel.INFO)
+@Field Logger log = new Logger(this)
 
 def call(Map params=[:]) {
     AcceptanceTestHarness ath = new AcceptanceTestHarness(this)
@@ -88,7 +88,11 @@ def call(Map params=[:]) {
             always {
                 script {
                     ath.runPostJobHandler("always")
-                    cleanWs()
+                    try {
+                        cleanWs()
+                    } catch (Exception ex) {
+                        log.warn("Unable to cleanup workspace - e.g., likely cause git clone failure", ex.getMessage())
+                    }
                 }
             }
         }

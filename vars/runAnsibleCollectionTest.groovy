@@ -62,6 +62,7 @@ def call(Map pipelineConfig=[:]) {
                 image config.dockerImage
 //                 args '-u root' // Optional: Add custom arguments to the docker run command
 //                 args "-v /var/run/docker.sock:/var/run/docker.sock --privileged"
+                reuseNode true
             }
         }
 //         tools {
@@ -80,7 +81,7 @@ def call(Map pipelineConfig=[:]) {
             stage('Load Collection Galaxy config') {
                 steps {
                     script {
-                        config = loadCollectionGalaxyConfig(config)
+                        config = loadCollectionTestConfig(config)
                     }
                 }
             }
@@ -129,38 +130,51 @@ def call(Map pipelineConfig=[:]) {
                 steps {
                     script {
                         try {
-                            catchError{
-                                runAnsiblePlaybook(config)
-                            }
-                            config.gitRemoteBuildStatus = "SUCCESSFUL"
+                            runAnsiblePlaybook(config)
+                            config.gitRemoteBuildStatus = "COMPLETED"
                             config.gitRemoteBuildConclusion = "SUCCESS"
                             currentBuild.result = 'SUCCESS'
+                        } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                            config.gitRemoteBuildStatus = "COMPLETED"
+                            config.gitRemoteBuildConclusion = "FAILURE"
+                            // Check if the interruption was a user-initiated abort
+                            e.getCauses().each { cause ->
+                                log.error("Cause: ${cause.getClass().getName()}")
+                            }
+                            // It is crucial to re-throw the exception to correctly mark the build as ABORTED
+                            currentBuild.result = 'FAILURE'
+                            throw e
                         } catch (hudson.AbortException ae) {
                             // handle an AbortException
                             // ref: https://github.com/jenkinsci/pipeline-model-definition-plugin/blob/master/pipeline-model-definition/src/main/groovy/org/jenkinsci/plugins/pipeline/modeldefinition/Utils.groovy
                             // ref: https://gist.github.com/stephansnyt/3ad161eaa6185849872c3c9fce43ca81
-                            config.gitRemoteBuildStatus = "ABORTED"
-                            config.gitRemoteBuildConclusion = "ABORTED"
-                            if (manager.build.getAction(InterruptedBuildAction.class) ||
-                                // this ambiguous condition means a user _probably_ aborted, not sure if this one is really necessary
-                                (ae instanceof FlowInterruptedException && ae.causes.size() == 0)) {
-                                throw ae
-                            } else {
-                                ansibleLogSummary = "ansible.execPlaybook error: " + ae.getMessage()
-                                log.error("ansible.execPlaybook error: " + ae.getMessage())
-                            }
+                            config.gitRemoteBuildConclusion = "COMPLETED"
+                            config.gitRemoteBuildConclusion = "FAILURE"
+                            log.error("ansible.execPlaybook abort error: " + ae.getMessage())
                             currentBuild.result = 'FAILURE'
+                            // It is crucial to re-throw the exception to correctly mark the build as ABORTED
+                            throw ae
+                        } catch (Exception e) {
+                            config.gitRemoteBuildStatus = "COMPLETED"
+                            config.gitRemoteBuildConclusion = "FAILURE"
+                            // General catch-all for any other unexpected failures
+                            log.error("An unexpected error occurred: ${e.message}")
+                            currentBuild.result = 'FAILURE'
+                            throw e
                         } finally {
                             if (fileExists("ansible.log")) {
                                 ansibleLogSummary = sh(returnStdout: true, script: "tail -n 50 ansible.log").trim()
                             }
 
-                            log.info("config.testComponentDir=${config.testComponentDir}")
-                            sh "pwd"
-                            sh "find . -type d"
+                            log.debug("config.testComponentDir=${config.testComponentDir}")
+                            if (log.isLogActive(LogLevel.DEBUG)) {
+                                sh "pwd"
+                                sh "find . -type d"
+                            }
                             if (fileExists(config.testComponentDir)) {
-                                sh "find ${config.testComponentDir} -type f"
-
+                                if (log.isLogActive(LogLevel.DEBUG)) {
+                                    sh "find ${config.testComponentDir} -type f"
+                                }
                                 archiveArtifacts(
                                     allowEmptyArchive: true,
                                     artifacts: "${config.testComponentDir}/**",
@@ -289,10 +303,9 @@ Map loadPipelineConfig(Map params) {
     config.get('testType','module')
 
     List jobParts = env.JOB_NAME.split('/')
-//     config.testGitBranch = jobParts[-1]
-//     log.debug("config.testGitBranch=${config.testGitBranch}")
-//     config.gitCommitId = env.GIT_COMMIT
-//
+    config.testGitBranch = jobParts[-1]
+    log.debug("config.testGitBranch=${config.testGitBranch}")
+    config.gitCommitId = env.GIT_COMMIT
 //     config.testGitBranchAbbrev = config.testGitBranch.replaceAll(/^(.*)-(\d+)-(.*)$/, '$1-$2').replace('/','-').replace('%2F','-')
 //     log.debug("config.testGitBranchAbbrev=${config.testGitBranchAbbrev}")
 
@@ -317,16 +330,16 @@ Map loadPipelineConfig(Map params) {
 
     config = loadAnsibleConfigs(config)
 
-    config.get("ansibleVersion", "stable-2.16")
-    config.get("pythonVersion", "3.12")
+    config.get("ansibleVersion", "2.18")
+    config.get("pythonVersion", "3.13")
     config.get("dockerRegistry", "media.johnson.int:5000")
 
-    config.dockerImage = getAnsibleDockerImageTag(
+    config.dockerImage = getAnsibleDockerImageId(
                             ansibleVersion: config.ansibleVersion,
                             pythonVersion: config.pythonVersion,
                             dockerRegistry: config.dockerRegistry)
 
-    config.testBaseDir = config.get('testBaseDir', "test-results")
+    config.testBaseDir = config.get('testBaseDir', ".test-results")
     log.debug("config.testComponent=${config.testComponent}")
 
 //         config.testJunitXmlReportDir = "${config.testComponentDir}"

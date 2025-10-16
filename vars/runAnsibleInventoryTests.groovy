@@ -9,7 +9,6 @@ import com.dettonville.pipeline.versioning.ComparableSemanticVersion
 
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field
-//@Field Logger log = new Logger(this, LogLevel.INFO)
 @Field Logger log = new Logger(this)
 
 def call(Map params=[:]) {
@@ -23,20 +22,22 @@ def call(Map params=[:]) {
     ComparableSemanticVersion minVersionPyTest = new ComparableSemanticVersion(pyTestVersion)
     ComparableSemanticVersion testScriptVersion
     boolean pytest_failed = false
+    int pytest_return_code = 0
 
     pipeline {
         agent {
-            label config.jenkinsNodeLabel
-        }
-        tools {
-            // ref: https://webapp.chatgpt4google.com/s/MzY5MjYw
-            // ref: https://stackoverflow.com/questions/47895668/how-to-select-multiple-jdk-version-in-declarative-pipeline-jenkins#48368506
-            ansible "${config.ansibleInstallation}"
+            docker {
+                label config.jenkinsNodeLabel
+                image config.dockerImage
+//                 args '-u root' // Optional: Add custom arguments to the docker run command
+//                 args "-v /var/run/docker.sock:/var/run/docker.sock --privileged"
+                reuseNode true
+            }
         }
         options {
             disableConcurrentBuilds()
             timestamps()
-            buildDiscarder(logRotator(numToKeepStr: '10'))
+            buildDiscarder(logRotator(numToKeepStr: '30', artifactNumToKeepStr: '30'))
             skipDefaultCheckout(config.skipDefaultCheckout)
             timeout(time: config.timeout, unit: config.timeoutUnit)
         }
@@ -45,25 +46,28 @@ def call(Map params=[:]) {
                 steps {
                     script {
                         String gitBranch = java.net.URLDecoder.decode(env.GIT_BRANCH, "UTF-8")
-                        config.gitBranch = config.get('gitBranch',"${gitBranch}")
+                        log.info("gitBranch=${gitBranch}")
+                        config.get('gitBranch',gitBranch)
                         config.gitCommitId = env.GIT_COMMIT
-                        log.info("config=${JsonUtils.printToJsonString(config)}")
+                        log.debug("config.gitBranch=${config.gitBranch}")
+                        log.debug("config.gitCommitId=${config.gitCommitId}")
 
-                        // ref: https://github.com/jenkinsci/bitbucket-build-status-notifier-plugin
                         notifyGitRemoteRepo(
                         	config.gitRemoteRepoType,
-                            gitRemoteBuildKey: 'test',
-                            gitRemoteBuildName: 'Test',
-                            gitRemoteBuildStatus: 'INPROGRESS',
+                            gitRemoteBuildKey: config.buildTestName,
+                            gitRemoteBuildName: config.buildTestName,
+                            gitRemoteBuildStatus: config.gitRemoteBuildStatus,
                             gitRemoteBuildSummary: 'ansible-datacenter',
                             gitCommitId: config.gitCommitId
                         )
                     }
                 }
             }
-            stage('Run ansible inventory tests') {
+            stage('ansible inventory tests') {
                 steps {
                     script {
+                        sh "mkdir -p ${config.junitXmlReportDir}"
+
                         config.testScriptVersion = getTestScriptVersion(this, log, config.testScript)
                         log.info("config.testScriptVersion=${config.testScriptVersion}")
 
@@ -71,13 +75,16 @@ def call(Map params=[:]) {
                         log.info("testScriptVersion=${testScriptVersion.toString()}")
                         log.info("minVersionPyTest=${minVersionPyTest.toString()}")
 
-                        sh "mkdir -p ${config.junitXmlReport}"
-
 //                         sh(script: "bash ${config.testScript} -r ${config.junitXmlReport} -p", returnStdout: true)
-                        pytest_failed = sh(
-                            script: "bash ${config.testScript} -r ${config.junitXmlReport} -p  > /dev/null 2>&1",
-                            returnStatus: true) != 0
+                        pytest_return_code = sh(
+                            script: "bash ${config.testScript} -r ${config.junitXmlReport} -p > /dev/null 2>&1",
+                            returnStatus: true)
 
+                        pytest_failed = (pytest_return_code>0)
+
+                        log.info("pytest_return_code=${pytest_return_code}")
+
+                        sh "tree ${config.junitXmlReportDir}"
                         junit(testResults: "${config.junitXmlReportDir}/*.xml",
                             skipPublishingChecks: true,
                             allowEmptyResults: true)
@@ -132,7 +139,7 @@ def call(Map params=[:]) {
                     script {
                         log.info("==> ************************************* ")
                         log.info("==> OVERALL INVENTORY TEST RESULTS")
-                        log.info("==> TOTAL totalNumFailed=${pytest_failed}")
+                        log.info("==> TOTAL totalNumFailed=${pytest_return_code}")
                         log.info("==> pytest_failed=${pytest_failed}")
 
                         if (pytest_failed) {
@@ -150,15 +157,12 @@ def call(Map params=[:]) {
         post {
             always {
                 script {
-// //                     ComparableSemanticVersion testScriptVersion = new ComparableSemanticVersion(config.testScriptVersion)
-//                     if (testScriptVersion && testScriptVersion >= minVersionPyTest) {
-//                         junit testResults: "${config.junitXmlReportDir}/*.xml", skipPublishingChecks: true
-//                     }
 
+                    // ref: https://www.jenkins.io/doc/pipeline/steps/stashNotifier/
                     notifyGitRemoteRepo(
                     	config.gitRemoteRepoType,
-                        gitRemoteBuildKey: 'test',
-                        gitRemoteBuildName: 'Test',
+                        gitRemoteBuildKey: config.buildTestName,
+                        gitRemoteBuildName: config.buildTestName,
                         gitRemoteBuildStatus: config.gitRemoteBuildStatus,
                         gitRemoteBuildSummary: 'ansible-datacenter',
                         gitCommitId: config.gitCommitId
@@ -172,11 +176,59 @@ def call(Map params=[:]) {
                         log.info("post(${config.gitBranch}): sendEmail(${currentBuild.result})")
                         sendEmail(currentBuild, env, emailAdditionalDistList: config.deployEmailDistList)
                     } else {
-                        log.info("post(${config.gitBranch}): sendEmail(${currentBuild.result}, 'RequesterRecipientProvider')")
+                        log.info("post(${config.gitBranch}): sendEmail(${currentBuild.result}, 'default')")
                         sendEmail(currentBuild, env)
                     }
-                    log.info("Empty current workspace dir")
-                    cleanWs()
+                    if (!config.debugPipeline) {
+                        log.info("Empty current workspace dir")
+                        try {
+                            cleanWs()
+                        } catch (Exception ex) {
+                            log.warn("Unable to cleanup workspace - e.g., likely cause git clone failure", ex.getMessage())
+                        }
+                    } else {
+                        log.info("Skipping cleanup of current workspace directory since config.debugPipeline == true")
+                    }
+                }
+            }
+            success {
+                script {
+                    if (config?.successEmailList) {
+                        log.info("config.successEmailList=${config.successEmailList}")
+                        sendEmail(currentBuild, env, emailAdditionalDistList: config.successEmailList.split(","))
+                    }
+                }
+            }
+            failure {
+                script {
+                    if (config?.failedEmailList) {
+                        log.info("config.failedEmailList=${config.failedEmailList}")
+//                         sendEmail(currentBuild, env, emailAdditionalDistList: config.failedEmailList.split(","))
+                        sendEmail(currentBuild, env,
+                            emailAdditionalDistList: config.failedEmailList.split(","),
+                            emailBody: ansibleLogSummary
+                        )
+                    }
+                }
+            }
+            aborted {
+                script {
+                    if (config?.failedEmailList) {
+                        log.info("config.failedEmailList=${config.failedEmailList}")
+//                         sendEmail(currentBuild, env, emailAdditionalDistList: config.failedEmailList.split(","))
+                        sendEmail(currentBuild, env,
+                            emailAdditionalDistList: config.failedEmailList.split(","),
+                            emailBody: ansibleLogSummary
+                        )
+                    }
+                }
+            }
+            changed {
+                script {
+                    if (config?.changedEmailList) {
+                        log.info("config.changedEmailList=${config.changedEmailList}")
+                        sendEmail(currentBuild, env, emailAdditionalDistList: config.changedEmailList.split(","))
+                    }
                 }
             }
         }
@@ -203,19 +255,33 @@ Map loadPipelineConfig(Map params) {
         log.setLevel(LogLevel.DEBUG)
     }
 
-    config.jenkinsNodeLabel = config.get('jenkinsNodeLabel',"ansible")
+//     config.jenkinsNodeLabel = config.get('jenkinsNodeLabel',"ansible")
+    config.get('jenkinsNodeLabel',"docker")
+//     config.get('ansibleVersion', '2.18')
+//     config.get('pythonVersion', '3.12')
+    config.get('ansibleVersion', '2.19')
+    config.get('pythonVersion', '3.13')
+
+    config.get("dockerRegistry", "media.johnson.int:5000")
+    config.get("dockerImageName", "ansible/ansible-runner")
+
+    config.dockerImage = getAnsibleDockerImageId(
+                            dockerImageName: config.dockerImageName,
+                            ansibleVersion: config.ansibleVersion,
+                            pythonVersion: config.pythonVersion,
+                            dockerRegistry: config.dockerRegistry)
+
     config.logLevel = config.get('logLevel', "INFO")
     config.debugPipeline = config.get('debugPipeline', false)
     config.timeout = config.get('timeout', 3)
     config.timeoutUnit = config.get('timeoutUnit', 'HOURS')
     config.skipDefaultCheckout = config.get('skipDefaultCheckout', false)
-    config.junitXmlReportDir = "test-results"
+    config.gitRemoteBuildStatus = "INPROGRESS"
+    config.junitXmlReportDir = ".test-results"
     config.junitXmlReport = "${config.junitXmlReportDir}/junit-report.xml"
 
     config.emailDist = config.get('emailDist',"lee.james.johnson@gmail.com")
-    config.alwaysEmailDistList = [
-        'lee.james.johnson@gmail.com'
-    ]
+    config.alwaysEmailDistList = ["lee.johnson@dettonville.com"]
 
     // config.alwaysEmailDist = config.alwaysEmailDist ?: "lee.james.johnson@gmail.com"
     config.emailFrom = config.emailFrom ?: "admin+ansible@dettonville.com"
@@ -230,6 +296,10 @@ Map loadPipelineConfig(Map params) {
     config.testScriptVersion = ""
 
     config.yamlLintCmd = "yamllint"
+
+    config.get("gitRemoteBuildKey", 'Ansible Inventory Tests')
+	config.get("gitRemoteBuildName", 'Ansible Inventory Tests')
+    config.get("gitRemoteBuildSummary", "${config.gitRemoteBuildName} update")
 
     log.debug("params=${params}")
     log.debug("config=${JsonUtils.printToJsonString(config)}")

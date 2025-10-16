@@ -36,7 +36,7 @@
                 <name>master</name>
             </branch>
         </lastBuiltRevision>
-        <remoteUrl>https://repo.dettonville.int/stash/scm/api/dcapi-automation-pipeline.git</remoteUrl>
+        <remoteUrl>https://gitea.admin.dettonville.int/infra/pipeline-automation-lib.git.git</remoteUrl>
         <scmName></scmName>
     </action>
     <action _class='hudson.plugins.git.GitTagAction'></action>

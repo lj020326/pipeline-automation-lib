@@ -1,8 +1,8 @@
 /*-
  * #%L
- * dcapi.dettonville.org
+ * apps.dettonville.org
  * %%
- * Copyright (C) 2019 Dettonville API
+ * Copyright (C) 2025 Dettonville
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

@@ -40,7 +40,7 @@
         "name": "master"
       }]
     },
-    "remoteUrls": ["https://repo.dettonville.int/stash/scm/api/dcapi-automation-pipeline.git"],
+    "remoteUrls": ["https://gitea.admin.dettonville.int/infra/pipeline-automation-lib.git.git"],
     "scmName": ""
   }, {
     "_class": "hudson.plugins.git.GitTagAction"

@@ -1,12 +1,8 @@
 #!/usr/bin/env groovy
 
-// import com.dettonville.pipeline.utils.logging.LogLevel
-// import com.dettonville.pipeline.utils.logging.Logger
-//
-// // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
-// import groovy.transform.Field
-// @Field Logger log = new Logger(this)
-
+/////////////////
+// NOTE:  "runWithConditionalEnvAndCredentials" handles the generalized use case of avoiding
+// massive duplication with "if...then" logic required for conditional envvars and secrets
 // Wrapper function to conditionally apply environment variables and credentials
 def call(envVars, secretVars, body) {
     // If both lists are empty, just execute the body

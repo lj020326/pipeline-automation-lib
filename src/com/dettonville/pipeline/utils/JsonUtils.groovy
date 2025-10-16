@@ -1,19 +1,17 @@
 package com.dettonville.pipeline.utils
 
-import com.dettonville.pipeline.utils.JsonUtils
-
-import groovy.json.*
+//import groovy.json.*
+import groovy.json.JsonOutput
 
 //import groovy.json.JsonSlurper
 //import net.sf.json.JSON
 
-class JsonUtilsException extends Exception {
-    JsonUtilsException(String message) {
-        super(message)
-    }
-}
-
-// ref: https://gist.github.com/tadaedo/c6394e0d34abf7cf6cf3
+/**
+ * Utility class for formatting Groovy objects into pretty-printed JSON strings.
+ * This class is designed for use in Jenkins Pipelines.
+ *
+ * ref: https://gist.github.com/tadaedo/c6394e0d34abf7cf6cf3
+ */
 class JsonUtils implements Serializable {
     private static final long serialVersionUID = 1L
 
@@ -28,19 +26,97 @@ class JsonUtils implements Serializable {
         this.dsl = dsl
     }
 
-//     static String printToJsonString(def config) {
-    static String printToJsonString(Object config) {
-//         if (config instanceof List) {
-//             return config.toString()
-//         }
+    /**
+     * Converts a Groovy object (like Map or List) into a pretty-printed JSON string.
+     *
+     * @param obj The object to be converted.
+     * @return A pretty-printed JSON string of the object, or an empty string ("") if the object is null.
+     */
+    static String printToJsonString(Object obj) {
         try {
-            if (config) {
-                return JsonOutput.prettyPrint(JsonOutput.toJson(config))
-            } else {
+            // If the object is null, return an empty string as required.
+            if (!obj) {
                 return ""
             }
+
+            // Recursively convert GStringImpl and other objects to serializable forms
+//             def finalObj = convertToSerializable(obj)
+
+            if (obj instanceof Map) {
+                obj = new TreeMap(obj)
+//                 finalObj = new TreeMap(finalObj)
+            }
+
+            return JsonOutput.prettyPrint(JsonOutput.toJson(obj))
         } catch (Exception err) {
             throw new JsonUtilsException(JsonUtils.class.getName() + ".printToJsonString(): exception occurred ==> [${err}]")
+        }
+    }
+
+    static String printToJsonString2(Object obj) {
+        try {
+            // If the object is null, return an empty string as required.
+            if (obj == null) {
+                return ""
+            }
+
+            // 1. Convert the Groovy object (Map/List) into a raw JSON string.
+            def rawJson = JsonOutput.toJson(obj)
+
+            // 2. Pretty-print the raw JSON string for readability and return it.
+            return JsonOutput.prettyPrint(rawJson)
+        } catch (Exception err) {
+            throw new JsonUtilsException(JsonUtils.class.getName() + ".printToJsonString(): exception occurred ==> [${err}]")
+        }
+    }
+
+//     // Helper method to recursively convert GStringImpl and other types
+//     static def convertToSerializable(Object obj) {
+//         if (obj instanceof GString) {
+//             return obj.toString()
+//         } else if (obj instanceof Map) {
+//             return obj.collectEntries { key, value ->
+//                 [(convertToSerializable(key)): convertToSerializable(value)]
+//             }
+//         } else if (obj instanceof List) {
+//             return obj.collect { convertToSerializable(it) }
+//         } else if (obj instanceof Collection) {
+//             return obj.collect { convertToSerializable(it) }
+//         } else if (obj instanceof Object[]) {
+//             return obj.collect { convertToSerializable(it) }
+//         }
+//         return obj
+//     }
+
+    // Helper method to recursively convert GStringImpl and other types
+//     @NonCPS
+    static def convertToSerializable(Object obj) {
+        if (obj == null) {
+            return null
+        }
+        if (obj instanceof GString) {
+            return obj.toString()
+        }
+        if (obj instanceof String || obj instanceof Number || obj instanceof Boolean) {
+            return obj // Safe types
+        }
+        if (obj instanceof Enum) {
+            return obj.name() // Convert enums to their string names
+        }
+        if (obj instanceof Map) {
+            return obj.collectEntries { key, value ->
+                [(convertToSerializable(key)): convertToSerializable(value)]
+            }
+        }
+        if (obj instanceof List || obj instanceof Collection || obj instanceof Object[]) {
+            return obj.collect { convertToSerializable(it) }
+        }
+        // Handle any other type by converting to String or null
+        try {
+            return obj.toString()
+        } catch (Exception e) {
+            println "Failed to convert object: ${obj} (type: ${obj?.getClass()?.name}), error: ${e}"
+            return null // Fallback to null to avoid serialization issues
         }
     }
 

@@ -1,4 +1,5 @@
 #!/usr/bin/env groovy
+// @Grab('org.jenkins-ci.plugins:copyartifact:1.46.2')
 
 import com.dettonville.pipeline.utils.MapMerge
 
@@ -16,6 +17,14 @@ import groovy.transform.Field
 
 Map call(Map rawJobConfigs) {
     Map jobConfigs = rawJobConfigs.clone()
+    jobConfigs.get('copyChildJobArtifacts', false)
+    List junitXmlsPatternsDefault = [
+        "**/target/surefire-reports/*.xml",
+        "**/.test-results/*.xml",
+        "**/tests/output/junit/*.xml"
+    ]
+    jobConfigs.get('junitXmlsPatterns', junitXmlsPatternsDefault)
+
     jobConfigs.get('logLevel', 'INFO')
     log.setLevel(jobConfigs.logLevel)
 
@@ -32,6 +41,7 @@ Map call(Map rawJobConfigs) {
         log.error("jobParameters must be specified")
         return jobResults
     }
+    jobConfigs.get("testResultsDir", "test-results")
     jobConfigs.get('wait', false)
     jobConfigs.get('propagate', true)
 
@@ -52,20 +62,20 @@ Map call(Map rawJobConfigs) {
 
     // --- Start of new random delay logic ---
     // Check for maxRandomDelaySeconds in jobParameters
-    Integer maxDelay = 0
+    Integer maxRandomDelaySeconds = 0
     if (jobConfigs?.maxRandomDelaySeconds) {
         try {
-            maxDelay = jobConfigs.maxRandomDelaySeconds as Integer
+            maxRandomDelaySeconds = jobConfigs.maxRandomDelaySeconds as Integer
         } catch (NumberFormatException e) {
             log.warn("${logPrefix} Invalid value for MaxRandomDelaySeconds: ${jobConfigs.maxRandomDelaySeconds}. Defaulting to 0.")
-            maxDelay = 0
+            maxRandomDelaySeconds = 0
         }
     }
 
-    if (maxDelay > 0) {
-        // Generate a random delay between 0 and maxDelay
+    if (maxRandomDelaySeconds > 0) {
+        // Generate a random delay between 0 and maxRandomDelaySeconds
         Random rand = new Random()
-        Integer delaySeconds = rand.nextInt(maxDelay + 1) // +1 to include maxDelay
+        Integer delaySeconds = rand.nextInt(maxRandomDelaySeconds + 1) // +1 to include maxRandomDelaySeconds
         log.info("${logPrefix} Waiting for a random delay of ${delaySeconds} seconds before starting the child job...")
         sleep(time: delaySeconds, unit: 'SECONDS')
     } else {
@@ -77,57 +87,87 @@ Map call(Map rawJobConfigs) {
     List paramList=[]
 
     jobConfigs.jobParameters.each { key, value ->
-        if (jobConfigs?.supportedJobParams) {
-            if (key in jobConfigs.supportedJobParams) {
-                paramList.add([$class: 'StringParameterValue', name: key, value: value])
+        if (value) {
+            if (jobConfigs?.supportedJobParams) {
+                if (key in jobConfigs.supportedJobParams) {
+                    paramList.add([$class: 'StringParameterValue', name: key, value: "${value}"])
+                }
+            } else {
+                paramList.add([$class: 'StringParameterValue', name: key, value: "${value}"])
             }
-        } else {
-            paramList.add([$class: 'StringParameterValue', name: key, value: value])
         }
     }
     log.debug("${logPrefix} paramList=${JsonUtils.printToJsonString(paramList)}")
 
     try {
-        log.info("${logPrefix} starting job ${jobConfigs.jobFolder}")
-        // ref: http://jenkins-ci.361315.n4.nabble.com/How-to-get-build-results-from-a-build-job-in-a-pipeline-td4897887.html
-        def jobBuild = build job: jobConfigs.jobFolder, parameters: paramList, wait: jobConfigs.wait, propagate: jobConfigs.propagate
+        log.info("${logPrefix} Triggering job: ${jobConfigs.jobFolder}")
+        def buildResult = build job: jobConfigs.jobFolder, parameters: paramList, propagate: jobConfigs.propagate, wait: jobConfigs.wait
 
-        jobResults.parentJobName = JOB_NAME
-        jobResults.parentJobURL = BUILD_URL
-        jobResults.parentBuildNumber = BUILD_NUMBER
+        jobResults.buildNumber = buildResult.number
+        jobResults.jobURL = buildResult.absoluteUrl
+        jobResults.jobResult = buildResult.result.toString()
+        log.debug("${logPrefix} buildResult.result => : ${buildResult.result}")
+        jobResults.failed = (jobResults.jobResult != "SUCCESS")
+        jobResults.error = null
+
+        jobResults.parentJobName = env.JOB_NAME
+        jobResults.parentJobURL = env.BUILD_URL
+        jobResults.parentBuildNumber = env.BUILD_NUMBER
+
+        log.debug("${logPrefix} jobResults* => : ${JsonUtils.printToJsonString(jobResults)}")
 
         if (jobConfigs.wait) {
 //             // ref: https://github.com/renfeiw/openjdk-tests/blob/master/buildenv/jenkins/JenkinsfileBase
-//             def jobInvocation = jobBuild.getRawBuild()
+//             def jobInvocation = buildResult.getRawBuild()
 //             jobResults.buildId = jobInvocation.getNumber()
 
-            jobResults.buildNumber = jobBuild.getNumber()
-            jobResults.jobURL = jobBuild.getAbsoluteUrl()
+//             jobResults.buildNumber = buildResult.getNumber()
+//             jobResults.jobURL = buildResult.getAbsoluteUrl()
 
             // ref: https://github.com/jenkinsci/jenkins-multijob-plugin/blob/master/src/main/java/com/tikal/jenkins/plugins/multijob/MultiJobBuild.java
-            String jobResult = jobBuild.getResult()
-            log.info("${logPrefix} Job build result: ${jobResult}")
+            //String jobResult = buildResult.getResult()
 
-            // ref: https://javadoc.jenkins.io/plugin/workflow-support/org/jenkinsci/plugins/workflow/support/steps/build/RunWrapper.html
-            // ref: https://github.com/apache/trafficserver-ci/blob/main/jenkins/github/github_polling.pipeline
-            jobResults.jobResult = jobResult
-            if (jobResult != 'SUCCESS') {
-                jobResults.failed = true
-                log.error("${logPrefix} test job failed with jobResults ==> : ${JsonUtils.printToJsonString(jobResults)}")
-                if (jobConfigs.failFast || !jobConfigs.continueIfFailed) {
-                    currentBuild.result = 'FAILURE'
-//                     error("${logPrefix} test job failed with jobResults ==> : ${JsonUtils.printToJsonString(jobResults)}")
+            // Copy artifacts if the option is enabled
+            if (jobConfigs.copyChildJobArtifacts) {
+                log.info("${logPrefix} Copying artifacts from job: /${jobConfigs.jobFolder} #${jobResults.buildNumber}")
+                try {
+                    copyArtifacts(
+                        projectName: "/${jobConfigs.jobFolder}",
+                        selector: specific("${jobResults.buildNumber}"),
+//                         filter: '**/tests/output/junit/*.xml',
+                        filter: "**/*.xml",
+                        fingerprintArtifacts: true,
+                        target: jobConfigs.testResultsDir,
+                        optional: true  // Fail softly if no artifacts/perms
+                    )
+                    log.info("${logPrefix} Artifacts copied successfully.")
+
+                    log.info("${logPrefix} Recording JUnit results")
+                    try {
+                        junit(
+                            testResults: "${jobConfigs.testResultsDir}/**/*.xml",
+                            skipPublishingChecks: true,
+                            allowEmptyResults: true
+                        )
+                        log.info("${logPrefix} Recorded JUnit results successfully")
+                    } catch (Exception archiveErr) {
+                        log.warn("${logPrefix} Failed to record JUnit: ${archiveErr.message}")
+                    }
+
+                } catch (Exception copyErr) {
+                    log.error("${logPrefix} Failed to copy artifacts: ${copyErr.message}. Check 'Permission to Copy Artifact' in /${jobConfigs.jobFolder} config.")
+                    // Don't set failed=true here; child succeeded
                 }
             }
-        }
 
+        }
     } catch (Exception err) {
         jobResults.failed = true
         jobResults.error = err.message
-        log.error("job exception occurred [${err}] jobResults ==> : ${JsonUtils.printToJsonString(jobResults)}")
+        log.error("job exception occurred [${err}] jobResults => : ${JsonUtils.printToJsonString(jobResults)}")
         if (jobConfigs.failFast || !jobConfigs.continueIfFailed) {
             currentBuild.result = 'FAILURE'
-//             error("job exception occurred [${err}] jobResults ==> : ${JsonUtils.printToJsonString(jobResults)}")
+//             error("job exception occurred [${err}] jobResults => : ${JsonUtils.printToJsonString(jobResults)}")
 //             throw err
         }
     }

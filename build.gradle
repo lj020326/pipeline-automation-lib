@@ -1,0 +1,90 @@
+// NOTE: This is a representative build.gradle file.
+// You may need to adjust the Groovy version, repository setup, and specific Jenkins dependency versions based on your actual project and Jenkins instance setup.
+
+plugins {
+    id 'groovy'
+}
+
+// Configure sourceSets to move the test directory from 'src/test' to 'test'
+// to avoid the Jenkins Shared Library exclusion warning.
+sourceSets {
+    test {
+        groovy {
+            srcDirs = ['test/groovy']
+        }
+        // If you have resources (like JSON files) for testing, ensure they are also moved
+        // and configured here, e.g.: srcDirs = ['test/resources']
+    }
+}
+
+group = 'com.dettonville.pipeline'
+version = '1.0.0-SNAPSHOT'
+
+repositories {
+    // Standard repository
+    mavenCentral()
+    // Add the Google repository, which often contains dependencies previously found in jcenter()
+    // and helps resolve transitive Spock/Groovy artifacts.
+    google()
+    // CRITICAL: Jenkins artifacts are often in the J.C.I. Repository
+    maven {
+        url "https://repo.jenkins-ci.org/public/"
+    }
+}
+
+dependencies {
+    // 1. Groovy Dependency (Required for compilation)
+    // Reverting to Groovy 3.x (3.0.21) for better compatibility and artifact resolution in this build environment.
+    implementation 'org.codehaus.groovy:groovy-all:3.0.21'
+
+    // 2. Jenkins Pipeline Dependencies (compileOnly)
+    // These are provided by the running Jenkins environment, so they are only needed for compilation.
+
+    // Dependencies for specific features like Credentials and Script Security
+    compileOnly 'org.jenkins-ci.plugins:credentials:1311.v34e819acb_905'
+    compileOnly 'org.jenkins-ci.plugins:script-security:1303.v758b_c11d04b_3'
+
+    // Dependencies for utility steps like readJson/readYaml (if used)
+    compileOnly 'org.jenkins-ci.plugins:pipeline-utility-steps:2.15.0'
+
+    // 3. Testing Framework Dependencies (testImplementation)
+    // Used for all your unit tests (JUnit, Spock, Mockito)
+
+    // Jenkins Pipeline Unit (used by your project based on com.lesfurets imports)
+    testImplementation 'com.lesfurets:jenkins-pipeline-unit:1.8'
+
+    // JUnit 4 (required for all org.junit.* imports)
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.hamcrest:hamcrest-core:1.3'
+
+    // Spock Framework (required for spock.lang.Specification/Unroll imports)
+    // Changed Spock version from 2.4 to the highly stable 2.3 for Groovy 3.x to fix resolution issues.
+    testImplementation 'org.spockframework:spock-core:2.3-groovy-3.0'
+
+    // Mockito (required for org.mockito.* imports)
+    testImplementation 'org.mockito:mockito-core:5.11.0'
+
+    // 4. Jenkins API and Plugin Dependencies for Testing
+
+    // Core Jenkins API (hudson.model.Run, etc.)
+    testImplementation 'org.jenkins-ci.main:jenkins-core:2.426.1'
+
+    // Core Workflow APIs (CpsScript, DSL) - Downgraded to stable, widely available versions
+    testImplementation 'org.jenkins-ci.plugins.workflow:workflow-cps:2.84'
+    testImplementation 'org.jenkins-ci.plugins.workflow:workflow-step-api:2.24'
+
+    // net.sf.json.JSON (used in many tests)
+    testImplementation 'net.sf.json-lib:json-lib:2.4:jdk15'
+
+    // Plugin dependencies required by test mocks and utility classes
+    testImplementation 'org.jenkins-ci.plugins:config-file-provider:3.0'
+
+    // CRITICAL FIX: The version-number plugin is failing to resolve at 1.1/1.2.
+    // Trying the older, widely available classic artifact coordinate:
+    testImplementation 'org.jenkins-ci.plugins:version-number:1.0'
+
+}
+
+test {
+    useJUnitPlatform() // Required for mixing JUnit 4 and Spock if you upgrade to Spock 2.x
+}

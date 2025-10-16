@@ -1220,7 +1220,7 @@ def notifyBuild(String buildStatus, String emailList,Boolean onSuccessEveryTime=
 
     def sendMail = false
     def lastBuildResult = currentBuild?.getPreviousBuild()?.getResult()
-    buildStatus = buildStatus ?: 'SUCCESS'
+    String buildStatus = buildStatus ?: 'SUCCESS'
 
 		if(onSuccessEveryTime) {
 			sendMail = true

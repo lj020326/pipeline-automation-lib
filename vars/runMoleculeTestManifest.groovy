@@ -348,8 +348,8 @@ Map runMoleculeJob(Map config) {
     log.debug("${logPrefix} buildArgs=${JsonUtils.printToJsonString(buildArgs)}")
 
     Map jobConfigs = [:]
-    // source for 'build-docker-image' job referenced in following 'jobFolder' located in buildDockerImage.groovy
-    jobConfigs.jobFolder = "INFRA/repo-test-automation/run-molecule-test"
+    // source for 'build-docker-image' job referenced in following 'jobFolder' located in runMoleculePipeline.groovy
+    jobConfigs.jobFolder = "INFRA/repo-test-automation/run-molecule"
     jobConfigs.wait = true
     jobConfigs.supportedJobParams = [
         "GitRepoUrl",

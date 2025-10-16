@@ -4,7 +4,7 @@ import com.dettonville.pipeline.utils.JsonUtils
 
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field
-@Field Logger log = new Logger(this, LogLevel.INFO)
+@Field Logger log = new Logger(this)
 
 /**
  * Sends an email to culprits, developers who made changes in the build, and the user who initiated the build.
@@ -38,12 +38,20 @@ void call(Map args=[:], java.lang.Object currentBuild, java.lang.Object env) {
     String recipients = emailAdditionalDistList.join(', ')
     log.info("recipients=${recipients}")
 
-    emailext (
-        mimeType: 'text/html',
-        recipientProviders: recipientProviders,
-        to: recipients,
-        subject: emailSubject,
-        body: '${SCRIPT, template="groovy-html.template"}'
-    )
-
+    if (args?.emailBody) {
+        emailext (
+            recipientProviders: recipientProviders,
+            to: recipients,
+            subject: emailSubject,
+            body: "Results:\n${args.emailBody}",
+        )
+    } else {
+        emailext (
+            mimeType: 'text/html',
+            recipientProviders: recipientProviders,
+            to: recipients,
+            subject: emailSubject,
+            body: '${SCRIPT, template="groovy-html.template"}'
+        )
+    }
 }

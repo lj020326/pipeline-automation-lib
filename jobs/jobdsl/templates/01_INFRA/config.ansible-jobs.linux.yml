@@ -18,13 +18,23 @@ pipelineConfig:
       - environment: QA
       - environment: PROD
   ansibleJobList:
+    - ansible_tag: bootstrap-aibrix
+      ansible_limit: aibrix
+    - ansible_tag: bootstrap-aibrix-only
+      ansible_limit: aibrix
     - ansible_tag: bootstrap-ansible
+    - ansible_tag: bootstrap-ansible-controller
+      ansible_limit: localhost
+      skip_always_tag: 'true'
     - ansible_tag: bootstrap-ansible-user
       skip_always_tag: 'true'
+    - ansible_tag: bootstrap-ca-certs
+      ansible_limit: ca_keystore
     - ansible_tag: bootstrap-cacerts
       ansible_limit: ca_keystore
     - ansible_tag: bootstrap-certs
       ansible_limit: ca_keystore
+    - ansible_tag: bootstrap-cron
     - ansible_tag: bootstrap-docker
       ansible_limit: docker
     - ansible_tag: bootstrap-docker-stack
@@ -33,10 +43,21 @@ pipelineConfig:
     - ansible_tag: bootstrap-esxi
       skip_always_tag: 'true'
       ansible_limit: vmware_physical_esx_host
+    - ansible_tag: bootstrap-etcd
+      ansible_limit: kubernetes_etcd
+    - ansible_tag: bootstrap-gitea-runner
     - ansible_tag: bootstrap-idrac
       ansible_limit: dell_idrac_hosts
       skip_always_tag: 'true'
     - ansible_tag: bootstrap-jenkins-agent
+    - ansible_tag: bootstrap-kubernetes-ca
+      ansible_limit: kubernetes_ca
+    - ansible_tag: bootstrap-kubernetes-controller
+      ansible_limit: kubernetes_controller
+    - ansible_tag: bootstrap-kubernetes-worker
+      ansible_limit: kubernetes_worker
+    - ansible_tag: bootstrap-kubernetes
+      ansible_limit: kubernetes
     - ansible_tag: bootstrap-ldap
     - ansible_tag: bootstrap-ldap-client
     - ansible_tag: bootstrap-linux
@@ -46,7 +67,6 @@ pipelineConfig:
     - ansible_tag: bootstrap-linux-package
     - ansible_tag: bootstrap-linux-user
     - ansible_tag: bootstrap-llm-server
-    - ansible_tag: bootstrap-cron
     - ansible_tag: bootstrap-mounts
     - ansible_tag: bootstrap-nfs
     - ansible_tag: bootstrap-nfs-client
@@ -54,6 +74,8 @@ pipelineConfig:
     - ansible_tag: bootstrap-ntp
     - ansible_tag: bootstrap-ntp-client
     - ansible_tag: bootstrap-ntp-server
+    - ansible_tag: bootstrap-pki
+      ansible_limit: ca_keystore
     - ansible_tag: bootstrap-plexupdate
     - ansible_tag: bootstrap-pip
     - ansible_tag: bootstrap-postfix

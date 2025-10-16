@@ -9,7 +9,6 @@ import java.util.regex.Matcher
 
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field
-//@Field Logger log = new Logger(this, LogLevel.INFO)
 @Field Logger log = new Logger(this)
 
 /**

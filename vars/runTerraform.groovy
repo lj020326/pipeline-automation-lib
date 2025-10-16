@@ -7,7 +7,6 @@ import com.dettonville.pipeline.utils.DockerUtil
 
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field
-//@Field Logger log = new Logger(this, LogLevel.INFO)
 @Field Logger log = new Logger(this)
 
 // ref: https://gist.github.com/fortunecookiezen/b3bc3214a07a14529608857d078b32dd
@@ -35,7 +34,6 @@ def call(Map params=[:]) {
         stages {
             //      stage('fetch_latest_code') {
             //        steps {
-            ////          git credentialsId: '17371c59-6b11-42c7-bb25-a37a9febb4db', url: 'https://github.com/PrashantBhatasana/terraform-jenkins-ec2'
             //          git credentialsId: 'infra-jenkins-git-user', url: 'https://gitea.admin.dettonville.int:8443/infra/terraform-jenkins.git'
             //        }
             //      }

@@ -54,7 +54,7 @@
         ]
       },
       "remoteUrls": [
-        "https://repo.dettonville.int/stash/scm/api/dcapi-automation-pipeline.git"
+        "https://gitea.admin.dettonville.int/infra/pipeline-automation-lib.git.git"
       ],
       "scmName": ""
     },

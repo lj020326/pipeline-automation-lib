@@ -7,7 +7,7 @@ import groovy.json.*
 
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field
-@Field Logger log = new Logger(this, LogLevel.INFO)
+@Field Logger log = new Logger(this)
 
 def call(Map params=[:]) {
 
@@ -152,7 +152,7 @@ Map loadPipelineConfig(Map params, String configFile=null) {
 //    config.get('logLevel', "INFO")
     config.get('logLevel', "DEBUG")
     config.get('debugPipeline', true)
-    if (config.debugPipeline) {
+    if (log.isLogActive(LogLevel.DEBUG)) {
         log.setLevel(LogLevel.DEBUG)
     }
     log.setLevel(config.logLevel)
@@ -283,7 +283,7 @@ def deployPcfAppEnv(Map config, VaultUtil vaultUtil, CaaSUtil caasUtil) {
     String pcfAppEnv=config.pcfAppEnv
     log.info("started")
 
-    if (config.debugPipeline) log.debug("config=${printToJsonString(config)}")
+    if (log.isLogActive(LogLevel.DEBUG)) log.debug("config=${printToJsonString(config)}")
 
     def agentLabelM3 = getJenkinsAgentLabel(config.jenkinsM3NodeLabel)
     def agentLabelDeploy = getJenkinsAgentLabel(config.jenkinsDeployNodeLabel)
@@ -341,7 +341,7 @@ def deployPCFApp(Map config) {
 
     config.keyMap = config.keyMaps[config.pcfAppName]
 
-    if (config.debugPipeline) log.debug("config=${printToJsonString(config)}")
+    if (log.isLogActive(LogLevel.DEBUG)) log.debug("config=${printToJsonString(config)}")
 
     String configEnv = pcfAppEnv.replace('-','_')
     String envLoc = pcfAppEnv.split('-')[0]
@@ -418,7 +418,7 @@ def deployPCFApp(Map config) {
         pom = readMavenPom file: pomFile
         def jarSuffix = config?.jar_suffix ?: ''
         def curlOptions = "-sS"
-        if (config.debugPipeline) curlOptions = "-vsS "
+        if (log.isLogActive(LogLevel.DEBUG)) curlOptions = "-vsS "
 
         sh "curl ${curlOptions} -o ${pom.artifactId}-${pom.version}${jarSuffix}.${pom.packaging} ${baseURL}/${pom.groupId.replace('.','/')}/${pom.artifactId}/${pom.version}/${pom.artifactId}-${pom.version}${jarSuffix}.${pom.packaging}"
 
@@ -434,7 +434,7 @@ def deployPCFApp(Map config) {
 //        sh "sed -i '/path:/c\\  path: ${pom.artifactId}-${pom.version}${jarSuffix}.${pom.packaging}' ${manifestFile}"
         sh "sed -i '/path:/c\\  path: ./${pom.artifactId}-${pom.version}${jarSuffix}.${pom.packaging}' ${manifestFile}"
 
-        if (config.debugPipeline) {
+        if (log.isLogActive(LogLevel.DEBUG)) {
             sh "find . -name \\*.war -type f -printf \"%TY-%Tm-%Td %TH:%TM:%.2Ts %m:%u:%g %p %k kB\\n\" | sort -k 3,3"
 
             log.debug("updated manifest file:")
@@ -460,7 +460,7 @@ def deployPCFApp(Map config) {
 void deployToPCFGoRouter(Map config) {
     log.debug("starting")
 
-    if (config.debugPipeline) log.debug("config=${printToJsonString(config)}")
+    if (log.isLogActive(LogLevel.DEBUG)) log.debug("config=${printToJsonString(config)}")
 
     String appHostName=config.pcfAppName
     String appDomain=config.pcfAppDomain
@@ -499,7 +499,7 @@ void deployToPCFGoRouter(Map config) {
                 sh "cf delete ${config.pcfAppName} -f -r"
             }
 
-            if (config.debugPipeline) sh "find . -name \\*.war -type f -printf \"%TY-%Tm-%Td %TH:%TM:%.2Ts %m:%u:%g %p %k kB\\n\" | sort -k 3,3"
+            if (log.isLogActive(LogLevel.DEBUG)) sh "find . -name \\*.war -type f -printf \"%TY-%Tm-%Td %TH:%TM:%.2Ts %m:%u:%g %p %k kB\\n\" | sort -k 3,3"
 
             dir(dirToPush) {
                 //push application but don't start it so we can set env variables
@@ -707,7 +707,7 @@ def notifyBuild(String buildStatus, String emailList,Boolean onSuccessEveryTime=
 
     def sendMail = false
     def lastBuildResult = currentBuild?.getPreviousBuild()?.getResult()
-    buildStatus = buildStatus ?: 'SUCCESS'
+    String buildStatus = buildStatus ?: 'SUCCESS'
 
     if(onSuccessEveryTime) {
         sendMail = true

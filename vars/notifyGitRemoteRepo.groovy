@@ -16,7 +16,8 @@ def call(Map args=[:], String gitRemoteRepoType) {
     // Status can be IN_PROGRESS or COMPLETED
     Set<String> VALID_GITEA_CHECK_STATUSES = ['QUEUED', 'IN_PROGRESS', 'COMPLETED']
     // Conclusion can be SUCCESS, FAILURE, NEUTRAL, SKIPPED, UNSTABLE, ABORTED
-    Set<String> VALID_GITEA_CHECK_CONCLUSIONS = ['SUCCESS', 'FAILURE', 'NEUTRAL', 'SKIPPED', 'UNSTABLE', 'ABORTED']
+//     Set<String> VALID_GITEA_CHECK_CONCLUSIONS = ['SUCCESS', 'FAILURE', 'NEUTRAL', 'SKIPPED', 'UNSTABLE', 'ABORTED']
+    Set<String> VALID_GITEA_CHECK_CONCLUSIONS = ['SUCCESS', 'FAILURE', 'NEUTRAL', 'CANCELED', 'SKIPPED', 'TIME_OUT', 'ACTION_REQUIRED', 'NONE']
 
     // Define valid states for Bitbucket Status API
     // BuildState can be INPROGRESS, SUCCESSFUL, FAILED
@@ -68,6 +69,15 @@ def call(Map args=[:], String gitRemoteRepoType) {
                     }
                     // No conclusion for IN_PROGRESS or QUEUED
                     break
+                case 'COMPLETED':
+                    notifyArgs['status'] = 'COMPLETED'
+                    if (args?.gitRemoteBuildConclusion
+                        && VALID_GITEA_CHECK_CONCLUSIONS.contains(args.gitRemoteBuildConclusion)) {
+                        notifyArgs['conclusion'] = args.gitRemoteBuildConclusion
+                    } else {
+                        notifyArgs['conclusion'] = 'NEUTRAL'  // Or derive from incomingStatus if no explicit conclusion
+                    }
+                    break
                 case 'SUCCESSFUL':
                     notifyArgs['status'] = 'COMPLETED'
                     notifyArgs['conclusion'] = 'SUCCESS'
@@ -118,6 +128,10 @@ def call(Map args=[:], String gitRemoteRepoType) {
         if (args?.gitRemoteBuildSummary) {
             notifyArgs['summary'] = args.gitRemoteBuildSummary
         }
-        publishChecks(notifyArgs)
+        try {
+            publishChecks(notifyArgs)
+        } catch (Exception ex) {
+            log.warn("Unable to notify repo", ex.getMessage())
+        }
     }
 }

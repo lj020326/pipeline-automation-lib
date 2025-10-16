@@ -7,6 +7,9 @@ import com.dettonville.pipeline.utils.MapMerge
 import com.dettonville.pipeline.utils.logging.LogLevel
 import com.dettonville.pipeline.utils.logging.Logger
 
+// import jenkins.model.CauseOfInterruption.*
+import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException
+
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field
 @Field Logger log = new Logger(this)
@@ -19,9 +22,9 @@ import groovy.transform.Field
 def call(Map params=[:]) {
 
     Map config = loadPipelineConfig(params)
+    Map jobResults = [:]
 
     pipeline {
-
         agent {
             label "docker"
         }
@@ -32,9 +35,8 @@ def call(Map params=[:]) {
             timestamps()
             timeout(time: config.timeout as Integer, unit: config.timeoutUnit)
         }
-
         stages {
-			stage('Load docker build config file') {
+			stage('Load pipeline config file') {
 				when {
                     expression { fileExists config.configFile }
 				}
@@ -47,26 +49,41 @@ def call(Map params=[:]) {
             stage("Run Docker Build Manifest") {
                 steps {
                     script {
-                        Map jobResults = runDockerBuildManifest(config)
-                        log.info("finished: jobResults=${JsonUtils.printToJsonString(jobResults)}")
-                        dir(config.buildReportDir) {
-                            log.info("dir: ${config.buildReportDir} successfully created!")
-                        }
-                        log.info("saving ${config.buildReport}")
                         try {
-                            // ref: https://www.jenkins.io/doc/pipeline/steps/pipeline-utility-steps/#writeyaml-write-a-yaml-from-an-object-or-objects
-                            writeYaml file: config.buildReport, data: jobResults
-                        } catch (Exception err) {
-                            log.error("writeYaml(${config.buildReport}): exception occurred [${err}]")
+                            jobResults = runDockerBuildManifest(config)
+                        } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                            currentBuild.result = 'ABORTED'
+                            throw e
+                        } catch (Exception e) {
+                            log.error("runDockerBuildManifest failed: ${e.getMessage()}")
+                            currentBuild.result = 'FAILURE'
+                            throw e
                         }
 
-                        archiveArtifacts(
-                            allowEmptyArchive: true,
-                            artifacts: "${config.buildReportDir}/**",
-                            fingerprint: true)
+                        log.info("finished: jobResults=${JsonUtils.printToJsonString(jobResults)}")
 
                         if (jobResults.failed) {
+                            config.gitRemoteBuildStatus = "COMPLETED"
+                            config.gitRemoteBuildConclusion = "FAILURE"
                             currentBuild.result = 'FAILURE'
+                        } else {
+                            config.gitRemoteBuildStatus = "COMPLETED"
+                            config.gitRemoteBuildConclusion = "SUCCESS"
+                            currentBuild.result = 'SUCCESS'
+                        }
+                        if (config.buildReport) {
+                            sh "mkdir -p ${config.testResultsDir}"
+                            log.info("saving ${config.buildReport}")
+                            try {
+                                writeYaml file: config.buildReport, data: jobResults
+                            } catch (Exception err) {
+                                log.error("writeYaml(${config.buildReport}): exception occurred [${err}]")
+                            }
+                            archiveArtifacts(
+                                allowEmptyArchive: true,
+                                artifacts: "${config.buildReportDir}/**",
+                                fingerprint: true)
+                            log.info("Archived jobResults report: ${config.buildReport}")
                         }
                     }
                 }
@@ -75,6 +92,15 @@ def call(Map params=[:]) {
         post {
             always {
                 script {
+                    notifyGitRemoteRepo(
+                        config.gitRemoteRepoType,
+                        gitRemoteBuildKey: config.gitRemoteBuildKey,
+                        gitRemoteBuildName: config.gitRemoteBuildName,
+                        gitRemoteBuildStatus: config.gitRemoteBuildStatus,
+                        gitRemoteBuildSummary: config.gitRemoteBuildSummary,
+                        gitRemoteBuildConclusion: config.gitRemoteBuildConclusion,
+                        gitCommitId: config.gitCommitId
+                    )
                     if (config?.alwaysEmailList) {
                         log.info("config.alwaysEmailList=${config.alwaysEmailList}")
                         sendEmail(currentBuild, env, emailAdditionalDistList: config.alwaysEmailList.split(","))
@@ -125,16 +151,11 @@ def call(Map params=[:]) {
     }
 } // body
 
-//@NonCPS
-Map loadPipelineConfig(Map params) {
-
-    Map config = [:]
-
-    if (params) {
-        log.debug("copy immutable params map to mutable config map")
-        log.debug("params=${JsonUtils.printToJsonString(params)}")
-        config = MapMerge.merge(config, params)
-    }
+Map loadPipelineConfig(Map params = [:]) {
+    log.debug("copy immutable params map to mutable config map")
+    log.debug("params=${JsonUtils.printToJsonString(params)}")
+//     Map config = MapMerge.merge(config, params)
+    Map config = params.clone()
 
     config.get('logLevel', "INFO")
 //     config.get('logLevel', "DEBUG")
@@ -144,10 +165,10 @@ Map loadPipelineConfig(Map params) {
     config.get('wait', true)
     config.get('failFast', false)
     config.get('propagate', config.failFast)
-    config.get('maxRandomDelaySeconds', "0")
-
+    config.get('maxRandomDelaySeconds', "10")
     config.get('childJobTimeout', "4")
     config.get('childJobTimeoutUnit', "HOURS")
+    config.get("copyChildJobArtifacts", false)
 
     config.get('runGroupsInParallel', false)
     config.get('runInParallel', false)
@@ -161,9 +182,10 @@ Map loadPipelineConfig(Map params) {
 //    config.get("registryUrl","https://media.dettonville.int:5000")
     config.get("registryCredId", "docker-registry-admin")
 
-    config.get("buildImageLabel", "${env.JOB_NAME.split('/')[-2]}")
+    config.get("buildImageName", "${env.JOB_NAME.split('/')[-2]}")
     config.get("buildDir", ".")
     config.get("buildPath", ".")
+    config.get("buildTestAppendIdArg", false)
 
     config.get('buildReportDir','build')
     config.get('buildReport',"${config.buildReportDir}/build-results.yml")
@@ -190,23 +212,19 @@ Map loadPipelineConfig(Map params) {
     ]
     config.get('dockerEnvVarsList', dockerEnvVarsListDefault)
 
-    log.info("config=${JsonUtils.printToJsonString(config)}")
-
     config.get('configFile', ".jenkins/docker-build-config.yml")
+
+    log.info("config=${JsonUtils.printToJsonString(config)}")
 
     return config
 }
 
 Map loadPipelineConfigFile(Map baseConfig) {
 
-    Map configFileMap = readYaml file: baseConfig.configFile
-    log.debug("configFileMap=${JsonUtils.printToJsonString(configFileMap)}")
-
-    Map buildConfigs = configFileMap.pipeline
+    Map buildConfigs = readYaml file: baseConfig.configFile
     log.debug("buildConfigs=${JsonUtils.printToJsonString(buildConfigs)}")
 
-//     config = baseConfig + buildConfigs
-
+//     Map config = baseConfig + buildConfigs
     Map config = MapMerge.merge(baseConfig, buildConfigs)
 
     log.info("Merged config=${JsonUtils.printToJsonString(config)}")
@@ -316,7 +334,7 @@ Map buildAndPublishImageList(Map config) {
 
         Map buildConfig = config.findAll { !["buildImageList"].contains(it.key) } + buildConfigRaw
 
-        String buildJobId = "${buildConfig.buildImageLabel}-${index}"
+        String buildJobId = "${buildConfig.buildImageName}-${index}"
         buildConfig.buildJobId = buildJobId
 
         log.debug("buildConfig=${JsonUtils.printToJsonString(buildConfig)}")
@@ -326,7 +344,7 @@ Map buildAndPublishImageList(Map config) {
                 jobResults.items.put(buildConfig.buildJobId, runDockerBuildManifest(buildConfig))
             }
         } else {
-            stage("build and publish ${buildConfig.buildImageLabel}-${index}") {
+            stage("build and publish ${buildConfig.buildImageName}-${index}") {
                 jobResults.items.put(buildConfig.buildJobId, runDockerBuildManifest(buildConfig))
             }
         }
@@ -350,7 +368,7 @@ Map buildAndPublishImageList(Map config) {
 
 Map runBuildAndPublishImageJob(Map config) {
     Map jobResults = [:]
-    String logPrefix = "[${config.buildImageLabel}]:"
+    String logPrefix = "[${config.buildImageName}]:"
 
     log.debug("${logPrefix} config=${JsonUtils.printToJsonString(config)}")
 
@@ -374,29 +392,12 @@ Map runBuildAndPublishImageJob(Map config) {
         buildArgs['BUILD_DATE'] = config.buildDate
     }
 
-    log.debug("${logPrefix} buildArgs=${JsonUtils.printToJsonString(buildArgs)}")
+    // Define UID and GID variables
+    // Note: The sh command runs on the Jenkins agent machine (the host of the container)
+//     config.builderUid = sh(script: 'id -u', returnStdout: true).trim()
+//     config.builderGid = sh(script: 'id -g', returnStdout: true).trim()
 
-    Map jobConfigs = [:]
-    // source for 'build-docker-image' job referenced in following 'jobFolder' located in buildDockerImage.groovy
-    jobConfigs.jobFolder = "INFRA/build-docker-image"
-    jobConfigs.supportedJobParams = [
-        "GitRepoUrl",
-        "GitRepoBranch",
-        "GitCredentialsId",
-        "RegistryUrl",
-        "RegistryCredId",
-        "BuildImageLabel",
-        "BuildDir",
-        "BuildPath",
-        "BuildTags",
-        "BuildArgs",
-        "DockerFile",
-        "ChangedEmailList",
-        "AlwaysEmailList",
-        "FailedEmailList",
-        "Timeout",
-        "TimeoutUnit",
-    ]
+    log.debug("${logPrefix} buildArgs=${JsonUtils.printToJsonString(buildArgs)}")
 
     log.debug("${logPrefix} GIT_URL=${GIT_URL}")
     log.debug("${logPrefix} GIT_BRANCH=${GIT_BRANCH}")
@@ -412,10 +413,23 @@ Map runBuildAndPublishImageJob(Map config) {
     jobParameters.RegistryUrl = config.registryUrl
     jobParameters.RegistryCredId = config.registryCredId
 
-    jobParameters.BuildImageLabel = config.buildImageLabel
+    if (config?.builderUid) {
+        jobParameters.BuilderUid = config.builderUid
+    }
+    if (config?.builderGid) {
+        jobParameters.BuilderGid = config.builderGid
+    }
+    if (config?.builderImage) {
+        jobParameters.BuilderImage = config.builderImage
+    }
+
+    jobParameters.BuildImageName = config.buildImageName
     jobParameters.BuildDir = config.buildDir
     jobParameters.BuildPath = config.buildPath
 
+    if (config?.buildImageTag) {
+        jobParameters.BuildImageTag = config.buildImageTag
+    }
     if (config?.buildTags) {
         if (config.buildTags instanceof List) {
             jobParameters.BuildTags = config.buildTags.join(",")
@@ -425,6 +439,20 @@ Map runBuildAndPublishImageJob(Map config) {
             log.error("unsupported buildTags type : " + config.buildTags.getClass())
         }
     }
+    if (config?.buildTestCommand) {
+//         jobParameters.BuildTestCommand = config.buildTestCommand
+        // address multiline string if found
+        jobParameters.BuildTestCommand = config.buildTestCommand.replaceAll(/\\\n/, ' ').replaceAll(/\n/, ' ').trim()
+    }
+    if (config?.buildTestAppendIdArg) {
+        jobParameters.BuildTestAppendIdArg = "${config.buildTestAppendIdArg}"
+    }
+    if (config?.buildTestAppendIdOption) {
+        jobParameters.BuildTestAppendIdOption = config.buildTestAppendIdOption
+    }
+    if (config?.testResultsPath) {
+        jobParameters.TestResultsPath = config.testResultsPath
+    }
 
 //     jobParameters.BuildArgs = JsonUtils.printToJsonString(buildArgs)
     jobParameters.BuildArgs = JsonOutput.toJson(buildArgs)
@@ -432,14 +460,19 @@ Map runBuildAndPublishImageJob(Map config) {
     if (config?.dockerFile) {
         jobParameters.DockerFile = config.dockerFile
     }
-    jobConfigs.jobParameters = jobParameters
-    jobResults.jobParameters = jobParameters
 
-    jobConfigs.propagate = config.propagate
-    jobConfigs.wait = config.wait
-    jobConfigs.failFast = config.failFast
-    jobConfigs.logLevel = config.logLevel
-    jobConfigs.maxRandomDelaySeconds = config.maxRandomDelaySeconds
+    Map jobConfigs = [
+        // source for 'build-docker-image' job referenced in following 'jobFolder' located in buildDockerImagePipeline.groovy
+        jobFolder: "INFRA/build-docker-image",
+        jobParameters: jobParameters,
+        propagate: config.propagate,
+        wait: config.wait,
+        failFast: config.failFast,
+        logLevel: config.logLevel,
+        maxRandomDelaySeconds: config.maxRandomDelaySeconds,
+        copyChildJobArtifacts: config.copyChildJobArtifacts
+    ]
+    jobResults.jobParameters = jobParameters
 
     log.debug("${logPrefix} jobConfigs=${JsonUtils.printToJsonString(jobConfigs)}")
 

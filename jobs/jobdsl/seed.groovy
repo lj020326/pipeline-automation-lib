@@ -12,14 +12,20 @@ import groovy.transform.Field
 @Field Logger log = new Logger(this)
 
 // Change to a List of String
+// Add other jobs here if needed, e.g., "SOME_FOLDER/another-job"
 List<String> jobsToTrigger = [
-    "ADMIN/reset-SSH-hostkeys"
-    // Add other jobs here if needed, e.g., "SOME_FOLDER/another-job"
+    "ADMIN/reset-SSH-hostkeys",
+    "INFRA/build-docker-image",
+    "INFRA/repo-test-automation/run-ansible-test"
 ]
 
 pipeline {
     agent { label 'controller' } // Use the 'controller' label as defined in your Job DSL
 
+    triggers {
+        // Cron schedule for 6 a.m. and 6 p.m. every day.
+        cron('0 6,18 * * *')
+    }
     options {
         buildDiscarder(logRotator(numToKeepStr: '20'))
         skipDefaultCheckout(false)
@@ -58,7 +64,7 @@ pipeline {
                             log.info("Triggering: ${jobName}")
                             // NOTE: each job is expected to support a hidden parameter
                             //    that allows running for parameter initialization only
-                            build job: jobName,
+                            build job: jobName, wait: false,
                                 parameters: [
                                     [$class: 'BooleanParameterValue', name: 'InitializeParamsOnly', value: true]
                                 ]

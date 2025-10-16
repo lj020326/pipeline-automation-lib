@@ -8,7 +8,6 @@ import com.dettonville.pipeline.utils.Utilities
 
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field
-//@Field Logger log = new Logger(this, LogLevel.INFO)
 @Field Logger log = new Logger(this)
 
 def call(Map config=[:]) {
@@ -51,7 +50,6 @@ def call(Map config=[:]) {
     }
 
     config.get('environment',"${env.JOB_NAME.split('/')[-3]}")
-    config.get('ansibleInstallation',"ansible-venv")
 
     def ansibleTags = "untagged,${env.JOB_BASE_NAME}"
     if (config.skipUntagged) {
@@ -68,7 +66,7 @@ def call(Map config=[:]) {
     config.get('ansibleInventory',"./inventory/${config.environment}")
 
     List ansibleEnvVarsListDefault = [
-        "ANSIBLE_COLLECTIONS_PATH=~/.ansible/collections:/usr/share/ansible/collections:./requirements_collections:./collections"
+        "ANSIBLE_COLLECTIONS_PATH=~/.ansible/collections:/usr/share/ansible/collections:./collections"
     ]
     config.get('ansibleEnvVarsList',ansibleEnvVarsListDefault)
 
@@ -78,23 +76,13 @@ def call(Map config=[:]) {
     }
 
 //     config.skipDefaultCheckout = true
-//     config.gitBranch = 'master'
     config.get('gitBranch','main')
-    config.get('gitRepoUrl','ssh://git@repo.example.org:2222/ansible/ansible-datacenter.git')
     config.get('gitCredentialsId','git-ssh-jenkins')
 
     config.get("gitRemoteRepoType","bitbucket")
     config.get("gitRemoteBuildKey", 'Ansible playbook run')
 	config.get("gitRemoteBuildName", 'Ansible playbook run')
     config.get("gitRemoteBuildSummary", "${config.gitRemoteBuildName} update")
-
-//     config.get('ansibleCollectionsRequirements','./collections/requirements.molecule.yml')
-//     config.get('ansibleRolesRequirements','./roles/requirements.yml')
-
-//     List ansibleSecretVarsList=[
-//         usernamePassword(credentialsId: 'ansible-ssh-password-linux', passwordVariable: 'ANSIBLE_SSH_PASSWORD', usernameVariable: 'ANSIBLE_SSH_USERNAME'),
-//         string(credentialsId: 'awx-oauth-token', variable: 'TOWER_OAUTH_TOKEN')
-//     ]
 
     log.info("config=${JsonUtils.printToJsonString(config)}")
 

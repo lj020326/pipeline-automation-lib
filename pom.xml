@@ -3,7 +3,7 @@
   #%L
   dettonville.org
   %%
-  Copyright (C) 2018 dettonville.org
+  Copyright (C) 2025 Dettonville
   %%
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -33,9 +33,9 @@
   <description>dettonville.org Jenkins Pipeline Library</description>
 
   <scm>
-    <connection>scm:git:git@repo.dettonville.int/stash/scm/api/dcapi-automation-pipeline.git</connection>
-    <developerConnection>scm:git:git@repo.dettonville.int/stash/scm/api/dcapi-automation-pipeline.git</developerConnection>
-    <url>https://repo.dettonville.int/stash/scm/api/dcapi-automation-pipeline</url>
+    <connection>scm:git:git@gitea.admin.dettonville.int:2222/infra/pipeline-automation-lib.git</connection>
+    <developerConnection>scm:git:git@gitea.admin.dettonville.int:2222/infra/pipeline-automation-lib.git</developerConnection>
+    <url>https://gitea.admin.dettonville.int/infra/pipeline-automation-lib.git</url>
     <tag>HEAD</tag>
   </scm>
 

@@ -1,6 +1,6 @@
 /*-
  * #%L
- * dcapi.dettonville.org
+ * apps.dettonville.org
  * %%
  * The MIT License (MIT)
  *

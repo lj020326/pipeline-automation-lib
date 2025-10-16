@@ -10,12 +10,12 @@ import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field
-@Field Logger log = new Logger(this, LogLevel.INFO)
+@Field Logger log = new Logger(this)
 
 /**
  * Executes a ansible playbook with the given configuration.
  * Please refer to the documentation for details about the configuration options
- * 
+ *
  * @param config The configuration used to execute the playbook
  */
 void execPlaybook(Map config) {

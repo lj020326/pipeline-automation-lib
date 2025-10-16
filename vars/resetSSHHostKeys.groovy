@@ -122,7 +122,7 @@ Map loadPipelineConfig(Map params) {
         }
     }
     config.get('logLevel', "DEBUG")
-    config.get('jenkinsNode', "build-in")
+    config.get('jenkinsNode', "built-in")
 
     // ref: https://stackoverflow.com/questions/40261710/getting-current-timestamp-in-inline-pipeline-script-using-pipeline-plugin-of-hud
     Date now = new Date()
