@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-VERSION="2025.9.17"
+VERSION="2025.10.16"
 
 GIT_DEFAULT_BRANCH=main
 GIT_PUBLIC_BRANCH=public
@@ -11,16 +11,18 @@ GIT_REMOVE_CACHED_FILES=0
 set -e
 
 #SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SCRIPT_DIR="$(dirname "$0")"
+#SCRIPT_DIR="$(dirname "$0")"
 SCRIPT_NAME="$(basename "$0")"
 
 CONFIRM=0
 
 ## PURPOSE RELATED VARS
 #REPO_DIR=$( git rev-parse --show-toplevel )
-REPO_DIR="$(cd "${SCRIPT_DIR}" && git rev-parse --show-toplevel)"
+#REPO_DIR="$(cd "${SCRIPT_DIR}" && git rev-parse --show-toplevel)"
+REPO_DIR="$(git rev-parse --show-toplevel)"
 
 PUBLIC_GITIGNORE=.gitignore.pub
+PUBLIC_GITMODULES=.gitmodules.pub
 
 ## ref: https://stackoverflow.com/questions/53839253/how-can-i-convert-an-array-into-a-comma-separated-string
 declare -a EXCLUDES_ARRAY
@@ -505,7 +507,7 @@ sync_public_branch() {
       echo "Resetting ansible submodule for private"
       git submodule deinit -f . && \
       git submodule update --init --recursive --remote && \
-      gitcommitpush
+      git_commit_push
     fi
 
     log_info "Returning to the original branch and applying stashed changes."

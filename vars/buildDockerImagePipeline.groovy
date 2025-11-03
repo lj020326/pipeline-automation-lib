@@ -134,7 +134,7 @@ def call() {
                             return
                         } finally {
                             if (config?.testResultsPath) {
-                                log.info("Archiving test results from path: ${config.testResultsPath}")
+                                log.info("Archiving test results from: ${config.testResultsPath}")
                                 archiveArtifacts(
                                     artifacts: "${config.testResultsPath}",
                                     fingerprint: true,

@@ -138,38 +138,8 @@ def call() {
                 steps {
                     script {
                         Map result = [:]
-                        try {
-                            // Execute the single test run
+                        dir(config.targetCollectionDir) {
                             result = runAnsibleTest(config)
-                            log.info("Test command successful.")
-                            currentBuild.result = 'SUCCESS'
-                        } catch (FlowInterruptedException e) {
-                            config.gitRemoteBuildStatus = "COMPLETED"
-                            config.gitRemoteBuildConclusion = "FAILURE"
-                            // Check if the interruption was a user-initiated abort
-                            e.getCauses().each { cause ->
-                                log.error("Cause: ${cause.getClass().getName()}")
-                            }
-                            // It is crucial to re-throw the exception to correctly mark the build as ABORTED
-                            currentBuild.result = 'FAILURE'
-                            throw e
-                        } catch (hudson.AbortException ae) {
-                            // handle an AbortException
-                            // ref: https://github.com/jenkinsci/pipeline-model-definition-plugin/blob/master/pipeline-model-definition/src/main/groovy/org/jenkinsci/plugins/pipeline/modeldefinition/Utils.groovy
-                            // ref: https://gist.github.com/stephansnyt/3ad161eaa6185849872c3c9fce43ca81
-                            config.gitRemoteBuildConclusion = "COMPLETED"
-                            config.gitRemoteBuildConclusion = "FAILURE"
-                            log.error("abort error: " + ae.getMessage())
-                            currentBuild.result = 'FAILURE'
-                            // It is crucial to re-throw the exception to correctly mark the build as ABORTED
-                            throw ae
-                        } catch (Exception e) {
-                            config.gitRemoteBuildStatus = "COMPLETED"
-                            config.gitRemoteBuildConclusion = "FAILURE"
-                            // General catch-all for any other unexpected failures
-                            log.error("An unexpected error occurred: ${e.message}")
-                            currentBuild.result = 'FAILURE'
-                            throw e
                         }
                     }
                 }

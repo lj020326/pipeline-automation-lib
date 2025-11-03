@@ -38,35 +38,7 @@ Map call(Map params = [:]) {
     }
 
     Map jobResult = [:]
-    log.info("config.targetCollectionDir => ${config.targetCollectionDir}")
-    dir(config.targetCollectionDir) {
-        jobResult = runAnsibleTestConfig(config)
-    }
-    // Archiving after dir closes (from workspace root)
-//     String fullResultsDir = "${config.targetCollectionDir}/${config.testResultsDir}"
-//     log.info("fullResultsDir => ${fullResultsDir}")
-    String relativeResultsDir = "ansible_collections/${config.collectionNamespace}/${config.collectionName}/${config.testResultsDir}"  // NEW: Relative to workspace
-    log.info("relativeResultsDir => ${relativeResultsDir}")
-    sh("find ${relativeResultsDir} -type f")
-
-    log.info("Archiving test results from : ${relativeResultsDir}")
-    archiveArtifacts(
-        artifacts: "${relativeResultsDir}/**",  // NEW: Use relative path
-        fingerprint: true,
-        onlyIfSuccessful: false,
-        allowEmptyArchive: true
-    )
-
-    // Use relative path
-    String junitPattern = "${relativeResultsDir}/*-${config.ansibleTestCommand}*.xml"
-    log.info("Recording junit test results from path: ${junitPattern}")
-    junit(
-        testResults: junitPattern,
-        skipPublishingChecks: true,
-        allowEmptyResults: true
-    )
-
-    log.info("Test results archived.")
+    jobResult = runAnsibleTestConfig(config)
     return jobResult
 }
 
@@ -118,6 +90,8 @@ void setupTestDependencies(Map config) {
 Map runAnsibleTestConfig(Map config) {
     Map jobResult = [:]
 
+    log.info("pwd => ${pwd()}")
+
     if (config?.preTestCmd) {
         log.info("executing pre-test-cmd: '${config.preTestCmd}'")
         sh "${config.preTestCmd}"
@@ -148,6 +122,9 @@ Map runAnsibleTestConfig(Map config) {
 //         testCmdList.push("--containers '{}'")
 //         testCmdList.push("--docker")
 //         testCmdList.push("--docker default")
+
+        log.info("Running tests from: tests/unit/plugins/modules")
+        sh("find tests/unit/plugins/modules -type f")
     }
     testCmdList.push("--python ${config.pythonVersion}")
 //     testCmdList.push("2>&1 | tee ${config.testResultsDir}/ansible-test-console.txt")
@@ -179,6 +156,32 @@ Map runAnsibleTestConfig(Map config) {
         currentBuild.result = 'FAILURE'
         // Re-raise to fail the stage
         throw e
+    } finally {
+        // Archiving after dir closes (from workspace root)
+//         String fullResultsDir = "${config.targetCollectionDir}/${config.testResultsDir}"
+//         log.info("fullResultsDir => ${fullResultsDir}")
+//         String relativeResultsDir = "ansible_collections/${config.collectionNamespace}/${config.collectionName}/${config.testResultsDir}"  // NEW: Relative to workspace
+//         log.info("relativeResultsDir => ${relativeResultsDir}")
+//         sh("find ${relativeResultsDir} -type f")
+        sh("find ${config.testResultsDir} -type f")
+        log.info("Archiving test results from: ${config.testResultsDir}")
+        archiveArtifacts(
+            artifacts: "${config.testResultsDir}/**",  // NEW: Use relative path
+            fingerprint: true,
+            onlyIfSuccessful: false,
+            allowEmptyArchive: true
+        )
+
+        // Use relative path
+        String junitPattern = "${config.testResultsDir}/*-${config.ansibleTestCommand}*.xml"
+        log.info("Recording junit test results from path: ${junitPattern}")
+        junit(
+            testResults: junitPattern,
+            skipPublishingChecks: true,
+            allowEmptyResults: true
+        )
+
+        log.info("Test results archived.")
     }
     return jobResult
 }
