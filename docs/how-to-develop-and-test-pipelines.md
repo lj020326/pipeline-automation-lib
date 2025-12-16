@@ -78,7 +78,7 @@ String projectName = "ADMIN"
 String projectFolder = projectName.toUpperCase()
 
 String pipelineRepoUrl = "ssh://git@gitea.admin.dettonville.int:2222/infra/pipeline-automation-lib.git"
-String gitPipelineLibCredId = "bitbucket-ssh-jenkins"
+String gitPipelineLibCredId = "gitea-ssh-jenkins"
 
 // ref: https://blog.pavelsklenar.com/jenkins-creating-dynamic-project-folders-with-job-dsl/
 // def adminGroup = "sg_${projectName}_admin"
@@ -223,7 +223,7 @@ The yaml configuration shows that the `project-update-jobs` pipeline jobs are on
 ---
 pipelineConfig:
   baseFolder: "INFRA/project-update-jobs"
-  gitCredentialsId: "bitbucket-ssh-jenkins"
+  gitCredentialsId: "gitea-ssh-jenkins"
   jobScript: pipelines/tagGitBranches.groovy
   periodicFolderTriggerInterval: "2m"
   runEnvMap:
@@ -243,7 +243,7 @@ The developer can modify this to define the same jobs to run on the sandbox mach
 ---
 pipelineConfig:
   baseFolder: "INFRA/project-update-jobs"
-  gitCredentialsId: "bitbucket-ssh-jenkins"
+  gitCredentialsId: "gitea-ssh-jenkins"
   jobScript: pipelines/tagGitBranches.groovy
   periodicFolderTriggerInterval: "2m"
   runEnvMap:
@@ -267,7 +267,7 @@ In this example, the developer's branch is to `develop-lj` as seen below:
 ---
 pipelineConfig:
   baseFolder: "INFRA/project-update-jobs"
-  gitCredentialsId: "bitbucket-ssh-jenkins"
+  gitCredentialsId: "gitea-ssh-jenkins"
   jobScript: pipelines/tagGitBranches.groovy
   periodicFolderTriggerInterval: "2m"
   runEnvMap:
@@ -328,8 +328,8 @@ The mapping of pipeline automation library repo branch to each jenkins environme
 ---
 
 pipelineConfig:
-  pipelineRepoUrl: "ssh://git@bitbucket.example.int:7999/aap/pipeline-automation-lib.git"
-  gitCredentialsId: "bitbucket-ssh-jenkins"
+  pipelineRepoUrl: "ssh://git@gitea.example.int:7999/aap/pipeline-automation-lib.git"
+  gitCredentialsId: "gitea-ssh-jenkins"
   envConfigs:
     PROD:
       pipelineLibraryBranch: "main"
@@ -357,8 +357,8 @@ And modify the `jobs/jobdsl/templates/01_INFRA/config.infra-jobs-root.yml` with 
 ---
 
 pipelineConfig:
-  pipelineRepoUrl: "ssh://git@bitbucket.example.int:7999/aap/pipeline-automation-lib.git"
-  gitCredentialsId: "bitbucket-ssh-jenkins"
+  pipelineRepoUrl: "ssh://git@gitea.example.int:7999/aap/pipeline-automation-lib.git"
+  gitCredentialsId: "gitea-ssh-jenkins"
   envConfigs:
     PROD:
       pipelineLibraryBranch: "main"
@@ -388,7 +388,7 @@ runAnsibleProjectUpdate.groovy before update:
 
 def call(String project) {
     Logger log = new Logger(this, LogLevel.INFO)
-    String credentialId = 'bitbucket-ssh-jenkins'
+    String credentialId = 'gitea-ssh-jenkins'
     String sandbox
     pipeline {
         agent any
@@ -410,7 +410,7 @@ After:
 
 def call(String project) {
     Logger log = new Logger(this, LogLevel.INFO)
-    String credentialId = 'bitbucket-ssh-jenkins'
+    String credentialId = 'gitea-ssh-jenkins'
     String sandbox
     pipeline {
         agent any

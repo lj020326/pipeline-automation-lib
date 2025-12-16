@@ -757,10 +757,10 @@ Map loadPipelineConfig(Map params) {
         usernamePassword(credentialsId: 'infra-govc-cred', passwordVariable: 'GOVC_PASSWORD', usernameVariable: 'GOVC_USERNAME'),
         usernamePassword(credentialsId: 'infra-packer-cred', passwordVariable: 'PACKER_USER_PASSWORD', usernameVariable: 'PACKER_USER_USERNAME'),
         string(credentialsId: 'ansible-vault-password', variable: 'ANSIBLE_VAULT_PASSWORD'),
-        string(credentialsId: 'bitbucket-ssh-jenkins-string', variable: 'ANSIBLE_BITBUCKET_SSH_KEY_STRING'),
+        string(credentialsId: 'gitea-ssh-jenkins-string', variable: 'ANSIBLE_GITEA_SSH_KEY_STRING'),
         string(credentialsId: 'packer-ssh-public-key', variable: 'PACKER_USER_SSH_PUBLIC_KEY'),
 //         string(credentialsId: config.ansibleGalaxyTokenCredId, variable: 'ANSIBLE_PAH_TOKEN'),
-        sshUserPrivateKey(credentialsId: 'bitbucket-ssh-jenkins', keyFileVariable: 'ANSIBLE_BITBUCKET_SSH_KEY')
+        sshUserPrivateKey(credentialsId: 'gitea-ssh-jenkins', keyFileVariable: 'ANSIBLE_GITEA_SSH_KEY')
     ]
     config.secret_vars = secretVars
 

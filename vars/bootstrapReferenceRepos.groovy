@@ -116,12 +116,12 @@ Map loadPipelineConfig(Map params) {
     config.emailDist = config.get('emailDist',"lee.johnson@dettonville.com")
     // config.alwaysEmailDist = config.alwaysEmailDist ?: "lee.johnson@dettonville.com"
     config.emailFrom = config.emailFrom ?: "admin+ansible@dettonville.com"
-    config.gitCredentialsId = "bitbucket-ssh-jenkins"
+    config.gitCredentialsId = "gitea-ssh-jenkins"
 
     //Specify the list of your git projects/repositories.
     List repoListDefault = [
-        [name: 'ansible-datacenter', url: "git@bitbucket.org:lj020326/ansible-datacenter.git"],
-        [name: 'vm-templates', url: "git@bitbucket.org:lj020326/vm-templates.git"],
+        [name: 'ansible-datacenter', url: "ssh://git@gitea.admin.dettonville.int:2222/infra/ansible-datacenter.git"],
+        [name: 'vm-templates', url: "ssh://git@gitea.admin.dettonville.int:2222/infra/vm-templates.git"],
         [name: 'ansible-dettonville-utils',
          url: "ssh://git@gitea.admin.dettonville.int:2222/infra/ansible-dettonville-utils.git",
          gitCredentialsId: "gitea-ssh-jenkins"

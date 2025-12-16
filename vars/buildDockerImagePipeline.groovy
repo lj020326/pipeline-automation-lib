@@ -25,7 +25,7 @@ def call() {
         initializeParamsOnly: booleanParam(defaultValue: false, description: "Set to true to only initialize parameters and skip execution of stages.", name: 'InitializeParamsOnly'),
         gitRepoUrl: string(defaultValue: "ssh://git@gitea.admin.dettonville.int:2222/infra/docker-jenkins.git", description: "Specify the git repo image URL", name: 'GitRepoUrl'),
         gitRepoBranch: string(defaultValue: "main", description: "Specify the git repo branch", name: 'GitRepoBranch'),
-        gitCredentialsId: string(defaultValue: "bitbucket-ssh-jenkins", description: "Specify the git repo credential ID", name: 'GitCredentialsId'),
+        gitCredentialsId: string(defaultValue: "gitea-ssh-jenkins", description: "Specify the git repo credential ID", name: 'GitCredentialsId'),
         registryUrl: string(defaultValue: "https://media.johnson.int:5000", description: "Specify the RegistryUrl", name: "RegistryUrl"),
         registryCredId: string(defaultValue:  "docker-registry-admin", description: "Specify the RegistryCredId", name: "RegistryCredId"),
         builderImage: string(defaultValue:  "", description: "Specify the docker builder image (e.g., 'media.johnson.int:5000/ansible/ansible-runner:stable-2.18-py3.13')", name: "BuilderImage"),

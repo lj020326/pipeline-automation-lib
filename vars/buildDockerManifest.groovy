@@ -174,7 +174,7 @@ Map loadPipelineConfig(Map params = [:]) {
     config.get('runInParallel', false)
     config.get('parallelJobsBatchSize', 0)
 
-//     config.get("gitCredentialsId", "bitbucket-ssh-jenkins")
+//     config.get("gitCredentialsId", "gitea-ssh-jenkins")
     config.get("gitCredentialsId", "infra-jenkins-git-user")
 
 //    config.get("registryUrl","https://registry.media.johnson.int:5000")
@@ -481,7 +481,8 @@ Map runBuildAndPublishImageJob(Map config) {
     log.debug("${logPrefix} jobResult=${JsonUtils.printToJsonString(jobResult)}")
     jobResults << jobResult
 
-    if (jobResults.failed && config.failFast) {
+    if (jobResults.failed) {
+//     if (jobResults.failed && config.failFast) {
         log.debug("${logPrefix} config.failFast=${config.failFast}")
         log.error("${logPrefix} results failed - not running any more jobs")
         currentBuild.result = 'FAILURE'

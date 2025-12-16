@@ -22,7 +22,7 @@ String projectName = "ADMIN"
 String projectFolder = projectName.toUpperCase()
 
 String pipelineRepoUrl = "ssh://git@gitea.admin.dettonville.int:2222/infra/pipeline-automation-lib.git"
-String gitPipelineLibCredId = "bitbucket-ssh-jenkins"
+String gitPipelineLibCredId = "gitea-ssh-jenkins"
 
 // ref: https://blog.pavelsklenar.com/jenkins-creating-dynamic-project-folders-with-job-dsl/
 // def adminGroup = "sg_${projectName}_admin"

@@ -30,8 +30,8 @@ Commit message: "updates from ${HOSTNAME}"
 [INFO] runAnsibleParamWrapper : runAnsibleParamWrapper(): config={
     "ansibleLimitHosts": "vmu20-01",
     "gitBranch": "master",
-    "gitRepoUrl": "git@bitbucket.org:lj020326/ansible-datacenter.git",
-    "gitCredId": "bitbucket-ssh-jenkins",
+    "gitRepoUrl": "ssh://git@gitea.admin.dettonville.int:2222/infra/ansible-datacenter.git",
+    "gitCredId": "gitea-ssh-jenkins",
     "ansibleCollectionsRequirements": "collections/requirements.yml",
     "ansibleRolesRequirements": "./roles/requirements.yml",
     "ansibleTags": "bootstrap-linux",
@@ -55,16 +55,16 @@ Running on admin02 in /workspace/dettonville/infra/ansible-datacenter/dev/bootst
 [Pipeline] { (hide)
 [Pipeline] checkout (hide)
 11:46:36  The recommended git tool is: NONE
-11:46:36  using credential bitbucket-ssh-jenkins
+11:46:36  using credential github-ssh-jenkins
 11:46:36  Fetching changes from the remote Git repository
 11:46:37  Checking out Revision 18e6bf2516478e33bd3aa8bfa78c522547350648 (origin/master)
 11:44:27   > git rev-parse --resolve-git-dir /workspace/dettonville/infra/ansible-datacenter/dev/bootstrap-linux/.git # timeout=10
-11:44:27   > git config remote.origin.url git@bitbucket.org:lj020326/ansible-datacenter.git # timeout=10
-11:44:27  Fetching upstream changes from git@bitbucket.org:lj020326/ansible-datacenter.git
+11:44:27   > git config remote.origin.url git@github.com:lj020326/ansible-datacenter.git # timeout=10
+11:44:27  Fetching upstream changes from git@github.com:lj020326/ansible-datacenter.git
 11:44:27   > git --version # timeout=10
 11:44:28   > git --version # 'git version 2.25.1'
-11:44:28  using GIT_SSH to set credentials bitbucket-ssh-jenkins
-11:44:28   > git fetch --tags --force --progress -- git@bitbucket.org:lj020326/ansible-datacenter.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+11:44:28  using GIT_SSH to set credentials github-ssh-jenkins
+11:44:28   > git fetch --tags --force --progress -- git@github.com:lj020326/ansible-datacenter.git +refs/heads/*:refs/remotes/origin/* # timeout=10
 11:44:28   > git rev-parse origin/master^{commit} # timeout=10
 11:44:28   > git config core.sparsecheckout # timeout=10
 11:44:28   > git checkout -f 18e6bf2516478e33bd3aa8bfa78c522547350648 # timeout=10
@@ -144,8 +144,8 @@ Running on admin02 in /workspace/dettonville/infra/ansible-datacenter/dev/bootst
 11:46:59      },
 11:46:59      "ansibleLimitHosts": "vmu20-01",
 11:46:59      "gitBranch": "master",
-11:46:59      "gitRepoUrl": "git@bitbucket.org:lj020326/ansible-datacenter.git",
-11:46:59      "gitCredId": "bitbucket-ssh-jenkins",
+11:46:59      "gitRepoUrl": "git@github.com:lj020326/ansible-datacenter.git",
+11:46:59      "gitCredId": "github-ssh-jenkins",
 11:46:59      "ansibleCollectionsRequirements": "collections/requirements.yml",
 11:46:59      "ansibleRolesRequirements": "./roles/requirements.yml",
 11:46:59      "ansibleTags": "bootstrap-linux",

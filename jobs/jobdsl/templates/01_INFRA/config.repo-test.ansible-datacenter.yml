@@ -3,8 +3,8 @@
 pipelineConfig:
   jobFolder: "INFRA/repo-test-automation/ansible-datacenter"
   repoName: "ansible-datacenter"
-  repoUrl: "git@bitbucket.org:lj020326/ansible-datacenter.git"
-  gitCredentialsId: "bitbucket-ssh-jenkins"
+  repoUrl: "ssh://git@gitea.admin.dettonville.int:2222/infra/ansible-datacenter.git"
+  gitCredentialsId: "gitea-ssh-jenkins"
   mirrorRepoDir: "/var/jenkins_home/git_repo_references/ansible-datacenter/ansible-datacenter.git"
 
   buildAllBranches: true

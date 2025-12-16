@@ -127,7 +127,7 @@ Map loadPipelineConfig(Map params) {
     config.childJobTimeout = config.get('childJobTimeout', "4")
     config.childJobTimeoutUnit = config.get('childJobTimeoutUnit', "HOURS")
 
-//     config.get("gitCredentialsId", "bitbucket-ssh-jenkins")
+//     config.get("gitCredentialsId", "gitea-ssh-jenkins")
     config.get("gitCredentialsId", "infra-jenkins-git-user")
 
 //    config.get("registryUrl","https://registry.media.johnson.int:5000")

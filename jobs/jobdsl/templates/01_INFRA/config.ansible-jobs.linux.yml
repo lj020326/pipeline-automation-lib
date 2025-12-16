@@ -3,9 +3,9 @@
 pipelineConfig:
   baseFolder: "INFRA/ansible"
   repoFolder: "ansible-linux"
-  repoUrl: "git@bitbucket.org:lj020326/ansible-datacenter.git"
+  repoUrl: "ssh://git@gitea.admin.dettonville.int:2222/infra/ansible-datacenter.git"
   mirrorRepoDir: "/var/jenkins_home/git_repo_references/ansible-datacenter/ansible-datacenter.git"
-  gitCredentialsId: "bitbucket-ssh-jenkins"
+  gitCredentialsId: "gitea-ssh-jenkins"
   jobScript: ".jenkins/runAnsibleSiteTag.groovy"
 
   runEnvMap:
@@ -99,9 +99,9 @@ pipelineConfig:
       skip_always_tag: 'true'
       ansible_limit: localhost
     - ansible_tag: bootstrap-webmin
-    - ansible_tag: deploy-cacerts
+    - ansible_tag: deploy-ca-certs
       ansible_limit: os_linux
-    - ansible_tag: deploy-caroot
+    - ansible_tag: deploy-cacerts
       ansible_limit: os_linux
     - ansible_tag: deploy-registry-certs
       ansible_limit: docker

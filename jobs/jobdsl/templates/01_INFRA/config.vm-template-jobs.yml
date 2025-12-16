@@ -2,9 +2,9 @@
 
 pipelineConfig:
   baseFolder: "INFRA/vm-templates"
-  repoUrl: "git@bitbucket.org:lj020326/vm-templates.git"
+  repoUrl: "ssh://git@gitea.admin.dettonville.int:2222/infra/vm-templates.git"
   mirrorRepoDir: "/var/jenkins_home/git_repo_references/vm-templates/vm-templates.git"
-  gitCredentialsId: "bitbucket-ssh-jenkins"
+  gitCredentialsId: "gitea-ssh-jenkins"
   jobScript: .jenkins/buildTemplate.groovy
   replaceExistingTemplate: false
   runEnvMap:
