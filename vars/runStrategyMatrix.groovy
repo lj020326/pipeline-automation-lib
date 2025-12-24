@@ -7,11 +7,13 @@ Map call(Map config) {
     // config should contain:
     // script: The CpsScript object (this from Jenkinsfile)
     // strategy: The map containing 'fail-fast' and 'matrix' (which contains 'versions') from YAML
+    // stageNamePrefix: The prefix to use for stages
     // baseConfig: The overall config from runAnsibleTestManifest (e.g., testType, collectionDir)
     // executorScript: The Closure/function to execute for each matrix combination
 
     def script = config.script
     def strategy = config.strategy
+    def stageNamePrefix = config.get("stageNamePrefix", "Stage")
     def baseConfig = config.baseConfig
     def executorScript = config.executorScript
 
@@ -93,7 +95,7 @@ Map call(Map config) {
         sortedKeys.each { key ->
             stageNameParts << "${key.capitalize()} ${matrixElement.get(key)}"
         }
-        def stageName = "Ansible Test: ${stageNameParts.join(' / ')}"
+        def stageName = "${stageNamePrefix}: ${stageNameParts.join(' / ')}"
 
         parallelStages.put(stageName, {
             script.stage(stageName) {

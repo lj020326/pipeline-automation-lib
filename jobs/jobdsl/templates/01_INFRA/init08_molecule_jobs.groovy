@@ -23,7 +23,7 @@ jobFolder = "${baseFolder}/run-molecule"
 // ref: https://stackoverflow.com/questions/40215394/how-to-get-environment-variable-in-jenkins-groovy-script-console
 log.info("${scriptName}: JENKINS_ENV=${JENKINS_ENV}")
 if (JENKINS_ENV=='PROD') {
-    createDockerJobs(this)
+    createMoleculeJobs(this)
 
     log.info("${scriptName}: Finished creating molecule jobs")
 }
@@ -31,11 +31,18 @@ if (JENKINS_ENV=='PROD') {
 //******************************************************
 //  Function definitions from this point forward
 //
-void createDockerJobs(def dsl) {
+void createMoleculeJobs(def dsl) {
 
     dsl.pipelineJob(jobFolder) {
         parameters {
             booleanParam('InitializeParamsOnly', false, 'Set to true to only initialize parameters without full execution.')
+        }
+        properties {
+            // Specific to parent multibranch
+            copyArtifactPermissionProperty {
+                projectNames('/**')
+//                 projectNames('INFRA/repo-test-automation/**')
+            }
         }
         definition {
             logRotator {
@@ -48,6 +55,9 @@ void createDockerJobs(def dsl) {
                 script("runMoleculePipeline()")
                 sandbox()
             }
+        }
+        throttleConcurrentBuilds {
+            categories(['ansible_test'])
         }
     }
 }

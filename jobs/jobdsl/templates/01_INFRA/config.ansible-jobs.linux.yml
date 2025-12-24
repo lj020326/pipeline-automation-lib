@@ -99,10 +99,12 @@ pipelineConfig:
       skip_always_tag: 'true'
       ansible_limit: localhost
     - ansible_tag: bootstrap-webmin
+    - ansible_tag: deploy-pki-certs
+      ansible_limit: ca_domain
     - ansible_tag: deploy-ca-certs
-      ansible_limit: os_linux
+      ansible_limit: ca_domain
     - ansible_tag: deploy-cacerts
-      ansible_limit: os_linux
+      ansible_limit: ca_domain
     - ansible_tag: deploy-registry-certs
       ansible_limit: docker
     - ansible_tag: deploy-vm

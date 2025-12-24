@@ -36,8 +36,8 @@ def call() {
         "-vvvv"
     ]
     List logLevelsList = [
-        'DEBUG',
         'INFO',
+        'DEBUG',
         'WARN',
         'ERROR'
     ]
@@ -49,8 +49,9 @@ def call() {
         gitRepoUrl: string(defaultValue: "ssh://git@gitea.admin.dettonville.int:2222/infra/ansible-dettonville-utils.git", description: "Specify the git repo image URL", name: 'GitRepoUrl'),
         gitRepoBranch: string(defaultValue: "main", description: "Specify the git repo branch", name: 'GitRepoBranch'),
         gitCredentialsId: string(defaultValue: "jenkins-ansible-ssh", description: "Specify the git repo credential ID", name: 'GitCredentialsId'),
-        dockerRegistry: string(defaultValue: "media.johnson.int:5000", name: "DockerRegistry"),
-        dockerImageName: string(defaultValue: "ansible/ansible-test", name: "DockerImageName"),
+        runnerImageName: string(defaultValue: "ansible/ansible-test", name: "RunnerImageName"),
+        runnerRegistry: string(defaultValue: "media.johnson.int:5000", name: "RunnerRegistry"),
+        registryCredentialsId: string(defaultValue:  "docker-registry-admin", description: "Specify the Registry Credential Id", name: "RegistryCredentialsId"),
         ansibleVersion: string(defaultValue: "2.19", name: "AnsibleVersion"),
         pythonVersion: string(defaultValue: "3.13", name: "PythonVersion"),
         testDeps: string(defaultValue: "", name: "TestDeps"),
@@ -76,14 +77,16 @@ def call() {
     log.info("Loading Default Configs")
     Map config = loadPipelineConfig(params)
 
-    log.info("Running tests inside docker container: ${config.dockerImage}")
+    log.info("Running tests inside docker container: ${config.runnerImage}")
 
     pipeline {
         agent {
             docker {
                 label config.jenkinsNodeLabel
-                image config.dockerImage
-                args config.dockerArgs
+                image config.runnerImage
+                args config.runnerArgs
+                registryUrl config.runnerRegistryUrl
+                registryCredentialsId config.registryCredentialsId
                 reuseNode true
             }
         }
@@ -248,16 +251,31 @@ Map loadPipelineConfig(Map params) {
     config.get('jenkinsNodeLabel',"docker")
 
     // Apply default values if not provided by the matrix driver
-    config.get("dockerRegistry", "media.johnson.int:5000")
-    config.get("dockerImageName", "ansible/ansible-test")
+    config.get("runnerRegistry", "media.johnson.int:5000")
+    config.get("runnerRegistryUrl", "https://${config.runnerRegistry}")
+    config.get("runnerImageName", "ansible/ansible-test")
+    config.get("registryCredentialsId", "docker-registry-admin")
+
+    List runnerArgsList = []
+    runnerArgsList.push("-v /var/run/docker.sock:/var/run/docker.sock")
+    runnerArgsList.push("--privileged")
+
+    // configure to share the host's network stack.
+    // This removes the network isolation between the container and the host, allowing the container
+    // to access services running on the host via 127.0.0.1 or the host's primary IP address/
+    runnerArgsList.push("--network host")
+
+//     runnerArgsList.push("-u root")
+    config.get("runnerArgs", runnerArgsList.join(" "))
+
     config.get("ansibleVersion", "2.19")
     config.get("pythonVersion", "3.13")
 
-    config.dockerImage = getAnsibleDockerImageId(
-                            dockerImageName: config.dockerImageName,
+    config.runnerImage = getAnsibleDockerImageId(
+                            dockerImageName: config.runnerImageName,
                             ansibleVersion: config.ansibleVersion,
                             pythonVersion: config.pythonVersion,
-                            dockerRegistry: config.dockerRegistry)
+                            dockerRegistry: config.runnerRegistry)
 
     config.get("ansibleTestCommand", "sanity")
     config.get("testDeps", "")

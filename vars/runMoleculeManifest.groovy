@@ -1,22 +1,5 @@
 #!/usr/bin/env groovy
-
-/**
- * Loads and executes ansible-test configurations from YAML manifest files
- * located in the repository.
- *
- * This function looks for default manifest files like:
- * - ./.jenkins/ansible-test-sanity.yml
- * - ./.jenkins/ansible-test-units.yml
- * - ./.jenkins/ansible-test-integration.yml
- *
- * Users can override these default paths via the `config` map.
- * Each YAML file should contain parameters directly consumable by the `runAnsibleTest` function.
- *
- * @param config A map to override default manifest file paths:
- * - sanityConfigFile (String, optional): Path to the sanity test YAML config.
- * - unitsConfigFile (String, optional): Path to the units test YAML config.
- * - integrationConfigFile (String, optional): Path to the integration test YAML config.
- */
+import groovy.json.JsonOutput
 
 import com.dettonville.pipeline.utils.JsonUtils
 import com.dettonville.pipeline.utils.MapMerge
@@ -50,16 +33,6 @@ def call(Map args=[:]) {
             timeout(time: config.timeout as Integer, unit: config.timeoutUnit)
         }
         stages {
-            stage('Load ansible collection galaxy config') {
-				when {
-                    expression { fileExists config.galaxyYamlPath }
-				}
-                steps {
-                    script {
-                        config = loadAnsibleGalaxyConfig(config)
-                    }
-                }
-            }
 			stage('Load pipeline config file') {
 				when {
                     expression { fileExists config.configFile }
@@ -70,16 +43,16 @@ def call(Map args=[:]) {
 					}
 				}
 			}
-            stage("Run Ansible Test Manifest") {
+            stage("Run Molecule Manifest") {
                 steps {
                     script {
                         try {
-                            jobResults = runAnsibleTestConfigs(config)
+                            jobResults = runMoleculeConfigs(config)
                         } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
                             currentBuild.result = 'ABORTED'
                             throw e
                         } catch (Exception e) {
-                            log.error("runAnsibleTestConfigs failed: ${e.getMessage()}")
+                            log.error("runMoleculeConfigs failed: ${e.getMessage()}")
                             currentBuild.result = 'FAILURE'
                             throw e
                         }
@@ -202,35 +175,32 @@ Map loadPipelineConfig(Map params = [:]) {
     }
     log.debug("log.level=${log.level}")
 
-    // Define the order in which to process the test types
-    config.get("galaxyYamlPath", "galaxy.yml")
-    config.get("ansibleTestCommand", "units")
+    config.get("moleculeCommand", "test")
+    config.get("moleculeImage", "ubuntu2404-systemd-python")
+    config.get("moleculeImageRegistry", "media.johnson.int:5000")
+    config.get("moleculeScenario", "bootstrap_linux_package")
+    config.get("moleculeDebugFlag", false)
 
-    config.get("testDeps", [])
     config.get("preTestCmd", "")
-    config.get("testResultsDir", "tests/output/junit")
+    config.get("testResultsDir", ".test-reports")
     List junitXmlsPatternsDefault = [
         "**/${config.testResultsDir}/*.xml"
     ]
     config.get('junitXmlsPatterns', junitXmlsPatternsDefault)
 
     config.get("gitRemoteRepoType", "gitea")
-    config.get("gitRemoteBuildKey", 'ansible-test')
-	config.get("gitRemoteBuildName", 'Ansible Test')
+    config.get("gitRemoteBuildKey", 'molecule-test')
+	config.get("gitRemoteBuildName", 'Molecule Test')
     config.get("gitRemoteBuildSummary", "${config.gitRemoteBuildName} update")
 //     config.get("gitCredentialsId", "jenkins-ansible-ssh")
     config.get("gitCredentialsId", "infra-jenkins-git-user")
 
-    config.get("galaxyYamlPath", "galaxy.yml")
-
     config.get("runnerRegistry", "media.johnson.int:5000")
-    config.get("runnerImageName", "ansible/ansible-test")
+    config.get("runnerImageName", "ansible/ansible-runner")
 
     config.get('jobReport',"test-results.yml")
 
-//     config.get('configFile', ".jenkins/ansible-test-integration.yml")
-//     config.get('configFile', ".jenkins/ansible-test-sanity.yml")
-    config.get('configFile', ".jenkins/ansible-test-units.yml")
+    config.get('configFile', ".jenkins/molecule-tests.yml")
 
     log.info("config=${JsonUtils.printToJsonString(config)}")
 
@@ -251,37 +221,20 @@ Map loadPipelineConfigFile(Map baseConfig) {
     return config
 }
 
-Map loadAnsibleGalaxyConfig(Map params) {
-    // copy immutable params maps to mutable config map
-    Map config = params.clone()
-
-    Map galaxyConfig = readYaml(file: config.galaxyYamlPath)
-    config.collectionNamespace = galaxyConfig.namespace
-    config.collectionName = galaxyConfig.name
-
-    log.info("Derived Collection Namespace: ${config.collectionNamespace}")
-    log.info("Derived Collection Name: ${config.collectionName}")
-
-    if (!config?.collectionNamespace || !config?.collectionName) {
-        error "FATAL: Could not derive collection namespace or name from ${config.galaxyYamlPath}. Please ensure 'namespace' and 'name' fields are present."
-    }
-    return config
-}
-
-Map runAnsibleTestConfigs(Map config) {
+Map runMoleculeConfigs(Map config) {
     Map collectedResults = [:]
     // To collect results from parallel jobs
     collectedResults.results = [:]
 
-    log.info("Successfully loaded config for '${config.ansibleTestCommand}'. Running tests...")
+    log.info("Successfully loaded config for '${config.moleculeCommand}'. Running tests...")
 
     if (config.strategy?.matrix) {
-        log.info("Matrix strategy detected for '${config.ansibleTestCommand}'. Generating parallel stages.")
+        log.info("Matrix strategy detected for '${config.moleculeCommand}'. Generating parallel stages.")
 
         Map strategyConfig = [
             script: this,
             strategy: config.strategy,
-            stageNamePrefix: "Ansible Test",
+            stageNamePrefix: "Molecule Test",
             maxRandomDelaySeconds: config.maxRandomDelaySeconds,
             baseConfig: config,
             // Define the executorScript as a closure
@@ -290,7 +243,7 @@ Map runAnsibleTestConfigs(Map config) {
                 // It needs to return the result of the actual test execution.
                 // The 'dir' step should wrap the execution of 'runAnsibleTests'
                 // to ensure it runs in the correct collection directory.
-                return runAnsibleTestJob(comboConfig)
+                return runMoleculeJob(comboConfig)
             }
         ]
 
@@ -298,9 +251,9 @@ Map runAnsibleTestConfigs(Map config) {
         Map parallelJobs = generated.stages
         collectedResults.results = generated.results
 
-        log.info("Running parallel matrix jobs for '${config.ansibleTestCommand}'.")
+        log.info("Running parallel matrix jobs for '${config.moleculeCommand}'.")
         parallel parallelJobs // Execute the parallel jobs with failFast applied by runMatrixStages
-        log.info("Completed parallel matrix jobs for '${config.ansibleTestCommand}'.")
+        log.info("Completed parallel matrix jobs for '${config.moleculeCommand}'.")
 
         // Optionally, process collectedResults here if needed
         log.debug("collectedResults=${JsonUtils.printToJsonString(collectedResults)}")
@@ -316,25 +269,23 @@ Map runAnsibleTestConfigs(Map config) {
             currentBuild.result = 'FAILURE'
         }
     } else {
-        error "Manifest for '${config.ansibleTestCommand}' does not define a 'strategy.matrix'. The pipeline is configured for matrix execution."
+        error "Manifest for '${config.moleculeCommand}' does not define a 'strategy.matrix'. The pipeline is configured for matrix execution."
     }
 
-    log.info("Ansible Test finished")
+    log.info("Molecule finished")
 
     log.info("collectedResults=${JsonUtils.printToJsonString(collectedResults)}")
     return collectedResults
 }
 
-Map runAnsibleTestJob(Map config) {
+Map runMoleculeJob(Map config) {
     log.debug("GIT_URL=${env.GIT_URL}")
     log.debug("GIT_BRANCH=${env.GIT_BRANCH}")
     log.debug("config=${JsonUtils.printToJsonString(config)}")
 
     Map jobConfigs = [
-        jobFolder: "INFRA/repo-test-automation/run-ansible-test",
+        jobFolder: "INFRA/repo-test-automation/run-molecule",
         jobParameters: [
-            CollectionNamespace: config.collectionNamespace,
-            CollectionName: config.collectionName,
             Timeout: config.childJobTimeout ?: "4",
             TimeoutUnit: config.childJobTimeoutUnit ?: "HOURS",
             GitRepoUrl: config.gitRepoUrl ?: env.GIT_URL,
@@ -344,8 +295,9 @@ Map runAnsibleTestJob(Map config) {
             RunnerImageName: config.runnerImageName,
             AnsibleVersion: config.ansibleVersion,
             PythonVersion: config.pythonVersion,
-            AnsibleTestCommand: config.ansibleTestCommand,
-            TestDeps: config.testDeps.join(','),
+            MoleculeImage: config.moleculeImage,
+            MoleculeCommand: config.moleculeCommand,
+            MoleculeScenario: config.moleculeScenario,
             PreTestCmd: config.preTestCmd,
             TestResultsDir: config.testResultsDir,
         ],

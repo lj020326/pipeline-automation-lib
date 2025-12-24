@@ -21,8 +21,13 @@ pipelineConfig:
 
   jobList:
     - jobName: run-inventory-tests
-      jobScript: ".jenkins/runInventoryTests.groovy"
+      jobScript: .jenkins/runInventoryTests.groovy
       description: "run aap-inventory test automation jobs"
+
+    - jobName: molecule-tests
+      jobScript: .jenkins/runMoleculeTests.groovy
+      description: "run molecule tests"
+
     - jobGroupName: lint-tests
       description: "Lint Test jobs"
       jobList:

@@ -346,6 +346,12 @@ Map buildAndPublishImageList(Map config) {
         } else {
             stage("build and publish ${buildConfig.buildImageName}-${index}") {
                 jobResults.items.put(buildConfig.buildJobId, runDockerBuildManifest(buildConfig))
+//                 // Early abort if failFast and this item failed
+//                 if (config.failFast && jobResults.items[buildConfig.buildJobId]?.failed) {
+//                     log.error("failFast=true: Aborting after failure in ${buildConfig.buildImageName}-${index}")
+//                     currentBuild.result = 'FAILURE'
+//                     error("Previous image build failed - stopping pipeline (failFast=true)")
+//                 }
             }
         }
     }
@@ -482,12 +488,14 @@ Map runBuildAndPublishImageJob(Map config) {
     jobResults << jobResult
 
     if (jobResults.failed) {
-//     if (jobResults.failed && config.failFast) {
         log.debug("${logPrefix} config.failFast=${config.failFast}")
-        log.error("${logPrefix} results failed - not running any more jobs")
         currentBuild.result = 'FAILURE'
+        if (config.failFast) {
+            log.error("${logPrefix} results failed - not running any more jobs")
+            log.error("${logPrefix} results failed - aborting (failFast=true)")
+            error("${logPrefix} Image build failed - aborting pipeline")
+        }
     }
-
     log.debug("${logPrefix} finished: jobResults=${JsonUtils.printToJsonString(jobResults)}")
     return jobResults
 }

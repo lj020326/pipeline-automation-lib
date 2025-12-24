@@ -16,7 +16,8 @@ import groovy.transform.Field
 List<String> jobsToTrigger = [
     "ADMIN/reset-SSH-hostkeys",
     "INFRA/build-docker-image",
-    "INFRA/repo-test-automation/run-ansible-test"
+    "INFRA/repo-test-automation/run-ansible-test",
+    "INFRA/repo-test-automation/run-molecule"
 ]
 
 pipeline {
