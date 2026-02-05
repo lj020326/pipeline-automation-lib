@@ -1,12 +1,13 @@
 ---
 
-pipelineConfig:
-  pipelineRepoUrl: "ssh://git@gitea.admin.dettonville.int:2222/infra/pipeline-automation-lib.git"
-  gitCredentialsId: "gitea-ssh-jenkins"
-  envConfigs:
-    PROD:
-      pipelineLibraryBranch: "main"
-    QA:
-      pipelineLibraryBranch: "main"
-    DEV:
-      pipelineLibraryBranch: "development"
+pipelineRepoUrl: "ssh://git@gitea.admin.dettonville.int:2222/infra/pipeline-automation-lib.git"
+gitCredentialsId: "gitea-ssh-jenkins"
+envConfigs:
+  ADMIN:
+    pipelineLibraryBranch: "main"
+  PROD:
+    pipelineLibraryBranch: "main"
+  QA:
+    pipelineLibraryBranch: "main"
+  DEV:
+    pipelineLibraryBranch: "development"

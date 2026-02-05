@@ -1,8 +1,9 @@
 #!/usr/bin/env groovy
 
-import com.dettonville.pipeline.utils.JsonUtils
 import com.dettonville.pipeline.utils.Utilities
+import com.dettonville.pipeline.utils.JsonUtils
 import com.dettonville.pipeline.utils.MapMerge
+
 import com.dettonville.pipeline.utils.logging.LogLevel
 import com.dettonville.pipeline.utils.logging.Logger
 
@@ -10,6 +11,7 @@ import static com.dettonville.pipeline.utils.ConfigConstants.*
 
 import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException
 
+// ref: https://stackoverflow.com/questions/6305910/how-to-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field
 @Field Logger log = new Logger(this)
 
@@ -50,6 +52,7 @@ Map call(Map args=[:]) {
         sshagent([config.ansibleSshCredId]) {
             sh 'echo SSH_AUTH_SOCK=$SSH_AUTH_SOCK SSH_AGENT_PID=$SSH_AGENT_PID'
             sh 'ssh-add -l'
+            sh "${config.ansibleGalaxyCmd} collection list"
             sh "${config.ansibleCmd} --version"
             try {
                 ansible.execPlaybook(config)

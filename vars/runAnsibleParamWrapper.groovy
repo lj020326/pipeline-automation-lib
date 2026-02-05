@@ -12,6 +12,7 @@ import groovy.transform.Field
 
 def call(Map config=[:]) {
 
+    log.info("initial config => ${JsonUtils.printToJsonString(config)}")
     List paramList = []
 
     Map paramMap = [
@@ -39,7 +40,7 @@ def call(Map config=[:]) {
 
     params.each { key, value ->
         key=Utilities.decapitalize(key)
-        if (value!="") {
+        if (value != "") {
             config[key] = value
         }
     }

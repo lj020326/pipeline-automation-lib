@@ -24,11 +24,10 @@ String configFilePath = "${new File(__FILE__).parent}"
 log.info("${scriptName}: configFilePath: ${configFilePath}")
 
 Map seedJobConfigs = new Yaml().load(("${configFilePath}/${pipelineConfigYaml}" as File).text)
-Map basePipelineConfig = seedJobConfigs.pipelineConfig
 
-log.info("${scriptName}: basePipelineConfig=${basePipelineConfig}")
+log.info("${scriptName}: seedJobConfigs=${seedJobConfigs}")
 
-List yamlProjectConfigList = basePipelineConfig.yamlProjectConfigList
+List yamlProjectConfigList = seedJobConfigs.yamlProjectConfigList
 log.info("${scriptName}: yamlProjectConfigList=${yamlProjectConfigList}")
 
 yamlProjectConfigList.each { Map projectConfig ->
@@ -36,10 +35,8 @@ yamlProjectConfigList.each { Map projectConfig ->
     log.info("${scriptName}: Creating Repo Test Jobs for ${projectConfigYamlFile}")
 
     Map repoTestJobConfigs = new Yaml().load(("${configFilePath}/${projectConfigYamlFile}" as File).text)
-    Map pipelineConfig = repoTestJobConfigs.pipelineConfig
 
     // Call the static method directly from the class
-    RepoTestJobCreator.createRepoTestJobs(this, pipelineConfig)
-
+    RepoTestJobCreator.createRepoTestJobs(this, repoTestJobConfigs)
 }
 log.info("${scriptName}: Finished creating repo test jobs")

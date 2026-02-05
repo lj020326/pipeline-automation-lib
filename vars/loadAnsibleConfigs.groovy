@@ -55,15 +55,18 @@ Map call(Map params) {
     // docker configuration
     //
 //     config.get('ansibleVersion', '2.18')
-    config.get('ansibleVersion', '2.19')
+//     config.get('ansibleVersion', '2.19')
+    config.get('ansibleVersion', '2.20')
     config.get('pythonVersion', '3.13')
-    config.get("dockerRegistry", "media.johnson.int:5000")
-    config.get("dockerImageName", "ansible/ansible-runner")
-    config.dockerImage = getAnsibleDockerImageId(
-                            dockerImageName: config.dockerImageName,
+    config.get("runnerRegistry", "media.johnson.int:5000")
+    config.get("runnerRegistryUrl", "https://${config.runnerRegistry}")
+    config.get("runnerImageName", "ansible/ansible-runner")
+    config.get("registryCredentialsId", "docker-registry-admin")
+    config.runnerImage = getAnsibleRunnerImageId(
+                            runnerImageName: config.runnerImageName,
+                            runnerRegistry: config.runnerRegistry,
                             ansibleVersion: config.ansibleVersion,
-                            pythonVersion: config.pythonVersion,
-                            dockerRegistry: config.dockerRegistry)
+                            pythonVersion: config.pythonVersion)
 
     List dockerArgsList = []
     // required to trust internal ca certificates
@@ -102,7 +105,7 @@ Map call(Map params) {
     config.get('ansibleEnvVarsList', [])
     config.get('ansibleExtraParams', [])
     config.get('ansibleExtraVars', [:])
-    config.get('ansibleDebugFlag', '-v')
+    config.get('ansibleDebugFlag', null)
     config.get('ansibleCheckMode', false)
     config.get('ansibleDiffMode', false)
     config.get('ansibleVarFiles', [])
@@ -132,6 +135,8 @@ Map call(Map params) {
     config.get('ansibleGalaxyIgnoreCerts', false)
     config.get('ansibleGalaxyForceOpt', false)
     config.get('ansibleGalaxyUpgradeOpt', false)
+    // default should be false since ansible-runner image has collections pre-installed
+    config.get('ansibleGalaxyInstallOpt', config.ansibleGalaxyUpgradeOpt)
 //     config.get('ansibleGalaxyTokenCredId', 'ansible-galaxy-pah-token-file')
 //     config.get('ansibleGalaxyTokenCredId', 'ansible-galaxy-pah-token')
 

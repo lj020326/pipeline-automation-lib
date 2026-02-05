@@ -1,120 +1,136 @@
 ---
 
-pipelineConfig:
-  baseFolder: "INFRA/ansible"
-  repoFolder: "ansible-linux"
-  repoUrl: "ssh://git@gitea.admin.dettonville.int:2222/infra/ansible-datacenter.git"
-  mirrorRepoDir: "/var/jenkins_home/git_repo_references/ansible-datacenter/ansible-datacenter.git"
-  gitCredentialsId: "gitea-ssh-jenkins"
-  jobScript: ".jenkins/runAnsibleSiteTag.groovy"
+baseFolder: "INFRA/ansible"
+repoFolder: "ansible-linux"
+repoUrl: "ssh://git@gitea.admin.dettonville.int:2222/infra/ansible-datacenter.git"
+mirrorRepoDir: "/var/jenkins_home/git_repo_references/ansible-datacenter/ansible-datacenter.git"
+gitCredentialsId: "gitea-ssh-jenkins"
+jobScript: ".jenkins/runAnsibleSiteTag.groovy"
 
-  runEnvMap:
-    DEV:
-      - environment: DEV
-    QA:
-      - environment: QA
-    PROD:
-      - environment: DEV
-      - environment: QA
-      - environment: PROD
-  ansibleJobList:
-    - ansible_tag: bootstrap-aibrix
-      ansible_limit: aibrix
-    - ansible_tag: bootstrap-aibrix-only
-      ansible_limit: aibrix
-    - ansible_tag: bootstrap-ansible
-    - ansible_tag: bootstrap-ansible-controller
-      ansible_limit: localhost
-      skip_always_tag: 'true'
-    - ansible_tag: bootstrap-ansible-user
-      skip_always_tag: 'true'
-    - ansible_tag: bootstrap-ca-certs
-      ansible_limit: ca_keystore
-    - ansible_tag: bootstrap-cacerts
-      ansible_limit: ca_keystore
-    - ansible_tag: bootstrap-certs
-      ansible_limit: ca_keystore
-    - ansible_tag: bootstrap-cron
-    - ansible_tag: bootstrap-docker
-      ansible_limit: docker
-    - ansible_tag: bootstrap-docker-stack
-      ansible_limit: docker_stack
-    - ansible_tag: bootstrap-docker-swarm
-    - ansible_tag: bootstrap-esxi
-      skip_always_tag: 'true'
-      ansible_limit: vmware_physical_esx_host
-    - ansible_tag: bootstrap-etcd
-      ansible_limit: kubernetes_etcd
-    - ansible_tag: bootstrap-gitea-runner
-    - ansible_tag: bootstrap-idrac
-      ansible_limit: dell_idrac_hosts
-      skip_always_tag: 'true'
-    - ansible_tag: bootstrap-jenkins-agent
-    - ansible_tag: bootstrap-kubernetes-ca
-      ansible_limit: kubernetes_ca
-    - ansible_tag: bootstrap-kubernetes-controller
-      ansible_limit: kubernetes_controller
-    - ansible_tag: bootstrap-kubernetes-worker
-      ansible_limit: kubernetes_worker
-    - ansible_tag: bootstrap-kubernetes
-      ansible_limit: kubernetes
-    - ansible_tag: bootstrap-ldap
-    - ansible_tag: bootstrap-ldap-client
-    - ansible_tag: bootstrap-linux
-    - ansible_tag: bootstrap-linux-core
-    - ansible_tag: bootstrap-linux-firewall
-    - ansible_tag: bootstrap-linux-logrotate
-    - ansible_tag: bootstrap-linux-package
-    - ansible_tag: bootstrap-linux-user
-    - ansible_tag: bootstrap-llm-server
-    - ansible_tag: bootstrap-mounts
-    - ansible_tag: bootstrap-nfs
-    - ansible_tag: bootstrap-nfs-client
-    - ansible_tag: bootstrap-nfs-server
-    - ansible_tag: bootstrap-ntp
-    - ansible_tag: bootstrap-ntp-client
-    - ansible_tag: bootstrap-ntp-server
-    - ansible_tag: bootstrap-pki
-      ansible_limit: ca_keystore
-    - ansible_tag: bootstrap-plexupdate
-    - ansible_tag: bootstrap-pip
-    - ansible_tag: bootstrap-postfix
-    - ansible_tag: bootstrap-postfix-client
-    - ansible_tag: bootstrap-postfix-server
-    - ansible_tag: bootstrap-python3
-    - ansible_tag: bootstrap-signing-certs
-      ansible_limit: localhost
-    - ansible_tag: bootstrap-sshd
-    - ansible_tag: bootstrap-vcenter
-      skip_always_tag: 'true'
-    - ansible_tag: bootstrap-vsphere
-      ansible_limit: localhost
-      skip_always_tag: 'true'
-    - ansible_tag: bootstrap-vm
-      skip_always_tag: 'true'
-    - ansible_tag: bootstrap-vmware-esxi
-      skip_always_tag: 'true'
-      ansible_limit: vmware_physical_esx_host
-    - ansible_tag: bootstrap-vmware-mounts
-      skip_always_tag: 'true'
-      ansible_limit: localhost
-    - ansible_tag: bootstrap-webmin
-    - ansible_tag: deploy-pki-certs
-      ansible_limit: ca_domain
-    - ansible_tag: deploy-ca-certs
-      ansible_limit: ca_domain
-    - ansible_tag: deploy-cacerts
-      ansible_limit: ca_domain
-    - ansible_tag: deploy-registry-certs
-      ansible_limit: docker
-    - ansible_tag: deploy-vm
-      skip_always_tag: 'true'
-      ansible_limit: localhost
-    - ansible_tag: display-common-vars
-    - ansible_tag: display-controller-vars
-      skip_always_tag: 'true'
-      ansible_limit: localhost
-    - ansible_tag: display-hostvars
-    - ansible_tag: vmware-remount-datastores
-      skip_always_tag: 'true'
-      ansible_limit: localhost
+runEnvMap:
+  DEV:
+    - environment: DEV
+  QA:
+    - environment: QA
+  PROD:
+    - environment: ADMIN
+    - environment: DEV
+    - environment: QA
+    - environment: PROD
+  ADMIN:
+    - environment: ADMIN
+    - environment: DEV
+    - environment: QA
+    - environment: PROD
+ansibleJobList:
+  - ansible_tag: bootstrap-aibrix
+    ansible_limit: aibrix
+  - ansible_tag: bootstrap-aibrix-only
+    ansible_limit: aibrix
+  - ansible_tag: bootstrap-ansible
+  - ansible_tag: bootstrap-ansible-controller
+    ansible_limit: localhost
+    skip_always_tag: 'true'
+  - ansible_tag: bootstrap-ansible-user
+    skip_always_tag: 'true'
+  - ansible_tag: bootstrap-ca-certs
+    ansible_limit: ca_keystore
+  - ansible_tag: bootstrap-cacerts
+    ansible_limit: ca_keystore
+  - ansible_tag: bootstrap-certs
+    ansible_limit: ca_keystore
+  - ansible_tag: bootstrap-cron
+  - ansible_tag: bootstrap-docker
+    ansible_limit: docker
+  - ansible_tag: bootstrap-docker-admin
+    ansible_limit: docker_stack_control_admin
+  - ansible_tag: bootstrap-docker-stack
+    ansible_limit: docker_stack
+  - ansible_tag: bootstrap-docker-swarm
+  - ansible_tag: bootstrap-esxi
+    skip_always_tag: 'true'
+    ansible_limit: vmware_physical_esx_host
+  - ansible_tag: bootstrap-etcd
+    ansible_limit: kubernetes_etcd
+  - ansible_tag: bootstrap-gitea-runner
+  - ansible_tag: bootstrap-idrac
+    ansible_limit: dell_idrac_hosts
+    skip_always_tag: 'true'
+  - ansible_tag: bootstrap-jenkins-agent
+  - ansible_tag: bootstrap-kubernetes-ca
+    ansible_limit: kubernetes_ca
+  - ansible_tag: bootstrap-kubernetes-controller
+    ansible_limit: kubernetes_controller
+  - ansible_tag: bootstrap-kubernetes-worker
+    ansible_limit: kubernetes_worker
+  - ansible_tag: bootstrap-kubernetes
+    ansible_limit: kubernetes
+  - ansible_tag: bootstrap-ldap
+  - ansible_tag: bootstrap-ldap-client
+  - ansible_tag: bootstrap-linux
+  - ansible_tag: bootstrap-linux-core
+  - ansible_tag: bootstrap-linux-firewall
+  - ansible_tag: bootstrap-linux-logrotate
+  - ansible_tag: bootstrap-linux-package
+  - ansible_tag: bootstrap-linux-user
+  - ansible_tag: bootstrap-llm-server
+  - ansible_tag: bootstrap-mounts
+  - ansible_tag: bootstrap-nfs
+    ansible_limit: nfs_network
+  - ansible_tag: bootstrap-nfs-client
+    ansible_limit: nfs_network
+  - ansible_tag: bootstrap-nfs-server
+    ansible_limit: nfs_server
+  - ansible_tag: bootstrap-ntp
+    ansible_limit: ntp_network
+  - ansible_tag: bootstrap-ntp-client
+    ansible_limit: ntp_network
+  - ansible_tag: bootstrap-ntp-server
+    ansible_limit: ntp_server
+  - ansible_tag: bootstrap-pki
+    ansible_limit: ca_keystore
+  - ansible_tag: bootstrap-plexupdate
+  - ansible_tag: bootstrap-pip
+  - ansible_tag: bootstrap-postfix
+    ansible_limit: postfix_network
+  - ansible_tag: bootstrap-postfix-client
+    ansible_limit: postfix_network
+  - ansible_tag: bootstrap-postfix-server
+    ansible_limit: postfix_server
+  - ansible_tag: bootstrap-python3
+  - ansible_tag: bootstrap-signing-certs
+    ansible_limit: localhost
+  - ansible_tag: bootstrap-sshd
+  - ansible_tag: bootstrap-vcenter
+    skip_always_tag: 'true'
+  - ansible_tag: bootstrap-vsphere
+    ansible_limit: localhost
+    skip_always_tag: 'true'
+  - ansible_tag: bootstrap-vm
+    skip_always_tag: 'true'
+  - ansible_tag: bootstrap-vmware-esxi
+    skip_always_tag: 'true'
+    ansible_limit: vmware_physical_esx_host
+  - ansible_tag: bootstrap-vmware-mounts
+    skip_always_tag: 'true'
+    ansible_limit: localhost
+  - ansible_tag: bootstrap-webmin
+  - ansible_tag: deploy-pki-certs
+    ansible_limit: ca_domain
+  - ansible_tag: deploy-ca-certs
+    ansible_limit: ca_domain
+  - ansible_tag: deploy-cacerts
+    ansible_limit: ca_domain
+  - ansible_tag: deploy-registry-certs
+    ansible_limit: docker
+  - ansible_tag: deploy-vm
+    skip_always_tag: 'true'
+    ansible_limit: localhost
+  - ansible_tag: display-common-vars
+  - ansible_tag: display-controller-vars
+    skip_always_tag: 'true'
+    ansible_limit: localhost
+  - ansible_tag: display-hostvars
+  - ansible_tag: vmware-remount-datastores
+    skip_always_tag: 'true'
+    ansible_limit: localhost

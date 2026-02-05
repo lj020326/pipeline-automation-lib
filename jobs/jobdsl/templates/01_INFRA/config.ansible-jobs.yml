@@ -1,8 +1,7 @@
 ---
 
-pipelineConfig:
-  baseFolder: "INFRA/ansible"
-  yamlProjectConfigList:
-#    - pipelineConfigYaml: "config.ansible-jobs.aap.yml"
-    - pipelineConfigYaml: "config.ansible-jobs.linux.yml"
-#    - pipelineConfigYaml: "config.ansible-jobs.windows.yml"
+baseFolder: "INFRA/ansible"
+yamlProjectConfigList:
+  - pipelineConfigYaml: "config.ansible-jobs.linux.yml"
+#  - pipelineConfigYaml: "config.ansible-jobs.windows.yml"
+#  - pipelineConfigYaml: "config.ansible-jobs.aap.yml"

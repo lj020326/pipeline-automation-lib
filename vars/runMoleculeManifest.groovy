@@ -283,6 +283,11 @@ Map runMoleculeJob(Map config) {
     log.debug("GIT_BRANCH=${env.GIT_BRANCH}")
     log.debug("config=${JsonUtils.printToJsonString(config)}")
 
+    Map jobResults = [:]
+    String gitCommitId = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+    log.debug("gitCommitId=${gitCommitId}")
+    jobResults.gitCommitId = gitCommitId
+
     Map jobConfigs = [
         jobFolder: "INFRA/repo-test-automation/run-molecule",
         jobParameters: [
@@ -309,12 +314,25 @@ Map runMoleculeJob(Map config) {
         copyChildJobArtifacts: config.copyChildJobArtifacts,
         junitXmlsPatterns: config.junitXmlsPatterns
     ]
+    jobResults.jobConfigs = jobConfigs
 
     log.debug("jobConfigs=${JsonUtils.printToJsonString(jobConfigs)}")
 
     Map jobResult = runJob(jobConfigs)
 
     log.debug("jobResult=${JsonUtils.printToJsonString(jobResult)}")
+    jobResults << jobResult
 
-    return jobResult
+    if (jobResults.failed) {
+        log.debug("config.failFast=${config.failFast}")
+        currentBuild.result = 'FAILURE'
+        if (config.failFast) {
+            log.error("results failed - aborting (failFast=true)")
+            error("Image build failed - aborting pipeline")
+        } else {
+            log.error("results failed")
+        }
+    }
+    log.debug("finished: jobResults=${JsonUtils.printToJsonString(jobResults)}")
+    return jobResults
 }

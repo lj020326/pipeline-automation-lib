@@ -22,11 +22,8 @@ jobFolder = "${baseFolder}/run-molecule"
 
 // ref: https://stackoverflow.com/questions/40215394/how-to-get-environment-variable-in-jenkins-groovy-script-console
 log.info("${scriptName}: JENKINS_ENV=${JENKINS_ENV}")
-if (JENKINS_ENV=='PROD') {
-    createMoleculeJobs(this)
-
-    log.info("${scriptName}: Finished creating molecule jobs")
-}
+createMoleculeJobs(this)
+log.info("${scriptName}: Finished creating molecule jobs")
 
 //******************************************************
 //  Function definitions from this point forward

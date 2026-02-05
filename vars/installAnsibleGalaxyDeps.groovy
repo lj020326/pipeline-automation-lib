@@ -44,7 +44,7 @@ def call(Map args=[:]) {
     // ref: https://docs.ansible.com/ansible/latest/collections_guide/collections_installing.html
     if (ansibleGalaxyUpgradeOpt) {
         ansibleGalaxyArgList.push("--upgrade")
-//         ansibleGalaxyArgList.push("--clear-response-cache")
+        ansibleGalaxyArgList.push("--clear-response-cache")
     }
     String ansibleGalaxyArgs = ansibleGalaxyArgList.join(" ")
 

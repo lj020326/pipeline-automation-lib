@@ -299,6 +299,8 @@ Map loadPipelineConfig(Map params) {
     String buildImageId = "${config.buildImageName}:${config.buildImageTag}"
     config.get("buildImageId", buildImageId)
 
+    config.dockerBranchLabel = config.gitRepoBranch.replaceAll(/^(.*)-(\d+)-(.*)$/, '$1-$2').replace('/','-').replace('%2F','-')
+
     // ref: https://issues.jenkins.io/browse/JENKINS-61372
     List dockerEnvVarsListDefault = [
         "BUILDX_CONFIG=/home/jenkins/.docker/buildx"
@@ -404,7 +406,7 @@ void publishDockerImage(def dockerImage, Map config) {
                     }
                 } else {
                     // push to standard set of derived tags (e.g., branch, buildId, buildDate, gitCommitId, latest)
-                    dockerImage.push "${config.gitRepoBranch}"
+                    dockerImage.push "${config.dockerBranchLabel}"
                     if (config?.buildId) {
                         dockerImage.push "${config.buildId}"
                     } else {

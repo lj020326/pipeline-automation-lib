@@ -271,11 +271,11 @@ Map loadPipelineConfig(Map params) {
     config.get("ansibleVersion", "2.19")
     config.get("pythonVersion", "3.13")
 
-    config.runnerImage = getAnsibleDockerImageId(
-                            dockerImageName: config.runnerImageName,
+    config.runnerImage = getAnsibleRunnerImageId(
+                            runnerImageName: config.runnerImageName,
+                            runnerRegistry: config.runnerRegistry,
                             ansibleVersion: config.ansibleVersion,
-                            pythonVersion: config.pythonVersion,
-                            dockerRegistry: config.runnerRegistry)
+                            pythonVersion: config.pythonVersion)
 
     config.get("ansibleTestCommand", "sanity")
     config.get("testDeps", "")

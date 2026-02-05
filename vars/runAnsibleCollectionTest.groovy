@@ -53,13 +53,13 @@ def call(Map pipelineConfig=[:]) {
     config = MapMerge.merge(config, pipelineConfig)
     log.info("config=${JsonUtils.printToJsonString(config)}")
 
-    log.info("Running tests inside docker container: ${config.dockerImage}")
+    log.info("Running tests inside docker container: ${config.runnerImage}")
 
     pipeline {
         agent {
             docker {
                 label 'docker'
-                image config.dockerImage
+                image config.runnerImage
 //                 args '-u root' // Optional: Add custom arguments to the docker run command
 //                 args "-v /var/run/docker.sock:/var/run/docker.sock --privileged"
                 reuseNode true
@@ -330,14 +330,17 @@ Map loadPipelineConfig(Map params) {
 
     config = loadAnsibleConfigs(config)
 
-    config.get("ansibleVersion", "2.18")
+    config.get("ansibleVersion", "2.20")
+//     config.get("ansibleVersion", "2.18")
     config.get("pythonVersion", "3.13")
-    config.get("dockerRegistry", "media.johnson.int:5000")
+    config.get("runnerImageName", "ansible/ansible-test")
+    config.get("runnerRegistry", "media.johnson.int:5000")
 
-    config.dockerImage = getAnsibleDockerImageId(
+    config.runnerImage = getAnsibleRunnerImageId(
+                            runnerImageName: config.runnerImageName,
+                            runnerRegistry: config.runnerRegistry,
                             ansibleVersion: config.ansibleVersion,
-                            pythonVersion: config.pythonVersion,
-                            dockerRegistry: config.dockerRegistry)
+                            pythonVersion: config.pythonVersion)
 
     config.testBaseDir = config.get('testBaseDir', ".test-results")
     log.debug("config.testComponent=${config.testComponent}")

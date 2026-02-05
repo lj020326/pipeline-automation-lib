@@ -1,48 +1,49 @@
 ---
 
-pipelineConfig:
-  jobFolder: "INFRA/repo-test-automation/ansible-utils"
-  repoName: "ansible-utils"
+jobFolder: "INFRA/repo-test-automation/ansible-utils"
+repoName: "ansible-utils"
 #  repoUrl: "ssh://git@gitea.admin.dettonville.int:2222/infra/ansible-dettonville-utils.git"
 #  gitCredentialsId: "gitea-ssh-jenkins"
 
-  branchSourceType: "gitea"
-  repoUrl: "https://gitea.admin.dettonville.int/infra/ansible-dettonville-utils.git"
-  giteaServerUrl: https://gitea.admin.dettonville.int
-  giteaCredentialsId: "infra-jenkins-git-user"
-  giteaServerId: "gitea-admin"
-  giteaOwner: "infra"
-  giteaRepoName: "ansible-dettonville-utils"
+branchSourceType: "gitea"
+repoUrl: "https://gitea.admin.dettonville.int/infra/ansible-dettonville-utils.git"
+giteaServerUrl: https://gitea.admin.dettonville.int
+giteaCredentialsId: "infra-jenkins-git-user"
+giteaServerId: "gitea-admin"
+giteaOwner: "infra"
+giteaRepoName: "ansible-dettonville-utils"
 
-  mirrorRepoDir: "/var/jenkins_home/git_repo_references/ansible-dettonville-utils/ansible-dettonville-utils.git"
+mirrorRepoDir: "/var/jenkins_home/git_repo_references/ansible-dettonville-utils/ansible-dettonville-utils.git"
 
-  buildAllBranches: true
-  useSuppressionStrategy: false
-  initializeJobMode: false
+buildAllBranches: true
+useSuppressionStrategy: false
+initializeJobMode: false
 
-  periodicFolderTriggerInterval: "2m"
-  skipInitialBuildOnFirstBranchIndexing: false
-  runEnvMap:
-    DEV:
-      environment: DEV
-    PROD:
-      environment: PROD
+skipInitialBuildOnFirstBranchIndexing: false
+runEnvMap:
+  DEV:
+    environment: DEV
+  PROD:
+    environment: PROD
+  ADMIN:
+    environment: ADMIN
+    periodicFolderTriggerInterval: "2m"
 
-  jobList:
-    - jobName: ansible-lint
-      jobScript: .jenkins/runAnsibleLint.groovy
-      description: "ansible-lint tests"
+jobList:
+  - jobName: ansible-lint
+    jobScript: .jenkins/runAnsibleLint.groovy
+    description: "ansible-lint tests"
 
-    - jobName: ansible-test-sanity
-      jobScript: .jenkins/runAnsibleTestSanity.groovy
-      description: "ansible-test-sanity"
+  - jobName: ansible-test-sanity
+    jobScript: .jenkins/runAnsibleTestSanity.groovy
+    description: "ansible-test-sanity"
 
-    - jobName: ansible-test-units
-      jobScript: .jenkins/runAnsibleTestUnits.groovy
-      description: "ansible-test-units"
+  - jobName: ansible-test-units
+    jobScript: .jenkins/runAnsibleTestUnits.groovy
+    description: "ansible-test-units"
 
-    - jobName: run-module-tests
-      description: "Integration tests"
+  - jobName: run-module-tests
+    description: "Integration tests"
 #      skipInitialBuildOnFirstBranchIndexing: true
-      useSuppressionStrategy: true
-      jobScript: tests/integration/targets/runModuleTest.groovy
+    useSuppressionStrategy: true
+    jobScript: tests/integration/targets/runModuleTest.groovy

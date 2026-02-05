@@ -20,11 +20,8 @@ jobFolder = "${baseFolder}/build-docker-image"
 
 // ref: https://stackoverflow.com/questions/40215394/how-to-get-environment-variable-in-jenkins-groovy-script-console
 log.info("${scriptName}: JENKINS_ENV=${JENKINS_ENV}")
-if (JENKINS_ENV=='PROD') {
-    createDockerJobs(this)
-
-    log.info("${scriptName}: Finished creating docker jobs")
-}
+createDockerJobs(this)
+log.info("${scriptName}: Finished creating docker jobs")
 
 //******************************************************
 //  Function definitions from this point forward

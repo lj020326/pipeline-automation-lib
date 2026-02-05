@@ -45,7 +45,8 @@ class RepoTestJobCreator {
         }
 
         Map envConfigsRaw = runEnvMap[jenkinsEnv]
-        // Map envConfigs = MapMerge.merge(repoJobConfigs.findAll { !["runEnvMap","jobList"].contains(it.key) }, envConfigsRaw) // Re-enable if MapMerge is setup
+        Map repoJobEnvConfigs = MapMerge.merge(repoJobConfigs.findAll { !["runEnvMap"].contains(it.key) }, envConfigsRaw)
+        log.info("envConfigsRaw=[${envConfigsRaw}]")
 
         log.info("creating baseFolder=[${baseFolder}]")
         dsl.folder(baseFolder) {
@@ -59,7 +60,7 @@ class RepoTestJobCreator {
             }
         }
 
-        factory.createJobs(repoJobConfigs)
+        factory.createJobs(repoJobEnvConfigs)
 
         dsl.listView("${jobFolder}") {
             jobs {

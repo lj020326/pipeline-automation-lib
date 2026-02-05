@@ -1,19 +1,26 @@
 ---
 
-pipelineConfig:
-  baseFolder: "INFRA/gitea-orgs"
-  serverUrl: "https://gitea.admin.dettonville.int"
-  gitCredentialsId: "infra-jenkins-git-user"
-  scriptPath: "Jenkinsfile"
+baseFolder: "INFRA/gitea-orgs"
+serverUrl: "https://gitea.admin.dettonville.int"
+gitCredentialsId: "infra-jenkins-git-user"
+scriptPath: "Jenkinsfile"
 
-  ## top level org scan
-  periodicInterval: "60m"
-  ## child org folder level scan interval in milliseconds (e.g., 120000 = 2 mins)
-  childTriggerInterval: 120000
-  numToKeep: 40
+## top level org scan
+periodicInterval: "60m"
+## child org folder level scan interval in milliseconds (e.g., 120000 = 2 mins)
+#childTriggerInterval: 120000
+numToKeep: 40
+
+runEnvMap:
+  PROD:
+    environment: PROD
+  ADMIN:
+    environment: ADMIN
+    ## child org folder level scan interval in milliseconds (e.g., 120000 = 2 mins)
+    childTriggerInterval: 120000
 
 #  ## run at 11 am
 #  cronSpecification: "H 11 * * *"
 #  cronSpecification: '@midnight'
-  ownerList:
+ownerList:
   - ownerName: "infra"

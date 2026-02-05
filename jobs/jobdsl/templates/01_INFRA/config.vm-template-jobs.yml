@@ -1,137 +1,151 @@
 ---
 
-pipelineConfig:
-  baseFolder: "INFRA/vm-templates"
-  repoUrl: "ssh://git@gitea.admin.dettonville.int:2222/infra/vm-templates.git"
-  mirrorRepoDir: "/var/jenkins_home/git_repo_references/vm-templates/vm-templates.git"
-  gitCredentialsId: "gitea-ssh-jenkins"
-  jobScript: .jenkins/buildTemplate.groovy
-  replaceExistingTemplate: false
-  runEnvMap:
-    DEV:
-      - environment: DEV
-        replaceExistingTemplate: true
-        jobList:
-          - jobName: run-all-builds
-            jobScript: .jenkins/runAllBuilds.groovy
-            description: "Job to run all VM template builds for SANDBOX"
+baseFolder: "INFRA/vm-templates"
+repoUrl: "ssh://git@gitea.admin.dettonville.int:2222/infra/vm-templates.git"
+mirrorRepoDir: "/var/jenkins_home/git_repo_references/vm-templates/vm-templates.git"
+gitCredentialsId: "gitea-ssh-jenkins"
+jobScript: .jenkins/buildTemplate.groovy
+replaceExistingTemplate: false
+runEnvMap:
+  DEV:
+    - environment: DEV
+      replaceExistingTemplate: true
+      jobList:
+        - jobName: run-all-builds
+          jobScript: .jenkins/runAllBuilds.groovy
+          description: "Job to run all VM template builds for SANDBOX"
 #            ## run at 11 am and 7 pm
 #            cronSpecification: "H 11,19 * * *"
 #            ## run at 11 am
 #            cronSpecification: "H 11 * * *"
-      - environment: PROD
-        replaceExistingTemplate: true
-    QA:
-      - environment: QA
-        replaceExistingTemplate: true
-        jobList:
-          - jobName: run-all-builds
-            jobScript: .jenkins/runAllBuilds.groovy
-            description: "Job to run all VM template builds for SANDBOX"
+    - environment: PROD
+      replaceExistingTemplate: true
+  QA:
+    - environment: QA
+      replaceExistingTemplate: true
+      jobList:
+        - jobName: run-all-builds
+          jobScript: .jenkins/runAllBuilds.groovy
+          description: "Job to run all VM template builds for SANDBOX"
 #            ## run at 10 am
 #            cronSpecification: "H 10 * * *"
-      - environment: DEV
-        replaceExistingTemplate: true
-    PROD:
-      - environment: PROD
-        replaceExistingTemplate: true
-        jobList:
-          - jobName: run-all-builds
-            jobScript: .jenkins/runAllBuilds.groovy
-            description: "Job to run all VM template builds for SANDBOX"
+    - environment: DEV
+      replaceExistingTemplate: true
+  PROD:
+    - environment: PROD
+      replaceExistingTemplate: true
+      jobList:
+        - jobName: run-all-builds
+          jobScript: .jenkins/runAllBuilds.groovy
+          description: "Job to run all VM template builds for SANDBOX"
 #            ## run at 10 am
 #            cronSpecification: "H 10 * * *"
-      - environment: DEV
-        replaceExistingTemplate: true
-  vmTemplateList:
-    - buildDistribution: CentOS
-      buildRelease: '10'
-      buildType: small
-    - buildDistribution: CentOS
-      buildRelease: '10'
-      buildType: medium
-    - buildDistribution: CentOS
-      buildRelease: '9'
-      buildType: small
-    - buildDistribution: CentOS
-      buildRelease: '9'
-      buildType: medium
-    - buildDistribution: CentOS
-      buildRelease: '8'
-      buildType: small
-    - buildDistribution: CentOS
-      buildRelease: '8'
-      buildType: medium
-    - buildDistribution: CentOS
-      buildRelease: '7'
-      buildType: small
-    - buildDistribution: Debian
-      buildRelease: '12'
-      buildType: small
-    - buildDistribution: Debian
-      buildRelease: '12'
-      buildType: medium
-    - buildDistribution: Debian
-      buildRelease: '11'
-      buildType: small
-    - buildDistribution: Debian
-      buildRelease: '10'
-      buildType: small
-    - buildDistribution: RHEL
-      buildRelease: '9'
-      buildType: small
-  #    cronSpecification: "H 10 * * *"
-    - buildDistribution: RHEL
-      buildRelease: '9'
-      buildType: medium
+  ADMIN:
+    - environment: ADMIN
+      replaceExistingTemplate: true
+      jobList:
+        - jobName: run-all-builds
+          jobScript: .jenkins/runAllBuilds.groovy
+          description: "Job to run all VM template builds for SANDBOX"
+    - environment: PROD
+      replaceExistingTemplate: true
+      jobList:
+        - jobName: run-all-builds
+          jobScript: .jenkins/runAllBuilds.groovy
+          description: "Job to run all VM template builds for SANDBOX"
+#            ## run at 10 am
+#            cronSpecification: "H 10 * * *"
+    - environment: DEV
+      replaceExistingTemplate: true
+vmTemplateList:
+  - buildDistribution: CentOS
+    buildRelease: '10'
+    buildType: small
+  - buildDistribution: CentOS
+    buildRelease: '10'
+    buildType: medium
+  - buildDistribution: CentOS
+    buildRelease: '9'
+    buildType: small
+  - buildDistribution: CentOS
+    buildRelease: '9'
+    buildType: medium
+  - buildDistribution: CentOS
+    buildRelease: '8'
+    buildType: small
+  - buildDistribution: CentOS
+    buildRelease: '8'
+    buildType: medium
+  - buildDistribution: CentOS
+    buildRelease: '7'
+    buildType: small
+  - buildDistribution: Debian
+    buildRelease: '12'
+    buildType: small
+  - buildDistribution: Debian
+    buildRelease: '12'
+    buildType: medium
+  - buildDistribution: Debian
+    buildRelease: '11'
+    buildType: small
+  - buildDistribution: Debian
+    buildRelease: '10'
+    buildType: small
+  - buildDistribution: RHEL
+    buildRelease: '9'
+    buildType: small
+#    cronSpecification: "H 10 * * *"
+  - buildDistribution: RHEL
+    buildRelease: '9'
+    buildType: medium
 #    - buildDistribution: RHEL
 #      buildRelease: '9'
 #      buildType: large
-    - buildDistribution: RHEL
-      buildRelease: '8'
-      buildType: small
-    - buildDistribution: RHEL
-      buildRelease: '8'
-      buildType: medium
+  - buildDistribution: RHEL
+    buildRelease: '8'
+    buildType: small
+  - buildDistribution: RHEL
+    buildRelease: '8'
+    buildType: medium
 #    - buildDistribution: RHEL
 #      buildRelease: '8'
 #      buildType: large
-    - buildDistribution: Ubuntu
-      buildRelease: '24.04'
-      buildType: small
-    - buildDistribution: Ubuntu
-      buildRelease: '24.04'
-      buildType: medium
-    - buildDistribution: Ubuntu
-      buildRelease: '24.04'
-      buildType: large
-    - buildDistribution: Ubuntu
-      buildRelease: '22.04'
-      buildType: small
-    - buildDistribution: Ubuntu
-      buildRelease: '22.04'
-      buildType: medium
-    - buildDistribution: Ubuntu
-      buildRelease: '20.04'
-      buildType: small
-    - buildDistribution: Windows/server
-      buildRelease: '2022'
-      buildType: standard
-    - buildDistribution: Windows/server
-      buildRelease: '2022'
-      buildType: dataserver
-    - buildDistribution: Windows/server
-      buildRelease: '2022'
-      buildType: sqlserver
-    - buildDistribution: Windows/server
-      buildRelease: '2019'
-      buildType: standard
-    - buildDistribution: Windows/server
-      buildRelease: '2019'
-      buildType: dataserver
-    - buildDistribution: Windows/server
-      buildRelease: '2019'
-      buildType: sqlserver
+  - buildDistribution: Ubuntu
+    buildRelease: '24.04'
+    buildType: small
+  - buildDistribution: Ubuntu
+    buildRelease: '24.04'
+    buildType: medium
+  - buildDistribution: Ubuntu
+    buildRelease: '24.04'
+    buildType: large
+  - buildDistribution: Ubuntu
+    buildRelease: '22.04'
+    buildType: small
+  - buildDistribution: Ubuntu
+    buildRelease: '22.04'
+    buildType: medium
+  - buildDistribution: Ubuntu
+    buildRelease: '20.04'
+    buildType: small
+  - buildDistribution: Windows/server
+    buildRelease: '2022'
+    buildType: standard
+  - buildDistribution: Windows/server
+    buildRelease: '2022'
+    buildType: dataserver
+  - buildDistribution: Windows/server
+    buildRelease: '2022'
+    buildType: sqlserver
+  - buildDistribution: Windows/server
+    buildRelease: '2019'
+    buildType: standard
+  - buildDistribution: Windows/server
+    buildRelease: '2019'
+    buildType: dataserver
+  - buildDistribution: Windows/server
+    buildRelease: '2019'
+    buildType: sqlserver
 #    - buildDistribution: Windows
 #      buildRelease: '2016'
 #      buildType: standard
@@ -141,6 +155,6 @@ pipelineConfig:
 #    - buildDistribution: Windows
 #      buildRelease: '2016'
 #      buildType: sqlserver
-    - buildDistribution: Windows/desktop
-      buildRelease: '11'
-      buildType: standard
+  - buildDistribution: Windows/desktop
+    buildRelease: '11'
+    buildType: standard

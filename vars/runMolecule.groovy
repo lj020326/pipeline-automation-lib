@@ -9,6 +9,7 @@
  * - moleculeCommand (String, optional): The molecule command to run (e.g., 'test', 'converge', 'check', 'verify').
  * - moleculeImageRegistry (String, optional): The the molecule image registry (e.g., 'registry.example.int:5000').
  * - moleculeImage (String, optional): The molecule image to run (e.g., 'ubuntu2404-systemd-python', 'centos9-systemd-python').
+ * - moleculeImageTag (String, optional): The molecule image tag to run (e.g., 'latest').
  * - moleculeScenario (String, optional): The molecule scenario to run (e.g., 'bootstrap_docker', 'bootstrap_java', 'bootstrap_linux', 'bootstrap_linux_package')", name: 'MoleculeScenario').
  * - moleculeDebugFlag (Boolean, optional): Set to enable molecule debug.
  * Defaults to 'test'.
@@ -70,6 +71,12 @@ Map runMoleculeCommand(Map config) {
     if (config?.moleculeImage) {
         commandEnvList.push("MOLECULE_IMAGE_LABEL=${config.moleculeImage}")
     }
+    if (config?.moleculeImageTag) {
+        commandEnvList.push("MOLECULE_IMAGE_TAG=${config.moleculeImageTag}")
+    }
+    commandEnvList.push("MOLECULE_BUILD_ID=${env.BUILD_ID}")
+    commandEnvList.push("ANSIBLE_ROLES_PATH=${env.WORKSPACE}/roles")
+
     log.info("commandEnvList=${JsonUtils.printToJsonString(commandEnvList)}")
 
     try {

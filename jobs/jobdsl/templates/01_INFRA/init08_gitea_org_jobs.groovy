@@ -34,20 +34,10 @@ String configFilePath = "${new File(__FILE__).parent}"
 log.info("${scriptName}: configFilePath: ${configFilePath}")
 
 Map seedJobConfigs = new Yaml().load(("${configFilePath}/${pipelineConfigYaml}" as File).text)
-log.info("${scriptName}: seedJobConfigs=${seedJobConfigs}")
+log.info("${scriptName}: seedJobConfigs=${JsonUtils.printToJsonString(seedJobConfigs)}")
 
-Map giteaOrgConfig = seedJobConfigs.pipelineConfig
-log.info("${scriptName}: giteaOrgConfig=${giteaOrgConfig}")
-
-String baseFolder = giteaOrgConfig.baseFolder
-
-log.info("${scriptName}: JENKINS_ENV=${JENKINS_ENV}")
-
-if (JENKINS_ENV=='PROD') {
-    createGiteaOrgFolder(this, giteaOrgConfig)
-
-    log.info("${scriptName}: Finished creating GITEA Organization Folder jobs")
-}
+createGiteaOrgFolder(this, seedJobConfigs)
+log.info("${scriptName}: Finished creating GITEA Organization Folder jobs")
 
 // ref: https://stackoverflow.com/questions/25039270/how-to-groovy-ify-a-null-check
 // ref: https://blog.mrhaki.com/2009/08/groovy-goodness-elvis-operator.html
@@ -69,6 +59,34 @@ void createGiteaOrgFolder(def dsl, Map config) {
     String gitCredentialsId = config.gitCredentialsId
     List ownerList = config.ownerList
 
+    Map runEnvMap = config.runEnvMap
+
+    // ref: https://stackoverflow.com/questions/40215394/how-to-get-environment-variable-in-jenkins-groovy-script-console
+    def envVars = Jenkins.instance.
+                       getGlobalNodeProperties().
+                       get(hudson.slaves.EnvironmentVariablesNodeProperty).
+                       getEnvVars()
+
+    if (!envVars?.JENKINS_ENV) {
+        log.info("${scriptName}: JENKINS_ENV not defined - skipping vm-templates project definition")
+        return
+    }
+
+    String jenkinsEnv = envVars.JENKINS_ENV
+    log.info("${scriptName}: jenkinsEnv=${jenkinsEnv}")
+
+    if (!runEnvMap.containsKey(jenkinsEnv)) {
+        log.info("${scriptName}: key for JENKINS_ENV=${jenkinsEnv} not found in `runEnvMap` project definition, skipping ansible-jobs build")
+        return
+    }
+
+    Map envConfigsRaw = runEnvMap[jenkinsEnv]
+    // log.info("${scriptName}: envConfigsRaw=${envConfigsRaw}")
+    log.info("${scriptName}: envConfigsRaw=${JsonUtils.printToJsonString(envConfigsRaw)}")
+
+    Map envConfigs = MapMerge.merge(config.findAll { !["runEnvMap"].contains(it.key) }, envConfigsRaw)
+    log.info("${scriptName}: envConfigs=${JsonUtils.printToJsonString(envConfigs)}")
+
     // ref: https://gist.github.com/nocode99/d4c654514ff2b683af90d7dd5e0156e0
     dsl.folder(baseFolder) {
         description "This folder contains jobs to run GITEA org jobs"
@@ -85,8 +103,8 @@ void createGiteaOrgFolder(def dsl, Map config) {
 
         log.info("${logPrefix} ownerConfigRaw=${ownerConfigRaw}")
 
-        Map ownerConfig = MapMerge.merge(config.findAll { !["ownerList"].contains(it.key) }, ownerConfigRaw)
-//         log.info("${logPrefix} ownerConfig=${ownerConfig}")
+        Map ownerConfig = MapMerge.merge(envConfigs.findAll { !["ownerList"].contains(it.key) }, ownerConfigRaw)
+        log.debug("${logPrefix} ownerConfig=${ownerConfig}")
 
         String orgOwner = ownerConfig.ownerName
         String orgFolder = "${baseFolder}/${orgOwner}"

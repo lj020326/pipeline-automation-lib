@@ -34,14 +34,12 @@ log.info("${scriptName}: configFilePath: ${configFilePath}")
 
 Map seedJobConfigs = new Yaml().load(("${configFilePath}/${pipelineConfigYaml}" as File).text)
 // log.info("${scriptName}: seedJobConfigs=${seedJobConfigs}")
+// log.info("${scriptName}: seedJobConfigs=${JsonUtils.printToJsonString(seedJobConfigs)}")
 
-Map pipelineConfig = seedJobConfigs.pipelineConfig
-// log.info("${scriptName}: pipelineConfig=${JsonUtils.printToJsonString(pipelineConfig)}")
+String pipelineRepoUrl = seedJobConfigs.pipelineRepoUrl
+String gitCredentialsId = seedJobConfigs.gitCredentialsId
 
-String pipelineRepoUrl = pipelineConfig.pipelineRepoUrl
-String gitCredentialsId = pipelineConfig.gitCredentialsId
-
-Map envConfigs = pipelineConfig.envConfigs
+Map envConfigs = seedJobConfigs.envConfigs
 
 // ref: https://blog.pavelsklenar.com/jenkins-creating-dynamic-project-folders-with-job-dsl/
 def jobFolder = folder(projectFolder) {

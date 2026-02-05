@@ -66,8 +66,9 @@ Map call(Map params=[:]) {
     config.targetCollectionDir = "${config.collectionsBaseDir}/ansible_collections/${config.collectionNamespace}/${config.collectionName}"
     log.debug("config.targetCollectionDir=${config.targetCollectionDir}")
 
+//         "ANSIBLE_COLLECTIONS_PATH=~/.ansible/collections:/usr/share/ansible/collections:${config.collectionsBaseDir}"
     config.ansibleEnvVarsList = [
-        "ANSIBLE_COLLECTIONS_PATH=~/.ansible/collections:/usr/share/ansible/collections:${config.collectionsBaseDir}"
+        "ANSIBLE_COLLECTIONS_PATH=${config.collectionsBaseDir}:~/.ansible/collections:/usr/share/ansible/collections"
     ]
 
     // good: test-results/tests/dettonville/git_inventory/main

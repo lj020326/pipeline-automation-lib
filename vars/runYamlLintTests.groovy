@@ -20,7 +20,7 @@ def call(Map params=[:]) {
         agent {
             docker {
                 label config.jenkinsNodeLabel
-                image config.dockerImage
+                image config.runnerImage
 //                 args '-u root' // Optional: Add custom arguments to the docker run command
 //                 args "-v /var/run/docker.sock:/var/run/docker.sock --privileged"
                 reuseNode true
@@ -222,14 +222,14 @@ Map loadPipelineConfig(Map params) {
     config.get('ansibleVersion', '2.19')
     config.get('pythonVersion', '3.13')
 
-    config.get("dockerRegistry", "media.johnson.int:5000")
-    config.get("dockerImageName", "ansible/ansible-runner")
+    config.get("runnerRegistry", "media.johnson.int:5000")
+    config.get("runnerImageName", "ansible/ansible-runner")
 
-    config.dockerImage = getAnsibleDockerImageId(
-                            dockerImageName: config.dockerImageName,
+    config.runnerImage = getAnsibleRunnerImageId(
+                            runnerImageName: config.runnerImageName,
                             ansibleVersion: config.ansibleVersion,
                             pythonVersion: config.pythonVersion,
-                            dockerRegistry: config.dockerRegistry)
+                            runnerRegistry: config.runnerRegistry)
 
     config.get('logLevel', "INFO")
     config.get('debugPipeline', false)

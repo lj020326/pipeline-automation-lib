@@ -1,7 +1,9 @@
 #!/usr/bin/env groovy
-import com.dettonville.pipeline.utils.JsonUtils
+
 import com.dettonville.pipeline.utils.Utilities
+import com.dettonville.pipeline.utils.JsonUtils
 import com.dettonville.pipeline.utils.MapMerge
+
 import com.dettonville.pipeline.utils.logging.LogLevel
 import com.dettonville.pipeline.utils.logging.Logger
 
@@ -10,7 +12,7 @@ import static com.dettonville.pipeline.utils.ConfigConstants.*
 // import jenkins.model.CauseOfInterruption.*
 import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException
 
-// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
+// ref: https://stackoverflow.com/questions/6305910/how-to-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field
 @Field Logger log = new Logger(this)
 
@@ -21,14 +23,14 @@ def call(Map params=[:]) {
     Map results = [:]
     results.gitRemoteBuildStatus = 'INPROGRESS'
     String ansibleLogSummary = "No results"
-    log.info("Running ansible inside docker container: ${config.dockerImage}")
+    log.info("Running ansible inside docker container: ${config.runnerImage}")
 
     pipeline {
         agent {
             docker {
                 label config.jenkinsNodeLabel
-                image config.dockerImage
-                args config.dockerArgs
+                image config.runnerImage
+                args config.runnerArgs
                 reuseNode true
             }
         }
@@ -56,7 +58,10 @@ def call(Map params=[:]) {
 			}
             stage('Prepare Ansible Environment') {
                 when {
-                    expression { config.ansibleCollectionsRequirements || config.ansibleRolesRequirements }
+                    allOf {
+                        expression { config.ansibleGalaxyInstallOpt }
+                        expression { config.ansibleCollectionsRequirements || config.ansibleRolesRequirements }
+                    }
                 }
                 steps {
                     script {
@@ -164,7 +169,6 @@ def call(Map params=[:]) {
             }
         }
     }
-
 } // body
 
 Map loadPipelineConfigFile(Map config) {

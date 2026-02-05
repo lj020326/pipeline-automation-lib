@@ -1,5 +1,4 @@
 #!/usr/bin/env groovy
-import groovy.json.JsonOutput
 
 import com.dettonville.pipeline.utils.Utilities
 import com.dettonville.pipeline.utils.JsonUtils
@@ -13,9 +12,7 @@ import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException
 
 // ref: https://stackoverflow.com/questions/6305910/how-to-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field
-//@Field Logger log = new Logger(this, LogLevel.DEBUG)
 @Field Logger log = new Logger(this)
-
 
 def call() {
 
@@ -198,7 +195,7 @@ def call() {
             }
         }
     }
-}
+} // body
 
 //@NonCPS
 Map loadPipelineConfig(Map params) {
@@ -241,6 +238,9 @@ Map loadPipelineConfig(Map params) {
     List runnerArgsList = []
     runnerArgsList.push("-v /var/run/docker.sock:/var/run/docker.sock")
     runnerArgsList.push("--privileged")
+    // Ensure the runner has enough memory
+    runnerArgsList.push("--memory=4g")
+    runnerArgsList.push("--memory-swap=4g")
 
     // configure to share the host's network stack.
     // This removes the network isolation between the container and the host, allowing the container
@@ -253,11 +253,11 @@ Map loadPipelineConfig(Map params) {
     config.get("ansibleVersion", "2.19")
     config.get("pythonVersion", "3.13")
 
-    config.runnerImage = getAnsibleDockerImageId(
-                            dockerImageName: config.runnerImageName,
+    config.runnerImage = getAnsibleRunnerImageId(
+                            runnerImageName: config.runnerImageName,
+                            runnerRegistry: config.runnerRegistry,
                             ansibleVersion: config.ansibleVersion,
-                            pythonVersion: config.pythonVersion,
-                            dockerRegistry: config.runnerRegistry)
+                            pythonVersion: config.pythonVersion)
 
     config.get("moleculeCommand", "test")
     config.get("moleculeImage", "ubuntu2404-systemd-python")

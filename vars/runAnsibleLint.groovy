@@ -15,12 +15,15 @@ def call(Map params=[:]) {
 
     // log.enableDebug()
     Map config = loadPipelineConfig(params)
+    log.info("config=${JsonUtils.printToJsonString(config)}")
 
     pipeline {
         agent {
             docker {
                 label config.jenkinsNodeLabel
-                image config.dockerImage
+                image config.runnerImage
+                args '--pull=always'
+//                 args "--pull=always -e PYTHONPATH=/root/.local/lib/python3.13/site-packages -e PATH=/root/.local/bin:/usr/local/bin:/usr/bin:/bin"
 //                 args '-u root' // Optional: Add custom arguments to the docker run command
 //                 args "-v /var/run/docker.sock:/var/run/docker.sock --privileged"
                 reuseNode true
@@ -62,18 +65,21 @@ def call(Map params=[:]) {
                     script {
                         sh "mkdir -p ${config.testResultsDir}"
 
-                        sh("ansible --version")
-                        sh("ansible-lint --version")
-                        sh("ansible-lint-junit --version")
-
                         List lintCmdList = []
 //                         lintCmdList.push("set -o pipefail &&")
                         lintCmdList.push("ansible-lint")
                         lintCmdList.push("-p")
                         lintCmdList.push("--nocolor")
-                        if (config.lintConfigFile) {
-                            lintCmdList.push("-c ${config.lintConfigFile}")
+                        if (config?.ansibleLintArgs) {
+                            lintCmdList.push("${config.ansibleLintArgs}")
                         }
+                        if (config?.ansibleLintConfigFile) {
+                            lintCmdList.push("-c ${config.ansibleLintConfigFile}")
+                        }
+                        if (config?.ansibleLintPaths) {
+                            lintCmdList.push("-c ${config.ansibleLintPaths.join(' ')}")
+                        }
+
 //                         lintCmdList.push("|& tee ${config.testResultsDir}/test-console-results.txt")
 //                         lintCmdList.push("2>&1 | tee ${config.testResultsDir}/test-console-results.txt")
                         lintCmdList.push("| tee ${config.testResultsDir}/test-console-results.txt")
@@ -81,10 +87,25 @@ def call(Map params=[:]) {
 
                         String lintCmd = lintCmdList.join(' ')
 
-                        try {
-                            sh(lintCmd)
+                        List testEnvList = []
+                        testEnvList += [
+                            "ANSIBLE_COLLECTIONS_PATH=~/.ansible/collections:./.ansible/collections:./collections:/usr/share/ansible/collections",
+//                            "ANSIBLE_COLLECTIONS_PATH=/root/.ansible/collections:./.ansible/collections:./collections:/usr/share/ansible/collections",
+                            "ANSIBLE_LINT_OFFLINE=true"
+                        ]
+                        log.info("testEnvList=${JsonUtils.printToJsonString(testEnvList)}")
 
-                            sh("ansible-lint-junit ${config.testResultsDir}/test-console-results.txt -o ${config.testResultsDir}/${config.testResultsJunitFile}")
+                        try {
+                            withEnv(testEnvList) {
+                                sh("ansible --version")
+                                sh("ansible-lint --version")
+                                sh("ansible-lint-junit --version")
+
+                                sh "ansible-galaxy collection list"
+
+                                sh(lintCmd)
+                                sh("ansible-lint-junit ${config.testResultsDir}/test-console-results.txt -o ${config.testResultsDir}/${config.testResultsJunitFile}")
+                            }
 
                             config.gitRemoteBuildStatus = "SUCCESSFUL"
 
@@ -233,18 +254,19 @@ Map loadPipelineConfig(Map params) {
 //     config.jenkinsNodeLabel = config.get('jenkinsNodeLabel',"ansible")
     config.get('jenkinsNodeLabel',"docker")
 //     config.get('ansibleVersion', '2.18')
-//     config.get('pythonVersion', '3.12')
     config.get('ansibleVersion', '2.19')
+
+//     config.get('pythonVersion', '3.12')
     config.get('pythonVersion', '3.13')
 
-    config.get("dockerRegistry", "media.johnson.int:5000")
-    config.get("dockerImageName", "ansible/ansible-runner")
+    config.get("runnerRegistry", "media.johnson.int:5000")
+    config.get("runnerImageName", "ansible/ansible-runner")
 
-    config.dockerImage = getAnsibleDockerImageId(
-                            dockerImageName: config.dockerImageName,
+    config.runnerImage = getAnsibleRunnerImageId(
+                            runnerImageName: config.runnerImageName,
+                            runnerRegistry: config.runnerRegistry,
                             ansibleVersion: config.ansibleVersion,
-                            pythonVersion: config.pythonVersion,
-                            dockerRegistry: config.dockerRegistry)
+                            pythonVersion: config.pythonVersion)
 
     config.get('logLevel', "INFO")
     config.get('debugPipeline', false)
@@ -269,7 +291,7 @@ Map loadPipelineConfig(Map params) {
 
     config.emailFrom = config.emailFrom ?: "admin+ansible@dettonville.com"
 
-//     config.lintConfigFile = config.get('lintConfigFile', ".ansible-lint")
+//     config.ansibleLintConfigFile = config.get('ansibleLintConfigFile', ".ansible-lint")
 
     log.debug("params=${params}")
     log.debug("config=${JsonUtils.printToJsonString(config)}")
