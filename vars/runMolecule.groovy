@@ -69,10 +69,13 @@ Map runMoleculeCommand(Map config) {
         commandEnvList.push("MOLECULE_IMAGE_REGISTRY=${config.moleculeImageRegistry}")
     }
     if (config?.moleculeImage) {
-        commandEnvList.push("MOLECULE_IMAGE_LABEL=${config.moleculeImage}")
+        commandEnvList.push("MOLECULE_IMAGE=${config.moleculeImage}")
     }
     if (config?.moleculeImageTag) {
         commandEnvList.push("MOLECULE_IMAGE_TAG=${config.moleculeImageTag}")
+    }
+    if (config?.moleculeContainerName) {
+        commandEnvList.push("MOLECULE_CONTAINER_NAME=${config.moleculeContainerName}")
     }
     commandEnvList.push("MOLECULE_BUILD_ID=${env.BUILD_ID}")
     commandEnvList.push("ANSIBLE_ROLES_PATH=${env.WORKSPACE}/roles")

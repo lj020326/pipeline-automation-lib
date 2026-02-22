@@ -44,7 +44,7 @@ def call() {
         initializeParamsOnly: booleanParam(defaultValue: false, description: "Set to true to only initialize parameters and skip execution of stages.", name: 'InitializeParamsOnly'),
         moleculeCommand : choice(choices: moleculeCommandTypes.join('\n'), description: "Choose molecule command", name: 'MoleculeCommand'),
         moleculeImageRegistry: string(defaultValue: "media.johnson.int:5000", description: "Specify the molecule image registry (e.g., 'registry.example.int:5000')", name: 'MoleculeImageRegistry'),
-        moleculeImage: string(defaultValue: "ubuntu2404-systemd-python", description: "Specify the molecule image (e.g., 'ubuntu2404-systemd-python', 'centos9-systemd-python')", name: 'MoleculeImage'),
+        moleculeImage: string(defaultValue: "systemd-python-ubuntu:24.04", description: "Specify the molecule image (e.g., 'ubuntu2404-systemd-python', 'systemd-python-centos:9')", name: 'MoleculeImage'),
         moleculeScenario: string(defaultValue: "bootstrap_linux_package", description: "Specify the molecule scenario (e.g., 'bootstrap_docker', 'bootstrap_java', 'bootstrap_linux', 'bootstrap_linux_package')", name: 'MoleculeScenario'),
         moleculeDebugFlag: booleanParam(defaultValue: false, description: "Set to enable molecule debug.", name: 'MoleculeDebugFlag'),
         gitRepoUrl: string(defaultValue: "ssh://git@gitea.admin.dettonville.int:2222/infra/ansible-datacenter.git", description: "Specify the git repo image URL", name: 'GitRepoUrl'),
@@ -260,7 +260,7 @@ Map loadPipelineConfig(Map params) {
                             pythonVersion: config.pythonVersion)
 
     config.get("moleculeCommand", "test")
-    config.get("moleculeImage", "ubuntu2404-systemd-python")
+    config.get("moleculeImage", "systemd-python-ubuntu:24.04")
     config.get("moleculeImageRegistry", "media.johnson.int:5000")
     config.get("moleculeScenario", "bootstrap_linux_package")
     config.get("moleculeDebugFlag", false)
