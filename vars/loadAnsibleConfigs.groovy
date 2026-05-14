@@ -45,7 +45,8 @@ Map call(Map params) {
     config.get('emailDist',"lee.johnson@dettonville.com")
     config.get('emailFrom',"admin+ansible@dettonville.com")
 
-    config.get('gitRemoteRepoType', 'bitbucket')
+//    config.get('gitRemoteRepoType', 'bitbucket')
+    config.get('gitRemoteRepoType', 'gitea')
     config.get('gitRemoteBuildKey', 'Ansible playbook run')
 	config.get('gitRemoteBuildName', 'Ansible playbook run')
     config.get('gitRemoteBuildSummary', "${config.gitRemoteBuildName} update")
@@ -54,40 +55,40 @@ Map call(Map params) {
     //
     // docker configuration
     //
-//     config.get('ansibleVersion', '2.18')
-//     config.get('ansibleVersion', '2.19')
+    config.get("registryCredentialsId", "docker-registry-admin")
     config.get('ansibleVersion', '2.20')
     config.get('pythonVersion', '3.13')
     config.get("runnerRegistry", "media.johnson.int:5000")
     config.get("runnerRegistryUrl", "https://${config.runnerRegistry}")
     config.get("runnerImageName", "ansible/ansible-runner")
-    config.get("registryCredentialsId", "docker-registry-admin")
     config.runnerImage = getAnsibleRunnerImageId(
                             runnerImageName: config.runnerImageName,
                             runnerRegistry: config.runnerRegistry,
                             ansibleVersion: config.ansibleVersion,
                             pythonVersion: config.pythonVersion)
 
-    List dockerArgsList = []
-    // required to trust internal ca certificates
-    dockerArgsList.push("-v /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro")
+//     config.get("runnerImage", "media.johnson.int:5000/jenkins-docker-agent:latest")
 
-//     dockerArgsList.push("-v ${env.SSH_AUTH_SOCK}:${env.SSH_AUTH_SOCK}")
-    dockerArgsList.push("-e SSH_AUTH_SOCK")
-
-//     dockerArgsList.push("-v /var/run/docker.sock:/var/run/docker.sock")
-//     dockerArgsList.push("--privileged")
-//     dockerArgsList.push("-u root")
-
-//     // configure to share the host's network stack.
-//     // This removes the network isolation between the container and the host, allowing the container
-//     // to access services running on the host via 127.0.0.1 or the host's primary IP address/
-    dockerArgsList.push("--network host")
-
-    if (config?.dockerUid && config?.dockerGid) {
-        dockerArgsList.push("-u ${config.builderUid}:${config.builderGid}")
+    List runnerArgsList = []
+    if (config?.runnerUid && config?.runnerGid) {
+        runnerArgsList.push("-u ${config.runnerUid}:${config.runnerGid}")
+    } else {
+        runnerArgsList.push("-u root:root")
+        runnerArgsList.push("--privileged")
     }
-    config.get("dockerArgs", dockerArgsList.join(" "))
+    // configure to share the host's network stack.
+    // This removes the network isolation between the container and the host, allowing the container
+    // to access services running on the host via 127.0.0.1 or the host's primary IP address/
+    runnerArgsList.push("--network host")
+    // allows process to have more control over signaling host ssh-agent process
+    runnerArgsList.push("-e SSH_AUTH_SOCK")
+//     runnerArgsList.push("-v ${env.SSH_AUTH_SOCK}:${env.SSH_AUTH_SOCK}")
+    runnerArgsList.push("-v /var/run/docker.sock:/var/run/docker.sock")
+    runnerArgsList.push("-v /etc/docker/daemon.json:/etc/docker/daemon.json:ro")
+    // required to trust internal ca certificates
+    runnerArgsList.push("-v /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro")
+
+    config.get("runnerArgs", runnerArgsList.join(" "))
 
     //
     // ansible configuration

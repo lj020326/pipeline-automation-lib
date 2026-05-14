@@ -71,14 +71,23 @@ class PipelineJobFactory implements Serializable {
                                     }
                                     pruneStaleBranch()
                                     pruneStaleTag()
-                                    cloneOption {
-                                        extension {
-                                            shallow(true)
-                                            depth(2)
-                                            noTags(true)
-                                            reference(mirrorRepoDir)
-                                            honorRefspec(false)
-                                            timeout(1)
+                                    // This tells Jenkins NOT to build if the commit message contains [skip ci]
+                                    // Ref: https://plugins.jenkins.io/git/#plugin-content-ignoring-commits
+                                    headWildcardFilter {
+                                        includes('*')
+                                        excludes('')
+                                    }
+                                    // Only add the reference if it's explicitly provided and not null/empty
+                                    if (jobConfigs?.mirrorRepoDir) {
+                                        cloneOption {
+                                            extension {
+                                                shallow(true)
+                                                depth(2)
+                                                noTags(true)
+                                                reference(jobConfigs.mirrorRepoDir)
+                                                honorRefspec(false)
+                                                timeout(1)
+                                            }
                                         }
                                     }
                                 }
@@ -93,14 +102,28 @@ class PipelineJobFactory implements Serializable {
                                     gitBranchDiscovery()
                                     pruneStaleBranch()
                                     pruneStaleTag()
-                                    cloneOption {
-                                        extension {
-                                            shallow(true)
-                                            depth(2)
-                                            noTags(true)
-                                            reference(mirrorRepoDir)
-                                            honorRefspec(false)
-                                            timeout(1)
+                                    // This tells Jenkins NOT to build if the commit message contains [skip ci]
+                                    // Ref: https://plugins.jenkins.io/git/#plugin-content-ignoring-commits
+                                    headWildcardFilter {
+                                        includes('*')
+                                        excludes('')
+                                    }
+//                                     // CRITICAL: This prevents the infinite loop by ignoring
+//                                     // any commit message containing [ci skip]
+//                                     scmCommitMessageStrategyTrait {
+//                                         pattern('.*\\[ci skip\\].*')
+//                                     }
+                                    // Only add the reference if it's explicitly provided and not null/empty
+                                    if (jobConfigs?.mirrorRepoDir) {
+                                        cloneOption {
+                                            extension {
+                                                shallow(true)
+                                                depth(2)
+                                                reference(jobConfigs.mirrorRepoDir)
+                                                honorRefspec(false)
+                                                noTags(true)
+                                                timeout(1)
+                                            }
                                         }
                                     }
                                 }
@@ -189,6 +212,23 @@ class PipelineJobFactory implements Serializable {
                 }
             }
         }
+
+//         // REPLACEMENT FOR scmCommitMessageStrategyTrait
+//         // This manually injects the SCM Filter trait logic
+//         jobObject.configure { it ->
+//             // Navigate to the specific SCM source traits node
+//             def traits = it / sources / data / 'jenkins.branch.BranchSource' / source / traits
+//             traits << 'jenkins.scm.filter.CommitMessageStrategyTrait' {
+//                 pattern('.*\\[(ci skip|skip ci)\\].*')
+//             }
+//
+// //             // This uses the specific Filter Branch PR plugin class which handles PRs and branches
+// //             // and is much more likely to appear in your 'Add' dropdown.
+// //             traits << 'com.igalg.jenkins.plugins.msfilter.BranchPublicFilterTrait' {
+// //                 // This is usually where the regex goes for this specific plugin
+// //                 filter('.*\\[(ci skip|skip ci)\\].*')
+// //             }
+//         }
 
         if (useSuppressionStrategy && branchesToBuild) {
             log.info("${logPrefix} adding trigger indexing suppression strategy for branches ${branchesToBuild}")

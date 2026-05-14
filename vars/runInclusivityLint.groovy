@@ -11,7 +11,7 @@ import com.dettonville.pipeline.versioning.ComparableSemanticVersion
 import groovy.transform.Field
 @Field Logger log = new Logger(this)
 
-def call(Map params=[:]) {
+def call(Map params = [:]) {
 
     // log.enableDebug()
     Map config = loadPipelineConfig(params)
@@ -24,6 +24,8 @@ def call(Map params=[:]) {
 //                 args '-u root' // Optional: Add custom arguments to the docker run command
 //                 args "-v /var/run/docker.sock:/var/run/docker.sock --privileged"
                 reuseNode true
+                // This force-checks the registry for a newer version
+                alwaysPull true
             }
         }
         options {
@@ -57,51 +59,47 @@ def call(Map params=[:]) {
             }
             // ref: https://github.com/shipilovds/yaml-lint-to-junit-xml
             // ref: https://pypi.org/project/yaml-lint-to-junit-xml/
-            stage('yamllint test') {
+            stage('lint test') {
                 steps {
                     script {
                         sh "mkdir -p ${config.testResultsDir}"
 
-                        sh("yamllint --version")
+                        sh("inclusivity --version")
 
                         List lintCmdList = []
 //                         lintCmdList.push("set -o pipefail &&")
 //                        lintCmdList.push("set -o pipefail;")
-                        lintCmdList.push("yamllint")
-                        lintCmdList.push("--no-warnings")
-                        lintCmdList.push("-f parsable")
+                        lintCmdList.push("inclusivity")
                         if (config.lintConfigFile) {
                             lintCmdList.push("-c ${config.lintConfigFile}")
                         }
+                        lintCmdList.push("--exit-1-on-failure")
                         lintCmdList.push(".")
-//                         lintCmdList.push("|& tee ${config.testResultsDir}/yamllint-results.txt")
-                        lintCmdList.push("| tee ${config.testResultsDir}/yamllint-results.txt")
-                        lintCmdList.push("|| true")
+//                         lintCmdList.push("|& tee ${config.testResultsDir}/inclusivity-results.txt")
+                        lintCmdList.push("| tee ${config.testResultsDir}/inclusivity-results.txt")
+//                         lintCmdList.push("|| true")
 
                         String lintCmd = lintCmdList.join(' ')
 
                         try {
-                            sh(lintCmd)
-                            config.gitRemoteBuildStatus = "SUCCESSFUL"
-                            currentBuild.result = "SUCCESS"
+                            sh("bash -c 'set -o pipefail && ${lintCmd}'")
                         } catch (Exception e) {
-                            config.gitRemoteBuildStatus = "FAILED"
-                            log.error("lint error: " + e.getMessage())
-                            currentBuild.result = "FAILED"
-//                             throw e
+                                log.info("lint failed")
+                                config.gitRemoteBuildStatus = "FAILED"
+                                currentBuild.result = 'FAILURE'
+                                log.error("lint error: " + e.getMessage())
+                                throw e
                         }
-                        sh("tree ${config.testResultsDir}")
+                        log.info("lint succeeded")
+                        currentBuild.result = 'SUCCESS'
+                        config.gitRemoteBuildStatus = "SUCCESSFUL"
 
-                        sh("yaml-lint-to-junit-xml ${config.testResultsDir}/yamllint-results.txt > ${config.testResultsDir}/${config.testResultsJunitFile}")
+                        sh("tree ${config.testResultsDir}")
 
                         archiveArtifacts(
                             allowEmptyArchive: true,
                             artifacts: "${config.testResultsDir}/**",
                             fingerprint: true)
-
-                        junit(testResults: "${config.testResultsDir}/${config.testResultsJunitFile}",
-                              skipPublishingChecks: true,
-                              allowEmptyResults: true)
 
                     }
                 }
@@ -217,19 +215,8 @@ Map loadPipelineConfig(Map params) {
 
 //     config.jenkinsNodeLabel = config.get('jenkinsNodeLabel',"ansible")
     config.get('jenkinsNodeLabel',"docker")
-//     config.get('ansibleVersion', '2.18')
-//     config.get('pythonVersion', '3.12')
-    config.get('ansibleVersion', '2.19')
-    config.get('pythonVersion', '3.13')
 
-    config.get("runnerRegistry", "media.johnson.int:5000")
-    config.get("runnerImageName", "ansible/ansible-runner")
-
-    config.runnerImage = getAnsibleRunnerImageId(
-                            runnerImageName: config.runnerImageName,
-                            ansibleVersion: config.ansibleVersion,
-                            pythonVersion: config.pythonVersion,
-                            runnerRegistry: config.runnerRegistry)
+    config.get("runnerImage", "media.johnson.int:5000/jenkins-docker-agent:latest")
 
     config.get('logLevel', "INFO")
     config.get('debugPipeline', false)
@@ -237,12 +224,11 @@ Map loadPipelineConfig(Map params) {
     config.get('timeoutUnit', 'HOURS')
     config.get('skipDefaultCheckout', false)
     config.get('testResultsDir', '.test-results')
-    config.get('testResultsJunitFile', 'yaml-lint-junit.xml')
 
     config.gitRemoteBuildStatus = "INPROGRESS"
     config.get("gitRemoteRepoType", "gitea")
-    config.get("gitRemoteBuildKey", 'YAML Lint Tests')
-	config.get("gitRemoteBuildName", 'YAML Lint Tests')
+    config.get("gitRemoteBuildKey", 'Inclusivity Lint Tests')
+	config.get("gitRemoteBuildName", 'Inclusivity Lint Tests')
     config.get("gitRemoteBuildSummary", "${config.gitRemoteBuildName} update")
 
 //    config.emailDist = config.emailDist ?: "admin@dettonville.com"
@@ -255,7 +241,7 @@ Map loadPipelineConfig(Map params) {
 
     config.emailFrom = config.emailFrom ?: "admin+ansible@dettonville.com"
 
-//     config.get('lintConfigFile', ".yamllint.yml")
+    config.get('lintConfigFile', ".inclusivity.yml")
 
     log.debug("params=${params}")
     log.debug("config=${JsonUtils.printToJsonString(config)}")

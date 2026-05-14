@@ -262,15 +262,17 @@ Map loadPipelineConfig(Map params) {
     config.get('testResultsHtmlFile', 'kics-results.html')
 
     config.gitRemoteBuildStatus = "INPROGRESS"
+    config.get("gitRemoteRepoType", "gitea")
     config.get("gitRemoteBuildKey", 'KICS Lint Tests')
 	config.get("gitRemoteBuildName", 'KICS Lint Tests')
     config.get("gitRemoteBuildSummary", "${config.gitRemoteBuildName} update")
+    config.get('gitRemoteRepoType', 'gitea')
 
-//    config.emailDist = config.emailDist ?: "lee.james.johnson@gmail.com"
-    config.get('emailDist',"lee.james.johnson@gmail.com")
+//    config.emailDist = config.emailDist ?: "admin@dettonville.com"
+    config.get('emailDist',"admin@dettonville.com")
     config.deployEmailDistList = [
         'lee.johnson@dettonville.com',
-        'lee.james.johnson@gmail.com'
+        'admin@dettonville.com'
     ]
     config.alwaysEmailDistList = ["lee.johnson@dettonville.com"]
 

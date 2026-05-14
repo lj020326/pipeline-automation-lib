@@ -19,6 +19,7 @@ import groovy.transform.Field
 def call(Map params=[:]) {
 
     Map config = loadPipelineConfig(params)
+    Map jobResults
 
     pipeline {
 
@@ -26,7 +27,7 @@ def call(Map params=[:]) {
         options {
             buildDiscarder(logRotator(numToKeepStr: '20'))
 //            overrideIndexTriggers(false)
-            skipDefaultCheckout()
+            skipDefaultCheckout(false)
             disableConcurrentBuilds()
             timestamps()
             timeout(time: config.timeout as Integer, unit: config.timeoutUnit)
@@ -35,7 +36,10 @@ def call(Map params=[:]) {
         stages {
 			stage('Load job config file') {
 				when {
-                    expression { fileExists config.configFile }
+                    allOf {
+                        expression { config?.configFile }
+                        expression { fileExists config.configFile }
+    				}
 				}
 				steps {
 					script {
@@ -46,27 +50,21 @@ def call(Map params=[:]) {
             stage("Run Jobs") {
                 steps {
                     script {
-                        Map jobResults = runJobStage(config)
-                        log.info("finished: jobResults=${JsonUtils.printToJsonString(jobResults)}")
-                        dir(config.buildReportDir) {
-                            log.info("dir: ${config.buildReportDir} successfully created!")
-                        }
-                        log.info("saving ${config.buildReport}")
-                        try {
-                            // ref: https://www.jenkins.io/doc/pipeline/steps/pipeline-utility-steps/#writeyaml-write-a-yaml-from-an-object-or-objects
-                            writeYaml file: config.buildReport, data: jobResults
-                        } catch (Exception err) {
-                            log.error("writeFile(${config.buildReport}): exception occurred [${err}]")
-                        }
+                        jobResults = runJobStage(config)
+                    }
+                }
+            }
+            stage('Set Pipeline Status') {
+                steps {
+                    script {
+                        log.info("**** final test results = [${JsonUtils.printToJsonString(jobResults)}]")
 
-                        archiveArtifacts(
-                            allowEmptyArchive: true,
-                            artifacts: "${config.buildReportDir}/**",
-                            fingerprint: true)
+                        List resultList = jobResults.values()
+                        boolean result = (resultList.size()>0) ? resultList.inject { a, b -> a && b } : true
 
-                        if (jobResults.failed) {
-                            currentBuild.result = 'FAILURE'
-                        }
+                        log.info("**** final result = [${result}]")
+                        currentBuild.result = result ? 'SUCCESS' : 'FAILURE'
+                        log.info("**** currentBuild.result=${currentBuild.result}")
                     }
                 }
             }
@@ -124,51 +122,17 @@ def call(Map params=[:]) {
     }
 } // body
 
-// ref: https://stackoverflow.com/questions/4052840/most-efficient-way-to-make-the-first-character-of-a-string-lower-case
-String decapitalize(String string) {
-    if (string == null || string.length() == 0) {
-        return string;
-    }
-    return string.substring(0, 1).toLowerCase() + string.substring(1);
-}
-
-
-def getYamlInt(Map config, String key) {
-    def value
-    if (config.containsKey(key)) {
-        try {
-            value = config[key].toInteger()
-        } catch (Exception err) {
-            value = config[key]
-        }
-    }
-    return value
-}
-
 //@NonCPS
 Map loadPipelineConfig(Map params) {
 
     Map config = [:]
-    config.supportedJobParams = ['changedEmailList','alwaysEmailList','failedEmailList']
+    config.jobParameters = ['changedEmailList','alwaysEmailList','failedEmailList']
     config.gitBranch = env.GIT_BRANCH
-
-    if (configFile != null && fileExists(configFile)) {
-        Map configSettings = readYaml file: "${configFile}"
-//        config=config + configSettings.pipeline
-        config = MapMerge.merge(configSettings.pipeline, config)
-    }
 
     if (params) {
         log.debug("copy immutable params map to mutable config map")
         log.debug("params=${JsonUtils.printToJsonString(params)}")
         config = MapMerge.merge(config, params)
-//         params.each { key, value ->
-//             log.debug("params[${key}]=${value}")
-//             key=decapitalize(key)
-//             if (value!="") {
-//                 config[key]=value
-//             }
-//         }
     }
 
     config.get('jenkinsJobNodeNodeLabel',"any")
@@ -231,37 +195,30 @@ String createJobId(Map config, i) {
 }
 
 Map runJobStage(Map stageConfig) {
-    String logPrefix="[${stageConfig.stage}]:"
+    String logPrefix="runJobStage(${stageConfig.stage}):"
 
     Map jobResults = [:]
-    jobResults.failed = false
+    boolean result = false
 
     log.info("${logPrefix} stageConfig=${JsonUtils.printToJsonString(stageConfig)}")
 
     stage(stageConfig.stage) {
         log.info("${logPrefix} starting stage")
 
+        List resultList = jobResults.values()
+        result = (resultList.size()>0) ? resultList.inject { a, b -> a && b } : true
+
+        log.debug("${logPrefix} jobResults=${jobResults}")
+        log.debug("${logPrefix} resultList=${resultList}")
+        log.debug("${logPrefix} prior stage results=${result}")
         if (stageConfig?.jobList || stageConfig?.jobs) {
             if (result || stageConfig.continueIfFailed) {
-//                 result = runJobList(stageConfig)
-//                 jobResults[stageConfig.stage] = result
-                jobResults.items.put(stageConfig.stage, runJobList(buildConfig))
+                result = runJobList(stageConfig)
+                jobResults[stageConfig.stage] = result
 
-                // ref: https://stackoverflow.com/questions/18380667/join-list-of-boolean-elements-groovy
-                // ref: https://blog.mrhaki.com/2009/09/groovy-goodness-using-inject-method.html
-                boolean failed = (jobResults.items.size()>0) ? jobResults.items.inject(false) { a, k, v -> a || v.failed } : false
-                jobResults.failed = failed
-
-                if (jobResults.failed && (config.failFast || !config.continueIfFailed)) {
-                    log.debug("${logPrefix} config.continueIfFailed=${config.continueIfFailed}")
-                    log.debug("${logPrefix} config.failFast=${config.failFast}")
-                    log.error("${logPrefix} results failed - not running any more jobs")
+                if (!result && !stageConfig.continueIfFailed) {
                     currentBuild.result = 'FAILURE'
                 }
-
-//                 if (!result && !stageConfig.continueIfFailed) {
-//                     currentBuild.result = 'FAILURE'
-//                 }
                 log.info("${logPrefix} finishing stage: result=${result}")
             } else {
                 log.info("${logPrefix} skipping stage: prior stage FAILURE results")

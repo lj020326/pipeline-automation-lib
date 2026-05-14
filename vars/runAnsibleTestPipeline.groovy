@@ -88,6 +88,8 @@ def call() {
                 registryUrl config.runnerRegistryUrl
                 registryCredentialsId config.registryCredentialsId
                 reuseNode true
+                // This force-checks the registry for a newer version
+                alwaysPull true
             }
         }
         options {

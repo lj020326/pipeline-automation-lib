@@ -1,0 +1,47 @@
+name: Jenkins Shared Library Config
+version: 1.0.0
+schema: v1
+
+models:
+  - name: Qwen2.5-Coder 32B (Jenkins Work)
+    provider: ollama
+    model: qwen2.5-coder:32b
+    apiBase: http://gpu02.johnson.int:11434
+    roles:
+      - chat
+      - edit
+      - apply
+
+  - name: Gemma 4 E2B (Fast Draft)
+    provider: llama.cpp
+    model: gemma-4-E2B-it-Q5_K_M
+    apiBase: http://gpu02.johnson.int:11432
+    roles:
+      - autocomplete
+
+tabAutocompleteModel:
+  name: Gemma 4 E2B (Fast Draft)
+  provider: llama.cpp
+  model: gemma-4-E2B-it-Q5_K_M
+  apiBase: http://gpu02.johnson.int:11432
+
+rules:
+  - "This is a Jenkins Shared Library — maintain high Pipeline compatibility"
+  - "Minimize @NonCPS usage"
+  - "Keep vars/ functions small, reusable, and well-documented"
+  - "Follow declarative pipeline style when possible"
+  - "Include proper error handling and logging"
+
+prompts:
+  - name: explain
+    description: Explain this code
+    prompt: "Explain this code in detail, focusing on what it does, why it does it that way, and any potential improvements."
+
+  - name: readable
+    description: make this more readable
+    prompt: |
+      Make this more readable.
+
+  - name: refactor
+    description: Refactor for quality
+    prompt: "Refactor this code to be cleaner, more maintainable, and follow best practices while preserving exact functionality."

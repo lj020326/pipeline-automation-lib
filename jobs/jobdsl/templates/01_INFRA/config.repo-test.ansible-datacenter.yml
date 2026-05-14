@@ -4,7 +4,7 @@ jobFolder: "INFRA/repo-test-automation/ansible-datacenter"
 repoName: "ansible-datacenter"
 repoUrl: "ssh://git@gitea.admin.dettonville.int:2222/infra/ansible-datacenter.git"
 gitCredentialsId: "gitea-ssh-jenkins"
-mirrorRepoDir: "/var/jenkins_home/git_repo_references/ansible-datacenter/ansible-datacenter.git"
+#mirrorRepoDir: "/var/jenkins_home/git_repo_references/ansible-datacenter/ansible-datacenter.git"
 
 buildAllBranches: true
 useSuppressionStrategy: false
@@ -25,6 +25,10 @@ jobList:
     jobScript: .jenkins/runInventoryTests.groovy
     description: "run aap-inventory test automation jobs"
 
+  - jobName: run-wiki-pipeline
+    jobScript: .jenkins/runWikiPipeline.groovy
+    description: "run wiki pipeline"
+
   - jobName: molecule-tests
     jobScript: .jenkins/runMoleculeTests.groovy
     description: "run molecule tests"
@@ -41,3 +45,6 @@ jobList:
       - jobName: kics-lint
         jobScript: .jenkins/runKicsLintTests.groovy
         description: "run KICS lint tests job"
+      - jobName: inclusivity-lint
+        jobScript: .jenkins/runInclusivityLintTests.groovy
+        description: "run Inclusivity lint tests job"

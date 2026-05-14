@@ -32,6 +32,8 @@ def call(Map params=[:]) {
                 image config.runnerImage
                 args config.runnerArgs
                 reuseNode true
+                // This force-checks the registry for a newer version
+                alwaysPull true
             }
         }
         options {

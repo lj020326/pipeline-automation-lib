@@ -219,12 +219,12 @@ Map loadPipelineConfig(Map params) {
     config.junitXmlReportDir = ".test-results"
     config.junitXmlReport = "${config.junitXmlReportDir}/junit-report.xml"
 
-    config.emailDist = config.get('emailDist',"lee.james.johnson@gmail.com")
+    config.emailDist = config.get('emailDist',"admin@dettonville.com")
     config.alwaysEmailDistList = [
-        'lee.james.johnson@gmail.com'
+        'lee.johnson@dettonville.com'
     ]
 
-    // config.alwaysEmailDist = config.alwaysEmailDist ?: "lee.james.johnson@gmail.com"
+    // config.alwaysEmailDist = config.alwaysEmailDist ?: "admin@dettonville.com"
     config.emailFrom = config.emailFrom ?: "admin+ansible@dettonville.com"
 
 //     config.ansibleInventory = config.get('ansibleInventory', 'hosts.yml')

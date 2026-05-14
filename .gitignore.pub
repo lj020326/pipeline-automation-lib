@@ -1,9 +1,9 @@
 *.iml
 .idea/
+.gradle/
 .DS_Store
 
 *.log
 
 save/
-
 archive/

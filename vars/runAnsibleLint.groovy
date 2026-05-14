@@ -27,6 +27,8 @@ def call(Map params=[:]) {
 //                 args '-u root' // Optional: Add custom arguments to the docker run command
 //                 args "-v /var/run/docker.sock:/var/run/docker.sock --privileged"
                 reuseNode true
+                // This force-checks the registry for a newer version
+                alwaysPull true
             }
         }
         options {
@@ -66,7 +68,6 @@ def call(Map params=[:]) {
                         sh "mkdir -p ${config.testResultsDir}"
 
                         List lintCmdList = []
-//                         lintCmdList.push("set -o pipefail &&")
                         lintCmdList.push("ansible-lint")
                         lintCmdList.push("-p")
                         lintCmdList.push("--nocolor")
@@ -83,7 +84,7 @@ def call(Map params=[:]) {
 //                         lintCmdList.push("|& tee ${config.testResultsDir}/test-console-results.txt")
 //                         lintCmdList.push("2>&1 | tee ${config.testResultsDir}/test-console-results.txt")
                         lintCmdList.push("| tee ${config.testResultsDir}/test-console-results.txt")
-                        lintCmdList.push("|| true")
+//                         lintCmdList.push("|| true")
 
                         String lintCmd = lintCmdList.join(' ')
 
@@ -95,50 +96,27 @@ def call(Map params=[:]) {
                         ]
                         log.info("testEnvList=${JsonUtils.printToJsonString(testEnvList)}")
 
-                        try {
-                            withEnv(testEnvList) {
-                                sh("ansible --version")
-                                sh("ansible-lint --version")
-                                sh("ansible-lint-junit --version")
+                        withEnv(testEnvList) {
+                            sh("ansible --version")
+                            sh("ansible-lint --version")
+                            sh("ansible-lint-junit --version")
 
-                                sh "ansible-galaxy collection list"
+                            sh "ansible-galaxy collection list"
 
-                                sh(lintCmd)
-                                sh("ansible-lint-junit ${config.testResultsDir}/test-console-results.txt -o ${config.testResultsDir}/${config.testResultsJunitFile}")
+                            try {
+                                //sh(lintCmd)
+                                sh("bash -c 'set -o pipefail && ${lintCmd}'")
+                            } catch (Exception e) {
+                                log.info("lint failed")
+                                config.gitRemoteBuildStatus = "FAILED"
+                                currentBuild.result = 'FAILURE'
+                                log.error("lint error: " + e.getMessage())
+                                throw e
                             }
-
-                            config.gitRemoteBuildStatus = "SUCCESSFUL"
-
-                            sh("tree ${config.testResultsDir}")
-
-//                                 sh("cat ${config.testResultsDir}/${config.testResultsJunitFile}")
-                            sh("head -20 ${config.testResultsDir}/${config.testResultsJunitFile}")
-                            echo "..."
-                            sh("tail -20 ${config.testResultsDir}/${config.testResultsJunitFile}")
-
-                            String sedCmd = "sed -i 's/<testsuites>/<testsuites name=\"ansible-lint test\">/' ${config.testResultsDir}/${config.testResultsJunitFile}"
-                            sedCmd += "&& sed -i 's/<testsuite errors=.* failures=.* \\(.*\\)\\/>/<testcase name=\"no linting errors found\"\\/>/' ${config.testResultsDir}/${config.testResultsJunitFile}"
-                            sedCmd += "&& sed -i 's/<testcase name=\"\\(.*\\)-\\([0-9]\\+\\)\">/<testcase name=\"\\1-\\2\" classname=\"\\1\">/' ${config.testResultsDir}/${config.testResultsJunitFile}"
-                            sh(sedCmd)
-
-    //                             sh("cat ${config.testResultsDir}/${config.testResultsJunitFile}")
-                            sh("head -20 ${config.testResultsDir}/${config.testResultsJunitFile}")
-                            echo "..."
-                            sh("tail -20 ${config.testResultsDir}/${config.testResultsJunitFile}")
-
-                            archiveArtifacts(
-                                allowEmptyArchive: true,
-                                artifacts: "${config.testResultsDir}/**",
-                                fingerprint: true)
-
-                            junit(testResults: "${config.testResultsDir}/${config.testResultsJunitFile}",
-                                  skipPublishingChecks: true,
-                                  allowEmptyResults: true)
-                        } catch (Exception e) {
-                            config.gitRemoteBuildStatus = "FAILED"
-                            log.error("lint error: " + e.getMessage())
-//                             throw e
                         }
+                        log.info("lint succeeded")
+                        currentBuild.result = 'SUCCESS'
+                        config.gitRemoteBuildStatus = "SUCCESSFUL"
                     }
                 }
             }
@@ -146,6 +124,34 @@ def call(Map params=[:]) {
         post {
             always {
                 script {
+
+                    sh("ansible-lint-junit ${config.testResultsDir}/test-console-results.txt -o ${config.testResultsDir}/${config.testResultsJunitFile}")
+                    sh("tree ${config.testResultsDir}")
+
+    //                                 sh("cat ${config.testResultsDir}/${config.testResultsJunitFile}")
+                    sh("head -20 ${config.testResultsDir}/${config.testResultsJunitFile}")
+                    echo "..."
+                    sh("tail -20 ${config.testResultsDir}/${config.testResultsJunitFile}")
+
+                    String sedCmd = "sed -i 's/<testsuites>/<testsuites name=\"ansible-lint test\">/' ${config.testResultsDir}/${config.testResultsJunitFile}"
+                    sedCmd += "&& sed -i 's/<testsuite errors=.* failures=.* \\(.*\\)\\/>/<testcase name=\"no linting errors found\"\\/>/' ${config.testResultsDir}/${config.testResultsJunitFile}"
+                    sedCmd += "&& sed -i 's/<testcase name=\"\\(.*\\)-\\([0-9]\\+\\)\">/<testcase name=\"\\1-\\2\" classname=\"\\1\">/' ${config.testResultsDir}/${config.testResultsJunitFile}"
+                    sh(sedCmd)
+
+    //                             sh("cat ${config.testResultsDir}/${config.testResultsJunitFile}")
+                    sh("head -20 ${config.testResultsDir}/${config.testResultsJunitFile}")
+                    echo "..."
+                    sh("tail -20 ${config.testResultsDir}/${config.testResultsJunitFile}")
+
+                    archiveArtifacts(
+                        allowEmptyArchive: true,
+                        artifacts: "${config.testResultsDir}/**",
+                        fingerprint: true)
+
+                    junit(testResults: "${config.testResultsDir}/${config.testResultsJunitFile}",
+                          skipPublishingChecks: true,
+                          allowEmptyResults: true)
+
 
                     // ref: https://www.jenkins.io/doc/pipeline/steps/stashNotifier/
                     notifyGitRemoteRepo(
@@ -277,15 +283,15 @@ Map loadPipelineConfig(Map params) {
     config.get('testResultsJunitFile', 'ansible-lint-junit.xml')
 
     config.gitRemoteBuildStatus = "INPROGRESS"
+    config.get("gitRemoteRepoType", "gitea")
     config.get("gitRemoteBuildKey", 'Ansible Lint Tests')
 	config.get("gitRemoteBuildName", 'Ansible Lint Tests')
     config.get("gitRemoteBuildSummary", "${config.gitRemoteBuildName} update")
 
-//    config.emailDist = config.emailDist ?: "lee.james.johnson@gmail.com"
-    config.get('emailDist',"lee.james.johnson@gmail.com")
+//    config.emailDist = config.emailDist ?: "admin@dettonville.com"
+    config.get('emailDist',"admin@dettonville.com")
     config.deployEmailDistList = [
         'lee.johnson@dettonville.com',
-        'lee.james.johnson@gmail.com'
     ]
     config.alwaysEmailDistList = ["lee.johnson@dettonville.com"]
 

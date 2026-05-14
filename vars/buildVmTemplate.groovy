@@ -1,5 +1,6 @@
 #!/usr/bin/env groovy
 import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 
 import com.dettonville.pipeline.utils.JsonUtils
 import com.dettonville.pipeline.utils.MapMerge
@@ -17,11 +18,7 @@ def call() {
 //     String packerTool = "packer-1.6.2" // Name of Packer Installation
 //     String packerTool = "packer-1.8.6" // Name of Packer Installation
 
-    Map config=[:]
     boolean vmTemplateExists = false
-
-//    Map config = loadPipelineConfig(params)
-//    String agentLabel = getJenkinsAgentLabel(config.jenkinsNodeLabel)
 
     List paramList = []
 
@@ -37,32 +34,38 @@ def call() {
         parameters(paramList)
     ])
 
-    params.each { key, value ->
-        key=Utilities.decapitalize(key)
-        log.info("key=${key} value=${value}")
-        if (value!="") {
-            config[key] = value
-        }
-    }
+    log.info("Loading Default Configs")
+    Map config=loadPipelineConfig(params)
+    log.info("config=${JsonUtils.printToJsonString(config)}")
 
     pipeline {
 
+//         agent {
+//             label "packer"
+//         }
         agent {
-            label "packer"
+            docker {
+                label config.jenkinsNodeLabel
+                image config.builderImage
+                args config.builderArgs
+                // This force-checks the registry for a newer version
+                alwaysPull true
+            }
         }
         // ref: https://stackoverflow.com/questions/45348761/jenkins-pipeline-how-do-i-use-the-tool-option-to-specify-a-custom-tool
         environment {
-            PACKER_HOME = tool name: 'packer-local', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
+//             PACKER_HOME = tool name: 'packer-local', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
             PACKER_CONFIG_DIR = "${env.JENKINS_HOME}/.config/packer/"
             CHECKPOINT_DISABLE = 1
-            GOVC_HOME = tool name: 'govc-local', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
+//             GOVC_HOME = tool name: 'govc-local', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
             GOVC_INSECURE = true
-            PATH = "${env.GOVC_HOME}/bin:${env.PACKER_HOME}/bin:${env.PATH}"
+//             PATH = "${env.GOVC_HOME}/bin:${env.PACKER_HOME}/bin:${env.PATH}"
+            PATH = "/usr/local/bin:${env.PATH}"
         }
         options {
             buildDiscarder(logRotator(numToKeepStr: '20'))
-            skipDefaultCheckout(false)
             disableConcurrentBuilds()
+            skipDefaultCheckout(false)
             timestamps()
             timeout(time: config.timeout as Integer, unit: config.timeoutUnit)
         }
@@ -76,15 +79,17 @@ def call() {
                         // ref: https://stackoverflow.com/questions/60756020/print-environment-variables-sorted-by-name-including-variables-with-newlines
                         sh "export -p | sed 's/declare -x //' | sed 's/export //'"
 
-                        config=loadPipelineConfig(params)
+                        config=loadPipelineConfigFile(config)
                         log.info("config=${JsonUtils.printToJsonString(config)}")
+
+                        sh "govc version"
+                        sh "packer --version"
 
                         // ref: https://stackoverflow.com/questions/25785/delete-all-but-the-most-recent-x-files-in-bash
                         // ref: https://stackoverflow.com/questions/22407480/command-to-list-all-files-except-dot-and-dot-dot
 //                         sh "cd /tmp/ && ls -Art1 | grep packer | tail -n +5 | xargs -I {} rm -fr -- {} || true"
 //                         sh "cd /tmp/ && ls -Art1 | tail -n +${config.tmpDirMaxFileCount} | xargs -I {} rm -fr -- {} || true"
                         sh "cd /tmp/ && find . -mtime ++${config.tmpDirMaxAge} -type d | xargs rm -f -r;"
-
                     }
                 }
             }
@@ -99,7 +104,7 @@ def call() {
                         withCredentials(config.secret_vars) {
                             log.info("Checking if template root folder at ${config.vm_template_root_folder} exists...")
 //                             sh "govc folder.info ${config.vm_template_root_folder}"
-                            vmTemplateFolderExists = sh(script: "govc folder.info ${config.vm_template_root_folder} | grep 'Path:'", returnStatus: true) == 0
+                            Boolean vmTemplateFolderExists = sh(script: "govc folder.info ${config.vm_template_root_folder} | grep 'Path:'", returnStatus: true) == 0
                             log.info("vmTemplateFolderExists=>${vmTemplateFolderExists}")
 
                             if (!vmTemplateFolderExists) {
@@ -121,7 +126,7 @@ def call() {
                             sh "govc datastore.mkdir -p -ds=${config.vm_template_datastore} ${config.vm_build_folder}"
 
                             log.info("Checking if template already exists...")
-                            vmTemplateExists = doesVmTemplateExist(this, log, config.vm_template_name)
+                            vmTemplateExists = doesVmTemplateExist(this, config.vm_template_name)
 
                             log.info("initial check if template already exists=>${vmTemplateExists}")
                         }
@@ -227,7 +232,7 @@ def call() {
                             // ref: https://blog.deimos.fr/2015/01/16/packer-build-multiple-images-easily/
                             // ref: https://github.com/hashicorp/packer/pull/7184
                             List packerCmdArgList = getPackerCommandArgList("validate", config)
-                            packerCmdString = packerCmdArgList.join(" ")
+                            String packerCmdString = packerCmdArgList.join(" ")
                             log.debug("packerCmdString=${packerCmdString}")
 
                             withCredentials(config.secret_vars) {
@@ -273,7 +278,7 @@ def call() {
                                     sh(packerCmdString)
                                 }
                                 log.info("packer build complete - check build template exists for ${config.template_build_name}")
-                                boolean vmBuildTemplateExists = doesVmTemplateExist(this, log, config.template_build_name)
+                                boolean vmBuildTemplateExists = doesVmTemplateExist(this, config.template_build_name)
 
                                 log.info("vmBuildTemplateExists=${vmBuildTemplateExists}")
 
@@ -293,7 +298,7 @@ def call() {
                                 retry(count: 5) {
                                     try {
 
-                                        vmTemplateExists = doesVmTemplateExist(this, log, config.vm_template_name, false)
+                                        vmTemplateExists = doesVmTemplateExist(this, config.vm_template_name, false)
 
                                         log.info("vmTemplateExists=${vmTemplateExists}")
 
@@ -433,7 +438,7 @@ def call() {
                                 sh "govc folder.create ${config.vm_template_deploy_folder2}"
                             }
 
-                            vmTemplateExists = doesVmTemplateExist(this, log, config.vm_template_name, false)
+                            vmTemplateExists = doesVmTemplateExist(this, config.vm_template_name, false)
 
                             log.info("vmTemplateExists=${vmTemplateExists}")
 
@@ -485,7 +490,7 @@ def call() {
                         deployConfigPrimary.secret_vars = config.secret_vars
 
                         log.info("Move template in ${config.vcenter_shortname1} to ${config.vm_template_deploy_folder}")
-                        moveTemplate(this, log, deployConfigPrimary)
+                        moveTemplate(this, deployConfigPrimary)
 
                         if (config?.import_ovf_to_dc2 && config.import_ovf_to_dc2.toBoolean()) {
                             deployConfigSecondary.vm_template_name = config.template_name
@@ -498,7 +503,7 @@ def call() {
                             deployConfigSecondary.secret_vars = config.secret_vars
 
                             log.info("Move template in ${config.vcenter_shortname2} to ${config.vm_template_deploy_folder2}")
-                            moveTemplate(this, log, deployConfigSecondary)
+                            moveTemplate(this, deployConfigSecondary)
                         }
                     }
                 }
@@ -559,23 +564,52 @@ def call() {
 
 //@NonCPS
 Map loadPipelineConfig(Map params) {
-
     Map config = [:]
+    params.each { key, value ->
+        key=Utilities.decapitalize(key)
+        log.info("key=${key} value=${value}")
+        if (value!="") {
+            config[key] = value
+        }
+    }
+
+    config.get('logLevel', "INFO")
+    config.get('debugPipeline', false)
+    log.setLevel(config.logLevel)
+
+    if (config?.debugPipeline && config.debugPipeline.toBoolean()) {
+        log.setLevel(LogLevel.DEBUG)
+    }
+
+    config.get('timeout', "3")
+    config.get('timeoutUnit', "HOURS")
+    config.get('alwaysEmailList', "admin@dettonville.com")
+    config.get('tmpDirMaxFileCount', 100)
+    config.get('tmpDirMaxAge', 7)
+
+    config.get('jenkinsNodeLabel',"docker")
+    String builderImage = "media.johnson.int:5000/jenkins-docker-agent:latest"
+//    String builderImage = "media.johnson.int:5000/ansible/ansible-runner:stable-2.18-py3.13"
+//    String builderImage = "media.johnson.int:5000/ansible/ansible-runner:latest-py3.13"
+//    String builderImage = "media.johnson.int:5000/jenkins-docker-cicd-agent:latest"
+    config.get("builderImage", builderImage)
+
+    List builderArgsList = []
+    builderArgsList.push("-v /var/run/docker.sock:/var/run/docker.sock")
+    builderArgsList.push("-v /etc/docker/daemon.json:/etc/docker/daemon.json:ro")
+    builderArgsList.push("--privileged")
+
+    // configure to share the host's network stack.
+    // This removes the network isolation between the container and the host, allowing the container
+    // to access services running on the host via 127.0.0.1 or the host's primary IP address/
+    builderArgsList.push("--network host")
+    config.get("builderArgs", builderArgsList.join(" "))
 
     List jobParts = JOB_NAME.split("/")
     log.info("jobParts=${jobParts}")
 //     config.jobBaseFolderLevel = (jobParts.size() - 4)
     config.jobBaseFolderLevel = 2
-    config.build_dir="templates"
-
-    config.get('logLevel', "INFO")
-    config.get('timeout', "3")
-    config.get('timeoutUnit', "HOURS")
-    config.get('debugPipeline', false)
-
-    config.get('alwaysEmailList', "lee.james.johnson@gmail.com")
-    config.get('tmpDirMaxFileCount', 100)
-    config.get('tmpDirMaxFileCount', 7)
+    config.get('build_dir', "templates")
 
     // ref: https://blog.mrhaki.com/2011/09/groovy-goodness-take-and-drop-items.html
     jobParts = jobParts.drop(config.jobBaseFolderLevel)
@@ -642,6 +676,13 @@ Map loadPipelineConfig(Map params) {
     config.get('vmware_iso_nfs_local_mounted', false)
     config.get('import_ovf_to_dc2', false)
 
+    return config
+}
+
+//@NonCPS
+Map loadPipelineConfigFile(Map baseConfig=[:]) {
+    Map config = baseConfig.clone()
+
     log.info("loading build config")
 
     String buildConfigFile = "./${config.build_dir}/${config.build_distribution_config_dir}/build-config.json"
@@ -649,7 +690,7 @@ Map loadPipelineConfig(Map params) {
         Map buildConfig = readJSON file: buildConfigFile
         config = MapMerge.merge(config, buildConfig.variables)
     } else {
-        String message = "${logPrefix} buildConfigFile [${buildConfigFile}] not found"
+        String message = "buildConfigFile [${buildConfigFile}] not found"
         log.error("${message}")
         throw new RuntimeException(message)
     }
@@ -702,8 +743,6 @@ Map loadPipelineConfig(Map params) {
         }
     }
 
-    config.get('jenkinsNodeLabel',"packer")
-
     // ***********************************************
     // build specific vars overridden by pipeline
     config.vm_template_build_name=config.template_build_name
@@ -713,6 +752,8 @@ Map loadPipelineConfig(Map params) {
     config.iso_dir=config.iso_dir
     config.iso_file=config.iso_file
 
+    config.logLevel = config.get('logLevel', "INFO")
+    config.debugPipeline = config.get('debugPipeline', false)
     log.setLevel(config.logLevel)
 
     if (config?.debugPipeline && config.debugPipeline.toBoolean()) {
@@ -775,7 +816,7 @@ String getJenkinsAgentLabel(String jenkinsLabel) {
     return "${-> println 'Right Now the Jenkins Agent Label Name is ' + jenkinsLabel; return jenkinsLabel}"
 }
 
-boolean doesVmTemplateExist(def dsl, Logger log, String vmTemplateName, boolean onlyIfTypeTemplate=true) {
+boolean doesVmTemplateExist(def dsl, String vmTemplateName, boolean onlyIfTypeTemplate=true) {
     boolean vmTemplateExists = false
 
     dsl.sh "govc vm.info ${vmTemplateName}"
@@ -858,7 +899,7 @@ List getPackerCommandArgList(String packerCommand, Map config) {
     return packerCmdArgList
 }
 
-void moveTemplate(def dsl, Logger log, Map deployConfig) {
+void moveTemplate(def dsl, Map deployConfig) {
     String logPrefix="[${deployConfig.vcenter_shortname}]:"
 
     String vm_template_name = deployConfig.vm_template_name
@@ -879,7 +920,7 @@ void moveTemplate(def dsl, Logger log, Map deployConfig) {
         dsl.withCredentials(deployConfig.secret_vars) {
 
 //             sh "govc folder.info ${vm_template_deploy_folder}"
-            vmTemplateFolderExists = sh(script: "govc folder.info ${vm_template_deploy_folder} | grep 'Path:'", returnStatus: true) == 0
+            Boolean vmTemplateFolderExists = sh(script: "govc folder.info ${vm_template_deploy_folder} | grep 'Path:'", returnStatus: true) == 0
             log.info("vmTemplateFolderExists=>${vmTemplateFolderExists}")
 
             if (!vmTemplateFolderExists) {

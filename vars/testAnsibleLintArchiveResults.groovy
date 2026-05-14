@@ -100,11 +100,10 @@ Map loadPipelineConfig(Map params) {
     config.timeoutUnit = config.get('timeoutUnit', 'HOURS')
     config.skipDefaultCheckout = config.get('skipDefaultCheckout', false)
 
-//    config.emailDist = config.emailDist ?: "lee.james.johnson@gmail.com"
-    config.emailDist = config.get('emailDist',"lee.james.johnson@gmail.com")
+//    config.emailDist = config.emailDist ?: "lee.johnson@dettonville.com"
+    config.emailDist = config.get('emailDist',"admin@dettonville.com")
     config.deployEmailDistList = [
         'lee.johnson@dettonville.com',
-        'lee.james.johnson@gmail.com'
     ]
     config.alwaysEmailDistList = ["lee.johnson@dettonville.com"]
 
@@ -130,6 +129,7 @@ Map loadPipelineConfig(Map params) {
 
 //     config.lintConfigFile = config.get('lintConfigFile', ".ansible-lint")
 
+    config.get("gitRemoteRepoType", "gitea")
     config.get("gitRemoteBuildKey", 'Ansible Lint Tests')
 	config.get("gitRemoteBuildName", 'Ansible Lint Tests')
     config.get("gitRemoteBuildSummary", "${config.gitRemoteBuildName} update")

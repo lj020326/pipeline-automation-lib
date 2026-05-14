@@ -111,6 +111,12 @@ vmTemplateList:
 #      buildRelease: '8'
 #      buildType: large
   - buildDistribution: Ubuntu
+    buildRelease: '26.04'
+    buildType: small
+  - buildDistribution: Ubuntu
+    buildRelease: '26.04'
+    buildType: medium
+  - buildDistribution: Ubuntu
     buildRelease: '24.04'
     buildType: small
   - buildDistribution: Ubuntu
@@ -125,9 +131,6 @@ vmTemplateList:
   - buildDistribution: Ubuntu
     buildRelease: '22.04'
     buildType: medium
-  - buildDistribution: Ubuntu
-    buildRelease: '20.04'
-    buildType: small
   - buildDistribution: Windows/server
     buildRelease: '2022'
     buildType: standard

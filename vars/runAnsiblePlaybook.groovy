@@ -48,12 +48,13 @@ Map call(Map args=[:]) {
         config = MapMerge.merge(ansibleConfig, config)
         log.info("config.ansible=${JsonUtils.printToJsonString(config.ansible)}")
 
+        sh "${config.ansibleGalaxyCmd} collection list"
+        sh "${config.ansibleCmd} --version"
+
         // Wrap the Ansible playbook execution with the Jenkins sshagent step
         sshagent([config.ansibleSshCredId]) {
             sh 'echo SSH_AUTH_SOCK=$SSH_AUTH_SOCK SSH_AGENT_PID=$SSH_AGENT_PID'
             sh 'ssh-add -l'
-            sh "${config.ansibleGalaxyCmd} collection list"
-            sh "${config.ansibleCmd} --version"
             try {
                 ansible.execPlaybook(config)
                 currentBuild.result = 'SUCCESS'

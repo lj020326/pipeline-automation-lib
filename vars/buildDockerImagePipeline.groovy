@@ -67,6 +67,8 @@ def call() {
                 label config.jenkinsNodeLabel
                 image config.builderImage
                 args config.builderArgs
+                // This force-checks the registry for a newer version
+                alwaysPull true
             }
         }
         options {
@@ -265,12 +267,15 @@ Map loadPipelineConfig(Map params) {
 //     config.get('jenkinsNodeLabel',"docker-in-docker")
     config.get('jenkinsNodeLabel',"docker")
 
-    String builderImage = "media.johnson.int:5000/ansible/ansible-runner:stable-2.18-py3.13"
-//     String builderImage = "media.johnson.int:5000/ansible/ansible-runner:latest-py3.13"
+    String builderImage = "media.johnson.int:5000/jenkins-docker-agent:latest"
+//    String builderImage = "media.johnson.int:5000/ansible/ansible-runner:stable-2.18-py3.13"
+//    String builderImage = "media.johnson.int:5000/ansible/ansible-runner:latest-py3.13"
+//    String builderImage = "media.johnson.int:5000/jenkins-docker-cicd-agent:latest"
     config.get("builderImage", builderImage)
 
     List builderArgsList = []
     builderArgsList.push("-v /var/run/docker.sock:/var/run/docker.sock")
+    builderArgsList.push("-v /etc/docker/daemon.json:/etc/docker/daemon.json:ro")
     builderArgsList.push("--privileged")
 
     // configure to share the host's network stack.
@@ -303,7 +308,8 @@ Map loadPipelineConfig(Map params) {
 
     // ref: https://issues.jenkins.io/browse/JENKINS-61372
     List dockerEnvVarsListDefault = [
-        "BUILDX_CONFIG=/home/jenkins/.docker/buildx"
+        "BUILDX_CONFIG=/home/jenkins/.docker/buildx",
+        "DOCKER_BUILDKIT=1"
     ]
     config.dockerEnvVarsList = config.get('dockerEnvVarsList', dockerEnvVarsListDefault)
 
