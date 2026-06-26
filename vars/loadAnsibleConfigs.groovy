@@ -56,18 +56,18 @@ Map call(Map params) {
     // docker configuration
     //
     config.get("registryCredentialsId", "docker-registry-admin")
-    config.get('ansibleVersion', '2.20')
-    config.get('pythonVersion', '3.13')
-    config.get("runnerRegistry", "media.johnson.int:5000")
-    config.get("runnerRegistryUrl", "https://${config.runnerRegistry}")
-    config.get("runnerImageName", "ansible/ansible-runner")
-    config.runnerImage = getAnsibleRunnerImageId(
-                            runnerImageName: config.runnerImageName,
-                            runnerRegistry: config.runnerRegistry,
-                            ansibleVersion: config.ansibleVersion,
-                            pythonVersion: config.pythonVersion)
+//     config.get('ansibleVersion', '2.20')
+//     config.get('pythonVersion', '3.13')
+//     config.get("runnerRegistry", "media.johnson.int:5000")
+//     config.get("runnerRegistryUrl", "https://${config.runnerRegistry}")
+//     config.get("runnerImageName", "ansible/ansible-runner")
+//     config.runnerImage = getAnsibleRunnerImageId(
+//                             runnerImageName: config.runnerImageName,
+//                             runnerRegistry: config.runnerRegistry,
+//                             ansibleVersion: config.ansibleVersion,
+//                             pythonVersion: config.pythonVersion)
 
-//     config.get("runnerImage", "media.johnson.int:5000/jenkins-docker-agent:latest")
+    config.get("runnerImage", "media.johnson.int:5000/jenkins-docker-agent:latest")
 
     List runnerArgsList = []
     if (config?.runnerUid && config?.runnerGid) {
@@ -166,7 +166,7 @@ Map call(Map params) {
     config.get('galaxySecretVarsList', galaxySecretVarsListDefault)
     config.get('isTestPipeline', false)
     if (config.isTestPipeline) {
-        config.get('testBaseDir', ".test-results")
+        config.get('testResultsBaseDir', ".test-results")
     }
 
 //     // Always add the ansible SSH key credential if none specified

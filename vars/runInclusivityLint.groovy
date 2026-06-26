@@ -83,17 +83,15 @@ def call(Map params = [:]) {
 
                         try {
                             sh("bash -c 'set -o pipefail && ${lintCmd}'")
+                            log.info("lint succeeded")
+                            currentBuild.result = 'SUCCESS'
+                            config.gitRemoteBuildStatus = "SUCCESSFUL"
                         } catch (Exception e) {
-                                log.info("lint failed")
-                                config.gitRemoteBuildStatus = "FAILED"
-                                currentBuild.result = 'FAILURE'
-                                log.error("lint error: " + e.getMessage())
-                                throw e
+                            log.info("lint failed")
+                            config.gitRemoteBuildStatus = "FAILED"
+                            currentBuild.result = 'FAILURE'
+                            log.error("lint error: " + e.getMessage())
                         }
-                        log.info("lint succeeded")
-                        currentBuild.result = 'SUCCESS'
-                        config.gitRemoteBuildStatus = "SUCCESSFUL"
-
                         sh("tree ${config.testResultsDir}")
 
                         archiveArtifacts(

@@ -89,7 +89,7 @@ def call() {
                         // ref: https://stackoverflow.com/questions/22407480/command-to-list-all-files-except-dot-and-dot-dot
 //                         sh "cd /tmp/ && ls -Art1 | grep packer | tail -n +5 | xargs -I {} rm -fr -- {} || true"
 //                         sh "cd /tmp/ && ls -Art1 | tail -n +${config.tmpDirMaxFileCount} | xargs -I {} rm -fr -- {} || true"
-                        sh "cd /tmp/ && find . -mtime ++${config.tmpDirMaxAge} -type d | xargs rm -f -r;"
+//                         sh "cd /tmp/ && find . -mtime ++${config.tmpDirMaxAge} -type d | xargs rm -f -r;"
                     }
                 }
             }

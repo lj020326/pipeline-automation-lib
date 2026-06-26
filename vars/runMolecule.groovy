@@ -8,7 +8,7 @@
  * - pythonVersion (String, REQUIRED): A single Python version to test under.
  * - moleculeCommand (String, optional): The molecule command to run (e.g., 'test', 'converge', 'check', 'verify').
  * - moleculeImageRegistry (String, optional): The the molecule image registry (e.g., 'registry.example.int:5000').
- * - moleculeImage (String, optional): The molecule image to run (e.g., 'ubuntu2404-systemd-python', 'centos9-systemd-python').
+ * - moleculeImage (String, optional): The molecule image to run (e.g., 'systemd-python-ubuntu:26.04', 'centos9-systemd-python').
  * - moleculeImageTag (String, optional): The molecule image tag to run (e.g., 'latest').
  * - moleculeScenario (String, optional): The molecule scenario to run (e.g., 'bootstrap_docker', 'bootstrap_java', 'bootstrap_linux', 'bootstrap_linux_package')", name: 'MoleculeScenario').
  * - moleculeDebugFlag (Boolean, optional): Set to enable molecule debug.
@@ -76,6 +76,9 @@ Map runMoleculeCommand(Map config) {
     }
     if (config?.moleculeContainerName) {
         commandEnvList.push("MOLECULE_CONTAINER_NAME=${config.moleculeContainerName}")
+    }
+    if (config?.moleculeTestResultsDir) {
+        commandEnvList.push("MOLECULE_TEST_RESULTS_DIR=${config.moleculeTestResultsDir}")
     }
     commandEnvList.push("MOLECULE_BUILD_ID=${env.BUILD_ID}")
     commandEnvList.push("ANSIBLE_ROLES_PATH=${env.WORKSPACE}/roles")

@@ -176,13 +176,15 @@ Map loadPipelineConfig(Map params = [:]) {
     log.debug("log.level=${log.level}")
 
     config.get("moleculeCommand", "test")
-    config.get("moleculeImage", "ubuntu2404-systemd-python")
+    config.get("moleculeImage", "systemd-python-ubuntu:26.04")
     config.get("moleculeImageRegistry", "media.johnson.int:5000")
     config.get("moleculeScenario", "bootstrap_linux_package")
     config.get("moleculeDebugFlag", false)
+    config.get("moleculeTestResultsDir", ".test-results")
 
     config.get("preTestCmd", "")
-    config.get("testResultsDir", ".test-reports")
+//    config.get("testResultsDir", ".test-reports")
+    config.get("testResultsDir", config.moleculeTestResultsDir)
     List junitXmlsPatternsDefault = [
         "**/${config.testResultsDir}/*.xml"
     ]
@@ -303,6 +305,7 @@ Map runMoleculeJob(Map config) {
             MoleculeImage: config.moleculeImage,
             MoleculeCommand: config.moleculeCommand,
             MoleculeScenario: config.moleculeScenario,
+            MoleculeTestResultsDir: config.moleculeTestResultsDir,
             PreTestCmd: config.preTestCmd,
             TestResultsDir: config.testResultsDir,
         ],

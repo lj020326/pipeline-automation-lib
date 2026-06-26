@@ -157,7 +157,7 @@ void createAnsibleJobs(def dsl, Map pipelineConfig) {
                 // ref: https://stackoverflow.com/questions/49262174/how-to-pass-paramaters-to-a-pipelinejob-in-dsl
                 // ref: https://jenkinsci.github.io/job-dsl-plugin/#path/job-parameters
                 parameters {
-                    stringParam("AnsibleLimitHosts", ansibleLimit, "Limit playbook to specified inventory hosts\nE.g., 'app_adm','app_tableau','host01', 'host01,host02'" )
+                    stringParam("AnsibleLimitHosts", ansibleLimit, "Limit playbook to specified inventory hosts\nE.g., 'app_adm','app_tableau','admin*','host01','host01,host02'" )
                     choiceParam("AnsibleDebugFlag", ['', '-v', '-vv', '-vvv', '-vvvv'], "Choose Ansible Debug Level")
                     booleanParam("AnsibleGalaxyForceOpt", false, 'Use Ansible Galaxy Force Mode?')
                     booleanParam("AnsibleGalaxyUpgradeOpt", false, 'Use Ansible Galaxy Upgrade?')

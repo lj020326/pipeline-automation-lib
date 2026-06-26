@@ -433,9 +433,6 @@ Map runBuildAndPublishImageJob(Map config) {
     jobParameters.BuildDir = config.buildDir
     jobParameters.BuildPath = config.buildPath
 
-    if (config?.buildImageTag) {
-        jobParameters.BuildImageTag = config.buildImageTag
-    }
     if (config?.buildTags) {
         if (config.buildTags instanceof List) {
             jobParameters.BuildTags = config.buildTags.join(",")
@@ -443,6 +440,15 @@ Map runBuildAndPublishImageJob(Map config) {
             jobParameters.BuildTags = config.buildTags
         } else {
             log.error("unsupported buildTags type : " + config.buildTags.getClass())
+        }
+    }
+    if (config?.buildPlatforms) {
+        if (config.buildPlatforms instanceof List) {
+            jobParameters.BuildPlatforms = config.buildPlatforms.join(",")
+        } else if (config.buildPlatforms instanceof String) {
+            jobParameters.BuildPlatforms = config.buildPlatforms
+        } else {
+            log.error("unsupported buildPlatforms type : " + config.buildPlatforms.getClass())
         }
     }
     if (config?.buildTestCommand) {
@@ -455,6 +461,9 @@ Map runBuildAndPublishImageJob(Map config) {
     }
     if (config?.buildTestAppendIdOption) {
         jobParameters.BuildTestAppendIdOption = config.buildTestAppendIdOption
+    }
+    if (config?.runTestCommandInsideContainer) {
+        jobParameters.RunTestCommandInsideContainer = "${config.runTestCommandInsideContainer}"
     }
     if (config?.testResultsPath) {
         jobParameters.TestResultsPath = config.testResultsPath

@@ -38,8 +38,8 @@ runEnvMap:
         - jobName: run-all-builds
           jobScript: .jenkins/runAllBuilds.groovy
           description: "Job to run all VM template builds for SANDBOX"
-#            ## run at 10 am
-#            cronSpecification: "H 10 * * *"
+          ## run at 10 am
+          cronSpecification: "H 10 * * *"
   ADMIN:
     - environment: ADMIN
       replaceExistingTemplate: true

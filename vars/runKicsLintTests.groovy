@@ -116,7 +116,6 @@ def call(Map params=[:]) {
                             config.gitRemoteBuildStatus = "FAILED"
                             log.error("lint error: " + e.getMessage())
                             currentBuild.result = "FAILED"
-//                             throw e
                         }
                         sh("tree ${config.testResultsDir}")
 

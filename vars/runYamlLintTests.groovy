@@ -225,11 +225,14 @@ Map loadPipelineConfig(Map params) {
     config.get("runnerRegistry", "media.johnson.int:5000")
     config.get("runnerImageName", "ansible/ansible-runner")
 
-    config.runnerImage = getAnsibleRunnerImageId(
-                            runnerImageName: config.runnerImageName,
-                            ansibleVersion: config.ansibleVersion,
-                            pythonVersion: config.pythonVersion,
-                            runnerRegistry: config.runnerRegistry)
+//     config.runnerImage = getAnsibleRunnerImageId(
+//                             runnerImageName: config.runnerImageName,
+//                             ansibleVersion: config.ansibleVersion,
+//                             pythonVersion: config.pythonVersion,
+//                             runnerRegistry: config.runnerRegistry)
+
+
+    config.get("runnerImage", "media.johnson.int:5000/jenkins-docker-agent:latest")
 
     config.get('logLevel', "INFO")
     config.get('debugPipeline', false)

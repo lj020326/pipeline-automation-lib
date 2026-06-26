@@ -73,8 +73,8 @@ Map call(Map params=[:]) {
 
     // good: test-results/tests/dettonville/git_inventory/main
     // bad:  test-results/tests/ansible-git-inventory/main
-//     String testComponentBaseDirDefault = "${config.testBaseDir}/tests/${config.testComponent.replace('.','/')}"
-    String testComponentBaseDirDefault = "${config.testBaseDir}/tests/${config.collectionNamespace}/${config.collectionName}"
+//     String testComponentBaseDirDefault = "${config.testResultsBaseDir}/tests/${config.testComponent.replace('.','/')}"
+    String testComponentBaseDirDefault = "${config.testResultsBaseDir}/tests/${config.collectionNamespace}/${config.collectionName}"
     config.testComponentBaseDir = config.get('testComponentBaseDir', testComponentBaseDirDefault)
     log.debug("config.testComponentBaseDir=${config.testComponentBaseDir}")
 
@@ -82,8 +82,8 @@ Map call(Map params=[:]) {
     config.testComponentDir = config.get('testComponentDir', testComponentDirDefault)
     log.debug("config.testComponentDir=${config.testComponentDir}")
 
-//     config.testBasePath = "${env.WORKSPACE_TMP}/${config.testBaseDir}"
-    config.testBasePath = "${env.WORKSPACE}/${config.testBaseDir}"
+//     config.testResultsBasePath = "${env.WORKSPACE_TMP}/${config.testResultsBaseDir}"
+    config.testResultsBasePath = "${env.WORKSPACE}/${config.testResultsBaseDir}"
 
     Map ansibleExtraVars = config.get('ansibleExtraVars',[:])
     if (config?.testCaseIdList) {
@@ -95,7 +95,7 @@ Map call(Map params=[:]) {
 
     ansibleExtraVars.test_component__git_test_results_enabled = config.enableGitTestResults
 
-    ansibleExtraVars.test_job__test_base_dir = config.testBasePath
+    ansibleExtraVars.test_job__test_results_base_dir = config.testResultsBasePath
     ansibleExtraVars.test_component__git_branch = config.testGitBranch
     ansibleExtraVars.test_component__git_commit_hash = config.gitCommitId
     ansibleExtraVars.test_component__git_comment_prefix = config.gitCommentPrefix

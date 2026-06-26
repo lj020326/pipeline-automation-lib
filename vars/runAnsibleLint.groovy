@@ -65,6 +65,9 @@ def call(Map params=[:]) {
             stage('ansible-lint test') {
                 steps {
                     script {
+                        sh "ansible-galaxy collection list"
+                        sh "ansible-lint --version"
+
                         sh "mkdir -p ${config.testResultsDir}"
 
                         List lintCmdList = []
@@ -268,11 +271,13 @@ Map loadPipelineConfig(Map params) {
     config.get("runnerRegistry", "media.johnson.int:5000")
     config.get("runnerImageName", "ansible/ansible-runner")
 
-    config.runnerImage = getAnsibleRunnerImageId(
-                            runnerImageName: config.runnerImageName,
-                            runnerRegistry: config.runnerRegistry,
-                            ansibleVersion: config.ansibleVersion,
-                            pythonVersion: config.pythonVersion)
+//     config.runnerImage = getAnsibleRunnerImageId(
+//                             runnerImageName: config.runnerImageName,
+//                             runnerRegistry: config.runnerRegistry,
+//                             ansibleVersion: config.ansibleVersion,
+//                             pythonVersion: config.pythonVersion)
+
+    config.get("runnerImage", "media.johnson.int:5000/jenkins-docker-agent:latest")
 
     config.get('logLevel', "INFO")
     config.get('debugPipeline', false)

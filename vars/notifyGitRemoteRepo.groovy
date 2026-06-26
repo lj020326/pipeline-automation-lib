@@ -4,7 +4,6 @@ import com.dettonville.pipeline.utils.JsonUtils
 import com.dettonville.pipeline.utils.logging.LogLevel
 import com.dettonville.pipeline.utils.logging.Logger
 
-// ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field
 @Field Logger log = new Logger(this)
 
@@ -24,7 +23,7 @@ def call(Map args=[:], String gitRemoteRepoType) {
     Set<String> VALID_BITBUCKET_BUILD_STATES = ['INPROGRESS', 'SUCCESSFUL', 'FAILED']
 
     Map notifyArgs = [:]
-    if (gitRemoteRepoType=="bitbucket") {
+    if (gitRemoteRepoType == "bitbucket") {
         notifyArgs['buildKey'] = args.gitRemoteBuildKey
         if (args?.gitRemoteBuildName) {
             notifyArgs['buildName'] = args.gitRemoteBuildName
@@ -47,91 +46,158 @@ def call(Map args=[:], String gitRemoteRepoType) {
             notifyArgs['commitId'] = args.gitCommitId
         }
         bitbucketStatusNotify(notifyArgs)
-    } else if (gitRemoteRepoType=="gitea") {
-        notifyArgs['title'] = args.gitRemoteBuildKey
-        if (args?.gitRemoteBuildName) {
-            notifyArgs['name'] = args.gitRemoteBuildName
-        }
+    } else if (gitRemoteRepoType == "gitea") {
+        String giteaStatus = 'COMPLETED'
+        String giteaConclusion = 'NEUTRAL'
 
-        // Validate and map Gitea Checks status and conclusion
         if (args?.gitRemoteBuildStatus) {
-            String incomingStatus = args.gitRemoteBuildStatus
+            String buildStatus = args.gitRemoteBuildStatus.toUpperCase()
 
-            // Map common pipeline results to Gitea Checks API status and conclusion
-            switch (incomingStatus) {
+            switch(buildStatus) {
+                case 'INPROGRESS':
                 case 'IN_PROGRESS':
                 case 'QUEUED':
-                    if (VALID_GITEA_CHECK_STATUSES.contains(incomingStatus)) {
-                        notifyArgs['status'] = incomingStatus
-                    } else {
-                        log.warn("Invalid Gitea Check status '${incomingStatus}' provided. Must be one of: ${VALID_GITEA_CHECK_STATUSES.join(', ')}. Setting to IN_PROGRESS as default.")
-                        notifyArgs['status'] = 'IN_PROGRESS' // Default to IN_PROGRESS if invalid
-                    }
-                    // No conclusion for IN_PROGRESS or QUEUED
+                    giteaStatus = 'IN_PROGRESS'
+                    giteaConclusion = null
                     break
                 case 'COMPLETED':
-                    notifyArgs['status'] = 'COMPLETED'
-                    if (args?.gitRemoteBuildConclusion
-                        && VALID_GITEA_CHECK_CONCLUSIONS.contains(args.gitRemoteBuildConclusion)) {
-                        notifyArgs['conclusion'] = args.gitRemoteBuildConclusion
-                    } else {
-                        notifyArgs['conclusion'] = 'NEUTRAL'  // Or derive from incomingStatus if no explicit conclusion
-                    }
-                    break
+                case 'SUCCESS':
                 case 'SUCCESSFUL':
-                    notifyArgs['status'] = 'COMPLETED'
-                    notifyArgs['conclusion'] = 'SUCCESS'
+                    giteaStatus = 'COMPLETED'
+                    giteaConclusion = 'SUCCESS'
                     break
                 case 'FAILED':
-                    notifyArgs['status'] = 'COMPLETED'
-                    notifyArgs['conclusion'] = 'FAILURE'
+                case 'FAILURE':
+                    giteaStatus = 'COMPLETED'
+                    giteaConclusion = 'FAILURE'
                     break
                 case 'ABORTED':
-                    notifyArgs['status'] = 'COMPLETED'
-                    notifyArgs['conclusion'] = 'ABORTED'
+                    giteaStatus = 'COMPLETED'
+                    giteaConclusion = 'ABORTED'
                     break
                 case 'UNSTABLE':
-                    notifyArgs['status'] = 'COMPLETED'
-                    notifyArgs['conclusion'] = 'UNSTABLE'
+                    giteaStatus = 'COMPLETED'
+                    giteaConclusion = 'UNSTABLE'
                     break
                 case 'SKIPPED':
-                    notifyArgs['status'] = 'COMPLETED'
-                    notifyArgs['conclusion'] = 'SKIPPED'
+                    giteaStatus = 'COMPLETED'
+                    giteaConclusion = 'SKIPPED'
                     break
                 case 'NEUTRAL':
-                    notifyArgs['status'] = 'COMPLETED'
-                    notifyArgs['conclusion'] = 'NEUTRAL'
+                    giteaStatus = 'COMPLETED'
+                    giteaConclusion = 'NEUTRAL'
                     break
                 default:
-                    // For any other unexpected status, default to COMPLETED and log a warning
-                    log.warn("Unexpected Git remote build status '${incomingStatus}'. Setting Gitea Check status to COMPLETED and conclusion to NEUTRAL.")
-                    notifyArgs['status'] = 'COMPLETED'
-                    notifyArgs['conclusion'] = 'NEUTRAL'
+                    log.warn("notifyGitRemoteRepo.call(): Unexpected Git remote build status '${buildStatus}'. Defaulting Gitea Check status to COMPLETED and conclusion to NEUTRAL.")
                     break
             }
         }
 
-        // The 'conclusion' field is derived from gitRemoteBuildStatus in the switch above,
-        // but if there's a separate 'gitRemoteBuildConclusion' parameter, we can validate it here.
-        // This assumes gitRemoteBuildConclusion would explicitly override or supplement the derived conclusion.
-        if (args?.gitRemoteBuildConclusion) {
-            String explicitConclusion = args.gitRemoteBuildConclusion
-            if (VALID_GITEA_CHECK_CONCLUSIONS.contains(explicitConclusion)) {
-                notifyArgs['conclusion'] = explicitConclusion
-            } else {
-                log.warn("Invalid Gitea Check conclusion '${explicitConclusion}' provided. Must be one of: ${VALID_GITEA_CHECK_CONCLUSIONS.join(', ')}. Ignoring invalid conclusion.")
-                // Do not set, or set to null, to avoid passing an invalid value
-                // If a conclusion was already derived, this won't overwrite it unless explicitly handled.
-            }
+        notifyArgs['status'] = giteaStatus
+        if (giteaConclusion) {
+            notifyArgs['conclusion'] = giteaConclusion
+        }
+
+        if (args?.gitRemoteBuildConclusion && VALID_GITEA_CHECK_CONCLUSIONS.contains(args.gitRemoteBuildConclusion)) {
+            notifyArgs['conclusion'] = args.gitRemoteBuildConclusion
         }
 
         if (args?.gitRemoteBuildSummary) {
             notifyArgs['summary'] = args.gitRemoteBuildSummary
         }
+
+        notifyArgs['name'] = args?.gitRemoteBuildName ?: "Jenkins Job Run"
+
         try {
+            log.info("Attempting to publish via Jenkins Checks API...")
             publishChecks(notifyArgs)
         } catch (Exception ex) {
-            log.warn("Unable to notify repo", ex.getMessage())
+            log.warn("publishChecks failed to find a valid publisher: ${ex.getMessage()}. Falling back to manual REST API notification...")
+
+            // 1. Get the commit hash dynamically
+            String commitId = args?.gitCommitId ?: env.GIT_COMMIT
+
+            // 2. Get the Git URL dynamically from environment variables
+            String gitUrl = env.GIT_URL ?: ""
+
+            if (!gitUrl && env.getEnvironment().containsKey('CHANGE_URL')) {
+                // Multibranch pipeline alternative if generic GIT_URL isn't populated
+                gitUrl = env.GIT_URL
+            }
+
+            if (!commitId || !gitUrl) {
+                log.error("Cannot fall back to Gitea Status API: Missing context. gitCommitId: ${commitId}, gitUrl: ${gitUrl}")
+                return
+            }
+
+            // 3. Dynamically derive Gitea API endpoint from SCM Git URL
+            // Handles transformations like: ssh://git@gitea.admin.dettonville.int:2222/infra/ansible-datacenter.git
+            // -> http://gitea.admin.dettonville.int:3000/api/v1/repos/infra/ansible-datacenter/statuses/...
+            String giteaApiUrl = deriveGiteaStatusApiUrl(gitUrl, commitId)
+            log.info("Derived Gitea API URL: ${giteaApiUrl}")
+
+            String apiState = 'pending'
+            if (giteaStatus == 'COMPLETED') {
+                apiState = (giteaConclusion == 'SUCCESS') ? 'success' : 'failure'
+            }
+
+            withCredentials([usernamePassword(credentialsId: 'infra-jenkins-git-user', passwordVariable: 'GITEA_TOKEN', usernameVariable: 'GITEA_USER')]) {
+                try {
+                    def payload = JsonUtils.printToJsonString([
+                        state: apiState,
+                        target_url: env.BUILD_URL ?: "",
+                        description: args?.gitRemoteBuildSummary ?: "Jenkins Build Status",
+                        context: notifyArgs['name']
+                    ])
+
+                    httpRequest httpMode: 'POST',
+                                contentType: 'APPLICATION_JSON',
+                                requestBody: payload,
+                                customHeaders: [[name: 'Authorization', value: "token ${GITEA_TOKEN}"]],
+                                url: giteaApiUrl,
+                                quiet: true
+                    log.info("Successfully updated Gitea commit status via dynamic REST fallback.")
+                } catch (Exception apiEx) {
+                    log.error("Gitea direct REST API notification fallback failed: ${apiEx.getMessage()}")
+                }
+            }
         }
     }
+}
+
+/**
+ * Parses out SSH or HTTP Git remote URLs to build the exact Gitea REST API endpoint.
+ */
+String deriveGiteaStatusApiUrl(String gitUrl, String commitId) {
+    // Standardize URL by clearing trailing .git suffix
+    String cleanUrl = gitUrl.trim()
+    if (cleanUrl.endsWith('.git')) {
+        cleanUrl = cleanUrl.substring(0, cleanUrl.length() - 4)
+    }
+
+    String host = "gitea.admin.dettonville.int:3000" // Fallback default domain if extraction fails
+    String repoPath = ""
+
+    if (cleanUrl.startsWith("ssh://") || cleanUrl.contains("@")) {
+        // Example: ssh://git@gitea.admin.dettonville.int:2222/infra/ansible-datacenter
+        // Splitting past the host/port demarcator
+        def matches = cleanUrl =~ /(?:ssh:\/\/)?[-_a-zA-Z0-9.]+@([-_a-zA-Z0-9.]+)(?::\d+)?\/(.+)/
+        if (matches.matches()) {
+            host = matches[0][1] + ":3000" // Remap SSH host domain to Gitea's standard HTTP API port
+            repoPath = matches[0][2]
+        }
+    } else if (cleanUrl.startsWith("http://") || cleanUrl.startsWith("https://")) {
+        // Example: http://gitea.admin.dettonville.int:3000/infra/ansible-datacenter
+        def urlObj = new URL(cleanUrl)
+        host = urlObj.getAuthority()
+        repoPath = urlObj.getPath().replaceAll(/^\//, "")
+    }
+
+    if (!repoPath) {
+        // Safe programmatic extraction failure fallback if regex breaks on specific edge-case layout
+        log.warn("Regex parsing could not safely isolate repository path from: ${gitUrl}. Attempting token slice fallback.")
+        repoPath = cleanUrl.tokenize('/')[-2..-1].join('/')
+    }
+
+    return "http://${host}/api/v1/repos/${repoPath}/statuses/${commitId}"
 }

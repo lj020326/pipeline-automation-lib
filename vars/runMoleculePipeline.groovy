@@ -44,9 +44,10 @@ def call() {
         initializeParamsOnly: booleanParam(defaultValue: false, description: "Set to true to only initialize parameters and skip execution of stages.", name: 'InitializeParamsOnly'),
         moleculeCommand : choice(choices: moleculeCommandTypes.join('\n'), description: "Choose molecule command", name: 'MoleculeCommand'),
         moleculeImageRegistry: string(defaultValue: "media.johnson.int:5000", description: "Specify the molecule image registry (e.g., 'registry.example.int:5000')", name: 'MoleculeImageRegistry'),
-        moleculeImage: string(defaultValue: "systemd-python-ubuntu:24.04", description: "Specify the molecule image (e.g., 'ubuntu2404-systemd-python', 'systemd-python-centos:9')", name: 'MoleculeImage'),
+        moleculeImage: string(defaultValue: "systemd-python-ubuntu:26.04", description: "Specify the molecule image (e.g., 'systemd-python-ubuntu:24.04', 'systemd-python-centos:9')", name: 'MoleculeImage'),
         moleculeScenario: string(defaultValue: "bootstrap_linux_package", description: "Specify the molecule scenario (e.g., 'bootstrap_docker', 'bootstrap_java', 'bootstrap_linux', 'bootstrap_linux_package')", name: 'MoleculeScenario'),
         moleculeDebugFlag: booleanParam(defaultValue: false, description: "Set to enable molecule debug.", name: 'MoleculeDebugFlag'),
+        moleculeTestResultsDir: string(defaultValue: ".test-results", description: "Specify the molecule test results directory", name: 'MoleculeTestResultsDir'),
         gitRepoUrl: string(defaultValue: "ssh://git@gitea.admin.dettonville.int:2222/infra/ansible-datacenter.git", description: "Specify the git repo image URL", name: 'GitRepoUrl'),
         gitRepoBranch: string(defaultValue: "main", description: "Specify the git repo branch", name: 'GitRepoBranch'),
         gitCredentialsId: string(defaultValue: "jenkins-ansible-ssh", description: "Specify the git repo credential ID", name: 'GitCredentialsId'),
@@ -253,17 +254,20 @@ Map loadPipelineConfig(Map params) {
     config.get("ansibleVersion", "2.19")
     config.get("pythonVersion", "3.13")
 
-    config.runnerImage = getAnsibleRunnerImageId(
-                            runnerImageName: config.runnerImageName,
-                            runnerRegistry: config.runnerRegistry,
-                            ansibleVersion: config.ansibleVersion,
-                            pythonVersion: config.pythonVersion)
+//     config.runnerImage = getAnsibleRunnerImageId(
+//                             runnerImageName: config.runnerImageName,
+//                             runnerRegistry: config.runnerRegistry,
+//                             ansibleVersion: config.ansibleVersion,
+//                             pythonVersion: config.pythonVersion)
+
+    config.get("runnerImage", "media.johnson.int:5000/jenkins-docker-agent:latest")
 
     config.get("moleculeCommand", "test")
     config.get("moleculeImage", "systemd-python-ubuntu:24.04")
     config.get("moleculeImageRegistry", "media.johnson.int:5000")
     config.get("moleculeScenario", "bootstrap_linux_package")
     config.get("moleculeDebugFlag", false)
+    config.get("moleculeTestResultsDir", ".test-results")
 
     config.get("preTestCmd", "")
     config.get('testResultsDir', '.test-reports')

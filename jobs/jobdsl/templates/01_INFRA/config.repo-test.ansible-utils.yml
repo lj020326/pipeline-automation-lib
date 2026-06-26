@@ -46,4 +46,5 @@ jobList:
     description: "Integration tests"
 #      skipInitialBuildOnFirstBranchIndexing: true
     useSuppressionStrategy: true
-    jobScript: tests/integration/targets/runModuleTest.groovy
+    jobScript: .jenkins/runModuleTest.groovy
+#    jobScript: tests/integration/targets/runModuleTest.groovy

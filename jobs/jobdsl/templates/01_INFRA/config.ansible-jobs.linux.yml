@@ -28,10 +28,12 @@ ansibleJobList:
   - ansible_tag: bootstrap-aibrix-only
     ansible_limit: aibrix
   - ansible_tag: bootstrap-ansible
+    ansible_limit: os_linux
   - ansible_tag: bootstrap-ansible-controller
     ansible_limit: localhost
     skip_always_tag: 'true'
   - ansible_tag: bootstrap-ansible-user
+    ansible_limit: os_linux
     skip_always_tag: 'true'
   - ansible_tag: bootstrap-ca-certs
     ansible_limit: ca_keystore
@@ -40,31 +42,51 @@ ansibleJobList:
   - ansible_tag: bootstrap-certs
     ansible_limit: ca_keystore
   - ansible_tag: bootstrap-cron
+    ansible_limit: os_linux
   - ansible_tag: bootstrap-docker
     ansible_limit: docker
   - ansible_tag: bootstrap-docker-admin
     ansible_limit: docker_stack_admin
   - ansible_tag: bootstrap-docker-control
     ansible_limit: docker_stack_control
+  - ansible_tag: bootstrap-docker-llm-agent
+    ansible_limit: docker_stack_llm_agent
   - ansible_tag: bootstrap-docker-llm
-    ansible_limit: docker_stack_llm
+    ansible_limit: docker_stack_llm,!control_host
+  - ansible_tag: bootstrap-docker-vllm
+    ansible_limit: docker_stack_vllm
+  - ansible_tag: bootstrap-docker-gitea
+    ansible_limit: docker_stack_gitea
+  - ansible_tag: bootstrap-docker-jenkins
+    ansible_limit: docker_stack_jenkins
+  - ansible_tag: bootstrap-docker-kanban
+    ansible_limit: docker_stack_kanban
   - ansible_tag: bootstrap-docker-media
     ansible_limit: docker_stack_media
+  - ansible_tag: bootstrap-docker-openbao
+    ansible_limit: docker_stack_openbao
+  - ansible_tag: bootstrap-docker-openldap
+    ansible_limit: docker_stack_openldap
+  - ansible_tag: bootstrap-docker-vault
+    ansible_limit: docker_stack_vault
   - ansible_tag: bootstrap-docker-stack
     ansible_limit: docker_stack
   - ansible_tag: bootstrap-docker-swarm
+    ansible_limit: docker_swarm
   - ansible_tag: bootstrap-esxi
-    skip_always_tag: 'true'
     ansible_limit: vmware_physical_esx_host
+    skip_always_tag: 'true'
   - ansible_tag: bootstrap-etcd
     ansible_limit: kubernetes_etcd
   - ansible_tag: bootstrap-gitea-runner
+    ansible_limit: gitea_runner
   - ansible_tag: bootstrap-gpu-drivers
     ansible_limit: gpu_host
   - ansible_tag: bootstrap-idrac
     ansible_limit: dell_idrac_hosts
     skip_always_tag: 'true'
   - ansible_tag: bootstrap-jenkins-agent
+    ansible_limit: jenkins_agent
   - ansible_tag: bootstrap-kubernetes-ca
     ansible_limit: kubernetes_ca
   - ansible_tag: bootstrap-kubernetes-controller
@@ -74,7 +96,9 @@ ansibleJobList:
   - ansible_tag: bootstrap-kubernetes
     ansible_limit: kubernetes
   - ansible_tag: bootstrap-ldap
+    ansible_limit: ldap_network
   - ansible_tag: bootstrap-ldap-client
+    ansible_limit: ldap_network
   - ansible_tag: bootstrap-linux
     ansible_limit: os_linux
   - ansible_tag: bootstrap-linux-core
@@ -92,6 +116,7 @@ ansibleJobList:
   - ansible_tag: bootstrap-llm-server
     ansible_limit: llm_host
   - ansible_tag: bootstrap-mounts
+    ansible_limit: os_linux
   - ansible_tag: bootstrap-nfs
     ansible_limit: nfs_network
   - ansible_tag: bootstrap-nfs-client
@@ -107,6 +132,7 @@ ansibleJobList:
   - ansible_tag: bootstrap-pki
     ansible_limit: ca_keystore
   - ansible_tag: bootstrap-plexupdate
+    ansible_limit: plex
   - ansible_tag: bootstrap-pip
     ansible_limit: os_linux
   - ansible_tag: bootstrap-postfix
@@ -122,18 +148,20 @@ ansibleJobList:
   - ansible_tag: bootstrap-sshd
     ansible_limit: os_linux
   - ansible_tag: bootstrap-vcenter
+    ansible_limit: localhost
     skip_always_tag: 'true'
   - ansible_tag: bootstrap-vsphere
     ansible_limit: localhost
     skip_always_tag: 'true'
   - ansible_tag: bootstrap-vm
+    ansible_limit: localhost
     skip_always_tag: 'true'
   - ansible_tag: bootstrap-vmware-esxi
-    skip_always_tag: 'true'
     ansible_limit: vmware_physical_esx_host
-  - ansible_tag: bootstrap-vmware-mounts
     skip_always_tag: 'true'
+  - ansible_tag: bootstrap-vmware-mounts
     ansible_limit: localhost
+    skip_always_tag: 'true'
   - ansible_tag: bootstrap-webmin
     ansible_limit: os_linux
   - ansible_tag: deploy-pki-certs
@@ -145,14 +173,17 @@ ansibleJobList:
   - ansible_tag: deploy-registry-certs
     ansible_limit: docker
   - ansible_tag: deploy-vm
-    skip_always_tag: 'true'
     ansible_limit: localhost
+    skip_always_tag: 'true'
   - ansible_tag: display-common-vars
+    ansible_limit: os_linux
   - ansible_tag: display-controller-vars
-    skip_always_tag: 'true'
     ansible_limit: localhost
+    skip_always_tag: 'true'
   - ansible_tag: display-hostvars
+    ansible_limit: os_linux
   - ansible_tag: ping-test
+    ansible_limit: os_linux
   - ansible_tag: vmware-remount-datastores
-    skip_always_tag: 'true'
     ansible_limit: localhost
+    skip_always_tag: 'true'

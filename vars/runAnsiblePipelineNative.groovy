@@ -268,12 +268,12 @@ Map getAnsibleCommandConfig(Map config) {
     config.get('isTestPipeline', false)
 
     if (config.isTestPipeline) {
-//         config.testBasePath = "${env.WORKSPACE}/${config.testBaseDir}"
-//         config.testBasePath = "${env.WORKSPACE_TMP}/${config.testBaseDir}"
-        config.testBasePath = "${env.WORKSPACE}/${config.testBaseDir}"
+//         config.testResultsBasePath = "${env.WORKSPACE}/${config.testResultsBaseDir}"
+//         config.testResultsBasePath = "${env.WORKSPACE_TMP}/${config.testResultsBaseDir}"
+        config.testResultsBasePath = "${env.WORKSPACE}/${config.testResultsBaseDir}"
         config.testComponentDir = "${config.testComponentBaseDir}/${config.gitBranch}"
 
-        extraVars.test_job__test_base_dir = config.testBasePath
+        extraVars.test_job__test_results_base_dir = config.testResultsBasePath
         extraVars.test_git_branch = config.gitBranch
         extraVars.test_git_commit_hash = config.gitCommitId
 

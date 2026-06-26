@@ -18,7 +18,7 @@ def call(Map config=[:]) {
     Map paramMap = [
         ansibleLimitHosts : string(
             defaultValue: "",
-            description: "Limit playbook to specified inventory hosts\nE.g., 'app_adm','app_tableau','host01', 'host01,host02'",
+            description: "Limit playbook to specified inventory hosts\nE.g., 'app_adm','app_tableau','admin*','host01','host01,host02'",
             name: 'AnsibleLimitHosts'),
         ansibleDebugFlag : choice(choices: "\n-v\n-vv\n-vvv\n-vvvv", description: "Choose Ansible Debug Level", name: 'AnsibleDebugFlag'),
         ansibleGalaxyForceOpt : booleanParam(defaultValue: false, description: "Use Ansible Galaxy Force Mode?", name: 'AnsibleGalaxyForceOpt'),

@@ -60,6 +60,7 @@ def call(Map pipelineConfig=[:]) {
             docker {
                 label 'docker'
                 image config.runnerImage
+                args config.runnerArgs
 //                 args '-u root' // Optional: Add custom arguments to the docker run command
 //                 args "-v /var/run/docker.sock:/var/run/docker.sock --privileged"
                 reuseNode true
@@ -169,7 +170,7 @@ def call(Map pipelineConfig=[:]) {
                             log.debug("config.testComponentDir=${config.testComponentDir}")
                             if (log.isLogActive(LogLevel.DEBUG)) {
                                 sh "pwd"
-                                sh "find . -type d"
+                                sh "find ${config.testResultsBaseDir} -type d"
                             }
                             if (fileExists(config.testComponentDir)) {
                                 if (log.isLogActive(LogLevel.DEBUG)) {
@@ -330,6 +331,18 @@ Map loadPipelineConfig(Map params) {
 
     config = loadAnsibleConfigs(config)
 
+    List runnerArgsList = []
+    runnerArgsList.push("-v /var/run/docker.sock:/var/run/docker.sock")
+    runnerArgsList.push("--privileged")
+
+    // configure to share the host's network stack.
+    // This removes the network isolation between the container and the host, allowing the container
+    // to access services running on the host via 127.0.0.1 or the host's primary IP address/
+    runnerArgsList.push("--network host")
+
+//     runnerArgsList.push("-u root")
+    config.get("runnerArgs", runnerArgsList.join(" "))
+
     config.get("ansibleVersion", "2.20")
 //     config.get("ansibleVersion", "2.18")
     config.get("pythonVersion", "3.13")
@@ -342,7 +355,7 @@ Map loadPipelineConfig(Map params) {
                             ansibleVersion: config.ansibleVersion,
                             pythonVersion: config.pythonVersion)
 
-    config.testBaseDir = config.get('testBaseDir', ".test-results")
+    config.testResultsBaseDir = config.get('testResultsBaseDir', ".test-results")
     log.debug("config.testComponent=${config.testComponent}")
 
 //         config.testJunitXmlReportDir = "${config.testComponentDir}"
