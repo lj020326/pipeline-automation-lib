@@ -1,19 +1,19 @@
 ---
 
-jobFolder: "INFRA/repo-test-automation/ansible-git-inventory"
-repoName: "ansible-git-inventory"
-#  repoUrl: "ssh://git@gitea.admin.dettonville.int:2222/infra/ansible-dettonville-inventory.git"
+jobFolder: "INFRA/repo-automation/ansible-llm"
+repoName: "ansible-llm"
+#  repoUrl: "ssh://git@gitea.admin.dettonville.int:2222/infra/ansible-dettonville-llm.git"
 #  gitCredentialsId: "gitea-ssh-jenkins"
 
 branchSourceType: "gitea"
-repoUrl: "https://gitea.admin.dettonville.int/infra/ansible-dettonville-inventory.git"
+repoUrl: "https://gitea.admin.dettonville.int/infra/ansible-dettonville-llm.git"
 giteaServerUrl: https://gitea.admin.dettonville.int
 giteaCredentialsId: "infra-jenkins-git-user"
 giteaServerId: "gitea-admin"
 giteaOwner: "infra"
-giteaRepoName: "ansible-dettonville-inventory"
+giteaRepoName: "ansible-dettonville-llm"
 
-mirrorRepoDir: "/var/jenkins_home/git_repo_references/ansible-dettonville-inventory/ansible-dettonville-inventory.git"
+mirrorRepoDir: "/var/jenkins_home/git_repo_references/ansible-dettonville-llm/ansible-dettonville-llm.git"
 
 buildAllBranches: true
 useSuppressionStrategy: false
@@ -30,6 +30,10 @@ runEnvMap:
     periodicFolderTriggerInterval: "2m"
 
 jobList:
+  - jobName: run-indexer
+    jobScript: .jenkins/runIndexerPipeline.groovy
+    description: "run indexer pipeline"
+
   - jobName: ansible-lint
     jobScript: .jenkins/runAnsibleLint.groovy
     description: "ansible-lint tests"
@@ -41,10 +45,3 @@ jobList:
   - jobName: ansible-test-units
     jobScript: .jenkins/runAnsibleTestUnits.groovy
     description: "ansible-test-units"
-
-  - jobName: run-module-tests
-    description: "Integration tests"
-#      skipInitialBuildOnFirstBranchIndexing: true
-    useSuppressionStrategy: true
-    jobScript: .jenkins/runModuleTest.groovy
-#    jobScript: tests/integration/targets/runModuleTest.groovy

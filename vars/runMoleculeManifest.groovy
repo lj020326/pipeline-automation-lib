@@ -33,57 +33,70 @@ def call(Map args=[:]) {
             timeout(time: config.timeout as Integer, unit: config.timeoutUnit)
         }
         stages {
-			stage('Load pipeline config file') {
-				when {
-                    expression { fileExists config.configFile }
-				}
-				steps {
-					script {
-                        config = loadPipelineConfigFile(config)
-					}
-				}
-			}
-            stage("Run Molecule Manifest") {
-                steps {
-                    script {
-                        try {
-                            jobResults = runMoleculeConfigs(config)
-                        } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
-                            currentBuild.result = 'ABORTED'
-                            throw e
-                        } catch (Exception e) {
-                            log.error("runMoleculeConfigs failed: ${e.getMessage()}")
-                            currentBuild.result = 'FAILURE'
-                            throw e
+            stage('Molecule Manifest: Execution') {
+                when {
+                    branch 'main'
+                }
+                stages {
+                    stage('Check Skip') {
+                        steps {
+                            // This plugin is in your plugins.txt and works regardless of the Job DSL UI
+                            scmSkip(skipPattern: '.*\\[(ci skip|skip ci)\\].*')
                         }
-
-                        log.info("finished: jobResults=${JsonUtils.printToJsonString(jobResults)}")
-
-                        if (jobResults.failed) {
-                            config.gitRemoteBuildStatus = "COMPLETED"
-                            config.gitRemoteBuildConclusion = "FAILURE"
-                            currentBuild.result = 'FAILURE'
-                        } else {
-                            config.gitRemoteBuildStatus = "COMPLETED"
-                            config.gitRemoteBuildConclusion = "SUCCESS"
-                            currentBuild.result = 'SUCCESS'
+                    }
+                    stage('Load pipeline config file') {
+                        when {
+                            expression { fileExists config.configFile }
                         }
-                        // Save jobResults as YAML report and archive
-                        if (config.jobReport) {
-                            String reportPath = "${config.testResultsDir}/${config.jobReport}"
-                            sh "mkdir -p ${config.testResultsDir}"
-                            log.info("saving ${config.buildReport}")
-                            try {
-                                writeYaml file: reportPath, data: jobResults, overwrite: true
-                                log.info("Saved jobResults report to ${reportPath}")
-                            } catch (Exception err) {
-                                log.error("writeYaml(${config.buildReport}): exception occurred [${err}]")
+                        steps {
+                            script {
+                                config = loadPipelineConfigFile(config)
                             }
-                            archiveArtifacts(
-                                allowEmptyArchive: true,
-                                artifacts: "${reportPath}",
-                                fingerprint: true)
-                            log.info("Archived jobResults report: ${reportPath}")
+                        }
+                    }
+                    stage("Run Molecule Manifest") {
+                        steps {
+                            script {
+                                try {
+                                    jobResults = runMoleculeConfigs(config)
+                                } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                                    currentBuild.result = 'ABORTED'
+                                    throw e
+                                } catch (Exception e) {
+                                    log.error("runMoleculeConfigs failed: ${e.getMessage()}")
+                                    currentBuild.result = 'FAILURE'
+                                    throw e
+                                }
+
+                                log.info("finished: jobResults=${JsonUtils.printToJsonString(jobResults)}")
+
+                                if (jobResults.failed) {
+                                    config.gitRemoteBuildStatus = "COMPLETED"
+                                    config.gitRemoteBuildConclusion = "FAILURE"
+                                    currentBuild.result = 'FAILURE'
+                                } else {
+                                    config.gitRemoteBuildStatus = "COMPLETED"
+                                    config.gitRemoteBuildConclusion = "SUCCESS"
+                                    currentBuild.result = 'SUCCESS'
+                                }
+                                // Save jobResults as YAML report and archive
+                                if (config.jobReport) {
+                                    String reportPath = "${config.testResultsDir}/${config.jobReport}"
+                                    sh "mkdir -p ${config.testResultsDir}"
+                                    log.info("saving ${config.buildReport}")
+                                    try {
+                                        writeYaml file: reportPath, data: jobResults, overwrite: true
+                                        log.info("Saved jobResults report to ${reportPath}")
+                                    } catch (Exception err) {
+                                        log.error("writeYaml(${config.buildReport}): exception occurred [${err}]")
+                                    }
+                                    archiveArtifacts(
+                                        allowEmptyArchive: true,
+                                        artifacts: "${reportPath}",
+                                        fingerprint: true)
+                                    log.info("Archived jobResults report: ${reportPath}")
+                                }
+                            }
                         }
                     }
                 }
@@ -92,6 +105,7 @@ def call(Map args=[:]) {
         post {
             always {
                 script {
+                    config.gitRemoteBuildStatus = "COMPLETED"
                     notifyGitRemoteRepo(
                         config.gitRemoteRepoType,
                         gitRemoteBuildKey: config.gitRemoteBuildKey,
@@ -190,7 +204,8 @@ Map loadPipelineConfig(Map params = [:]) {
     ]
     config.get('junitXmlsPatterns', junitXmlsPatternsDefault)
 
-    config.get("gitRemoteRepoType", "gitea")
+    config.gitRemoteBuildStatus = "INPROGRESS"
+    config.get("gitRemoteRepoType", "git")
     config.get("gitRemoteBuildKey", 'molecule-test')
 	config.get("gitRemoteBuildName", 'Molecule Test')
     config.get("gitRemoteBuildSummary", "${config.gitRemoteBuildName} update")
@@ -291,7 +306,7 @@ Map runMoleculeJob(Map config) {
     jobResults.gitCommitId = gitCommitId
 
     Map jobConfigs = [
-        jobFolder: "INFRA/repo-test-automation/run-molecule",
+        jobFolder: "INFRA/repo-automation/run-molecule",
         jobParameters: [
             Timeout: config.childJobTimeout ?: "4",
             TimeoutUnit: config.childJobTimeoutUnit ?: "HOURS",

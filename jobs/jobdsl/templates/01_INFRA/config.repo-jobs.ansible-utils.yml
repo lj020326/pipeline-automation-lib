@@ -1,6 +1,6 @@
 ---
 
-jobFolder: "INFRA/repo-test-automation/ansible-utils"
+jobFolder: "INFRA/repo-automation/ansible-utils"
 repoName: "ansible-utils"
 #  repoUrl: "ssh://git@gitea.admin.dettonville.int:2222/infra/ansible-dettonville-utils.git"
 #  gitCredentialsId: "gitea-ssh-jenkins"
@@ -30,6 +30,10 @@ runEnvMap:
     periodicFolderTriggerInterval: "2m"
 
 jobList:
+  - jobName: run-indexer
+    jobScript: .jenkins/runIndexerPipeline.groovy
+    description: "run indexer pipeline"
+
   - jobName: ansible-lint
     jobScript: .jenkins/runAnsibleLint.groovy
     description: "ansible-lint tests"

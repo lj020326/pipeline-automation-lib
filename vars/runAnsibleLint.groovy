@@ -39,87 +39,100 @@ def call(Map params=[:]) {
             timeout(time: config.timeout, unit: config.timeoutUnit)
         }
         stages {
-            stage('Pre-test') {
-                steps {
-                    script {
-                        String gitBranch = java.net.URLDecoder.decode(env.GIT_BRANCH, "UTF-8")
-                        log.info("gitBranch=${gitBranch}")
-                        config.get('gitBranch',gitBranch)
-                        config.gitCommitId = env.GIT_COMMIT
-                        log.debug("config.gitBranch=${config.gitBranch}")
-                        log.debug("config.gitCommitId=${config.gitCommitId}")
-
-                        notifyGitRemoteRepo(
-                        	config.gitRemoteRepoType,
-                            gitRemoteBuildKey: config.buildTestName,
-                            gitRemoteBuildName: config.buildTestName,
-                            gitRemoteBuildStatus: config.gitRemoteBuildStatus,
-                            gitRemoteBuildSummary: 'ansible-datacenter',
-                            gitCommitId: config.gitCommitId
-                        )
-                    }
+            stage('Molecule Manifest: Execution') {
+                when {
+                    branch 'main'
                 }
-            }
-            // ref: https://medium.com/@alexandru.raul/building-an-efficient-ansible-development-pipeline-using-jenkins-8830a0a19de0
-            // ref: https://github.com/wasilak/ansible-lint-junit
-            stage('ansible-lint test') {
-                steps {
-                    script {
-                        sh "ansible-galaxy collection list"
-                        sh "ansible-lint --version"
-
-                        sh "mkdir -p ${config.testResultsDir}"
-
-                        List lintCmdList = []
-                        lintCmdList.push("ansible-lint")
-                        lintCmdList.push("-p")
-                        lintCmdList.push("--nocolor")
-                        if (config?.ansibleLintArgs) {
-                            lintCmdList.push("${config.ansibleLintArgs}")
+                stages {
+                    stage('Check Skip') {
+                        steps {
+                            // This plugin is in your plugins.txt and works regardless of the Job DSL UI
+                            scmSkip(skipPattern: '.*\\[(ci skip|skip ci)\\].*')
                         }
-                        if (config?.ansibleLintConfigFile) {
-                            lintCmdList.push("-c ${config.ansibleLintConfigFile}")
-                        }
-                        if (config?.ansibleLintPaths) {
-                            lintCmdList.push("-c ${config.ansibleLintPaths.join(' ')}")
-                        }
+                    }
+                    stage('Pre-test') {
+                        steps {
+                            script {
+                                String gitBranch = java.net.URLDecoder.decode(env.GIT_BRANCH, "UTF-8")
+                                log.info("gitBranch=${gitBranch}")
+                                config.get('gitBranch',gitBranch)
+                                config.gitCommitId = env.GIT_COMMIT
+                                log.debug("config.gitBranch=${config.gitBranch}")
+                                log.debug("config.gitCommitId=${config.gitCommitId}")
 
-//                         lintCmdList.push("|& tee ${config.testResultsDir}/test-console-results.txt")
-//                         lintCmdList.push("2>&1 | tee ${config.testResultsDir}/test-console-results.txt")
-                        lintCmdList.push("| tee ${config.testResultsDir}/test-console-results.txt")
-//                         lintCmdList.push("|| true")
-
-                        String lintCmd = lintCmdList.join(' ')
-
-                        List testEnvList = []
-                        testEnvList += [
-                            "ANSIBLE_COLLECTIONS_PATH=~/.ansible/collections:./.ansible/collections:./collections:/usr/share/ansible/collections",
-//                            "ANSIBLE_COLLECTIONS_PATH=/root/.ansible/collections:./.ansible/collections:./collections:/usr/share/ansible/collections",
-                            "ANSIBLE_LINT_OFFLINE=true"
-                        ]
-                        log.info("testEnvList=${JsonUtils.printToJsonString(testEnvList)}")
-
-                        withEnv(testEnvList) {
-                            sh("ansible --version")
-                            sh("ansible-lint --version")
-                            sh("ansible-lint-junit --version")
-
-                            sh "ansible-galaxy collection list"
-
-                            try {
-                                //sh(lintCmd)
-                                sh("bash -c 'set -o pipefail && ${lintCmd}'")
-                            } catch (Exception e) {
-                                log.info("lint failed")
-                                config.gitRemoteBuildStatus = "FAILED"
-                                currentBuild.result = 'FAILURE'
-                                log.error("lint error: " + e.getMessage())
-                                throw e
+                                notifyGitRemoteRepo(
+                                    config.gitRemoteRepoType,
+                                    gitRemoteBuildKey: config.buildTestName,
+                                    gitRemoteBuildName: config.buildTestName,
+                                    gitRemoteBuildStatus: config.gitRemoteBuildStatus,
+                                    gitRemoteBuildSummary: 'ansible-datacenter',
+                                    gitCommitId: config.gitCommitId
+                                )
                             }
                         }
-                        log.info("lint succeeded")
-                        currentBuild.result = 'SUCCESS'
-                        config.gitRemoteBuildStatus = "SUCCESSFUL"
+                    }
+                    // ref: https://medium.com/@alexandru.raul/building-an-efficient-ansible-development-pipeline-using-jenkins-8830a0a19de0
+                    // ref: https://github.com/wasilak/ansible-lint-junit
+                    stage('ansible-lint test') {
+                        steps {
+                            script {
+                                sh "ansible-galaxy collection list"
+                                sh "ansible-lint --version"
+
+                                sh "mkdir -p ${config.testResultsDir}"
+
+                                List lintCmdList = []
+                                lintCmdList.push("ansible-lint")
+                                lintCmdList.push("-p")
+                                lintCmdList.push("--nocolor")
+                                if (config?.ansibleLintArgs) {
+                                    lintCmdList.push("${config.ansibleLintArgs}")
+                                }
+                                if (config?.ansibleLintConfigFile) {
+                                    lintCmdList.push("-c ${config.ansibleLintConfigFile}")
+                                }
+                                if (config?.ansibleLintPaths) {
+                                    lintCmdList.push("-c ${config.ansibleLintPaths.join(' ')}")
+                                }
+
+        //                         lintCmdList.push("|& tee ${config.testResultsDir}/test-console-results.txt")
+        //                         lintCmdList.push("2>&1 | tee ${config.testResultsDir}/test-console-results.txt")
+                                lintCmdList.push("| tee ${config.testResultsDir}/test-console-results.txt")
+        //                         lintCmdList.push("|| true")
+
+                                String lintCmd = lintCmdList.join(' ')
+
+                                List testEnvList = []
+                                testEnvList += [
+                                    "ANSIBLE_COLLECTIONS_PATH=~/.ansible/collections:./.ansible/collections:./collections:/usr/share/ansible/collections",
+        //                            "ANSIBLE_COLLECTIONS_PATH=/root/.ansible/collections:./.ansible/collections:./collections:/usr/share/ansible/collections",
+                                    "ANSIBLE_LINT_OFFLINE=true"
+                                ]
+                                log.info("testEnvList=${JsonUtils.printToJsonString(testEnvList)}")
+
+                                withEnv(testEnvList) {
+                                    sh("ansible --version")
+                                    sh("ansible-lint --version")
+                                    sh("ansible-lint-junit --version")
+
+                                    sh "ansible-galaxy collection list"
+
+                                    try {
+                                        //sh(lintCmd)
+                                        sh("bash -c 'set -o pipefail && ${lintCmd}'")
+                                    } catch (Exception e) {
+                                        log.info("lint failed")
+                                        config.gitRemoteBuildStatus = "FAILED"
+                                        currentBuild.result = 'FAILURE'
+                                        log.error("lint error: " + e.getMessage())
+                                        throw e
+                                    }
+                                }
+                                log.info("lint succeeded")
+                                currentBuild.result = 'SUCCESS'
+                                config.gitRemoteBuildStatus = "SUCCESSFUL"
+                            }
+                        }
                     }
                 }
             }
@@ -155,6 +168,7 @@ def call(Map params=[:]) {
                           skipPublishingChecks: true,
                           allowEmptyResults: true)
 
+                    config.gitRemoteBuildStatus = "COMPLETED"
 
                     // ref: https://www.jenkins.io/doc/pipeline/steps/stashNotifier/
                     notifyGitRemoteRepo(
@@ -205,18 +219,6 @@ def call(Map params=[:]) {
                 }
             }
             failure {
-                script {
-                    if (config?.failedEmailList) {
-                        log.info("config.failedEmailList=${config.failedEmailList}")
-//                         sendEmail(currentBuild, env, emailAdditionalDistList: config.failedEmailList.split(","))
-                        sendEmail(currentBuild, env,
-                            emailAdditionalDistList: config.failedEmailList.split(","),
-                            emailBody: ansibleLogSummary
-                        )
-                    }
-                }
-            }
-            aborted {
                 script {
                     if (config?.failedEmailList) {
                         log.info("config.failedEmailList=${config.failedEmailList}")
@@ -288,7 +290,7 @@ Map loadPipelineConfig(Map params) {
     config.get('testResultsJunitFile', 'ansible-lint-junit.xml')
 
     config.gitRemoteBuildStatus = "INPROGRESS"
-    config.get("gitRemoteRepoType", "gitea")
+    config.get("gitRemoteRepoType", "git")
     config.get("gitRemoteBuildKey", 'Ansible Lint Tests')
 	config.get("gitRemoteBuildName", 'Ansible Lint Tests')
     config.get("gitRemoteBuildSummary", "${config.gitRemoteBuildName} update")

@@ -1,0 +1,78 @@
+---
+
+jobFolder: "INFRA/repo-automation/ansible-datacenter"
+repoName: "ansible-datacenter"
+repoUrl: "ssh://git@gitea.admin.dettonville.int:2222/infra/ansible-datacenter.git"
+gitCredentialsId: "gitea-ssh-jenkins"
+# mirrorRepoDir: "/var/jenkins_home/git_repo_references/ansible-datacenter/ansible-datacenter.git"
+
+buildAllBranches: true
+useSuppressionStrategy: false
+initializeJobMode: false
+orphanedItemDaysToKeep: 1
+
+skipInitialBuildOnFirstBranchIndexing: false
+runEnvMap:
+  DEV:
+    environment: DEV
+  PROD:
+    environment: PROD
+  ADMIN:
+    environment: ADMIN
+    periodicFolderTriggerInterval: "2m"
+
+jobList:
+  - jobName: run-indexer
+    jobScript: .jenkins/runIndexerPipeline.groovy
+    description: "run indexer pipeline"
+    mirrorRepoDir: "/var/jenkins_home/git_repo_references/ansible-datacenter/ansible-datacenter.git"
+    branchesToDiscover:
+      - main
+
+  - jobName: run-doc-pipeline
+    jobScript: .jenkins/runDocPipeline.groovy
+    description: "run documentation pipeline"
+    branchesToDiscover:
+      - main
+
+  - jobName: run-wiki-pipeline
+    jobScript: .jenkins/runWikiPipeline.groovy
+    description: "run wiki pipeline"
+    branchesToDiscover:
+      - main
+
+  - jobGroupName: qa-tests
+    description: "QA Test jobs"
+    mirrorRepoDir: "/var/jenkins_home/git_repo_references/ansible-datacenter/ansible-datacenter.git"
+    jobList:
+      - jobName: yamllint
+        jobScript: .jenkins/runYamlLintTests.groovy
+        description: "run yaml-lint tests job"
+
+      - jobName: inclusivity-lint
+        jobScript: .jenkins/runInclusivityLintTests.groovy
+        description: "run Inclusivity lint tests job"
+
+      - jobName: ansible-lint
+        jobScript: .jenkins/runAnsibleLintTests.groovy
+        description: "run ansible-lint tests job"
+        branchesToDiscover:
+          - main
+
+      - jobName: run-inventory-tests
+        jobScript: .jenkins/runInventoryTests.groovy
+        description: "run inventory test automation jobs"
+        mirrorRepoDir: "/var/jenkins_home/git_repo_references/ansible-datacenter/ansible-datacenter.git"
+
+      - jobName: kics-lint
+        jobScript: .jenkins/runKicsLintTests.groovy
+        description: "run KICS lint tests job"
+        branchesToDiscover:
+          - main
+
+      - jobName: molecule-tests
+        jobScript: .jenkins/runMoleculeTests.groovy
+        description: "run molecule tests"
+        mirrorRepoDir: "/var/jenkins_home/git_repo_references/ansible-datacenter/ansible-datacenter.git"
+        branchesToDiscover:
+          - main

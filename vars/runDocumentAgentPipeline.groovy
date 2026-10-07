@@ -24,7 +24,7 @@ def call() {
     Map paramMap = [
         initializeParamsOnly: booleanParam(defaultValue: false, description: "Set to true to only initialize parameters and skip execution of stages.", name: 'InitializeParamsOnly'),
         changedOnly: booleanParam(defaultValue: true, description: "Run wiki-pipeline commands for changed files only (uncheck to run for the entire repo)", name: 'ChangedOnly'),
-        defaultVerbosity: choice(choices: debugVerbosityList.join('\n'), description: "Choose Verbosity Level", name: 'DefaultVerbosity'),
+        verbosity: choice(choices: debugVerbosityList.join('\n'), description: "Choose Verbosity Level", name: 'Verbosity'),
     ]
     paramMap.each { String key, def param ->
         paramList.addAll([param])
@@ -61,7 +61,7 @@ def call() {
             timeout(time: config.timeout, unit: config.timeoutUnit)
         }
         stages {
-            stage('Wiki: Execution') {
+            stage('Documentation Agent: Execution') {
                 when {
                     allOf {
                         expression { return !config.initializeParamsOnly }
@@ -75,145 +75,87 @@ def call() {
                             scmSkip(skipPattern: '.*\\[(ci skip|skip ci)\\].*')
                         }
                     }
-                    stage('Wiki: Load Repo Configuration') {
-                        when {
-                            expression { config?.configFile }
-                        }
+
+                    stage('Setup Directory') {
                         steps {
                             script {
-                                if (fileExists(config?.configFile)) {
-                                    echo "✅ Found .wiki-config.yml configuration."
-                                    config = loadGiteaConfigs(config)
-                                    config = loadWikiConfigFile(config)
-                                } else {
-                                    echo "⚠️ .wiki-config.yml not found, using default configurations."
+                                log.info("Starting code agent pipeline for ${env.JOB_NAME}")
+                                config = loadGiteaConfigs(config)
+                                sh "mkdir -p ${config.indexDir} ${config.agentStateDir}"
+                            }
+                        }
+                    }
+
+                    stage('Pull Index Assets from Gitea') {
+                        steps {
+                            script {
+                                String giteaApiReleaseUrl = "${config.giteaApiRepoBaseUrl}/releases/tags/${config.codeIndexTagName}"
+
+                                log.info("Fetching latest release artifacts from Gitea API: ${giteaApiReleaseUrl}")
+                                try {
+                                    // 1. Query Gitea API for release metadata
+                                    def response = httpRequest(
+                                        httpMode: 'GET',
+                                        url: giteaApiReleaseUrl,
+                                        acceptType: 'APPLICATION_JSON',
+                                        authentication: config.giteaTokenCredentialId,
+                                        validResponseCodes: '200'
+                                    )
+
+                                    // 2. Parse response JSON using Jenkins built-in readJSON step
+                                    def releaseData = readJSON(text: response.content)
+                                    def assets = releaseData.assets ?: []
+
+                                    def targetAsset = assets.find { it.name.endsWith('.tar.gz') || it.name.endsWith('.zip') }
+                                    if (targetAsset) {
+                                        def downloadUrl = targetAsset.browser_download_url
+                                        log.info("Downloading index package from: ${downloadUrl}")
+
+                                        // 3. Download the archive directly to workspace file
+                                        httpRequest(
+                                            httpMode: 'GET',
+                                            url: downloadUrl,
+                                            authentication: config.giteaTokenCredentialId,
+                                            outputFile: 'index_package.tar.gz',
+                                            validResponseCodes: '200'
+                                        )
+
+                                        // 4. Extract and clean up archive
+                                        sh """
+                                            tar -xzf index_package.tar.gz -C ${config.indexDir}/
+                                            rm -f index_package.tar.gz
+                                        """
+                                    } else {
+                                        log.info("⚠️ No suitable release archive asset found in latest Gitea release.")
+                                    }
+                                } catch (Exception apiEx) {
+                                    error("Failed to query Gitea API for release artifacts: ${apiEx.getMessage()}")
                                 }
                             }
                         }
                     }
 
-                    stage('Wiki: Harvest Legacy Markdown') {
-                        when {
-                            // This stage will only run if config.skipHarvest is false
-                            expression { return !config.skipHarvest }
-                        }
+                    stage('Run CrewAI Documentation Agent') {
                         steps {
                             script {
-                                List harvestCommandList=["wiki-pipeline harvest"]
-                                if (config.changedOnly) {
-                                    harvestCommandList+=["--changed-only"]
+                                log.info("Executing CrewAI Documentation Agent container...")
+                                
+                                List agentCommandList=["crewai-doc-agent run"]
+                                if (config?.configYaml) {
+                                    agentCommandList+=["--config ${config.configYaml}"]
                                 }
-                                if (config?.harvestVerbosity) {
-                                    harvestCommandList+=[config.harvestVerbosity]
+//                                 if (config.changedOnly) {
+//                                     agentCommandList+=["--changed-only"]
+//                                 }
+                                if (config?.verbosity) {
+                                    agentCommandList+=[config.verbosity]
                                 }
-                                if (config?.harvestLimit) {
-                                    harvestCommandList+=["--limit ${config.harvestLimit}"]
-                                }
-                                sh "${harvestCommandList.join(' ')}"
+                                sh "${agentCommandList.join(' ')}"
                             }
                         }
                     }
 
-                    stage('Wiki: Ingest Ansible YAML') {
-                        when {
-                            // This stage will only run if config.skipIngest is false
-                            expression { return !config.skipIngest }
-                        }
-                        steps {
-                            script {
-                                List ingestCommandList=["wiki-pipeline ingest"]
-                                if (config.changedOnly) {
-                                    ingestCommandList+=["--changed-only"]
-                                }
-                                if (config?.ingestVerbosity) {
-                                    ingestCommandList+=[config.ingestVerbosity]
-                                }
-                                if (config?.ingestLimit) {
-                                    ingestCommandList+=["--limit ${config.ingestLimit}"]
-                                }
-
-                                sh "${ingestCommandList.join(' ')}"
-                            }
-                        }
-                    }
-
-                    stage('Wiki: Compile raw → wiki/') {
-                        when {
-                            // This stage will only run if config.skipCompile is false
-                            expression { return !config.skipCompile }
-                        }
-                        steps {
-                            script {
-                                List compileCommandList=["wiki-pipeline compile"]
-                                if (config.changedOnly) {
-                                    compileCommandList+=["--changed-only"]
-                                }
-                                if (config?.compileVerbosity) {
-                                    compileCommandList+=[config.compileVerbosity]
-                                }
-                                if (config?.compileLimit) {
-                                    compileCommandList+=["--limit ${config.compileLimit}"]
-                                }
-                                sh "${compileCommandList.join(' ')}"
-                            }
-                        }
-                    }
-
-                    stage('Wiki: Lint & Auto-fix') {
-                        when {
-                            // This stage will only run if config.skipLint is false
-                            expression { return !config.skipLint }
-                        }
-                        steps {
-                            script {
-                                List lintCommandList=["wiki-pipeline lint --fix"]
-                                if (config.changedOnly) {
-                                    lintCommandList+=["--changed-only"]
-                                }
-                                if (config?.lintVerbosity) {
-                                    lintCommandList+=[config.lintVerbosity]
-                                }
-                                if (config?.lintLimit) {
-                                    lintCommandList+=["--limit ${config.lintLimit}"]
-                                }
-                                sh "${lintCommandList.join(' ')}"
-                            }
-                        }
-                    }
-
-                    stage('Wiki: Re-index backlinks & categories') {
-                        steps {
-                            script {
-                                List indexCommandList=["wiki-pipeline index"]
-                                if (config?.indexVerbosity) {
-                                    indexCommandList+=[config.indexVerbosity]
-                                }
-                                sh "${indexCommandList.join(' ')}"
-                            }
-                        }
-                    }
-
-                    stage('Wiki: Generate media (slides, charts)') {
-                        when {
-                            // This stage will only run if config.skipMedia is false
-                            expression { return !config.skipMedia }
-                        }
-                        steps {
-                            script {
-                                List generateCommandList=["wiki-pipeline generate-media"]
-                                if (config?.mediaVerbosity) {
-                                    generateCommandList+=[config.mediaVerbosity]
-                                }
-                                sh "${generateCommandList.join(' ')}"
-                            }
-                        }
-                    }
-
-                    stage('Git: Create PR Branch & Push Changes') {
-                        when {
-                            // Prevent recursive execution if build triggered on an auto-generated PR branch
-                            expression { return !(env.BRANCH_NAME?.startsWith('wiki-update-build-')) }
-                        }
+                    stage('Commit Generated Documentation') {
                         steps {
                             script {
                                 def prBranchName = "wiki-update-build-${env.BUILD_NUMBER}"
@@ -261,7 +203,6 @@ def call() {
                                     // 7. Automatically open a Pull Request via Gitea API if the branch was pushed
                                     String branchExists = sh(script: "git ls-remote --heads origin ${prBranchName}", returnStdout: true).trim()
                                     if (branchExists) {
-
                                         String payload = JsonUtils.printToJsonString([
                                             head: prBranchName,
                                             base: baseBranch,
@@ -280,12 +221,12 @@ def call() {
                                                         authentication: config.gitCredentialsId,
                                                         quiet: true,
                                                         responseHandle: 'NONE'
-                                            echo "🚀 Pull Request created successfully via Gitea API for branch ${prBranchName} targeting ${baseBranch}."
+                                            log.info("🚀 Pull Request created successfully via Gitea API for branch ${prBranchName} targeting ${baseBranch}.")
                                         } catch (Exception apiEx) {
                                             log.error("Gitea direct REST API notification failed: ${apiEx.getMessage()}")
                                         }
                                     } else {
-                                        echo "ℹ️ No PR branch pushed (no changes detected)."
+                                        log.info("ℹ️ No PR branch pushed (no changes detected).")
                                     }
                                     config.gitRemoteBuildStatus = "SUCCESSFUL"
                                     currentBuild.result = "SUCCESS"
@@ -360,11 +301,6 @@ Map loadPipelineConfig(Map params) {
         if (value != "") config[key] = value
     }
 
-    // Explicitly handle CHANGED_ONLY build parameter from Jenkins UI
-    if (params.CHANGED_ONLY != null) {
-        config.changedOnly = params.CHANGED_ONLY instanceof Boolean ? params.CHANGED_ONLY : params.CHANGED_ONLY.toString().toBoolean()
-    }
-
     config.get('logLevel', "INFO")
     log.setLevel(config.logLevel)
 
@@ -375,7 +311,10 @@ Map loadPipelineConfig(Map params) {
     config.get('timeout', 4)
     config.get('timeoutUnit', 'HOURS')
     config.get('skipDefaultCheckout', true)
-    config.get("runnerImage", "media.johnson.int:5000/wiki-pipeline:latest")
+    config.get('indexDir', '.code_index')
+    config.get('agentStateDir', '.agent_state')
+    config.get('codeIndexTagName', 'code-index')
+    config.get('runnerImage', 'lj020326/crewai-doc-agent:latest')
 
     List runnerArgsList = []
     if (config?.runnerUid && config?.runnerGid) {
@@ -417,50 +356,20 @@ Map loadPipelineConfig(Map params) {
 	config.get("gitRemoteBuildName", 'Wiki Pipeline')
     config.get("gitRemoteBuildSummary", "${config.gitRemoteBuildName} update")
 
-    config.get('configFile', ".wiki-config.yml")
+//     config.get('giteaTokenCredentialId', 'gitea-api-token')
+    config.get('giteaTokenCredentialId', 'infra-jenkins-git-user')
+
+    config.get('configYaml', '.crewai-config.yml')
 
     config.get('changedOnly', true)
 
-    config.get('defaultVerbosity', "-v")
-    config.get('harvestVerbosity', config.defaultVerbosity)
-    config.get('ingestVerbosity', config.defaultVerbosity)
-    config.get('compileVerbosity', config.defaultVerbosity)
-    config.get('lintVerbosity', config.defaultVerbosity)
-    config.get('indexVerbosity', config.defaultVerbosity)
-    config.get('mediaVerbosity', config.defaultVerbosity)
-
-//     config.get('defaultLimit', 20)
-//     config.get('defaultLimit', 5)
-
-//     config.get('ingestLimit', config.defaultLimit)
-//     config.get('compileLimit', config.defaultLimit)
-//     config.get('lintLimit', config.defaultLimit)
-
-    config.get('skipHarvest', false)
-    config.get('skipIngest', false)
-    config.get('skipLint', false)
-    config.get('skipCompile', false)
-    config.get('skipMedia', false)
+    config.get('verbosity', "-v")
 
 //     List secretVars=[
 //         string(credentialsId: 'ollama-api-key', variable: 'LLM_API_KEY'),
 //     ]
 //     config.secretVars = secretVars
 
-    log.debug("wiki config=${JsonUtils.printToJsonString(config)}")
-    return config
-}
-
-Map loadWikiConfigFile(Map baseConfig) {
-
-    Map wikiConfigs = readYaml file: baseConfig.configFile
-    log.debug("wikiConfigs=${JsonUtils.printToJsonString(wikiConfigs)}")
-
-//     sh "cat ${baseConfig.configFile}"
-
-//     Map config = baseConfig + wikiConfigs
-    Map config = MapMerge.merge(baseConfig, wikiConfigs)
-
-    log.debug("Merged config=${JsonUtils.printToJsonString(config)}")
+    log.debug("agent config=${JsonUtils.printToJsonString(config)}")
     return config
 }

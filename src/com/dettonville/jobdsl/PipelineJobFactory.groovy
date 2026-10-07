@@ -25,7 +25,7 @@ class PipelineJobFactory implements Serializable {
     // Consolidated createMultibranchPipelineJob
     def createMultibranchPipelineJob(String jobFolder, Map jobConfigs) {
         String logPrefix = "createMultibranchPipelineJob(${jobConfigs.jobName}):"
-        log.debug("${logPrefix} jobConfigs=${JsonUtils.printToJsonString(jobConfigs)}") // Use jobConfigs directly, assuming JsonUtils.printToJsonString is handled or not strictly necessary here
+        log.debug("${logPrefix} jobConfigs=${JsonUtils.printToJsonString(jobConfigs)}")
 
         String jobRepoUrl = jobConfigs.repoUrl
         String gitCredentialsId = jobConfigs.gitCredentialsId
@@ -39,6 +39,11 @@ class PipelineJobFactory implements Serializable {
         boolean useSuppressionStrategy = jobConfigs.get('useSuppressionStrategy', false).toBoolean()
         boolean buildAllBranchesBool = jobConfigs.get('buildAllBranches', false).toBoolean()
         List branchesToBuild = jobConfigs.get('branchesToBuild', []) as List
+        String orphanedItemDaysToKeep = jobConfigs.get('orphanedItemDaysToKeep', '1')
+
+        // Extract branch discovery filter list if present
+        List branchesToDiscover = jobConfigs.get('branchesToDiscover', []) as List
+        String wildcardIncludes = branchesToDiscover ? branchesToDiscover.join(' ') : '*'
 
         String giteaServerUrl = jobConfigs.get('giteaServerUrl', '')
         String giteaCredentialsId = jobConfigs.get('giteaCredentialsId', '')
@@ -50,7 +55,7 @@ class PipelineJobFactory implements Serializable {
             jobId = "job-${jobConfigs.jobGroupName}-${jobName}"
         }
 
-        log.info("${logPrefix} creating job for jobName=${jobName} with branchSourceType=${branchSourceType}")
+        log.info("${logPrefix} creating job for jobName=${jobName} with branchSourceType=${branchSourceType}, wildcardIncludes=${wildcardIncludes}")
 
         def jobObject = dsl.multibranchPipelineJob("${jobFolderPath}") {
             description "Run ${jobName}"
@@ -71,30 +76,28 @@ class PipelineJobFactory implements Serializable {
                                     }
                                     pruneStaleBranch()
                                     pruneStaleTag()
-                                    // This tells Jenkins NOT to build if the commit message contains [skip ci]
-                                    // Ref: https://plugins.jenkins.io/git/#plugin-content-ignoring-commits
                                     headWildcardFilter {
-                                        includes('*')
+                                        includes(wildcardIncludes)
                                         excludes('')
                                     }
-                                    // Only add the reference if it's explicitly provided and not null/empty
-                                    if (jobConfigs?.mirrorRepoDir) {
-                                        cloneOption {
-                                            extension {
-                                                shallow(true)
-                                                depth(2)
-                                                noTags(true)
+                                    cloneOption {
+                                        extension {
+                                            shallow(true)
+                                            depth(2)
+                                            noTags(false)
+                                            if (jobConfigs?.mirrorRepoDir) {
                                                 reference(jobConfigs.mirrorRepoDir)
-                                                honorRefspec(false)
-                                                timeout(1)
+                                            } else {
+                                                reference('')
                                             }
+                                            honorRefspec(true)
+                                            timeout(15)
                                         }
                                     }
                                 }
                             }
                         } else { // Default to git
                             git {
-                                // IMPORTANT: use a constant and unique identifier
                                 id(jobId)
                                 remote(jobRepoUrl)
                                 credentialsId(gitCredentialsId)
@@ -102,35 +105,28 @@ class PipelineJobFactory implements Serializable {
                                     gitBranchDiscovery()
                                     pruneStaleBranch()
                                     pruneStaleTag()
-                                    // This tells Jenkins NOT to build if the commit message contains [skip ci]
-                                    // Ref: https://plugins.jenkins.io/git/#plugin-content-ignoring-commits
                                     headWildcardFilter {
-                                        includes('*')
+                                        includes(wildcardIncludes)
                                         excludes('')
                                     }
-//                                     // CRITICAL: This prevents the infinite loop by ignoring
-//                                     // any commit message containing [ci skip]
-//                                     scmCommitMessageStrategyTrait {
-//                                         pattern('.*\\[ci skip\\].*')
-//                                     }
-                                    // Only add the reference if it's explicitly provided and not null/empty
-                                    if (jobConfigs?.mirrorRepoDir) {
-                                        cloneOption {
-                                            extension {
-                                                shallow(true)
-                                                depth(2)
+                                    cloneOption {
+                                        extension {
+                                            shallow(true)
+                                            depth(2)
+                                            noTags(false)
+                                            if (jobConfigs?.mirrorRepoDir) {
                                                 reference(jobConfigs.mirrorRepoDir)
-                                                honorRefspec(false)
-                                                noTags(true)
-                                                timeout(1)
+                                            } else {
+                                                reference('')
                                             }
+                                            honorRefspec(true)
+                                            timeout(15)
                                         }
                                     }
                                 }
                             }
                         }
                     }
-                    // END OF CHANGE for gitea traits
                     if (buildAllBranchesBool) {
                         buildStrategies {
                             buildAllBranches {
@@ -183,14 +179,13 @@ class PipelineJobFactory implements Serializable {
             }
             orphanedItemStrategy {
                 discardOldItems {
-                    numToKeep(10)
-    //                 daysToKeep(-1)
+                    daysToKeep(orphanedItemDaysToKeep.toInteger())
                 }
                 defaultOrphanedItemStrategy {
-    //                 abortBuilds(true)
+                    abortBuilds(true)
                     pruneDeadBranches(true)
-                    numToKeepStr("10")
-                    daysToKeepStr("-1")
+                    numToKeepStr('10')
+                    daysToKeepStr("1")
                 }
             }
             properties {
@@ -252,18 +247,18 @@ class PipelineJobFactory implements Serializable {
 
         def jobObject = createMultibranchPipelineJob(jobFolder, jobConfigs)
 
-    //     // ref: https://github.com/jenkinsci/job-dsl-plugin/wiki/Job-DSL-Commands#job
-    //     // ref: https://jenkins.admin.dettonville.int/plugin/job-dsl/api-viewer/index.html#path/multibranchPipelineJob
-    //     def jobObject
-    //     if (jobConfigs.useSuppressionStrategy) {
-    //         jobObject = createMultibranchPipelineJobNoAutoBuilds(dsl, jobFolder, jobConfigs)
-    //     } else {
-    //         if (jobConfigs?.branchesToBuild && jobConfigs.branchesToBuild) {
-    //             jobObject = createMultibranchPipelineJobBranchAutoBuilds(dsl, jobFolder, jobConfigs)
-    //         } else {
-    //             jobObject = createMultibranchPipelineJobAutoBuilds(dsl, jobFolder, jobConfigs)
-    //         }
-    //     }
+//         // ref: https://github.com/jenkinsci/job-dsl-plugin/wiki/Job-DSL-Commands#job
+//         // ref: https://jenkins.admin.dettonville.int/plugin/job-dsl/api-viewer/index.html#path/multibranchPipelineJob
+//         def jobObject
+//         if (jobConfigs.useSuppressionStrategy) {
+//             jobObject = createMultibranchPipelineJobNoAutoBuilds(dsl, jobFolder, jobConfigs)
+//         } else {
+//             if (jobConfigs?.branchesToBuild && jobConfigs.branchesToBuild) {
+//                 jobObject = createMultibranchPipelineJobBranchAutoBuilds(dsl, jobFolder, jobConfigs)
+//             } else {
+//                 jobObject = createMultibranchPipelineJobAutoBuilds(dsl, jobFolder, jobConfigs)
+//             }
+//         }
 
         if (jobConfigs?.skipInitialBuildOnFirstBranchIndexing && jobConfigs.skipInitialBuildOnFirstBranchIndexing.toBoolean()) {
             log.info("${logPrefix} adding skipInitialBuildOnFirstBranchIndexing() strategy")
@@ -292,7 +287,7 @@ class PipelineJobFactory implements Serializable {
             // ref: https://ftclausen.github.io/infra/jenkins/jenkins-jobdsl-git-traits/
             // ref: https://groups.google.com/g/jenkinsci-users/c/GHsvyCI7Xoo
             // ref: https://stackoverflow.com/questions/69813779/what-is-jcasc-job-dsl-option-for-build-when-a-change-is-pushed-to-bitbucket
-            log.info("${logPrefix} adding build strategy for branches: [${jobConfigs.branchesToDiscover.join(' ')}]")
+            log.info("${logPrefix} adding WildcardSCMHeadFilterTrait for branches: [${jobConfigs.branchesToDiscover.join(' ')}]")
             jobObject.configure {
                 def traits = it / sources / data / 'jenkins.branch.BranchSource' / source / traits
                 traits << 'jenkins.scm.impl.trait.WildcardSCMHeadFilterTrait' {
@@ -300,41 +295,40 @@ class PipelineJobFactory implements Serializable {
                     excludes('')
                 }
             }
-    //    if (jobConfigs?.branchesToBuild) {
-    //         jobObject.configure {
-    //             it / sources / data / 'jenkins.branch.BranchSource' / buildStrategies {
-    //                 buildNamedBranches {
-    //                     filters {
-    //                         wildcards {
-    //                             includes(jobConfigs.branchesToBuild.join(' '))
-    //                         }
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //         else {
-    //             log.info("${logPrefix} adding build strategy for ALL branches")
-    //             jobObject.configure {
-    //                 it / sources / data / 'jenkins.branch.BranchSource' / buildStrategies {
-    //                     buildAllBranches {
-    //                         strategies {
-    //                             buildRegularBranches()
-    //                         }
-    //                     }
-    //                 }
-    //             }
-    //         }
+//        if (jobConfigs?.branchesToBuild) {
+//             jobObject.configure {
+//                 it / sources / data / 'jenkins.branch.BranchSource' / buildStrategies {
+//                     buildNamedBranches {
+//                         filters {
+//                             wildcards {
+//                                 includes(jobConfigs.branchesToBuild.join(' '))
+//                             }
+//                         }
+//                     }
+//                 }
+//             }
+//             else {
+//                 log.info("${logPrefix} adding build strategy for ALL branches")
+//                 jobObject.configure {
+//                     it / sources / data / 'jenkins.branch.BranchSource' / buildStrategies {
+//                         buildAllBranches {
+//                             strategies {
+//                                 buildRegularBranches()
+//                             }
+//                         }
+//                     }
+//                 }
+//             }
         }
 
-    //     log.info("${logPrefix} Initialize test jobs")
-    //     if (jobConfigs?.initializeJobMode && jobConfigs.initializeJobMode.toBoolean()) {
-    //         log.info("${logPrefix} Running test job initialization for jobConfigs=${JsonUtils.printToJsonString(jobConfigs)}")
-    //         initJobs(dsl, jobFolder, jobConfigs)
-    //     }
+//         log.info("${logPrefix} Initialize test jobs")
+//         if (jobConfigs?.initializeJobMode && jobConfigs.initializeJobMode.toBoolean()) {
+//             log.info("${logPrefix} Running test job initialization for jobConfigs=${JsonUtils.printToJsonString(jobConfigs)}")
+//             initJobs(dsl, jobFolder, jobConfigs)
+//         }
 
     }
 
-    // createJobs function
     void createJobs(Map jobConfigs) {
         String jobFolder = jobConfigs.jobFolder
         String logPrefix = "createJobs(${jobFolder}):"
@@ -373,7 +367,7 @@ class PipelineJobFactory implements Serializable {
 
                 String jobChildFolder = "${jobConfigs.jobFolder}/${jobFolderConfig.name}"
                 log.info("${logPrefix} creating jobChildFolder=[${jobChildFolder}]")
-                dsl.folder(jobChildFolder) { // Use dsl.folder here
+                dsl.folder(jobChildFolder) {
                     description "${jobFolderConfig.description}"
                 }
 
@@ -401,7 +395,6 @@ class PipelineJobFactory implements Serializable {
         }
     }
 
-    // initJobs function
     void initJobs(String jobFolder, Map jobConfigs) {
         String logPrefix = "initJobs():"
         log.debug("${logPrefix} jobConfigs=${JsonUtils.printToJsonString(jobConfigs)}")
@@ -424,8 +417,7 @@ class PipelineJobFactory implements Serializable {
                 params.push(new hudson.model.BooleanParameterValue('EnableGitTestResults', true))
             }
             def paramsAction = new hudson.model.ParametersAction(params)
-            // You might need to adjust how currentBuild and cause are obtained if this is run outside a build context
-            def cause = new hudson.model.Cause.UserCause() // Simpler cause for shared library invocation
+            def cause = new hudson.model.Cause.UserCause()
             def causeAction = new hudson.model.CauseAction(cause)
             def scheduledJob = hudson.model.Hudson.instance.queue.schedule(job, 0, causeAction, paramsAction)
         }

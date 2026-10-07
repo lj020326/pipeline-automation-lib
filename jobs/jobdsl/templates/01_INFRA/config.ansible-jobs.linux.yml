@@ -67,6 +67,8 @@ ansibleJobList:
     ansible_limit: docker_stack_openbao
   - ansible_tag: bootstrap-docker-openldap
     ansible_limit: docker_stack_openldap
+  - ansible_tag: bootstrap-docker-plex
+    ansible_limit: docker_stack_plex
   - ansible_tag: bootstrap-docker-vault
     ansible_limit: docker_stack_vault
   - ansible_tag: bootstrap-docker-stack
@@ -184,6 +186,8 @@ ansibleJobList:
     ansible_limit: os_linux
   - ansible_tag: ping-test
     ansible_limit: os_linux
+  - ansible_tag: run-vllm-benchmark-tests
+    ansible_limit: docker_stack_vllm
   - ansible_tag: vmware-remount-datastores
     ansible_limit: localhost
     skip_always_tag: 'true'

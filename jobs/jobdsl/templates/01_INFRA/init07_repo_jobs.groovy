@@ -6,7 +6,7 @@ import jenkins.model.Jenkins
 import com.dettonville.pipeline.utils.JsonUtils
 import com.dettonville.pipeline.utils.MapMerge
 import com.dettonville.pipeline.utils.logging.JenkinsLogger
-import com.dettonville.jobdsl.RepoTestJobCreator
+import com.dettonville.jobdsl.RepoJobCreator
 
 @Grab('org.yaml:snakeyaml:1.17')
 import org.yaml.snakeyaml.Yaml
@@ -17,7 +17,7 @@ import groovy.transform.Field
 @Field JenkinsLogger log = new JenkinsLogger(this, prefix: scriptName)
 // @Field JenkinsLogger log = new JenkinsLogger(this, logLevel: 'DEBUG', prefix: scriptName)
 
-String pipelineConfigYaml = "config.repo-test-jobs.yml"
+String pipelineConfigYaml = "config.repo-jobs.yml"
 
 // ref: https://stackoverflow.com/questions/47336502/get-absolute-path-of-the-script-directory-that-is-being-processed-by-job-dsl#47336735
 String configFilePath = "${new File(__FILE__).parent}"
@@ -32,11 +32,11 @@ log.info("${scriptName}: yamlProjectConfigList=${yamlProjectConfigList}")
 
 yamlProjectConfigList.each { Map projectConfig ->
     String projectConfigYamlFile = projectConfig.pipelineConfigYaml
-    log.info("${scriptName}: Creating Repo Test Jobs for ${projectConfigYamlFile}")
+    log.info("${scriptName}: Creating Repo Jobs for ${projectConfigYamlFile}")
 
-    Map repoTestJobConfigs = new Yaml().load(("${configFilePath}/${projectConfigYamlFile}" as File).text)
+    Map repoJobConfigs = new Yaml().load(("${configFilePath}/${projectConfigYamlFile}" as File).text)
 
     // Call the static method directly from the class
-    RepoTestJobCreator.createRepoTestJobs(this, repoTestJobConfigs)
+    RepoJobCreator.createRepoJobs(this, repoJobConfigs)
 }
-log.info("${scriptName}: Finished creating repo test jobs")
+log.info("${scriptName}: Finished creating repo jobs")

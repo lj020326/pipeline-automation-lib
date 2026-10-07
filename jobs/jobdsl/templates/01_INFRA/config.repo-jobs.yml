@@ -1,0 +1,8 @@
+---
+
+baseFolder: "INFRA/repo-automation"
+yamlProjectConfigList:
+  - pipelineConfigYaml: "config.repo-jobs.ansible-datacenter.yml"
+  - pipelineConfigYaml: "config.repo-jobs.ansible-git-inventory.yml"
+  - pipelineConfigYaml: "config.repo-jobs.ansible-llm.yml"
+  - pipelineConfigYaml: "config.repo-jobs.ansible-utils.yml"

@@ -98,42 +98,25 @@ def call(Map params=[:]) {
         post {
             always {
                 script {
-                    notifyGitRemoteRepo(
-                        config.gitRemoteRepoType,
-                        gitRemoteBuildKey: config.gitRemoteBuildKey,
-                        gitRemoteBuildName: config.gitRemoteBuildName,
-                        gitRemoteBuildStatus: results.gitRemoteBuildStatus,
-                        gitRemoteBuildSummary: config.gitRemoteBuildSummary,
-                        gitCommitId: config.gitCommitId
-                    )
-                    List emailAdditionalDistList = []
-                    if (config?.alwaysEmailDistList) {
-                        emailAdditionalDistList = config.alwaysEmailDistList
-                    }
-                    if (config.gitBranch in ['origin/main','main']) {
-                        log.info("post(${config.gitBranch}): sendEmail(${currentBuild.result})")
-                        sendEmail(currentBuild, env, emailAdditionalDistList: emailAdditionalDistList)
-                    } else {
-                        log.info("post(${config.gitBranch}): sendEmail(${currentBuild.result}, 'RequesterRecipientProvider')")
-                        sendEmail(currentBuild, env)
-                    }
-                    if (!config.debugPipeline) {
-                        log.info("Empty current workspace dir")
-                        try {
-                            cleanWs()
-                        } catch (Exception ex) {
-                            log.warn("Unable to cleanup workspace - e.g., likely cause git clone failure", ex.getMessage())
+                    if (!config.initializeParamsOnly) {
+                        if (!config.debugPipeline) {
+                            cleanWorkspace()
                         }
-                    } else {
-                        log.info("Skipping cleanup of current workspace directory since config.debugPipeline == true")
+                        sendEmailNotification(config, "always")
+                    }
+                }
+            }
+            changed {
+                script {
+                    if (!config.initializeParamsOnly) {
+                        sendEmailNotification(config, "changed")
                     }
                 }
             }
             success {
                 script {
-                    if (config?.successEmailList) {
-                        log.info("config.successEmailList=${config.successEmailList}")
-                        sendEmail(currentBuild, env, emailAdditionalDistList: config.successEmailList.split(","))
+                    if (!config.initializeParamsOnly) {
+                        sendEmailNotification(config, "success")
                     }
                 }
             }
@@ -141,7 +124,6 @@ def call(Map params=[:]) {
                 script {
                     if (config?.failedEmailList) {
                         log.info("config.failedEmailList=${config.failedEmailList}")
-//                         sendEmail(currentBuild, env, emailAdditionalDistList: config.failedEmailList.split(","))
                         sendEmail(currentBuild, env,
                             emailAdditionalDistList: config.failedEmailList.split(","),
                             emailBody: ansibleLogSummary
@@ -149,26 +131,17 @@ def call(Map params=[:]) {
                     }
                 }
             }
-            aborted {
-                script {
-                    if (config?.failedEmailList) {
-                        log.info("config.failedEmailList=${config.failedEmailList}")
-//                         sendEmail(currentBuild, env, emailAdditionalDistList: config.failedEmailList.split(","))
-                        sendEmail(currentBuild, env,
-                            emailAdditionalDistList: config.failedEmailList.split(","),
-                            emailBody: ansibleLogSummary
-                        )
-                    }
-                }
-            }
-            changed {
-                script {
-                    if (config?.changedEmailList) {
-                        log.info("config.changedEmailList=${config.changedEmailList}")
-                        sendEmail(currentBuild, env, emailAdditionalDistList: config.changedEmailList.split(","))
-                    }
-                }
-            }
+//             aborted {
+//                 script {
+//                     if (config?.failedEmailList) {
+//                         log.info("config.failedEmailList=${config.failedEmailList}")
+//                         sendEmail(currentBuild, env,
+//                             emailAdditionalDistList: config.failedEmailList.split(","),
+//                             emailBody: ansibleLogSummary
+//                         )
+//                     }
+//                 }
+//             }
         }
     }
 } // body
@@ -220,4 +193,13 @@ Map loadPipelineConfigFile(Map config) {
 
     log.info("Merged config=${JsonUtils.printToJsonString(config)}")
     return config
+}
+
+void cleanWorkspace() {
+    log.info("Cleaning execution environment workspace paths...")
+    try {
+        cleanWs deleteDirs: true, notFailBuild: true
+    } catch (Exception ex) {
+        log.warn("Unable to cleanup workspace - e.g., likely cause git clone failure", ex.getMessage())
+    }
 }

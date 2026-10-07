@@ -79,6 +79,12 @@ def call(Map pipelineConfig=[:]) {
             timeout(time: config.timeout as Integer, unit: config.timeoutUnit)
         }
         stages {
+            stage('Check Skip') {
+                steps {
+                    // This plugin is in your plugins.txt and works regardless of the Job DSL UI
+                    scmSkip(skipPattern: '.*\\[(ci skip|skip ci)\\].*')
+                }
+            }
             stage('Load Collection Galaxy config') {
                 steps {
                     script {

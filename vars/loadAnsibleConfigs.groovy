@@ -70,12 +70,13 @@ Map call(Map params) {
     config.get("runnerImage", "media.johnson.int:5000/jenkins-docker-agent:latest")
 
     List runnerArgsList = []
-    if (config?.runnerUid && config?.runnerGid) {
-        runnerArgsList.push("-u ${config.runnerUid}:${config.runnerGid}")
-    } else {
-        runnerArgsList.push("-u root:root")
-        runnerArgsList.push("--privileged")
-    }
+//     if (config?.runnerUid && config?.runnerGid) {
+//         runnerArgsList.push("-u ${config.runnerUid}:${config.runnerGid}")
+//     } else {
+// //         runnerArgsList.push("-u root:root")
+//         runnerArgsList.push("--privileged")
+//     }
+    runnerArgsList.push("--privileged")
     // configure to share the host's network stack.
     // This removes the network isolation between the container and the host, allowing the container
     // to access services running on the host via 127.0.0.1 or the host's primary IP address/

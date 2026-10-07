@@ -2,8 +2,11 @@
 .idea/
 .gradle/
 .DS_Store
+.package_dir.context.yml
+
+save/
 
 *.log
 
-save/
+## avoid push to public
 archive/

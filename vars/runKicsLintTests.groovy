@@ -19,10 +19,8 @@ def call(Map params=[:]) {
         agent {
 //             label "docker"
             docker {
-                // ref: https://stackoverflow.com/questions/48226183/how-to-mount-jenkins-workspace-in-docker-container-using-jenkins-pipeline#48227560
-                image 'checkmarx/kics:latest'
-//                        args "--entrypoint='' -v /etc/pki/tls/certs/ca-bundle.crt:/etc/ssl/certs/ca-certificates.crt:ro"
-                args "--entrypoint='' -v /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro"
+                image config.runnerImage
+                args config.runnerArgs
                 // Run the container on the node specified at the
                 // top-level of the Pipeline, in the same workspace,
                 // rather than on a new node entirely:
@@ -37,6 +35,12 @@ def call(Map params=[:]) {
             timeout(time: config.timeout, unit: config.timeoutUnit)
         }
         stages {
+            stage('Check Skip') {
+                steps {
+                    // This plugin is in your plugins.txt and works regardless of the Job DSL UI
+                    scmSkip(skipPattern: '.*\\[(ci skip|skip ci)\\].*')
+                }
+            }
             stage('Pre-test') {
                 steps {
                     script {
@@ -60,18 +64,6 @@ def call(Map params=[:]) {
             }
             // ref: https://github.com/Checkmarx/kics/blob/master/docs/integrations_jenkins.md
             stage('KICS scan') {
-//                 agent {
-//                     docker {
-//                         // ref: https://stackoverflow.com/questions/48226183/how-to-mount-jenkins-workspace-in-docker-container-using-jenkins-pipeline#48227560
-//                         image 'checkmarx/kics:latest'
-// //                        args "--entrypoint='' -v /etc/pki/tls/certs/ca-bundle.crt:/etc/ssl/certs/ca-certificates.crt:ro"
-//                         args "--entrypoint='' -v /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro"
-//                         // Run the container on the node specified at the
-//                         // top-level of the Pipeline, in the same workspace,
-//                         // rather than on a new node entirely:
-//                         reuseNode true
-//                     }
-//                 }
                 steps {
                     script {
                         sh "mkdir -p ${config.testResultsDir}"
@@ -206,18 +198,6 @@ def call(Map params=[:]) {
                     }
                 }
             }
-            aborted {
-                script {
-                    if (config?.failedEmailList) {
-                        log.info("config.failedEmailList=${config.failedEmailList}")
-//                         sendEmail(currentBuild, env, emailAdditionalDistList: config.failedEmailList.split(","))
-                        sendEmail(currentBuild, env,
-                            emailAdditionalDistList: config.failedEmailList.split(","),
-                            emailBody: ansibleLogSummary
-                        )
-                    }
-                }
-            }
             changed {
                 script {
                     if (config?.changedEmailList) {
@@ -256,12 +236,22 @@ Map loadPipelineConfig(Map params) {
     config.get('timeout', 3)
     config.get('timeoutUnit', 'HOURS')
     config.get('skipDefaultCheckout', false)
+
+    // ref: https://stackoverflow.com/questions/48226183/how-to-mount-jenkins-workspace-in-docker-container-using-jenkins-pipeline#48227560
+    config.get("runnerImage", "checkmarx/kics:latest")
+    List runnerArgsList = ["--entrypoint=''"]
+    runnerArgsList.push("--privileged")
+//     runnerArgsList.push("-v /var/run/docker.sock:/var/run/docker.sock")
+//                 args "-v /var/run/docker.sock:/var/run/docker.sock"
+    runnerArgsList.push("-v /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro")
+    config.get("runnerArgs", runnerArgsList.join(" "))
+
     config.get('testResultsDir', '.test-results')
     config.get('testResultsJunitFile', 'junit-kics-results.xml')
     config.get('testResultsHtmlFile', 'kics-results.html')
 
     config.gitRemoteBuildStatus = "INPROGRESS"
-    config.get("gitRemoteRepoType", "gitea")
+    config.get("gitRemoteRepoType", "git")
     config.get("gitRemoteBuildKey", 'KICS Lint Tests')
 	config.get("gitRemoteBuildName", 'KICS Lint Tests')
     config.get("gitRemoteBuildSummary", "${config.gitRemoteBuildName} update")

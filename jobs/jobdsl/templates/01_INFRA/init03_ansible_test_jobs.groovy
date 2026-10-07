@@ -14,7 +14,7 @@ import com.dettonville.pipeline.utils.logging.JenkinsLogger
 @Field JenkinsLogger log = new JenkinsLogger(this, prefix: scriptName)
 //@Field JenkinsLogger log = new JenkinsLogger(this, logLevel: 'DEBUG', prefix: scriptName)
 
-String baseFolder = "INFRA/repo-test-automation"
+String baseFolder = "INFRA/repo-automation"
 
 jobFolder = "${baseFolder}/run-ansible-test"
 
@@ -36,14 +36,14 @@ void createAnsibleTestJobs(def dsl) {
             // Specific to parent multibranch
             copyArtifactPermissionProperty {
                 projectNames('/**')
-//                 projectNames('INFRA/repo-test-automation/**')
-//                 projectNames('INFRA/repo-test-automation/ansible-utils/ansible-test-units/main')
+//                 projectNames('INFRA/repo-automation/**')
+//                 projectNames('INFRA/repo-automation/ansible-utils/ansible-test-units/main')
             }
         }
         definition {
             logRotator {
                daysToKeep(-1)
-               numToKeep(40)
+               numToKeep(200)
                artifactNumToKeep(-1)
                artifactDaysToKeep(-1)
             }
