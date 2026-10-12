@@ -1,9 +1,53 @@
-*.iml
+
+# ---------------------------------------------------------------------------
+# CrewAI / LanceDB agent state (ephemeral CI + local runs)
+# ---------------------------------------------------------------------------
+.agent_state/
+.crewai/
+**/crewai/memory/
+**/.lancedb/
+**/*.lance
+**/memories.lance/
+
+# Legacy / alternate CrewAI storage layouts
+chroma.sqlite3
+chromadb-*.lock
+**/short_term_memory/
+**/long_term_memory/
+**/entities/
+**/long_term_memory_storage.db
+
+# Packaged LLM context (regenerated each run; large)
+.package_dir.context.yml
+.package_dir.*.yml
+**/index_package.tar.gz
+
+.code_index/
+.rsync/
 .idea/
+.vscode/
+venv/
+save/
 .gradle/
 .DS_Store
 
+*~
 *.log
+.vault_pass
 
-save/
+# ---------------------------------------------------------------------------
+# avoid push to public
+# ---------------------------------------------------------------------------
 archive/
+.wiki/
+raw/
+id_rsa
+private/
+files/private/
+vars/vault.yml
+vars/secrets.yml
+vault.yml
+vaulted-credentials.yml
+*.vault.yml
+secrets.yml
+*.secrets.yml

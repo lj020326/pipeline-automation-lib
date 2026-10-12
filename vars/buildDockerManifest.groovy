@@ -478,7 +478,7 @@ Map runBuildAndPublishImageJob(Map config) {
 
     Map jobConfigs = [
         // source for 'build-docker-image' job referenced in following 'jobFolder' located in buildDockerImagePipeline.groovy
-        jobFolder: "INFRA/build-docker-image",
+        jobFolder: "INFRA/repo-automation/build-docker-image",
         jobParameters: jobParameters,
         propagate: config.propagate,
         wait: config.wait,

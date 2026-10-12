@@ -5,7 +5,7 @@ import com.dettonville.pipeline.utils.Utilities
 import com.dettonville.pipeline.utils.MapMerge
 import com.dettonville.pipeline.utils.logging.LogLevel
 import com.dettonville.pipeline.utils.logging.Logger
-import com.dettonville.pipeline.versioning.ComparableSemanticVersion
+// import com.dettonville.pipeline.versioning.ComparableSemanticVersion
 
 // ref: https://stackoverflow.com/questions/6305910/how-do-i-create-and-access-the-global-variables-in-groovy
 import groovy.transform.Field
@@ -18,9 +18,9 @@ def call(Map params=[:]) {
     String ansibleLogSummary = "No results"
     int numTestsFailed = 0
     int exception_count = 0
-    String pyTestVersion = "2024.1.1"
-    ComparableSemanticVersion minVersionPyTest = new ComparableSemanticVersion(pyTestVersion)
-    ComparableSemanticVersion testScriptVersion
+//     String pyTestVersion = "2024.1.1"
+//     ComparableSemanticVersion minVersionPyTest = new ComparableSemanticVersion(pyTestVersion)
+//     ComparableSemanticVersion testScriptVersion
     boolean pytest_failed = false
     int pytest_return_code = 0
 
@@ -42,6 +42,12 @@ def call(Map params=[:]) {
             timeout(time: config.timeout, unit: config.timeoutUnit)
         }
         stages {
+            stage('Check Skip') {
+                steps {
+                    // This plugin is in your plugins.txt and works regardless of the Job DSL UI
+                    scmSkip(skipPattern: '.*\\[(ci skip|skip ci)\\].*')
+                }
+            }
             stage('Pre-test') {
                 steps {
                     script {
@@ -68,17 +74,22 @@ def call(Map params=[:]) {
                     script {
                         sh "mkdir -p ${config.junitXmlReportDir}"
 
-                        config.testScriptVersion = getTestScriptVersion(this, log, config.testScript)
-                        log.info("config.testScriptVersion=${config.testScriptVersion}")
+                        sh "python3 ${config.testScript} --version"
 
-                        testScriptVersion = new ComparableSemanticVersion(config.testScriptVersion)
-                        log.info("testScriptVersion=${testScriptVersion.toString()}")
-                        log.info("minVersionPyTest=${minVersionPyTest.toString()}")
+//                         config.testScriptVersion = getTestScriptVersion(this, log, config.testScript)
+//                         log.info("config.testScriptVersion=${config.testScriptVersion}")
+//
+//                         testScriptVersion = new ComparableSemanticVersion(config.testScriptVersion)
+//                         log.info("testScriptVersion=${testScriptVersion.toString()}")
+//                         log.info("minVersionPyTest=${minVersionPyTest.toString()}")
 
 //                         sh(script: "bash ${config.testScript} -r ${config.junitXmlReport} -p", returnStdout: true)
                         pytest_return_code = sh(
-                            script: "bash ${config.testScript} -r ${config.junitXmlReport} -p > /dev/null 2>&1",
+                            script: "python3 ${config.testScript} test -r ${config.junitXmlReport} -p > /dev/null 2>&1",
                             returnStatus: true)
+//                         pytest_return_code = sh(
+//                             script: "bash ${config.testScript} -r ${config.junitXmlReport} -p > /dev/null 2>&1",
+//                             returnStatus: true)
 
                         pytest_failed = (pytest_return_code>0)
 
@@ -91,8 +102,10 @@ def call(Map params=[:]) {
 
                         List testCmdList = []
 //                         testCmdList.push("set -eo pipefail;")
-                        testCmdList.push("bash")
+//                         testCmdList.push("bash")
+                        testCmdList.push("python3")
                         testCmdList.push("${config.testScript}")
+                        testCmdList.push("test")
                         String testCmd = testCmdList.join(' ')
 
 //                         testCmdList.push("|& tee ${config.junitXmlReportDir}/inventory-test-results.txt")
@@ -211,18 +224,6 @@ def call(Map params=[:]) {
                     }
                 }
             }
-            aborted {
-                script {
-                    if (config?.failedEmailList) {
-                        log.info("config.failedEmailList=${config.failedEmailList}")
-//                         sendEmail(currentBuild, env, emailAdditionalDistList: config.failedEmailList.split(","))
-                        sendEmail(currentBuild, env,
-                            emailAdditionalDistList: config.failedEmailList.split(","),
-                            emailBody: ansibleLogSummary
-                        )
-                    }
-                }
-            }
             changed {
                 script {
                     if (config?.changedEmailList) {
@@ -294,12 +295,13 @@ Map loadPipelineConfig(Map params) {
     config.ansibleInventoryCmd = "ansible-inventory"
     config.ansibleCmd = "ansible"
 
-    config.testScript = "inventory/run-inventory-tests.sh"
+//     config.testScript = "inventory/run-inventory-tests.sh"
+    config.testScript = "verify_inventory.py"
     config.testScriptVersion = ""
 
     config.yamlLintCmd = "yamllint"
 
-    config.get("gitRemoteRepoType", "gitea")
+    config.get("gitRemoteRepoType", "git")
     config.get("gitRemoteBuildKey", 'Ansible Inventory Tests')
 	config.get("gitRemoteBuildName", 'Ansible Inventory Tests')
     config.get("gitRemoteBuildSummary", "${config.gitRemoteBuildName} update")

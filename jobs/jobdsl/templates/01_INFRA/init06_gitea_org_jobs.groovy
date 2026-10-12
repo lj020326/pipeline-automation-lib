@@ -31,10 +31,10 @@ String pipelineConfigYaml = "config.gitea-orgs.yml"
 
 // ref: https://stackoverflow.com/questions/47336502/get-absolute-path-of-the-script-directory-that-is-being-processed-by-job-dsl#47336735
 String configFilePath = "${new File(__FILE__).parent}"
-log.info("${scriptName}: configFilePath: ${configFilePath}")
+log.debug("${scriptName}: configFilePath: ${configFilePath}")
 
 Map seedJobConfigs = new Yaml().load(("${configFilePath}/${pipelineConfigYaml}" as File).text)
-log.info("${scriptName}: seedJobConfigs=${JsonUtils.printToJsonString(seedJobConfigs)}")
+log.debug("${scriptName}: seedJobConfigs=${JsonUtils.printToJsonString(seedJobConfigs)}")
 
 createGiteaOrgFolder(this, seedJobConfigs)
 log.info("${scriptName}: Finished creating GITEA Organization Folder jobs")
@@ -52,7 +52,7 @@ def defaultValue(def value, def defaultValue) {
 void createGiteaOrgFolder(def dsl, Map config) {
     String logPrefix = "createGiteaOrgFolder():"
 
-    log.info("${logPrefix} config=${config}")
+    log.debug("${logPrefix} config=${config}")
 
     String baseFolder = config.baseFolder
     String orgServerUrl = config.serverUrl
@@ -73,7 +73,7 @@ void createGiteaOrgFolder(def dsl, Map config) {
     }
 
     String jenkinsEnv = envVars.JENKINS_ENV
-    log.info("${scriptName}: jenkinsEnv=${jenkinsEnv}")
+    log.debug("${scriptName}: jenkinsEnv=${jenkinsEnv}")
 
     if (!runEnvMap.containsKey(jenkinsEnv)) {
         log.info("${scriptName}: key for JENKINS_ENV=${jenkinsEnv} not found in `runEnvMap` project definition, skipping ansible-jobs build")
@@ -81,11 +81,11 @@ void createGiteaOrgFolder(def dsl, Map config) {
     }
 
     Map envConfigsRaw = runEnvMap[jenkinsEnv]
-    // log.info("${scriptName}: envConfigsRaw=${envConfigsRaw}")
-    log.info("${scriptName}: envConfigsRaw=${JsonUtils.printToJsonString(envConfigsRaw)}")
+    // log.debug("${scriptName}: envConfigsRaw=${envConfigsRaw}")
+    log.debug("${scriptName}: envConfigsRaw=${JsonUtils.printToJsonString(envConfigsRaw)}")
 
     Map envConfigs = MapMerge.merge(config.findAll { !["runEnvMap"].contains(it.key) }, envConfigsRaw)
-    log.info("${scriptName}: envConfigs=${JsonUtils.printToJsonString(envConfigs)}")
+    log.debug("${scriptName}: envConfigs=${JsonUtils.printToJsonString(envConfigs)}")
 
     // ref: https://gist.github.com/nocode99/d4c654514ff2b683af90d7dd5e0156e0
     dsl.folder(baseFolder) {
@@ -101,7 +101,7 @@ void createGiteaOrgFolder(def dsl, Map config) {
 
     ownerList.each { Map ownerConfigRaw ->
 
-        log.info("${logPrefix} ownerConfigRaw=${ownerConfigRaw}")
+        log.debug("${logPrefix} ownerConfigRaw=${ownerConfigRaw}")
 
         Map ownerConfig = MapMerge.merge(envConfigs.findAll { !["ownerList"].contains(it.key) }, ownerConfigRaw)
         log.debug("${logPrefix} ownerConfig=${ownerConfig}")
@@ -185,7 +185,7 @@ void createGiteaOrgFolder(def dsl, Map config) {
         }
 
         if (ownerConfig?.scriptPath) {
-            log.info("${scriptName}: adding to job scriptPath=[${ownerConfig.scriptPath}]")
+            log.debug("${scriptName}: adding to job scriptPath=[${ownerConfig.scriptPath}]")
             folderObject.projectFactories {
                 workflowMultiBranchProjectFactory {
                     // Relative location within the checkout of your Pipeline script.

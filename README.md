@@ -114,7 +114,6 @@ Some of the most often used pipelines in this library include:
 
 See the [pivotal pcf section](./docs/pivotal-pcf.md) for details.
 
-
 ### Pipeline Screen snaps
 ![00-pipeline-library](./docs/screenshots/00-pipeline-library.png)
 ![ansible-datacenter-0-toplevel](./docs/screenshots/ansible-datacenter-0-toplevel.png)
@@ -147,6 +146,10 @@ See the [pivotal pcf section](./docs/pivotal-pcf.md) for details.
 ![packer-templates-2a-run-all-builds-config](./docs/screenshots/packer-templates-2a-run-all-builds-config.png)
 ![packer-templates-2b-run-all-builds-output](./docs/screenshots/packer-templates-2b-run-all-builds-output.png)
 
-## Contact
+---
 
-[![Linkedin](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/leejjohnson/)
+## 🛡️ Identity & Maintainer
+* **Maintainer:** Lee Johnson
+* **Contact:** <ljohnson@dettonville.org>
+* **LinkedIn:** https://www.linkedin.com/in/leejjohnson/
+* **System Framework:** [Dettonville Cloud Infrastructure Services](https://dettonville.org)

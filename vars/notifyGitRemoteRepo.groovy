@@ -46,7 +46,7 @@ def call(Map args=[:], String gitRemoteRepoType) {
             notifyArgs['commitId'] = args.gitCommitId
         }
         bitbucketStatusNotify(notifyArgs)
-    } else if (gitRemoteRepoType == "gitea") {
+    } else if (gitRemoteRepoType == "gitea" || gitRemoteRepoType == "git") {
         String giteaStatus = 'COMPLETED'
         String giteaConclusion = 'NEUTRAL'
 
@@ -106,98 +106,158 @@ def call(Map args=[:], String gitRemoteRepoType) {
             notifyArgs['summary'] = args.gitRemoteBuildSummary
         }
 
-        notifyArgs['name'] = args?.gitRemoteBuildName ?: "Jenkins Job Run"
+        notifyArgs['name'] = args?.gitRemoteBuildName ?: args?.gitRemoteBuildKey ?: "Jenkins Job Run"
 
+        // Since publishChecks exits cleanly with a [WARN] message instead of throwing an exception,
+        // we force standard Git SCM integration paths directly into our HTTP REST handler.
+        log.info("Attempting to publish via generic Jenkins Checks API...")
+        executeGiteaRestAPI(args, notifyArgs, giteaStatus, giteaConclusion)
+//         if (gitRemoteRepoType == "git") {
+//             log.info("Standard Git SCM detected. Utilizing direct Gitea Status REST API payload execution...")
+//             executeGiteaRestAPI(args, notifyArgs, giteaStatus, giteaConclusion)
+//         } else {
+//             log.info("Attempting to publish via generic Jenkins Checks API...")
+//             try {
+//                 log.info("Attempting to publish via generic Jenkins Checks API...")
+//                 publishChecks(notifyArgs)
+//             } catch (Exception ex) {
+//                 log.warn("publishChecks hard-faulted: ${ex.getMessage()}. Falling back to manual REST API...")
+//                 executeGiteaRestAPI(args, notifyArgs, giteaStatus, giteaConclusion)
+//             }
+//         }
+    }
+}
+
+/**
+ * Encapsulates the explicit HTTP Request logic to update the commit status via Gitea API.
+ * Uses native Jenkins HTTP Request Plugin step with secure credential binding.
+ */
+def executeGiteaRestAPI(Map args, Map notifyArgs, String giteaStatus, String giteaConclusion) {
+    String commitId = args?.gitCommitId ?: env.GIT_COMMIT
+    String gitUrl = args?.gitRepoUrl ?: env.GIT_URL ?: ""
+    String gitCredentialId = "infra-jenkins-git-user"
+
+    if (!commitId || !gitUrl) {
+        log.error("Cannot execute status update: Missing context parameters. gitCommitId: ${commitId}, gitUrl: ${gitUrl}")
+        return
+    }
+
+    // Uses the fixed port/host derivation mapping confirmed by your test runs
+    String giteaApiUrl = deriveGiteaStatusApiUrl(gitUrl, commitId)
+    log.info("Resolved Gitea REST Endpoint: ${giteaApiUrl}")
+
+    String apiState = 'pending'
+    if (giteaStatus == 'COMPLETED') {
+        apiState = (giteaConclusion == 'SUCCESS') ? 'success' : 'failure'
+    }
+
+    try {
+        def payload = JsonUtils.printToJsonString([
+            state: apiState,
+            target_url: env.BUILD_URL ?: "",
+            description: args?.gitRemoteBuildSummary ?: "Jenkins Build Status",
+            context: notifyArgs['name']
+        ])
+
+        // Fix the security warning by delegating credential handling to the plugin's native authentication parameter.
+        // This removes the need for both the 'withCredentials' wrapper block and the explicit 'customHeaders' token token assignment.
+        httpRequest httpMode: 'POST',
+                    contentType: 'APPLICATION_JSON',
+                    requestBody: payload,
+                    url: giteaApiUrl,
+                    authentication: gitCredentialId,
+                    quiet: true,
+                    responseHandle: 'NONE'
+
+        log.info("Successfully posted commit status update to Gitea via native REST API handler.")
+    } catch (Exception apiEx) {
+        log.error("Gitea direct REST API notification failed: ${apiEx.getMessage()}")
+    }
+}
+
+/**
+ * Encapsulates the explicit HTTP Request logic to update the commit status via Gitea API.
+ * Securely binds credentials and custom parameters to the shell execution environment.
+ */
+def executeGiteaRestAPICurl(Map args, Map notifyArgs, String giteaStatus, String giteaConclusion) {
+    String commitId = args?.gitCommitId ?: env.GIT_COMMIT
+    String gitUrl = args?.gitRepoUrl ?: env.GIT_URL ?: ""
+    String gitCredentialId = "infra-jenkins-git-user"
+
+    if (!commitId || !gitUrl) {
+        log.error("Cannot execute status update: Missing context parameters. gitCommitId: ${commitId}, gitUrl: ${gitUrl}")
+        return
+    }
+
+    String giteaApiUrl = deriveGiteaStatusApiUrl(gitUrl, commitId)
+    log.info("Resolved Gitea REST Endpoint: ${giteaApiUrl}")
+
+    String apiState = 'pending'
+    if (giteaStatus == 'COMPLETED') {
+        apiState = (giteaConclusion == 'SUCCESS') ? 'success' : 'failure'
+    }
+
+    withCredentials([usernamePassword(credentialsId: gitCredentialId, passwordVariable: 'GITEA_TOKEN', usernameVariable: 'GITEA_USER')]) {
         try {
-            log.info("Attempting to publish via Jenkins Checks API...")
-            publishChecks(notifyArgs)
-        } catch (Exception ex) {
-            log.warn("publishChecks failed to find a valid publisher: ${ex.getMessage()}. Falling back to manual REST API notification...")
+            def payloadMap = [
+                state: apiState,
+                target_url: env.BUILD_URL ?: "",
+                description: args?.gitRemoteBuildSummary ?: "Jenkins Build Status",
+                context: notifyArgs['name']
+            ]
+            String payload = JsonUtils.printToJsonString(payloadMap)
 
-            // 1. Get the commit hash dynamically
-            String commitId = args?.gitCommitId ?: env.GIT_COMMIT
-
-            // 2. Get the Git URL dynamically from environment variables
-            String gitUrl = env.GIT_URL ?: ""
-
-            if (!gitUrl && env.getEnvironment().containsKey('CHANGE_URL')) {
-                // Multibranch pipeline alternative if generic GIT_URL isn't populated
-                gitUrl = env.GIT_URL
+            // Fix: Use native 'withEnv' to supply variables to the underlying shell context safely
+            withEnv(["GITEA_API_URL=${giteaApiUrl}", "TARGET_PAYLOAD=${payload}"]) {
+                sh(
+                    script: '''
+                        curl -s -X POST "${GITEA_API_URL}" \
+                             -H "Content-Type: application/json" \
+                             -H "Authorization: token ${GITEA_TOKEN}" \
+                             -d "${TARGET_PAYLOAD}" > /dev/null
+                    ''',
+                    returnStdout: false
+                )
             }
-
-            if (!commitId || !gitUrl) {
-                log.error("Cannot fall back to Gitea Status API: Missing context. gitCommitId: ${commitId}, gitUrl: ${gitUrl}")
-                return
-            }
-
-            // 3. Dynamically derive Gitea API endpoint from SCM Git URL
-            // Handles transformations like: ssh://git@gitea.admin.dettonville.int:2222/infra/ansible-datacenter.git
-            // -> http://gitea.admin.dettonville.int:3000/api/v1/repos/infra/ansible-datacenter/statuses/...
-            String giteaApiUrl = deriveGiteaStatusApiUrl(gitUrl, commitId)
-            log.info("Derived Gitea API URL: ${giteaApiUrl}")
-
-            String apiState = 'pending'
-            if (giteaStatus == 'COMPLETED') {
-                apiState = (giteaConclusion == 'SUCCESS') ? 'success' : 'failure'
-            }
-
-            withCredentials([usernamePassword(credentialsId: 'infra-jenkins-git-user', passwordVariable: 'GITEA_TOKEN', usernameVariable: 'GITEA_USER')]) {
-                try {
-                    def payload = JsonUtils.printToJsonString([
-                        state: apiState,
-                        target_url: env.BUILD_URL ?: "",
-                        description: args?.gitRemoteBuildSummary ?: "Jenkins Build Status",
-                        context: notifyArgs['name']
-                    ])
-
-                    httpRequest httpMode: 'POST',
-                                contentType: 'APPLICATION_JSON',
-                                requestBody: payload,
-                                customHeaders: [[name: 'Authorization', value: "token ${GITEA_TOKEN}"]],
-                                url: giteaApiUrl,
-                                quiet: true
-                    log.info("Successfully updated Gitea commit status via dynamic REST fallback.")
-                } catch (Exception apiEx) {
-                    log.error("Gitea direct REST API notification fallback failed: ${apiEx.getMessage()}")
-                }
-            }
+            log.info("Successfully posted commit status update to Gitea via secure shell curl handler.")
+        } catch (Exception apiEx) {
+            log.error("Gitea direct REST API notification failed: ${apiEx.getMessage()}")
         }
     }
 }
 
 /**
- * Parses out SSH or HTTP Git remote URLs to build the exact Gitea REST API endpoint.
+ * Parses out parameters across SSH or HTTP Git schemas to assemble the Gitea API endpoint.
+ * Remaps SSH host domains to the standard proxy web layout without hardcoded port 3000.
  */
 String deriveGiteaStatusApiUrl(String gitUrl, String commitId) {
-    // Standardize URL by clearing trailing .git suffix
     String cleanUrl = gitUrl.trim()
     if (cleanUrl.endsWith('.git')) {
         cleanUrl = cleanUrl.substring(0, cleanUrl.length() - 4)
     }
 
-    String host = "gitea.admin.dettonville.int:3000" // Fallback default domain if extraction fails
+    // Defaulting to standard HTTP host. If your Gitea UI runs behind an HTTPS proxy,
+    // change the "http" prefix below to "https".
+    String host = "gitea.admin.dettonville.int"
     String repoPath = ""
 
     if (cleanUrl.startsWith("ssh://") || cleanUrl.contains("@")) {
-        // Example: ssh://git@gitea.admin.dettonville.int:2222/infra/ansible-datacenter
-        // Splitting past the host/port demarcator
         def matches = cleanUrl =~ /(?:ssh:\/\/)?[-_a-zA-Z0-9.]+@([-_a-zA-Z0-9.]+)(?::\d+)?\/(.+)/
         if (matches.matches()) {
-            host = matches[0][1] + ":3000" // Remap SSH host domain to Gitea's standard HTTP API port
+            host = matches[0][1]
             repoPath = matches[0][2]
         }
     } else if (cleanUrl.startsWith("http://") || cleanUrl.startsWith("https://")) {
-        // Example: http://gitea.admin.dettonville.int:3000/infra/ansible-datacenter
         def urlObj = new URL(cleanUrl)
         host = urlObj.getAuthority()
         repoPath = urlObj.getPath().replaceAll(/^\//, "")
     }
 
     if (!repoPath) {
-        // Safe programmatic extraction failure fallback if regex breaks on specific edge-case layout
-        log.warn("Regex parsing could not safely isolate repository path from: ${gitUrl}. Attempting token slice fallback.")
+        log.warn("Regex matching could not confidently extract the repo slug. Utilizing structural slice fallback.")
         repoPath = cleanUrl.tokenize('/')[-2..-1].join('/')
     }
 
-    return "http://${host}/api/v1/repos/${repoPath}/statuses/${commitId}"
+    // Dropped explicit port 3000 to route via standard web server ports (80/443 proxy setups)
+    return "https://${host}/api/v1/repos/${repoPath}/statuses/${commitId}"
 }

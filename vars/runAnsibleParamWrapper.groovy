@@ -81,7 +81,7 @@ def call(Map config=[:]) {
     config.get('gitCredentialsId','git-ssh-jenkins')
 
 //     config.get("gitRemoteRepoType","bitbucket")
-    config.get("gitRemoteRepoType", "gitea")
+    config.get("gitRemoteRepoType", "git")
     config.get("gitRemoteBuildKey", 'Ansible playbook run')
 	config.get("gitRemoteBuildName", 'Ansible playbook run')
     config.get("gitRemoteBuildSummary", "${config.gitRemoteBuildName} update")

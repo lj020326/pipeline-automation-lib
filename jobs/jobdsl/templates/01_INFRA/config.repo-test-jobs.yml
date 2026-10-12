@@ -1,7 +1,0 @@
----
-
-baseFolder: "INFRA/repo-test-automation"
-yamlProjectConfigList:
-  - pipelineConfigYaml: "config.repo-test.ansible-datacenter.yml"
-  - pipelineConfigYaml: "config.repo-test.ansible-utils.yml"
-  - pipelineConfigYaml: "config.repo-test.ansible-git-inventory.yml"

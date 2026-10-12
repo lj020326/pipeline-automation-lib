@@ -79,6 +79,12 @@ def call(Map pipelineConfig=[:]) {
             timeout(time: config.timeout as Integer, unit: config.timeoutUnit)
         }
         stages {
+            stage('Check Skip') {
+                steps {
+                    // This plugin is in your plugins.txt and works regardless of the Job DSL UI
+                    scmSkip(skipPattern: '.*\\[(ci skip|skip ci)\\].*')
+                }
+            }
             stage('Load Collection Galaxy config') {
                 steps {
                     script {
@@ -333,6 +339,8 @@ Map loadPipelineConfig(Map params) {
 
     List runnerArgsList = []
     runnerArgsList.push("-v /var/run/docker.sock:/var/run/docker.sock")
+    runnerArgsList.push("-v /var/jenkins_home/git_repo_references:/var/jenkins_home/git_repo_references")
+
     runnerArgsList.push("--privileged")
 
     // configure to share the host's network stack.

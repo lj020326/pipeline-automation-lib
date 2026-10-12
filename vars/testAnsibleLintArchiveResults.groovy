@@ -129,7 +129,7 @@ Map loadPipelineConfig(Map params) {
 
 //     config.lintConfigFile = config.get('lintConfigFile', ".ansible-lint")
 
-    config.get("gitRemoteRepoType", "gitea")
+    config.get("gitRemoteRepoType", "git")
     config.get("gitRemoteBuildKey", 'Ansible Lint Tests')
 	config.get("gitRemoteBuildName", 'Ansible Lint Tests')
     config.get("gitRemoteBuildSummary", "${config.gitRemoteBuildName} update")

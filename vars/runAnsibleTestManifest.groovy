@@ -50,6 +50,12 @@ def call(Map args=[:]) {
             timeout(time: config.timeout as Integer, unit: config.timeoutUnit)
         }
         stages {
+            stage('Check Skip') {
+                steps {
+                    // This plugin is in your plugins.txt and works regardless of the Job DSL UI
+                    scmSkip(skipPattern: '.*\\[(ci skip|skip ci)\\].*')
+                }
+            }
             stage('Load ansible collection galaxy config') {
 				when {
                     expression { fileExists config.galaxyYamlPath }
@@ -214,7 +220,7 @@ Map loadPipelineConfig(Map params = [:]) {
     ]
     config.get('junitXmlsPatterns', junitXmlsPatternsDefault)
 
-    config.get("gitRemoteRepoType", "gitea")
+    config.get("gitRemoteRepoType", "git")
     config.get("gitRemoteBuildKey", 'ansible-test')
 	config.get("gitRemoteBuildName", 'Ansible Test')
     config.get("gitRemoteBuildSummary", "${config.gitRemoteBuildName} update")
@@ -331,7 +337,7 @@ Map runAnsibleTestJob(Map config) {
     log.debug("config=${JsonUtils.printToJsonString(config)}")
 
     Map jobConfigs = [
-        jobFolder: "INFRA/repo-test-automation/run-ansible-test",
+        jobFolder: "INFRA/repo-automation/run-ansible-test",
         jobParameters: [
             CollectionNamespace: config.collectionNamespace,
             CollectionName: config.collectionName,
