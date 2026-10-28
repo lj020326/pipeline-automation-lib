@@ -9,7 +9,6 @@
  * - moleculeCommand (String, optional): The molecule command to run (e.g., 'test', 'converge', 'check', 'verify').
  * - moleculeImageRegistry (String, optional): The the molecule image registry (e.g., 'registry.example.int:5000').
  * - moleculeImage (String, optional): The molecule image to run (e.g., 'systemd-python-ubuntu:26.04', 'centos9-systemd-python').
- * - moleculeImageTag (String, optional): The molecule image tag to run (e.g., 'latest').
  * - moleculeScenario (String, optional): The molecule scenario to run (e.g., 'bootstrap_docker', 'bootstrap_java', 'bootstrap_linux', 'bootstrap_linux_package')", name: 'MoleculeScenario').
  * - moleculeDebugFlag (Boolean, optional): Set to enable molecule debug.
  * Defaults to 'test'.
@@ -70,9 +69,17 @@ Map runMoleculeCommand(Map config) {
     }
     if (config?.moleculeImage) {
         commandEnvList.push("MOLECULE_IMAGE=${config.moleculeImage}")
-    }
-    if (config?.moleculeImageTag) {
-        commandEnvList.push("MOLECULE_IMAGE_TAG=${config.moleculeImageTag}")
+
+//         // Strips "systemd-python-" and removes non-alphanumeric characters (like '-' and ':')
+//         def shortImage = config.moleculeImage.replaceAll(/^systemd-python-/, '').replaceAll(/[^a-zA-Z0-9]/, '')
+
+        // Captures the target OS name (e.g. "ubuntu") and all version digits (e.g. "24.04" -> "2404")
+        // Matches "centos" and "10" from "systemd-python-centos:10"
+        def matcher = (config.moleculeImage =~ /([a-zA-Z]+)[:\-]([\d.]+)/)
+        def shortImage = matcher ? "${matcher[0][1]}${matcher[0][2].replaceAll(/\./, '')}" : config.moleculeImage.replaceAll(/[^a-zA-Z0-9]/, '')
+//         def matcher = (config.moleculeImage =~ /([a-zA-Z]+):(\d+)$/)
+//         def shortImage = matcher ? "${matcher[0][1]}${matcher[0][2]}" : config.moleculeImage.replaceAll(/[^a-zA-Z0-9]/, '')
+        commandEnvList.push("MOLECULE_IMAGE_SHORT=${shortImage}")
     }
     if (config?.moleculeContainerName) {
         commandEnvList.push("MOLECULE_CONTAINER_NAME=${config.moleculeContainerName}")

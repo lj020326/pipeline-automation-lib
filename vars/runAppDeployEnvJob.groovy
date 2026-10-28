@@ -119,15 +119,15 @@ appComponents:
         artifactVersionDescription += " <a href=\"https://fusion.dettonville.int/stash/projects/API/repos/pipeline-automation-lib/browse/vars/runATHEnv.groovy\">runAppDeployEnv yml</a>"
 
         Map paramMap = [
-                appEnvironment: choice(choices: appEnvironmentList.join('\n'), description: "Choose App Environment", name: 'AppEnvironment'),
-                appComponentSet: choice(choices: appComponentSetList.join('\n'), description: "Choose App Component Set to Deploy", name: 'AppComponentSet'),
-                artifactVersion: string(defaultValue: artifactVersionDefault, description: artifactVersionDescription, name: 'ArtifactVersion'),
-                alwaysEmailList: string(defaultValue: alwaysEmailListDefault, description: "Specify always email dist", name: 'AlwaysEmailList'),
-                runPostDeployTests: booleanParam(defaultValue: runPostDeployTestsDefault, name: 'RunPostDeployTests'),
-                useSimulationMode: booleanParam(defaultValue: useSimulationModeDefault, description: "Use Simulation Mode?", name: 'UseSimulationMode'),
-                debugPipeline: booleanParam(defaultValue: debugPipelineDefault, description: "Debug Pipeline?", name: 'DebugPipeline'),
-                debugReleaseScript: booleanParam(defaultValue: debugReleaseScriptDefault, description: "Debug ARA Release Script?", name: 'DebugReleaseScript'),
-                logLevel: choice(choices: LOGLEVELS.join('\n'), description: "Choose Log Level", name: 'LogLevel')
+            appEnvironment: choice(choices: appEnvironmentList.join('\n'), description: "Choose App Environment", name: 'AppEnvironment'),
+            appComponentSet: choice(choices: appComponentSetList.join('\n'), description: "Choose App Component Set to Deploy", name: 'AppComponentSet'),
+            artifactVersion: string(defaultValue: artifactVersionDefault, description: artifactVersionDescription, name: 'ArtifactVersion'),
+            alwaysEmailList: string(defaultValue: alwaysEmailListDefault, description: "Specify always email dist", name: 'AlwaysEmailList'),
+            runPostDeployTests: booleanParam(defaultValue: runPostDeployTestsDefault, name: 'RunPostDeployTests'),
+            useSimulationMode: booleanParam(defaultValue: useSimulationModeDefault, description: "Use Simulation Mode?", name: 'UseSimulationMode'),
+            debugPipeline: booleanParam(defaultValue: debugPipelineDefault, description: "Debug Pipeline?", name: 'DebugPipeline'),
+            debugReleaseScript: booleanParam(defaultValue: debugReleaseScriptDefault, description: "Debug ARA Release Script?", name: 'DebugReleaseScript'),
+            logLevel: choice(choices: LOGLEVELS.join('\n'), description: "Choose Log Level", name: 'LogLevel')
         ]
 
         log.debug("paramMap=${JsonUtils.printToJsonString(paramMap)}")
@@ -211,13 +211,13 @@ Map getSelectableDeploymentJobParams(Map inConfig) {
     artifactVersionDescription += " <a href=\"https://fusion.dettonville.int/stash/projects/API/repos/pipeline-automation-lib/browse/vars/runATHEnv.groovy\">runAppDeployEnv yml</a>"
 
     Map paramMap = [
-            artifactVersion: string(defaultValue: artifactVersionDefault, description: artifactVersionDescription, name: 'ArtifactVersion'),
-            alwaysEmailList: string(defaultValue: alwaysEmailListDefault, description: "Specify always email dist", name: 'AlwaysEmailList'),
-            runPostDeployTests: booleanParam(defaultValue: runPostDeployTestsDefault, name: 'RunPostDeployTests'),
-            useSimulationMode: booleanParam(defaultValue: useSimulationModeDefault, description: "Use Simulation Mode?", name: 'UseSimulationMode'),
-            debugPipeline: booleanParam(defaultValue: debugPipelineDefault, description: "Debug Pipeline?", name: 'DebugPipeline'),
-            debugReleaseScript: booleanParam(defaultValue: debugReleaseScriptDefault, description: "Debug ARA Release Script?", name: 'DebugReleaseScript'),
-            logLevel: choice(choices: LOGLEVELS.join('\n'), description: "Choose Log Level", name: 'LogLevel')
+        artifactVersion: string(defaultValue: artifactVersionDefault, description: artifactVersionDescription, name: 'ArtifactVersion'),
+        alwaysEmailList: string(defaultValue: alwaysEmailListDefault, description: "Specify always email dist", name: 'AlwaysEmailList'),
+        runPostDeployTests: booleanParam(defaultValue: runPostDeployTestsDefault, name: 'RunPostDeployTests'),
+        useSimulationMode: booleanParam(defaultValue: useSimulationModeDefault, description: "Use Simulation Mode?", name: 'UseSimulationMode'),
+        debugPipeline: booleanParam(defaultValue: debugPipelineDefault, description: "Debug Pipeline?", name: 'DebugPipeline'),
+        debugReleaseScript: booleanParam(defaultValue: debugReleaseScriptDefault, description: "Debug ARA Release Script?", name: 'DebugReleaseScript'),
+        logLevel: choice(choices: LOGLEVELS.join('\n'), description: "Choose Log Level", name: 'LogLevel')
     ]
 
     List paramList = []

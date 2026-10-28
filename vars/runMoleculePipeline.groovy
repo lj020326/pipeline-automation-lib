@@ -92,7 +92,7 @@ def call() {
         }
         options {
             skipDefaultCheckout()
-            buildDiscarder(logRotator(numToKeepStr: '40'))
+            buildDiscarder(logRotator(numToKeepStr: '200'))
             timestamps()
             timeout(time: config.timeout as Integer, unit: config.timeoutUnit)
             // depends on 'throttle-concurrents' plugin
@@ -102,12 +102,12 @@ def call() {
                 throttleEnabled: true,
                 throttleOption: 'category'
             )
-            // Explicitly allow the parent job (INFRA/repo-test-automation/ansible-utils/ansible-test-units/main)
-            // or use the wildcard 'INFRA/repo-test-automation/**' as discussed earlier.
+            // Explicitly allow the parent job (INFRA/repo-automation/ansible-utils/ansible-test-units/main)
+            // or use the wildcard 'INFRA/repo-automation/**' as discussed earlier.
             // We'll use the absolute path for maximum security/specificity here:
 //             copyArtifactPermission('*')
 //             copyArtifactPermission('/**')
-            copyArtifactPermission('/INFRA/repo-test-automation/*')
+            copyArtifactPermission('/INFRA/repo-automation/*')
         }
 
         stages {
@@ -238,6 +238,8 @@ Map loadPipelineConfig(Map params) {
 
     List runnerArgsList = []
     runnerArgsList.push("-v /var/run/docker.sock:/var/run/docker.sock")
+    runnerArgsList.push("-v /var/jenkins_home/git_repo_references:/var/jenkins_home/git_repo_references")
+
     runnerArgsList.push("--privileged")
     // Ensure the runner has enough memory
     runnerArgsList.push("--memory=4g")

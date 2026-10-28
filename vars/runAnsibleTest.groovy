@@ -158,22 +158,17 @@ Map runAnsibleTestConfig(Map config) {
         throw e
     } finally {
         // Archiving after dir closes (from workspace root)
-//         String fullResultsDir = "${config.targetCollectionDir}/${config.testResultsDir}"
-//         log.info("fullResultsDir => ${fullResultsDir}")
-//         String relativeResultsDir = "ansible_collections/${config.collectionNamespace}/${config.collectionName}/${config.testResultsDir}"  // NEW: Relative to workspace
-//         log.info("relativeResultsDir => ${relativeResultsDir}")
-//         sh("find ${relativeResultsDir} -type f")
-        sh("find ${config.testResultsDir} -type f")
-        log.info("Archiving test results from: ${config.testResultsDir}")
-        archiveArtifacts(
-            artifacts: "${config.testResultsDir}/**",  // NEW: Use relative path
-            fingerprint: true,
-            onlyIfSuccessful: false,
-            allowEmptyArchive: true
-        )
+//         sh("find ${config.testResultsDir} -type f")
+//         log.info("Archiving test results from: ${config.testResultsDir}")
+//         archiveArtifacts(
+//             artifacts: "${config.testResultsDir}/**",  // NEW: Use relative path
+//             fingerprint: true,
+//             onlyIfSuccessful: false,
+//             allowEmptyArchive: true
+//         )
 
         // Use relative path
-        String junitPattern = "${config.testResultsDir}/*-${config.ansibleTestCommand}*.xml"
+        String junitPattern = "${config.junitTestResultsDir}/*-${config.ansibleTestCommand}*.xml"
         log.info("Recording junit test results from path: ${junitPattern}")
         junit(
             testResults: junitPattern,

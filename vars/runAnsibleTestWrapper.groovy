@@ -44,7 +44,8 @@ Map call(Map params = [:]) {
     config.get("ansibleTestCommand", "sanity")
     config.get("testDeps", [])
     config.get("preTestCmd", "")
-    config.get('testResultsDir', 'tests/output/junit')
+    config.get('testResultsDir', '.test-results')
+    config.get('junitTestResultsDir', 'tests/output/junit')
 
     log.info("Running tests inside docker container: ${config.dockerImage}")
 

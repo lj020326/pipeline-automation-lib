@@ -51,7 +51,7 @@ def call(Map params=[:]) {
                     script {
                         try {
                             jobResults = runDockerBuildManifest(config)
-                        } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                        } catch (FlowInterruptedException e) {
                             currentBuild.result = 'ABORTED'
                             throw e
                         } catch (Exception e) {
@@ -478,7 +478,7 @@ Map runBuildAndPublishImageJob(Map config) {
 
     Map jobConfigs = [
         // source for 'build-docker-image' job referenced in following 'jobFolder' located in buildDockerImagePipeline.groovy
-        jobFolder: "INFRA/build-docker-image",
+        jobFolder: "INFRA/repo-automation/build-docker-image",
         jobParameters: jobParameters,
         propagate: config.propagate,
         wait: config.wait,

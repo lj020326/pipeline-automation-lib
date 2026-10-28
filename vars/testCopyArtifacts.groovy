@@ -32,7 +32,7 @@ Map call() {
                         // We use the full job path provided by the user as the projectName.
                         copyArtifacts(
                             // 1. PROJECT NAME: The full path/name of the job to copy artifacts *from*.
-                            projectName: '/INFRA/repo-test-automation/run-ansible-test',
+                            projectName: '/INFRA/repo-automation/run-ansible-test',
 
                             // 2. SELECTOR: Specifies which build to copy from (e.g., last successful, specific build number).
 //                             selector: lastSuccessful(),

@@ -42,7 +42,8 @@ Map call(Map params = [:]) {
     config.get("ansibleTestCommand", "sanity") // Default, but should be overridden by runAnsibleTestManifest
     config.get("testDeps", [])
     config.get("preTestCmd", "")
-    config.get('testResultsDir', 'tests/output/junit')
+    config.get('testResultsDir', '.test-results')
+    config.get('junitTestResultsDir', 'tests/output/junit')
 
     Map result = [:]
 

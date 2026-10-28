@@ -7,6 +7,36 @@ mirrorRepoDir: "/var/jenkins_home/git_repo_references/ansible-datacenter/ansible
 gitCredentialsId: "gitea-ssh-jenkins"
 jobScript: ".jenkins/runAnsibleSiteTag.groovy"
 
+parameters:
+  - name: "AnsibleLimitHosts"
+    type: "string"
+    defaultValue: ""
+    description: "Limit playbook to specified inventory hosts\nE.g., 'app_adm','app_tableau','admin*','host01','host01,host02'"
+  - name: "AnsibleDebugFlag"
+    type: "choice"
+    choices: ['', '-v', '-vv', '-vvv', '-vvvv']
+    description: "Choose Ansible Debug Level"
+  - name: "AnsibleGalaxyForceOpt"
+    type: "boolean"
+    defaultValue: false
+    description: "Use Ansible Galaxy Force Mode?"
+  - name: "AnsibleGalaxyUpgradeOpt"
+    type: "boolean"
+    defaultValue: false
+    description: "Use Ansible Galaxy Upgrade?"
+  - name: "UseCheckDiffMode"
+    type: "boolean"
+    defaultValue: false
+    description: "Use Check+Diff Mode (Dry Run with Diffs)?"
+  - name: "SkipUntagged"
+    type: "boolean"
+    defaultValue: false
+    description: "Skip Untagged plays?"
+  - name: "SkipAlwaysTag"
+    type: "boolean"
+    defaultValue: false
+    description: "Skip 'always' tagged plays?"
+
 runEnvMap:
   DEV:
     - environment: DEV
@@ -67,6 +97,8 @@ ansibleJobList:
     ansible_limit: docker_stack_openbao
   - ansible_tag: bootstrap-docker-openldap
     ansible_limit: docker_stack_openldap
+  - ansible_tag: bootstrap-docker-plex
+    ansible_limit: docker_stack_plex
   - ansible_tag: bootstrap-docker-vault
     ansible_limit: docker_stack_vault
   - ansible_tag: bootstrap-docker-stack
@@ -184,6 +216,8 @@ ansibleJobList:
     ansible_limit: os_linux
   - ansible_tag: ping-test
     ansible_limit: os_linux
+  - ansible_tag: run-vllm-benchmark-tests
+    ansible_limit: docker_stack_vllm
   - ansible_tag: vmware-remount-datastores
     ansible_limit: localhost
     skip_always_tag: 'true'

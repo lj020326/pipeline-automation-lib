@@ -126,6 +126,10 @@ Map loadPipelineConfig(Map params) {
          url: "ssh://git@gitea.admin.dettonville.int:2222/infra/ansible-dettonville-utils.git",
          gitCredentialsId: "gitea-ssh-jenkins"
         ],
+        [name: 'ansible-dettonville-llm',
+         url: "ssh://git@gitea.admin.dettonville.int:2222/infra/ansible-dettonville-llm.git",
+         gitCredentialsId: "gitea-ssh-jenkins"
+        ],
         [name: 'ansible-dettonville-inventory',
          url: "ssh://git@gitea.admin.dettonville.int:2222/infra/ansible-dettonville-inventory.git",
          gitCredentialsId: "gitea-ssh-jenkins"

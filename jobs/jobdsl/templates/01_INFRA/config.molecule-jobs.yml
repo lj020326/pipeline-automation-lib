@@ -1,0 +1,13 @@
+---
+jobFolder: "INFRA/repo-automation"
+jobList:
+  - jobName: run-molecule
+    jobType: pipeline
+    scmSourceType: "cps"
+    jobScript: "runMoleculePipeline()"
+    description: "Run Molecule Pipeline"
+    numToKeep: 200
+    copyArtifactProjects: "/**"
+    throttleCategories:
+      - "ansible_test"
+    replaceExistingTemplate: false

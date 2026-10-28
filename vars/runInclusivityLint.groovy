@@ -36,6 +36,12 @@ def call(Map params = [:]) {
             timeout(time: config.timeout, unit: config.timeoutUnit)
         }
         stages {
+            stage('Check Skip') {
+                steps {
+                    // This plugin is in your plugins.txt and works regardless of the Job DSL UI
+                    scmSkip(skipPattern: '.*\\[(ci skip|skip ci)\\].*')
+                }
+            }
             stage('Pre-test') {
                 steps {
                     script {
@@ -167,18 +173,6 @@ def call(Map params = [:]) {
                     }
                 }
             }
-            aborted {
-                script {
-                    if (config?.failedEmailList) {
-                        log.info("config.failedEmailList=${config.failedEmailList}")
-//                         sendEmail(currentBuild, env, emailAdditionalDistList: config.failedEmailList.split(","))
-                        sendEmail(currentBuild, env,
-                            emailAdditionalDistList: config.failedEmailList.split(","),
-                            emailBody: ansibleLogSummary
-                        )
-                    }
-                }
-            }
             changed {
                 script {
                     if (config?.changedEmailList) {
@@ -224,7 +218,7 @@ Map loadPipelineConfig(Map params) {
     config.get('testResultsDir', '.test-results')
 
     config.gitRemoteBuildStatus = "INPROGRESS"
-    config.get("gitRemoteRepoType", "gitea")
+    config.get("gitRemoteRepoType", "git")
     config.get("gitRemoteBuildKey", 'Inclusivity Lint Tests')
 	config.get("gitRemoteBuildName", 'Inclusivity Lint Tests')
     config.get("gitRemoteBuildSummary", "${config.gitRemoteBuildName} update")

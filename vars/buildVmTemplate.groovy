@@ -194,11 +194,11 @@ def call() {
                                 log.info("uploading ISO ${config.iso_file} to ${config.vm_iso_datastore}")
 
                                 sh """
-                                govc datastore.upload \
-                                 -ds=${config.vm_iso_datastore} \
-                                 ${config.os_image_dir}/${config.iso_file} \
-                                 ${config.iso_base_dir}/${config.iso_dir}/${config.iso_file}
-                                 """
+                                    govc datastore.upload \
+                                        -ds=${config.vm_iso_datastore} \
+                                        ${config.os_image_dir}/${config.iso_file} \
+                                        ${config.iso_base_dir}/${config.iso_dir}/${config.iso_file}
+                                """
                             }
                         }
                     }
@@ -597,6 +597,7 @@ Map loadPipelineConfig(Map params) {
     List builderArgsList = []
     builderArgsList.push("-v /var/run/docker.sock:/var/run/docker.sock")
     builderArgsList.push("-v /etc/docker/daemon.json:/etc/docker/daemon.json:ro")
+    builderArgsList.push("-v /var/jenkins_home/git_repo_references:/var/jenkins_home/git_repo_references")
     builderArgsList.push("--privileged")
 
     // configure to share the host's network stack.

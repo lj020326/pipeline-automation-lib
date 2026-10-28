@@ -56,7 +56,8 @@ def call() {
         pythonVersion: string(defaultValue: "3.13", name: "PythonVersion"),
         testDeps: string(defaultValue: "", name: "TestDeps"),
         preTestCmd: string(defaultValue: "", name: "PreTestCmd"),
-        testResultsDir: string(defaultValue: 'tests/output/junit', name: "TestResultsDir"),
+        testResultsDir: string(defaultValue: '.test-results', name: "TestResultsDir"),
+        junitTestResultsDir: string(defaultValue: 'tests/output/junit', name: "JunitTestResultsDir"),
         ansibleDebugFlag : choice(choices: ansibleDebugFlagList.join('\n'), description: "Choose Ansible Debug Level", name: 'AnsibleDebugFlag'),
         changedEmailList: string(defaultValue: "", description: "Specify the email recipients for job 'changed' status", name: 'ChangedEmailList'),
         alwaysEmailList: string(defaultValue: "", description: "Specify the email recipients for job 'always' status", name: 'AlwaysEmailList'),
@@ -93,10 +94,11 @@ def call() {
             }
         }
         options {
+            ansiColor('xterm')
+            buildDiscarder(logRotator(numToKeepStr: '200'))
             skipDefaultCheckout()
-            buildDiscarder(logRotator(numToKeepStr: '40'))
-            timestamps()
             timeout(time: config.timeout as Integer, unit: config.timeoutUnit)
+            timestamps()
             // depends on 'throttle-concurrents' plugin
             // ref: https://plugins.jenkins.io/throttle-concurrents/
             throttleJobProperty(
@@ -104,12 +106,12 @@ def call() {
                 throttleEnabled: true,
                 throttleOption: 'category'
             )
-            // Explicitly allow the parent job (INFRA/repo-test-automation/ansible-utils/ansible-test-units/main)
-            // or use the wildcard 'INFRA/repo-test-automation/**' as discussed earlier.
+            // Explicitly allow the parent job (INFRA/repo-automation/ansible-utils/ansible-test-units/main)
+            // or use the wildcard 'INFRA/repo-automation/**' as discussed earlier.
             // We'll use the absolute path for maximum security/specificity here:
 //             copyArtifactPermission('*')
 //             copyArtifactPermission('/**')
-            copyArtifactPermission('/INFRA/repo-test-automation/*')
+            copyArtifactPermission('/INFRA/repo-automation/*')
         }
 
         stages {
@@ -260,6 +262,8 @@ Map loadPipelineConfig(Map params) {
 
     List runnerArgsList = []
     runnerArgsList.push("-v /var/run/docker.sock:/var/run/docker.sock")
+    runnerArgsList.push("-v /var/jenkins_home/git_repo_references:/var/jenkins_home/git_repo_references")
+
     runnerArgsList.push("--privileged")
 
     // configure to share the host's network stack.
@@ -282,7 +286,8 @@ Map loadPipelineConfig(Map params) {
     config.get("ansibleTestCommand", "sanity")
     config.get("testDeps", "")
     config.get("preTestCmd", "")
-    config.get('testResultsDir', 'tests/output/junit')
+    config.get('testResultsDir', '.test-results')
+    config.get('junitTestResultsDir', 'tests/output/junit')
 
     // Map boolean params to config for stashing decisions
     config.get("stashJobArtifacts", false)
